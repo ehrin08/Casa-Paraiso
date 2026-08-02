@@ -1,0 +1,1043 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/forms";
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../views/**/*.blade.php";
+@source "../js/**/*.js";
+
+[x-cloak] {
+    display: none !important;
+}
+
+@theme {
+    --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --font-editorial: "Cormorant Garamond", ui-serif, Georgia, serif;
+
+    --color-casa-cacao: #7A3E14;
+    --color-casa-cacao-dark: #54290E;
+    --color-casa-palm: #4F6A4E;
+    --color-casa-palm-dark: #334736;
+    --color-casa-brass: #B38745;
+    --color-casa-brass-light: #D4AF73;
+    --color-casa-sand: #F3EBDD;
+    --color-casa-paper: #FFFCF7;
+    --color-casa-ink: #232620;
+    --color-casa-bg: #F5F0E7;
+    --color-casa-surface: #FFFCF7;
+    --color-casa-surface-dark: #263028;
+    --color-casa-primary: #4F6A4E;
+    --color-casa-primary-dark: #334736;
+    --color-casa-gold: #B38745;
+    --color-casa-green: #3F714B;
+    --color-casa-text: #232620;
+    --color-casa-muted: #67675F;
+    --color-casa-border: #DCD2C2;
+    --color-casa-charcoal: #263028;
+    --color-casa-taupe: #B9AD9C;
+    --color-casa-wood: #2D332D;
+
+    --shadow-casa-card: 0 10px 30px rgba(55, 44, 32, 0.07);
+    --shadow-casa-lift: 0 26px 70px rgba(45, 51, 45, 0.18);
+}
+
+@layer base {
+    html {
+        background: var(--color-casa-bg);
+        scroll-behavior: smooth;
+    }
+
+    body {
+        min-width: 320px;
+        color: var(--color-casa-text);
+        background: var(--color-casa-bg);
+        text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        font: inherit;
+    }
+
+    h1,
+    h2,
+    h3 {
+        letter-spacing: -0.025em;
+    }
+
+    ::selection {
+        color: #fff;
+        background: var(--color-casa-cacao);
+    }
+
+    :focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--color-casa-brass) 78%, white);
+        outline-offset: 3px;
+    }
+}
+
+@layer components {
+    .casa-page {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 92% 4%, rgba(179, 135, 69, 0.09), transparent 24rem),
+            linear-gradient(180deg, var(--color-casa-paper) 0, var(--color-casa-bg) 42rem);
+    }
+
+    .casa-landing {
+        --casa-landing-header-height: 4.0625rem;
+    }
+
+    .casa-landing-header {
+        block-size: var(--casa-landing-header-height);
+    }
+
+    .casa-landing-main {
+        padding-block-start: var(--casa-landing-header-height);
+    }
+
+    .casa-landing-screen-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-block-size: calc(100vh - var(--casa-landing-header-height));
+        min-block-size: calc(100dvh - var(--casa-landing-header-height));
+        scroll-margin-block-start: var(--casa-landing-header-height);
+    }
+
+    .casa-card,
+    .casa-card-compact {
+        background: color-mix(in srgb, var(--color-casa-paper) 96%, white);
+        border: 1px solid color-mix(in srgb, var(--color-casa-border) 92%, white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-casa-card);
+    }
+
+    .casa-card-compact {
+        box-shadow: 0 7px 22px rgba(55, 44, 32, 0.055);
+    }
+
+    .casa-app-card {
+        border-radius: 14px;
+        box-shadow: 0 5px 18px rgba(55, 44, 32, 0.05);
+    }
+
+    .casa-editorial-card {
+        border-radius: 28px;
+        background: var(--color-casa-paper);
+        border: 1px solid color-mix(in srgb, var(--color-casa-border) 82%, white);
+        box-shadow: 0 24px 70px rgba(55, 44, 32, 0.11);
+    }
+
+    .casa-dark-panel,
+    .casa-wood-panel {
+        color: #F9F3E9;
+        background:
+            linear-gradient(145deg, rgba(38, 48, 40, 0.99), rgba(45, 51, 45, 0.98)),
+            repeating-linear-gradient(90deg, rgba(179, 135, 69, 0.06) 0 1px, transparent 1px 22px);
+    }
+
+    .casa-wood-panel {
+        background:
+            radial-gradient(circle at 12% 8%, rgba(179, 135, 69, 0.15), transparent 18rem),
+            linear-gradient(165deg, #29332B 0%, #202821 58%, #18201A 100%);
+    }
+
+    .casa-section-label,
+    .casa-eyebrow {
+        font-size: 0.69rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        line-height: 1.4;
+        text-transform: uppercase;
+        color: var(--color-casa-cacao);
+    }
+
+    .casa-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .casa-eyebrow::before {
+        width: 1.6rem;
+        height: 1px;
+        content: "";
+        background: var(--color-casa-brass);
+    }
+
+    .casa-button-primary,
+    .casa-button-secondary,
+    .casa-danger-button {
+        display: inline-flex;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        border-radius: 12px;
+        padding: 0.68rem 1.05rem;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.075em;
+        line-height: 1.2;
+        text-transform: uppercase;
+        transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .casa-button-primary {
+        border: 1px solid transparent;
+        background: var(--color-casa-palm);
+        color: #fff;
+        box-shadow: 0 12px 25px rgba(51, 71, 54, 0.19);
+    }
+
+    .casa-button-primary:hover {
+        background: var(--color-casa-palm-dark);
+        box-shadow: 0 16px 30px rgba(51, 71, 54, 0.24);
+        transform: translateY(-1px);
+    }
+
+    .casa-button-primary:disabled,
+    .casa-button-secondary:disabled,
+    .casa-danger-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.56;
+        transform: none;
+    }
+
+    .casa-button-secondary {
+        border: 1px solid var(--color-casa-border);
+        background: color-mix(in srgb, var(--color-casa-paper) 90%, var(--color-casa-sand));
+        color: var(--color-casa-cacao);
+    }
+
+    .casa-button-secondary:hover {
+        border-color: color-mix(in srgb, var(--color-casa-cacao) 35%, var(--color-casa-border));
+        background: #FFF8EE;
+        color: var(--color-casa-cacao-dark);
+    }
+
+    .casa-danger-button {
+        border: 1px solid transparent;
+        background: #A92D23;
+        color: #fff;
+    }
+
+    .casa-danger-button:hover {
+        background: #842018;
+        transform: translateY(-1px);
+    }
+
+    .casa-input {
+        width: 100%;
+        min-height: 2.75rem;
+        border-radius: 12px;
+        border: 1px solid var(--color-casa-border);
+        background: var(--color-casa-paper);
+        color: var(--color-casa-text);
+        box-shadow: 0 1px 0 rgba(55, 44, 32, 0.035);
+        transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    }
+
+    .casa-input:hover {
+        border-color: color-mix(in srgb, var(--color-casa-palm) 32%, var(--color-casa-border));
+    }
+
+    .casa-input:focus {
+        border-color: var(--color-casa-palm);
+        box-shadow: 0 0 0 4px rgba(79, 106, 78, 0.16);
+        outline: none;
+    }
+
+    .casa-label {
+        display: block;
+        color: var(--color-casa-text);
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .casa-error {
+        color: #A92D23;
+        font-size: 0.84rem;
+        line-height: 1.5;
+    }
+
+    .casa-nav-link {
+        position: relative;
+        display: flex;
+        min-height: 2.85rem;
+        align-items: center;
+        gap: 0.75rem;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 0.64rem 0.75rem;
+        color: rgba(249, 243, 233, 0.72);
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+
+    .casa-nav-link:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.07);
+        transform: translateX(2px);
+    }
+
+    .casa-nav-link-active {
+        color: #fff;
+        border-color: rgba(179, 135, 69, 0.23);
+        background: linear-gradient(90deg, rgba(179, 135, 69, 0.22), rgba(255, 255, 255, 0.07));
+    }
+
+    .casa-nav-link-active::after {
+        position: absolute;
+        inset-block: 0.7rem;
+        inset-inline-end: 0.35rem;
+        width: 3px;
+        border-radius: 999px;
+        content: "";
+        background: var(--color-casa-brass);
+    }
+
+    .casa-nav-control {
+        display: flex;
+        min-height: 2.75rem;
+        align-items: center;
+        border-radius: 12px;
+        padding: 0.6rem 0.75rem;
+        color: var(--color-casa-muted);
+        font-size: 0.84rem;
+        font-weight: 800;
+        text-align: left;
+        transition: background-color 180ms ease, color 180ms ease;
+    }
+
+    .casa-nav-control:hover,
+    .casa-nav-control-active {
+        background: color-mix(in srgb, var(--color-casa-palm) 12%, white);
+        color: var(--color-casa-palm-dark);
+    }
+
+    .casa-top-link {
+        display: inline-flex;
+        min-height: 2.75rem;
+        align-items: center;
+        border-bottom: 2px solid transparent;
+        color: var(--color-casa-muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        transition: border-color 180ms ease, color 180ms ease;
+    }
+
+    .casa-top-link:hover,
+    .casa-top-link-active {
+        color: var(--color-casa-cacao);
+        border-color: var(--color-casa-brass);
+    }
+
+    .casa-icon-button {
+        display: inline-grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 12px;
+        border: 1px solid var(--color-casa-border);
+        background: var(--color-casa-paper);
+        color: var(--color-casa-palm-dark);
+        box-shadow: 0 7px 18px rgba(55, 44, 32, 0.06);
+        transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+
+    .casa-icon-button:hover {
+        border-color: color-mix(in srgb, var(--color-casa-palm) 38%, var(--color-casa-border));
+        background: #FFF8EE;
+        color: var(--color-casa-cacao);
+        transform: translateY(-1px);
+    }
+
+    .casa-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        padding: 0.35rem 0.68rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.055em;
+        line-height: 1.2;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .casa-table-wrap {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        border-radius: 14px;
+        border: 1px solid var(--color-casa-border);
+        background: var(--color-casa-paper);
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-casa-taupe) transparent;
+    }
+
+    .casa-table-wrap thead {
+        background: color-mix(in srgb, var(--color-casa-sand) 72%, white);
+    }
+
+    .casa-table-wrap th {
+        padding-block: 0.78rem;
+        color: color-mix(in srgb, var(--color-casa-muted) 90%, var(--color-casa-cacao));
+    }
+
+    .casa-table-wrap td {
+        padding-block: 0.82rem;
+    }
+
+    .casa-list-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        border-bottom: 1px solid var(--color-casa-border);
+        padding-bottom: 1.1rem;
+    }
+
+    .casa-filter-grid {
+        display: grid;
+        gap: 0.7rem;
+    }
+
+    .casa-filter-chip {
+        display: inline-flex;
+        min-height: 2rem;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid var(--color-casa-border);
+        background: var(--color-casa-paper);
+        padding: 0.35rem 0.7rem;
+        color: var(--color-casa-muted);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 639px) {
+        .casa-metric-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .casa-metric-grid > .casa-metric-card:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+    }
+
+    .casa-stat-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--color-casa-border);
+        border-radius: 14px;
+        background: var(--color-casa-border);
+        box-shadow: 0 5px 18px rgba(55, 44, 32, 0.05);
+    }
+
+    .casa-stat-strip dt,
+    .casa-stat-strip dd,
+    .casa-stat-strip p {
+        overflow-wrap: anywhere;
+    }
+
+    .casa-pagination {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+        border-top: 1px solid var(--color-casa-border);
+        padding-top: 0.85rem;
+    }
+
+    .casa-pagination-control {
+        display: inline-flex;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--color-casa-border);
+        border-radius: 10px;
+        background: var(--color-casa-paper);
+        padding: 0.45rem 0.65rem;
+        color: var(--color-casa-palm-dark);
+        font-size: 0.875rem;
+        font-weight: 800;
+        transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+    }
+
+    a.casa-pagination-control:hover {
+        border-color: color-mix(in srgb, var(--color-casa-palm) 42%, var(--color-casa-border));
+        background: color-mix(in srgb, var(--color-casa-palm) 9%, white);
+    }
+
+    .casa-calendar-event-confirmed {
+        border-color: color-mix(in srgb, var(--color-casa-palm) 64%, var(--color-casa-border));
+        background: linear-gradient(145deg, var(--color-casa-palm), var(--color-casa-palm-dark));
+        color: #fff;
+    }
+
+    .casa-calendar-event-completed {
+        border-color: color-mix(in srgb, var(--color-casa-palm) 32%, var(--color-casa-border));
+        background: color-mix(in srgb, var(--color-casa-palm) 12%, white);
+        color: var(--color-casa-palm-dark);
+    }
+
+    .casa-calendar-event-cancelled {
+        border-color: #E2B7B2;
+        background: #FFF5F3;
+        color: #842018;
+    }
+
+    .casa-calendar-event-blocker {
+        border-color: color-mix(in srgb, var(--color-casa-cacao) 58%, var(--color-casa-border));
+        background: color-mix(in srgb, var(--color-casa-cacao) 84%, black);
+        color: #fff;
+    }
+
+    .casa-calendar-availability,
+    .casa-calendar-availability-exception {
+        border-color: color-mix(in srgb, var(--color-casa-palm) 28%, var(--color-casa-border));
+        background: color-mix(in srgb, var(--color-casa-palm) 10%, transparent);
+        color: var(--color-casa-palm-dark);
+    }
+
+    .casa-calendar-availability-exception {
+        border-color: color-mix(in srgb, var(--color-casa-brass) 42%, var(--color-casa-border));
+        background: color-mix(in srgb, var(--color-casa-brass) 14%, white);
+        color: var(--color-casa-cacao);
+    }
+
+    .casa-calendar-unavailable {
+        border-color: color-mix(in srgb, var(--color-casa-cacao) 34%, var(--color-casa-border));
+        background:
+            repeating-linear-gradient(-45deg, rgba(122, 62, 20, 0.12) 0 7px, rgba(122, 62, 20, 0.035) 7px 14px),
+            color-mix(in srgb, var(--color-casa-sand) 78%, white);
+        color: var(--color-casa-cacao-dark);
+    }
+
+    [data-calendar-scroll] {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-casa-taupe) transparent;
+    }
+
+    .casa-table-row {
+        transition: background-color 160ms ease;
+    }
+
+    .casa-table-row:hover {
+        background: color-mix(in srgb, var(--color-casa-sand) 46%, white);
+    }
+
+    .turbo-progress-bar {
+        display: none;
+    }
+
+    .casa-page-loading {
+        position: fixed;
+        inset-inline: 0;
+        top: 0;
+        z-index: 90;
+        display: none;
+        pointer-events: none;
+    }
+
+    .casa-page-loading.is-visible {
+        display: block;
+    }
+
+    .casa-page-loading__bar {
+        height: 0.22rem;
+        width: 100%;
+        overflow: hidden;
+        background: color-mix(in srgb, var(--color-casa-brass) 24%, transparent);
+    }
+
+    .casa-page-loading__bar::after {
+        display: block;
+        height: 100%;
+        width: 42%;
+        content: "";
+        background: linear-gradient(90deg, transparent, var(--color-casa-brass), var(--color-casa-palm));
+        box-shadow: 0 0 18px rgba(179, 135, 69, 0.45);
+        animation: casa-loading-sweep 980ms ease-in-out infinite;
+    }
+
+    .casa-page-loading__pill {
+        position: absolute;
+        inset-inline-end: 1rem;
+        top: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px solid rgba(220, 210, 194, 0.9);
+        border-radius: 999px;
+        background: rgba(255, 252, 247, 0.95);
+        color: var(--color-casa-cacao);
+        padding: 0.45rem 0.8rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        box-shadow: 0 12px 28px rgba(55, 44, 32, 0.14);
+        backdrop-filter: blur(12px);
+    }
+
+    .casa-page-loading__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: var(--color-casa-brass);
+        animation: casa-loading-pulse 680ms ease-in-out infinite;
+    }
+
+    .casa-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(179, 135, 69, 0.62), transparent);
+    }
+
+    .casa-panel-host {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: none;
+        pointer-events: none;
+    }
+
+    .casa-panel-host.is-open {
+        display: block;
+        pointer-events: auto;
+    }
+
+    .casa-panel-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(29, 37, 31, 0.65);
+        backdrop-filter: blur(4px);
+    }
+
+    .casa-panel {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 0;
+        display: flex;
+        width: min(58rem, 100vw);
+        max-width: 100vw;
+        flex-direction: column;
+        overflow: hidden;
+        border-inline-start: 1px solid var(--color-casa-border);
+        background: var(--color-casa-bg);
+        box-shadow: -26px 0 70px rgba(38, 48, 40, 0.25);
+        transform: translateX(100%);
+        transition: transform 200ms ease;
+    }
+
+    .casa-panel-host.is-open .casa-panel {
+        transform: translateX(0);
+    }
+
+    .casa-panel__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border-bottom: 1px solid var(--color-casa-border);
+        background: rgba(255, 252, 247, 0.96);
+        padding: 0.9rem 1rem;
+        backdrop-filter: blur(12px);
+    }
+
+    .casa-panel__status {
+        display: none;
+        border-bottom: 1px solid var(--color-casa-border);
+        background: var(--color-casa-paper);
+        padding: 1rem;
+        color: var(--color-casa-muted);
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .casa-panel-host.is-loading .casa-panel__status {
+        display: block;
+    }
+
+    .casa-panel__content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .casa-panel-page > header {
+        border: 1px solid var(--color-casa-border);
+        border-radius: 16px;
+        background: var(--color-casa-paper);
+    }
+
+    .casa-panel-page > header > div {
+        padding: 1rem;
+    }
+
+    .casa-panel-page > main {
+        padding: 1rem 0 0;
+    }
+
+    .casa-canopy {
+        position: relative;
+        overflow: hidden;
+        border-radius: 999px 999px 28px 28px;
+        background: var(--color-casa-charcoal);
+        box-shadow: var(--shadow-casa-lift);
+    }
+
+    .casa-canopy::after {
+        position: absolute;
+        inset: 0.7rem;
+        border: 1px solid rgba(255, 252, 247, 0.42);
+        border-radius: inherit;
+        content: "";
+        pointer-events: none;
+    }
+
+    .casa-canopy img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .casa-ritual-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px 28px 8rem 28px;
+        box-shadow: var(--shadow-casa-lift);
+    }
+
+    .casa-mobile-dock {
+        position: fixed;
+        inset-inline: 0.75rem;
+        bottom: max(0.75rem, env(safe-area-inset-bottom));
+        z-index: 45;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.25rem;
+        border: 1px solid rgba(220, 210, 194, 0.92);
+        border-radius: 18px;
+        background: rgba(255, 252, 247, 0.96);
+        padding: 0.35rem;
+        box-shadow: 0 18px 48px rgba(38, 48, 40, 0.22);
+        backdrop-filter: blur(18px);
+    }
+
+    .casa-mobile-dock-link {
+        display: flex;
+        min-height: 3.5rem;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+        border-radius: 13px;
+        color: var(--color-casa-muted);
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+    }
+
+    .casa-mobile-dock-link-active {
+        background: color-mix(in srgb, var(--color-casa-palm) 12%, white);
+        color: var(--color-casa-palm-dark);
+    }
+
+}
+
+.casa-app-page h1 {
+    overflow-wrap: anywhere;
+    font-size: clamp(1.5rem, 1.65vw, 1.875rem);
+    line-height: 1.16;
+}
+
+.casa-app-page h2 {
+    font-size: clamp(1.125rem, 1.25vw, 1.375rem);
+    letter-spacing: -0.02em;
+}
+
+.casa-page-heading {
+    width: 100%;
+}
+
+.casa-page-heading > * {
+    min-width: 0;
+}
+
+body[data-workspace-role] {
+    min-width: 0;
+}
+
+.casa-page-heading [class*="text-4xl"],
+.casa-page-heading [class*="text-3xl"] {
+    font-size: inherit;
+}
+
+body[data-workspace-role] .casa-section-label,
+body[data-workspace-role] .casa-eyebrow {
+    font-size: 0.875rem;
+    letter-spacing: 0.07em;
+}
+
+body[data-workspace-role] .casa-eyebrow {
+    gap: 0.45rem;
+}
+
+body[data-workspace-role] .casa-eyebrow::before {
+    width: 1.15rem;
+}
+
+body[data-workspace-role] .casa-button-primary,
+body[data-workspace-role] .casa-button-secondary,
+body[data-workspace-role] .casa-danger-button {
+    border-radius: 10px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.035em;
+}
+
+body[data-workspace-role] .casa-input {
+    border-radius: 10px;
+    font-size: 0.875rem;
+}
+
+body[data-workspace-role] .casa-label,
+body[data-workspace-role] .casa-error {
+    font-size: 0.875rem;
+}
+
+body[data-workspace-role] .casa-nav-link,
+body[data-workspace-role] .casa-nav-control {
+    min-height: 2.75rem;
+    border-radius: 10px;
+    padding-block: 0.5rem;
+    font-size: 0.875rem;
+}
+
+body[data-workspace-role] .casa-icon-button {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(55, 44, 32, 0.05);
+}
+
+body[data-workspace-role] .casa-badge,
+body[data-workspace-role] .casa-filter-chip {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+}
+
+body[data-workspace-role] a.casa-filter-chip {
+    min-height: 2.75rem;
+}
+
+body[data-workspace-role] .casa-table-wrap {
+    border-radius: 12px;
+}
+
+body[data-workspace-role] .casa-table-wrap:focus-visible {
+    outline: 2px solid var(--color-casa-palm);
+    outline-offset: 2px;
+}
+
+body[data-workspace-role] .casa-table-wrap th,
+body[data-workspace-role] .casa-table-wrap td {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+}
+
+body[data-workspace-role] .casa-table-wrap th a,
+body[data-workspace-role] .casa-table-wrap td a,
+body[data-workspace-role] .casa-table-wrap td button {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+}
+
+body[data-workspace-role] .text-xs,
+body[data-workspace-role] [class*="text-[0.6"],
+body[data-workspace-role] [class*="text-[0.7"],
+body[data-workspace-role] [class*="text-[0.8"] {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+body[data-workspace-role] .casa-list-toolbar {
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+body[data-workspace-role] .casa-filter-grid {
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
+}
+
+body[data-workspace-role] .casa-list-toolbar {
+    flex-wrap: wrap;
+}
+
+body[data-workspace-role] .casa-list-toolbar > :last-child {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.casa-app-page [data-page-content] .gap-6 {
+    gap: 1rem;
+}
+
+.casa-app-page [data-page-content] .casa-dark-panel.p-6 {
+    padding: 1rem;
+}
+
+    .casa-app-page [data-page-content] .casa-editorial-card {
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(55, 44, 32, 0.07);
+    }
+
+.casa-app-page .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem;
+}
+
+    .casa-app-page .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 0.875rem;
+    }
+
+@media (min-width: 640px) {
+    .casa-landing {
+        --casa-landing-header-height: 4.5625rem;
+    }
+}
+
+.casa-app-page [data-page-content] .grid,
+.casa-app-page [data-page-content] .grid > *,
+.casa-app-page [data-page-content] .casa-card,
+.casa-app-page [data-page-content] .casa-card-compact {
+    min-width: 0;
+}
+
+.casa-panel .lg\:grid-cols-\[minmax\(0\,1fr\)_22rem\],
+.casa-panel .lg\:grid-cols-\[minmax\(0\,1fr\)_minmax\(320px\,0\.8fr\)\],
+.casa-panel .xl\:grid-cols-\[minmax\(0\,1fr\)_minmax\(320px\,0\.55fr\)\],
+.casa-panel .xl\:grid-cols-\[minmax\(0\,1\.45fr\)_minmax\(320px\,0\.55fr\)\] {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@keyframes casa-loading-sweep {
+    0% { transform: translateX(-110%); }
+    55%, 100% { transform: translateX(250%); }
+}
+
+@keyframes casa-loading-pulse {
+    0%, 100% { opacity: 0.45; transform: scale(0.82); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+@media (min-width: 1024px) {
+    .casa-list-toolbar {
+        flex-direction: row;
+        align-items: end;
+        justify-content: space-between;
+    }
+
+    body[data-workspace-role] .casa-list-toolbar > :last-child {
+        flex: 1 1 32rem;
+    }
+
+    .casa-modal-form [data-modal-actions] {
+        position: sticky;
+        bottom: -1px;
+        z-index: 5;
+        border-color: var(--color-casa-border);
+        background: rgba(255, 252, 247, 0.98);
+        box-shadow: 0 -12px 30px rgba(55, 44, 32, 0.09);
+    }
+
+    .casa-pagination {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .casa-pagination-pages {
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 640px) {
+    .casa-panel {
+        width: 100vw;
+    }
+
+    .casa-panel__content {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .casa-pagination-mobile {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .casa-pagination-mobile > :first-child {
+        justify-self: start;
+    }
+
+    .casa-pagination-mobile > :last-child {
+        justify-self: end;
+    }
+
+    .casa-pagination-status {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        text-align: center;
+    }
+
+    .casa-mobile-dock-link > span:last-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    .casa-mobile-dock-link {
+        min-height: 3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

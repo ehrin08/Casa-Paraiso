@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+public/build
+storage/backups
+storage/testing
+storage/logs

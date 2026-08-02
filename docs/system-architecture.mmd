@@ -1,0 +1,6 @@
+flowchart LR
+    Browser["Guests and staff browsers"] --> Web["Laravel 12 Blade web application"]
+    Web --> Auth["Breeze and Socialite authentication"]
+    Web --> Domain["Scheduling, payments, attendance, rewards, reports"]
+    Domain --> MySQL[("MySQL 8.4")]
+    Web --> Mailpit["Mailpit in local development"]

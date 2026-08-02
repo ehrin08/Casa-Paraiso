@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "status": "internal-seed-required",
+  "sources": [],
+  "required_fields": ["text", "rating", "label", "language", "topics", "split"],
+  "redaction": ["names", "phone_numbers", "email_addresses", "booking_numbers", "addresses", "urls"],
+  "policy": "Do not export or train on customer text until it has been redacted and independently reviewed."
+}

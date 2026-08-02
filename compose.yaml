@@ -1,0 +1,62 @@
+name: casa-paraiso-web
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '127.0.0.1:${APP_PORT:-18001}:80'
+      - '127.0.0.1:${FORWARD_VITE_PORT:-15173}:5173'
+    volumes:
+      - '.:/var/www/html'
+      - 'vendor:/var/www/html/vendor'
+      - 'node_modules:/var/www/html/node_modules'
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    networks:
+      - casa
+
+  mysql:
+    image: 'mysql:8.4'
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - '127.0.0.1:${FORWARD_DB_PORT:-13306}:3306'
+    environment:
+      MYSQL_DATABASE: '${DB_DATABASE:-casa_paraiso}'
+      MYSQL_USER: '${DB_USERNAME:-sail}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:-password}'
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD:-rootpassword}'
+    volumes:
+      - 'mysql-data:/var/lib/mysql'
+      - './docker/mysql/init/01-create-testing-database.sql:/docker-entrypoint-initdb.d/01-create-testing-database.sql:ro'
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - casa
+
+  mailpit:
+    image: 'axllent/mailpit:v1.28.3'
+    ports:
+      - '127.0.0.1:${FORWARD_MAILPIT_PORT:-11026}:1025'
+      - '127.0.0.1:${FORWARD_MAILPIT_DASHBOARD_PORT:-18025}:8025'
+    networks:
+      - casa
+
+networks:
+  casa:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+  vendor:
+    driver: local
+  node_modules:
+    driver: local

@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><div><p class="casa-section-label">{{ __('Add-on catalog') }}</p><h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Edit :name', ['name' => $addon->name]) }}</h1></div></x-slot>@include('admin.addons.form')</x-app-layout>
