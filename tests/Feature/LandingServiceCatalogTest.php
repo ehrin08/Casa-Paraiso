@@ -11,6 +11,18 @@ class LandingServiceCatalogTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_landing_page_describes_immediately_confirmed_bookings(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('<title>Casa Paraiso Body and Wellness Spa</title>', false)
+            ->assertSee('Book an appointment')
+            ->assertSee('Instant confirmation')
+            ->assertSee('A successful booking immediately reserves your appointment.')
+            ->assertDontSee('Request an appointment')
+            ->assertDontSee('Request-first care');
+    }
+
     public function test_landing_page_uses_current_active_service_prices_after_an_admin_update(): void
     {
         $admin = User::factory()->admin()->create();

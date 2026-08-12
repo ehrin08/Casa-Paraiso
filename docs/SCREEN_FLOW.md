@@ -697,3 +697,4 @@ Primary actions:
 - RFM promotion suggestions are covered by admin configuration/reporting and customer add-on voucher selection during booking.
 - Feedback and sentiment analytics are covered by customer feedback and admin feedback screens.
 - Reports and exports are covered by admin reports.
+- Super administrators can review grouped system-error reports at `/admin/system-errors`, inspect sanitized occurrence history, and resolve or reopen reports. Customers and staff receive safe branded error pages with a request reference instead of technical diagnostics.

@@ -1231,6 +1231,15 @@ const panelElements = () => {
 
 const panelCache = new Map();
 const panelCacheTtl = 60000;
+let panelTrigger = null;
+
+const panelFocusTarget = (trigger) => {
+    if (trigger instanceof HTMLElement && trigger.isConnected) {
+        return trigger;
+    }
+
+    return document.querySelector('#main-content');
+};
 
 const closeModalWithin = (root) => {
     if (!root || !modalStore().active) {
@@ -1310,8 +1319,10 @@ const setPanelLoading = (url) => {
     window.setTimeout(() => dialog?.focus(), 20);
 };
 
-const closePanel = () => {
+const closePanel = ({ restoreFocus = true } = {}) => {
     const { host, content } = panelElements();
+    const trigger = panelTrigger;
+    panelTrigger = null;
 
     if (!host) {
         return;
@@ -1324,6 +1335,10 @@ const closePanel = () => {
 
     if (content) {
         content.innerHTML = '';
+    }
+
+    if (restoreFocus) {
+        window.requestAnimationFrame(() => panelFocusTarget(trigger)?.focus({ preventScroll: true }));
     }
 };
 
@@ -1369,12 +1384,17 @@ const renderPanelHtml = (pageHtml) => {
     return true;
 };
 
-const openPanel = async (url) => {
+const openPanel = async (url, trigger = document.activeElement) => {
     let { host, content } = panelElements();
 
     if (!host || !content || !isPanelEligibleUrl(url)) {
+        panelTrigger = null;
         window.location.href = url.href;
         return;
+    }
+
+    if (!host.classList.contains('is-open') || !(panelTrigger instanceof HTMLElement && panelTrigger.isConnected)) {
+        panelTrigger = trigger instanceof HTMLElement ? trigger : null;
     }
 
     const cached = panelCache.get(url.href);
@@ -1453,7 +1473,7 @@ document.addEventListener('turbo:load', () => {
 });
 
 document.addEventListener('turbo:before-cache', () => {
-    closePanel();
+    closePanel({ restoreFocus: false });
     hidePageLoading();
 });
 
@@ -1481,7 +1501,7 @@ document.addEventListener('click', (event) => {
     }
 
     event.preventDefault();
-    openPanel(url);
+    openPanel(url, link);
 });
 
 document.addEventListener('keydown', (event) => {

@@ -7,6 +7,8 @@
 - [x] Use CSRF protection for state-changing web forms.
 - [x] Send security headers and restrict browser camera access to the attendance scanner.
 - [x] Keep secrets, backups, source exports, and local environments out of Git.
+- Capture HTTP 4xx/5xx responses with a server-generated request reference. End-user error pages must not expose exception messages, traces, request payloads, query strings, headers, cookies, sessions, raw IP addresses, SQL bindings, or credentials.
+- Restrict the technical system-error inbox to the configured super-administrator account. Store sanitized diagnostic text and argument-free stack frames encrypted at rest.
 
 ## MySQL
 
@@ -21,3 +23,4 @@
 - [ ] Verify guest, customer, receptionist, therapist, administrator, and super-administrator workflows.
 - [ ] Run `composer audit`, the Laravel test suite, and the web asset build.
 - [ ] Confirm no retired client, public API, alternate database, hosted-pilot, or secret artifacts are present.
+- Verify the production scheduler or the once-daily fallback prune path is active so system-error occurrence retention remains bounded.

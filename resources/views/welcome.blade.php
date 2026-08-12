@@ -3,9 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Casa Paraiso Body and Wellness Spa offers signature full-body massage packages and request-first appointments every day from 1:00 PM to 12:00 MN.">
+        <meta name="description" content="Casa Paraiso Body and Wellness Spa offers signature full-body massage packages with instant appointment confirmation every day from 1:00 PM to 12:00 MN.">
 
-        <title>{{ config('app.name', 'Casa Paraiso') }}</title>
+        <title>Casa Paraiso Body and Wellness Spa</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=cormorant-garamond:600,700|manrope:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -59,14 +59,14 @@
                                 Let the day<br><span class="italic text-casa-cacao">soften here.</span>
                             </h1>
                             <p class="mt-7 max-w-xl text-base leading-8 text-casa-muted sm:text-lg">
-                                Thoughtful full-body massage rituals, prepared around your pace and confirmed with care by our spa team.
+                                Thoughtful full-body massage rituals, prepared around your pace and confirmed as soon as you book.
                             </p>
 
                             <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                                 @auth
                                     <a href="{{ $homeUrl }}" class="casa-button-primary">{{ __('Open your workspace') }}</a>
                                 @else
-                                    <a href="{{ route('login') }}" class="casa-button-primary">{{ __('Request an appointment') }}</a>
+                                    <a href="{{ route('login') }}" class="casa-button-primary">{{ __('Book an appointment') }}</a>
                                     <a href="#treatments" class="casa-button-secondary">{{ __('Explore treatments') }}</a>
                                 @endauth
                             </div>
@@ -103,8 +103,8 @@
                                 </picture>
                             </div>
                             <div class="absolute -bottom-5 start-4 max-w-[17rem] rounded-2xl border border-white/55 bg-casa-paper/94 p-4 shadow-casa-lift backdrop-blur sm:start-8 sm:p-5">
-                                <p class="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-casa-cacao">Request-first care</p>
-                                <p class="mt-2 text-sm font-semibold leading-6 text-casa-text">Choose your preferred visit. Our team confirms the final schedule.</p>
+                                <p class="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-casa-cacao">Instant confirmation</p>
+                                <p class="mt-2 text-sm font-semibold leading-6 text-casa-text">Choose an available visit. Your appointment is confirmed as soon as booking succeeds.</p>
                             </div>
                         </div>
                     </div>
@@ -169,8 +169,8 @@
 
                         <div>
                             <p class="casa-eyebrow">A considered booking flow</p>
-                            <h2 class="mt-5 max-w-2xl font-editorial text-5xl font-semibold leading-[0.98] text-casa-ink sm:text-6xl">Simple to request.<br>Personal to confirm.</h2>
-                            <p class="mt-6 max-w-xl text-sm leading-7 text-casa-muted sm:text-base">A request starts the conversation. Your booking becomes final after the team checks the service, therapist, and schedule.</p>
+                            <h2 class="mt-5 max-w-2xl font-editorial text-5xl font-semibold leading-[0.98] text-casa-ink sm:text-6xl">Simple to book.<br>Confirmed right away.</h2>
+                            <p class="mt-6 max-w-xl text-sm leading-7 text-casa-muted sm:text-base">Choose your service, therapist, and time. A successful booking immediately reserves your appointment.</p>
 
                             <ol class="mt-9 space-y-4">
                                 <li class="grid grid-cols-[3rem_minmax(0,1fr)] gap-4 rounded-2xl border border-casa-border bg-casa-paper p-5">
@@ -183,7 +183,7 @@
                                 </li>
                                 <li class="grid grid-cols-[3rem_minmax(0,1fr)] gap-4 rounded-2xl border border-casa-border bg-casa-paper p-5">
                                     <span class="grid size-12 place-items-center rounded-full bg-casa-brass text-sm font-extrabold text-casa-charcoal">03</span>
-                                    <span><strong class="block text-base text-casa-text">Return to your account for confirmation.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Your appointment status and wellness history stay organized in one place.</span></span>
+                                    <span><strong class="block text-base text-casa-text">Return to your account anytime.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Your confirmed appointment and wellness history stay organized in one place.</span></span>
                                 </li>
                             </ol>
                         </div>
@@ -230,7 +230,7 @@
                             <div class="casa-divider my-7"></div>
                             <p class="font-editorial text-3xl font-semibold italic leading-tight text-casa-cacao">{{ config('casa.marketing_line') }}</p>
                             @guest
-                                <a href="{{ route('login') }}" class="casa-button-primary mt-7 w-full">{{ __('Request your visit') }}</a>
+                                <a href="{{ route('login') }}" class="casa-button-primary mt-7 w-full">{{ __('Book your visit') }}</a>
                             @endguest
                         </aside>
                     </div>
@@ -242,12 +242,12 @@
                             <article class="casa-card p-6 sm:p-7">
                                 <x-nav-icon name="calendar" class="size-6 text-casa-cacao" />
                                 <h2 class="mt-5 text-lg font-extrabold text-casa-text">Clear appointment status</h2>
-                                <p class="mt-3 text-sm leading-7 text-casa-muted">Requests, confirmed visits, and completed care remain easy to follow.</p>
+                                <p class="mt-3 text-sm leading-7 text-casa-muted">Confirmed visits and completed care remain easy to follow.</p>
                             </article>
                             <article class="casa-card p-6 sm:p-7">
                                 <x-nav-icon name="team" class="size-6 text-casa-cacao" />
                                 <h2 class="mt-5 text-lg font-extrabold text-casa-text">Therapist-aware scheduling</h2>
-                                <p class="mt-3 text-sm leading-7 text-casa-muted">The spa team checks availability before every booking becomes final.</p>
+                                <p class="mt-3 text-sm leading-7 text-casa-muted">The system checks availability before every booking is confirmed.</p>
                             </article>
                             <article class="casa-card p-6 sm:p-7">
                                 <x-nav-icon name="feedback" class="size-6 text-casa-cacao" />

@@ -93,7 +93,7 @@
         </div>
 
         <div class="mt-5 overflow-x-auto rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-casa-palm" tabindex="0" role="region" aria-label="{{ __('Scrollable days in selected week') }}" data-calendar-scroll>
-            <div class="grid min-w-[22rem] grid-cols-7 gap-1.5" role="tablist" aria-label="{{ __('Days in selected week') }}">
+            <div class="grid min-w-[22rem] grid-cols-[repeat(7,minmax(2.75rem,1fr))] gap-1.5" role="tablist" aria-label="{{ __('Days in selected week') }}">
                 <template x-for="day in dayOptions" x-bind:key="day.date">
                     <button
                         type="button"

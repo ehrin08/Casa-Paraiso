@@ -7,7 +7,6 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class MeasureApplicationRequest
@@ -17,7 +16,7 @@ class MeasureApplicationRequest
         $startedAt = hrtime(true);
         $queryCount = 0;
         $queryMilliseconds = 0.0;
-        $requestId = $this->requestId($request);
+        $requestId = (string) $request->attributes->get('request_id');
 
         DB::listen(function (QueryExecuted $query) use (&$queryCount, &$queryMilliseconds): void {
             $queryCount++;
@@ -41,12 +40,5 @@ class MeasureApplicationRequest
         $response->headers->set('Server-Timing', sprintf('app;dur=%.1f, db;dur=%.1f, queries;desc="%d"', $durationMilliseconds, $queryMilliseconds, $queryCount));
 
         return $response;
-    }
-
-    private function requestId(Request $request): string
-    {
-        $provided = (string) $request->header('X-Request-ID', '');
-
-        return preg_match('/^[A-Za-z0-9_-]{8,64}$/', $provided) === 1 ? $provided : (string) Str::uuid();
     }
 }

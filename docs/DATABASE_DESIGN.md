@@ -676,3 +676,9 @@ Use this order when creating Laravel migrations:
 - Admin can configure fixed customer rewards and dismiss an available reward; appointment cancellation/no-show releases a reserved voucher.
 - Customer can submit one feedback record for a completed appointment.
 - Admin can filter reports by appointment, transaction, promotion, and feedback fields without direct database access.
+
+## System Error Reporting
+
+- `system_error_reports` groups matching HTTP 4xx/5xx responses by status, category, exception class, route, and application source frame. It stores encrypted sanitized diagnostics, first/last seen timestamps, count, and resolution metadata.
+- `system_error_occurrences` keeps one request-reference record per captured response, with method, query-free path, route, optional user, and occurrence timestamp.
+- Occurrences are retained for 30 days. Resolved reports with no retained occurrences are pruned; unresolved reports remain available until reviewed.

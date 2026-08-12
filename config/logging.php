@@ -62,7 +62,7 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'permission' => 0664,
+            // The Docker-managed log volume owns the file mode and web-user access.
             'replace_placeholders' => true,
         ],
 
@@ -71,7 +71,7 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
-            'permission' => 0664,
+            // See the single channel note above.
             'replace_placeholders' => true,
         ],
 

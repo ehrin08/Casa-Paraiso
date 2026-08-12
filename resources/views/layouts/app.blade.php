@@ -1,3 +1,14 @@
+@php
+    $applicationName = config('app.name', 'Casa Paraiso');
+    $headerTitle = null;
+
+    if (isset($header) && preg_match('/<h1\\b[^>]*>(.*?)<\\/h1>/is', (string) $header, $matches) === 1) {
+        $headerTitle = \Illuminate\Support\Str::of(html_entity_decode(strip_tags($matches[1]), ENT_QUOTES, 'UTF-8'))->squish()->toString();
+    }
+
+    $documentTitle = $pageTitle ?? $headerTitle;
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -5,7 +16,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Casa Paraiso') }}</title>
+        <title>{{ $documentTitle ? $documentTitle.' · '.$applicationName : $applicationName }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -46,7 +57,7 @@
                 @endisset
 
                 <!-- Page Content -->
-                <main id="main-content" data-page-content class="mx-auto max-w-[90rem] px-4 py-4 sm:px-5 lg:px-6">
+                <main id="main-content" data-page-content tabindex="-1" class="mx-auto max-w-[90rem] px-4 py-4 sm:px-5 lg:px-6">
                     {{ $slot }}
                 </main>
             </div>

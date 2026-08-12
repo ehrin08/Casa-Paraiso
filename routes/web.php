@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\AppointmentCalendarController as AdminAppointmentCalendarController;
 use App\Http\Controllers\Admin\AddonController as AdminAddonController;
+use App\Http\Controllers\Admin\AppointmentCalendarController as AdminAppointmentCalendarController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Admin\StaffScheduleExceptionController as AdminStaffScheduleExceptionController;
 use App\Http\Controllers\Admin\StaffWeeklyScheduleController as AdminStaffWeeklyScheduleController;
+use App\Http\Controllers\Admin\SystemErrorReportController as AdminSystemErrorReportController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserManagementController as AdminUserManagementController;
 use App\Http\Controllers\Admin\WeeklyRosterController as AdminWeeklyRosterController;
@@ -36,10 +37,10 @@ use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\FeedbackController as StaffFeedbackController;
 use App\Http\Controllers\Staff\TransactionController as StaffTransactionController;
 use App\Http\Controllers\WebAttendanceController;
-use App\Models\ApplicationSetting;
-use App\Models\Addon;
-use App\Models\Service;
 use App\Http\Middleware\MeasureApplicationRequest;
+use App\Models\Addon;
+use App\Models\ApplicationSetting;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -131,6 +132,10 @@ Route::middleware(['auth', 'active', 'verified', 'super_admin', MeasureApplicati
     ->name('admin.')
     ->group(function () {
         Route::resource('users', AdminUserManagementController::class)->only(['index', 'store', 'update']);
+        Route::get('/system-errors', [AdminSystemErrorReportController::class, 'index'])->name('system-errors.index');
+        Route::get('/system-errors/{systemErrorReport}', [AdminSystemErrorReportController::class, 'show'])->name('system-errors.show');
+        Route::patch('/system-errors/{systemErrorReport}/resolve', [AdminSystemErrorReportController::class, 'resolve'])->name('system-errors.resolve');
+        Route::patch('/system-errors/{systemErrorReport}/reopen', [AdminSystemErrorReportController::class, 'reopen'])->name('system-errors.reopen');
     });
 
 Route::middleware(['auth', 'active', 'verified', 'role:staff', MeasureApplicationRequest::class])

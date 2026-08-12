@@ -16,4 +16,8 @@ RUN apt-get update \
 
 WORKDIR /var/www/html
 
+COPY docker/app/entrypoint.sh /usr/local/bin/casa-entrypoint
+RUN chmod +x /usr/local/bin/casa-entrypoint
+
+ENTRYPOINT ["casa-entrypoint"]
 CMD ["apache2-foreground"]

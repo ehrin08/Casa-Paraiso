@@ -1,3 +1,11 @@
+@php
+    $applicationName = config('app.name', 'Casa Paraiso');
+    $headingTitle = isset($title)
+        ? \Illuminate\Support\Str::of(html_entity_decode(strip_tags((string) $title), ENT_QUOTES, 'UTF-8'))->squish()->toString()
+        : null;
+    $documentTitle = $pageTitle ?? $headingTitle;
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -5,7 +13,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Casa Paraiso') }}</title>
+        <title>{{ $documentTitle ? $documentTitle.' · '.$applicationName : $applicationName }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

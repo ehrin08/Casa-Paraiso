@@ -12,16 +12,16 @@ Production credentials must stay outside committed source files.
 
 ## Usage
 
-Seed the local database:
+For a verified disposable local database only, add the demo data without wiping existing records:
 
 ```powershell
-docker compose exec -T laravel.test php artisan migrate:fresh --seed
+.\scripts\casa-docker.ps1 compose exec -T app php artisan db:seed
 ```
 
 Open the local login page:
 
 ```text
-http://localhost:8001/login
+http://localhost:18001/login
 ```
 
-Sign in using the admin email and password above.
+Sign in using the admin email and password above. Never run `migrate:fresh`, `db:wipe`, or other destructive database commands against an account-bearing database.

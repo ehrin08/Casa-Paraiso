@@ -30,7 +30,10 @@ class CustomerBookingModalTest extends TestCase
         $this->actingAs($customer->user)
             ->get(route('customer.appointments.create', absolute: false))
             ->assertOk()
-            ->assertSee('Book an appointment');
+            ->assertSee('Book an appointment')
+            ->assertSee('min-w-[22.25rem]', false)
+            ->assertSee('grid-cols-[repeat(7,minmax(2.75rem,1fr))]', false)
+            ->assertSee('x-bind:aria-selected="selectedDate === day.date"', false);
     }
 
     public function test_booking_page_accepts_validated_service_and_date_preselection(): void

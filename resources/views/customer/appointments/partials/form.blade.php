@@ -188,15 +188,17 @@
                     </button>
                 </div>
 
-                <div class="mt-5 grid grid-cols-7 gap-1.5 text-center text-[0.62rem] font-extrabold uppercase tracking-[0.08em] text-casa-muted sm:gap-2 sm:text-xs">
-                    <template x-for="dayName in weekDays" x-bind:key="dayName"><span x-text="dayName"></span></template>
-                </div>
+                <div class="mt-5 overflow-x-auto rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-casa-palm" tabindex="0" role="region" aria-label="{{ __('Scrollable available appointment dates') }}">
+                    <div class="min-w-[22.25rem]">
+                        <div class="grid grid-cols-[repeat(7,minmax(2.75rem,1fr))] gap-1.5 text-center text-[0.62rem] font-extrabold uppercase tracking-[0.08em] text-casa-muted sm:gap-2 sm:text-xs">
+                            <template x-for="dayName in weekDays" x-bind:key="dayName"><span x-text="dayName"></span></template>
+                        </div>
 
-                <div class="mt-2 grid grid-cols-7 gap-1.5 sm:gap-2" role="grid" aria-label="{{ __('Available appointment dates') }}">
-                    <template x-for="day in calendarDays" x-bind:key="day.key">
-                        <button
-                            type="button"
-                            class="relative min-h-12 rounded-xl border px-1.5 py-2 text-center text-xs font-extrabold transition sm:min-h-24 sm:rounded-2xl sm:px-2 sm:py-3 sm:text-left sm:text-sm"
+                        <div class="mt-2 grid grid-cols-[repeat(7,minmax(2.75rem,1fr))] gap-1.5 sm:gap-2" role="grid" aria-label="{{ __('Available appointment dates') }}">
+                            <template x-for="day in calendarDays" x-bind:key="day.key">
+                                <button
+                                    type="button"
+                                    class="relative min-h-12 min-w-11 rounded-xl border px-1.5 py-2 text-center text-xs font-extrabold transition sm:min-h-24 sm:rounded-2xl sm:px-2 sm:py-3 sm:text-left sm:text-sm"
                             x-bind:class="day.date === selectedDate
                                 ? 'border-casa-palm bg-casa-palm text-white shadow-md'
                                 : day.available
@@ -208,21 +210,24 @@
                             x-on:keydown.left.prevent="moveAvailableDate(day.date, -1)"
                             x-on:keydown.down.prevent="moveAvailableDate(day.date, 7)"
                             x-on:keydown.up.prevent="moveAvailableDate(day.date, -7)"
-                            x-bind:aria-label="day.date ? `${day.date}${day.available ? ', available' : ', unavailable'}` : 'Blank calendar day'"
-                            x-bind:tabindex="!day.available ? -1 : (selectedDate ? (selectedDate === day.date ? 0 : -1) : 0)"
-                            x-bind:data-booking-calendar-day="day.date || ''"
-                            role="gridcell"
-                        >
-                            <span class="block" x-text="day.label"></span>
-                            <span class="mx-auto mt-1 block size-1.5 rounded-full bg-casa-brass sm:hidden" x-show="day.available && day.date !== selectedDate"></span>
-                            <span class="mt-2 hidden flex-col gap-1 sm:flex" x-show="day.available">
-                                <template x-for="slot in day.previewSlots" x-bind:key="slot.starts_at">
-                                    <span class="block w-full truncate rounded-full px-1.5 py-1 text-center text-[0.6rem] font-extrabold uppercase leading-none" x-bind:class="day.date === selectedDate ? 'bg-white/15 text-white' : 'bg-casa-brass/15 text-casa-cacao'" x-text="slot.label"></span>
-                                </template>
-                                <span class="block truncate text-center text-[0.6rem] font-extrabold uppercase leading-none" x-bind:class="day.date === selectedDate ? 'text-white/75' : 'text-casa-muted'" x-show="day.moreSlots" x-text="moreSlotsLabel(day)"></span>
-                            </span>
-                        </button>
-                    </template>
+                                    x-bind:aria-label="day.date ? `${day.date}${day.available ? ', available' : ', unavailable'}` : 'Blank calendar day'"
+                                    x-bind:aria-selected="selectedDate === day.date"
+                                    x-bind:tabindex="!day.available ? -1 : (selectedDate ? (selectedDate === day.date ? 0 : -1) : 0)"
+                                    x-bind:data-booking-calendar-day="day.date || ''"
+                                    role="gridcell"
+                                >
+                                    <span class="block" x-text="day.label"></span>
+                                    <span class="mx-auto mt-1 block size-1.5 rounded-full bg-casa-brass sm:hidden" x-show="day.available && day.date !== selectedDate"></span>
+                                    <span class="mt-2 hidden flex-col gap-1 sm:flex" x-show="day.available">
+                                        <template x-for="slot in day.previewSlots" x-bind:key="slot.starts_at">
+                                            <span class="block w-full truncate rounded-full px-1.5 py-1 text-center text-[0.6rem] font-extrabold uppercase leading-none" x-bind:class="day.date === selectedDate ? 'bg-white/15 text-white' : 'bg-casa-brass/15 text-casa-cacao'" x-text="slot.label"></span>
+                                        </template>
+                                        <span class="block truncate text-center text-[0.6rem] font-extrabold uppercase leading-none" x-bind:class="day.date === selectedDate ? 'text-white/75' : 'text-casa-muted'" x-show="day.moreSlots" x-text="moreSlotsLabel(day)"></span>
+                                    </span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
 
