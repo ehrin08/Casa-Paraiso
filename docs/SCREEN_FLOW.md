@@ -71,9 +71,15 @@ Purpose:
 
 Primary actions:
 
-- Guests use the single `Reserve` navigation action to open the login page.
+- When active services are available, guests use the `Book an appointment` action in the desktop header, mobile public menu, treatment catalog, and visit panel to open the login page. Otherwise, these guest actions direct visitors to `#visit` to contact Casa Paraiso for current availability.
 - Authenticated users open their role workspace.
 - Book an available appointment after authentication.
+
+Responsive behavior:
+
+- Desktop exposes Treatments, How it works, and Visit & contact in the fixed header; small screens use an accessible compact public menu with the same links and primary action.
+- The booking-flow copy precedes its image on small screens, while visit hours and contact details precede optional add-ons.
+- When no services are active, the Treatments section continues to show the four configured signature packages as display-only reference cards, with a contact-for-availability notice and `#visit` action. Active database services completely replace these fallback cards when one or more are available.
 
 Main data:
 

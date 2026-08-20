@@ -13,14 +13,39 @@ class LandingServiceCatalogTest extends TestCase
 
     public function test_landing_page_describes_immediately_confirmed_bookings(): void
     {
+        Service::factory()->create(['is_active' => true]);
+
         $this->get('/')
             ->assertOk()
             ->assertSee('<title>Casa Paraiso Body and Wellness Spa</title>', false)
             ->assertSee('Book an appointment')
             ->assertSee('Instant confirmation')
             ->assertSee('A successful booking immediately reserves your appointment.')
+            ->assertSee('data-landing-catalog-cta', false)
             ->assertDontSee('Request an appointment')
             ->assertDontSee('Request-first care');
+    }
+
+    public function test_landing_page_shows_configured_packages_as_a_contact_only_fallback_when_no_services_are_active(): void
+    {
+        Service::factory()->create(['is_active' => false]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-landing-catalog-fallback', false)
+            ->assertSee('GAIA TOUCH')
+            ->assertSee('TETHYS FLOW')
+            ->assertSee('HESTIA WARMTH')
+            ->assertSee('AURORA BREEZE')
+            ->assertSee('PHP 499.00')
+            ->assertSee('PHP 649.00')
+            ->assertSee('PHP 749.00')
+            ->assertSee('PHP 849.00')
+            ->assertSee('These signature packages are shown for reference.')
+            ->assertSee('Contact for availability')
+            ->assertSee('Current availability')
+            ->assertDontSee('Book an appointment')
+            ->assertDontSee('Instant confirmation');
     }
 
     public function test_landing_page_uses_current_active_service_prices_after_an_admin_update(): void
@@ -63,6 +88,8 @@ class LandingServiceCatalogTest extends TestCase
             ->assertSee('Premium Treatment')
             ->assertSee('Starter Treatment')
             ->assertDontSee('Hidden Treatment')
+            ->assertDontSee('GAIA TOUCH')
+            ->assertDontSee('data-landing-catalog-fallback', false)
             ->assertSee('PHP 750.00');
     }
 }

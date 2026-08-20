@@ -45,12 +45,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    $activeServices = Service::query()
+        ->where('is_active', true)
+        ->orderBy('name')
+        ->get();
+
+    $servicesAreBookable = $activeServices->isNotEmpty();
+
     return view('welcome', [
         'applicationSettings' => ApplicationSetting::current(),
-        'services' => Service::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(),
+        'services' => $servicesAreBookable
+            ? $activeServices
+            : collect(config('casa.service_packages', []))->map(static fn (array $package): object => (object) $package),
+        'servicesAreBookable' => $servicesAreBookable,
         'addons' => Addon::tableAvailable()
             ? Addon::query()->where('is_active', true)->orderBy('name')->get()
             : collect(),

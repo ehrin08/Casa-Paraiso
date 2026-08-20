@@ -27,6 +27,7 @@ Earlier native-client, versioned API, device-token, database, tunnel, and hosted
 - Role controllers are under `app/Http/Controllers/{Admin,Reception,Staff,Customer}`.
 - Business invariants are implemented in services including `AppointmentWorkflow`, `AppointmentAvailability`, `AppointmentCompletion`, `TransactionWorkflow`, `AttendanceWorkflow`, `RfmPromotionGenerator`, and `SentimentClassifier`.
 - `config/casa.php` owns business hours, pagination, reward presets, and security switches.
+- The public landing page displays active `Service` records when available. If none are active, it displays the four `casa.service_packages` as informational reference cards only; fallback packages are never bookable or written to the database.
 - `tests/Feature` contains the primary behavioral coverage.
 - Super-administrator error inbox routes are `admin.system-errors.index`, `admin.system-errors.show`, `admin.system-errors.resolve`, and `admin.system-errors.reopen`; no current business route is intentionally marked unavailable.
 
