@@ -23,6 +23,7 @@ use App\Http\Controllers\Auth\GooglePasswordSetupController;
 use App\Http\Controllers\Customer\AppointmentCalendarController as CustomerAppointmentCalendarController;
 use App\Http\Controllers\Customer\AppointmentController as CustomerAppointmentController;
 use App\Http\Controllers\Customer\FeedbackController as CustomerFeedbackController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reception\AppointmentCalendarController as ReceptionAppointmentCalendarController;
 use App\Http\Controllers\Reception\AppointmentController as ReceptionAppointmentController;
@@ -178,6 +179,13 @@ Route::middleware(['auth', 'active', 'verified', 'role:receptionist', MeasureApp
 Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,receptionist'])
     ->prefix('attendance-station')->name('attendance-station.')->group(function (): void {
         Route::get('/qr', [WebAttendanceController::class, 'qr'])->name('qr');
+    });
+
+Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,receptionist,staff', MeasureApplicationRequest::class])
+    ->group(function (): void {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::patch('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     });
 
 Route::middleware(['auth', 'active', 'verified', 'role:customer', MeasureApplicationRequest::class])

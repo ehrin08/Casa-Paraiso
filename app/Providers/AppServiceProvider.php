@@ -56,6 +56,17 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.navigation', function ($view): void {
             $user = request()->user();
+            $receivesBookingNotifications = $user?->isAdmin() || $user?->isReceptionist() || $user?->isStaff();
+
+            try {
+                $unreadNotificationCount = $receivesBookingNotifications
+                    ? $user->unreadNotifications()->count()
+                    : 0;
+            } catch (\Throwable) {
+                $unreadNotificationCount = 0;
+            }
+
+            $view->with('unreadNotificationCount', $unreadNotificationCount);
 
             if (! $user?->isSuperAdmin()) {
                 $view->with('unresolvedSystemErrorCount', 0);

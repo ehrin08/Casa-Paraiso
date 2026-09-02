@@ -58,7 +58,7 @@
     <input type="hidden" name="service_id" x-bind:value="serviceId">
     <input type="hidden" name="requested_start_at" x-bind:value="selectedSlot">
 
-    <div class="space-y-5">
+    <div class="space-y-5 pb-28 xl:pb-0">
         <section class="casa-editorial-card p-5 sm:p-7">
             <div class="flex items-start gap-4 border-b border-casa-border pb-5">
                 <span class="grid size-11 shrink-0 place-items-center rounded-full bg-casa-cacao text-sm font-extrabold text-white">1</span>
@@ -66,6 +66,10 @@
                     <p class="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-casa-cacao">{{ __('Choose your care') }}</p>
                     <h2 class="mt-1 font-editorial text-3xl font-semibold text-casa-text">{{ __('Treatment and therapist') }}</h2>
                     <p class="mt-2 text-sm leading-6 text-casa-muted">{{ __('Choose a treatment first. A therapist preference is optional and filters the calendar to that person’s open times.') }}</p>
+                    <details class="mt-3 text-sm leading-6 text-casa-muted">
+                        <summary class="cursor-pointer font-bold text-casa-cacao">{{ __('Choosing your care') }}</summary>
+                        <p class="mt-2">{{ __('No therapist preference gives the spa team the most flexibility. A preference is considered, while the final reservation is confirmed only after availability is rechecked.') }}</p>
+                    </details>
                 </div>
             </div>
 
@@ -108,7 +112,10 @@
                 </div>
             </div>
 
-            <fieldset class="mt-5 rounded-2xl border border-casa-border bg-casa-sand/45 p-4 sm:p-5">
+            <details class="mt-5 rounded-2xl border border-casa-border bg-casa-sand/45 p-4 sm:p-5">
+                <summary class="cursor-pointer font-bold text-casa-text">{{ __('Add paid add-ons (optional)') }}</summary>
+                <div class="mt-4">
+            <fieldset>
                 <legend class="casa-label px-1">{{ __('Add-ons (optional)') }}</legend>
                 <p class="mt-1 text-sm leading-6 text-casa-muted">{{ __('Add extra care to your visit. Back Massage extends your reserved time by 30 minutes.') }}</p>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -125,9 +132,14 @@
                 <p class="mt-3 text-sm font-bold text-casa-text">{{ __('Selected add-ons:') }} <span x-text="`PHP ${paidAddonTotal.toFixed(2)}`"></span><span x-show="addonDurationMinutes" x-text="` · +${addonDurationMinutes} min`"></span></p>
                 <x-input-error class="mt-3" :messages="$errors->get('addon_codes')" />
             </fieldset>
+                </div>
+            </details>
 
             @if ($vouchers->isNotEmpty())
-                <fieldset class="mt-5 rounded-2xl border border-casa-brass/60 bg-casa-brass/10 p-4 sm:p-5">
+                <details class="mt-5 rounded-2xl border border-casa-brass/60 bg-casa-brass/10 p-4 sm:p-5">
+                    <summary class="cursor-pointer font-bold text-casa-cacao">{{ __('Use a complimentary add-on voucher (optional)') }}</summary>
+                    <div class="mt-4">
+                <fieldset>
                     <legend class="casa-label px-1">{{ __('Complimentary add-on voucher (optional)') }}</legend>
                     <p class="mt-1 text-sm leading-6 text-casa-muted">{{ __('Your customer reward adds one spa add-on to this visit. It does not change the package price.') }}</p>
                     <div class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -152,6 +164,8 @@
                     </div>
                     <x-input-error class="mt-3" :messages="$errors->get('promotion_suggestion_id')" />
                 </fieldset>
+                    </div>
+                </details>
             @endif
 
             <noscript>
@@ -217,7 +231,7 @@
                                     role="gridcell"
                                 >
                                     <span class="block" x-text="day.label"></span>
-                                    <span class="mx-auto mt-1 block size-1.5 rounded-full bg-casa-brass sm:hidden" x-show="day.available && day.date !== selectedDate"></span>
+                                    <span class="mt-1 block text-[0.56rem] font-extrabold uppercase tracking-[0.04em] text-casa-cacao sm:hidden" x-show="day.available && day.date !== selectedDate">{{ __('Open') }}</span>
                                     <span class="mt-2 hidden flex-col gap-1 sm:flex" x-show="day.available">
                                         <template x-for="slot in day.previewSlots" x-bind:key="slot.starts_at">
                                             <span class="block w-full truncate rounded-full px-1.5 py-1 text-center text-[0.6rem] font-extrabold uppercase leading-none" x-bind:class="day.date === selectedDate ? 'bg-white/15 text-white' : 'bg-casa-brass/15 text-casa-cacao'" x-text="slot.label"></span>
@@ -258,6 +272,10 @@
                 </div>
 
                 <p class="mt-4 text-sm leading-6 text-casa-muted" x-show="serviceId && selectedDate && !selectedDateSlots.length && !loading">{{ __('No available times remain for this date. Choose another highlighted day.') }}</p>
+                <details class="mt-4 text-sm leading-6 text-casa-muted">
+                    <summary class="cursor-pointer font-bold text-casa-cacao">{{ __('Need a different time?') }}</summary>
+                    <p class="mt-2">{{ __('Choose another date marked Open. Availability changes as appointments are reserved, so the spa checks your selected time again when you confirm.') }}</p>
+                </details>
                 <x-input-error class="mt-3" :messages="$errors->get('requested_start_at')" />
             </div>
 
@@ -285,6 +303,17 @@
             </div>
         </section>
     </div>
+
+    <section class="fixed inset-x-4 bottom-20 z-40 rounded-2xl border border-casa-border bg-casa-paper p-3 shadow-casa-lift xl:hidden" x-show="serviceId || selectedSlot" x-cloak aria-live="polite" aria-label="{{ __('Booking recap') }}">
+        <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-sm font-extrabold text-casa-text" x-text="selectedService?.name || '{{ __('Choose a treatment') }}'"></p>
+                <p class="mt-0.5 truncate text-xs text-casa-muted" x-text="selectedSlotLabel || '{{ __('Choose a time to continue') }}'"></p>
+                <p class="mt-0.5 text-xs font-bold text-casa-cacao" x-show="selectedPaidAddons.length" x-text="`Add-ons: PHP ${paidAddonTotal.toFixed(2)}`"></p>
+            </div>
+            <button type="submit" class="casa-button-primary shrink-0" x-bind:disabled="!serviceId || !selectedSlot">{{ __('Confirm') }}</button>
+        </div>
+    </section>
 
     <aside class="space-y-4 xl:sticky xl:top-6 xl:self-start">
         <div class="casa-dark-panel rounded-[24px] p-6 shadow-casa-card">

@@ -66,6 +66,7 @@ Access: guest and authenticated users.
 Purpose:
 
 - Introduce Casa Paraiso - Body and Wellness Spa.
+- Show the admin-managed company history and role-based organizational chart when either has been published.
 - Show the four massage packages, add-on price list, business hours, and call to action.
 - Use the marketing line: "Reserve your spot. You deserve this."
 
@@ -77,7 +78,8 @@ Primary actions:
 
 Responsive behavior:
 
-- Desktop exposes Treatments, How it works, and Visit & contact in the fixed header; small screens use an accessible compact public menu with the same links and primary action.
+- Desktop exposes About when company-profile content is published, plus Treatments, How it works, and Visit & contact in the fixed header; small screens use an accessible compact public menu with the same available links and primary action.
+- The About section combines a plain-text company narrative with an Owner → Administrator → Team chart. Blank content is not exposed publicly.
 - The booking-flow copy precedes its image on small screens, while visit hours and contact details precede optional add-ons.
 - When no services are active, the Treatments section continues to show the four configured signature packages as display-only reference cards, with a contact-for-availability notice and `#visit` action. Active database services completely replace these fallback cards when one or more are available.
 
@@ -87,6 +89,7 @@ Main data:
 - Add-ons as static customer-facing content only.
 - Business hours: Open every day, 1:00 PM to 12:00 MN.
 - Basic business information.
+- Admin-managed company history and organizational role labels, summaries, and ordering.
 
 ### Service Listing
 

@@ -432,6 +432,9 @@ Key columns:
 - `contact_email` nullable
 - `contact_phone` nullable
 - `business_address` nullable
+- `location_landmarks`, `facebook_url`, `messenger_url`, and `map_url` nullable public contact fields
+- `company_history` nullable plain-text public narrative
+- `organization_chart` nullable JSON object containing the owner tier, administrator tier, and up to eight team roles
 - `default_payment_method`
 - `updated_by` nullable foreign key to `users.id`
 - `created_at`, `updated_at`
@@ -441,6 +444,8 @@ Rules:
 - The application uses the first row and writes the canonical row with `id = 1`.
 - Safe configuration defaults are used before the migration is applied, so public and payment forms remain available while saving is disabled.
 - The payment default only prefills forms and never marks a transaction paid or initiates a transfer.
+- Admin-managed company-profile content is escaped when rendered publicly; an entirely blank history and chart keep the landing-page About section hidden.
+- Organizational chart content is role-based and does not query or expose staff accounts.
 - Booking hours, intervals, timezone, commission rate, and security controls remain configuration-controlled.
 
 ## RFM Promotions

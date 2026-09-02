@@ -17,11 +17,15 @@ class DashboardController extends Controller
         $appointmentSummary = Appointment::query()
             ->selectRaw('SUM(CASE WHEN scheduled_start_at >= ? AND scheduled_start_at < ? THEN 1 ELSE 0 END) AS today_appointments', [$today, $today->copy()->addDay()])
             ->selectRaw('SUM(CASE WHEN status = ? AND scheduled_start_at >= ? THEN 1 ELSE 0 END) AS upcoming_appointments', [Appointment::STATUS_CONFIRMED, now()])
+            ->selectRaw('SUM(CASE WHEN status = ? AND scheduled_start_at >= ? AND scheduled_start_at < ? THEN 1 ELSE 0 END) AS confirmed_today', [Appointment::STATUS_CONFIRMED, $today, $today->copy()->addDay()])
+            ->selectRaw('SUM(CASE WHEN status = ? AND scheduled_start_at < ? THEN 1 ELSE 0 END) AS overdue_confirmed', [Appointment::STATUS_CONFIRMED, now()])
             ->first();
 
         $summary = [
             'todayAppointments' => (int) $appointmentSummary?->today_appointments,
             'upcomingAppointments' => (int) $appointmentSummary?->upcoming_appointments,
+            'confirmedToday' => (int) $appointmentSummary?->confirmed_today,
+            'overdueConfirmed' => (int) $appointmentSummary?->overdue_confirmed,
             'todayRevenue' => Transaction::query()
                 ->where('payment_status', Transaction::PAYMENT_PAID)
                 ->whereDate('paid_at', $today)

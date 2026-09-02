@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
+use App\Models\PromotionSuggestion;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\StaffWeeklySchedule;
@@ -17,6 +18,7 @@ class CustomerBookingModalTest extends TestCase
     public function test_my_appointments_loads_the_booking_form_lazily_and_keeps_full_page_fallback(): void
     {
         $customer = CustomerProfile::factory()->create();
+        PromotionSuggestion::factory()->for($customer)->create();
 
         $this->actingAs($customer->user)
             ->get(route('customer.appointments.index', absolute: false))
@@ -33,7 +35,13 @@ class CustomerBookingModalTest extends TestCase
             ->assertSee('Book an appointment')
             ->assertSee('min-w-[22.25rem]', false)
             ->assertSee('grid-cols-[repeat(7,minmax(2.75rem,1fr))]', false)
-            ->assertSee('x-bind:aria-selected="selectedDate === day.date"', false);
+            ->assertSee('x-bind:aria-selected="selectedDate === day.date"', false)
+            ->assertSee('aria-label="Booking recap"', false)
+            ->assertSee('x-cloak', false)
+            ->assertSee('Add paid add-ons (optional)')
+            ->assertSee('Use a complimentary add-on voucher (optional)')
+            ->assertSee('Need a different time?')
+            ->assertSee('>Open<', false);
     }
 
     public function test_booking_page_accepts_validated_service_and_date_preselection(): void

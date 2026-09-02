@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Appointment;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\View\View;
+
+class NotificationController extends Controller
+{
+    public function index(Request $request): View
+    {
+        return view('notifications.index', [
+            'notifications' => $request->user()
+                ->notifications()
+                ->latest()
+                ->paginate((int) config('casa.pagination.per_page', 15))
+                ->withQueryString(),
+        ]);
+    }
+
+    public function open(Request $request, string $notification): RedirectResponse
+    {
+        /** @var DatabaseNotification $notification */
+        $notification = $request->user()->notifications()->findOrFail($notification);
+        $notification->markAsRead();
+
+        $appointment = Appointment::query()->findOrFail($notification->data['appointment_id'] ?? 0);
+
+        return redirect()->route($this->appointmentRoute($request->user()), $appointment);
+    }
+
+    public function markAllRead(Request $request): RedirectResponse
+    {
+        $request->user()->unreadNotifications()->update(['read_at' => now()]);
+
+        return redirect()->route('notifications.index');
+    }
+
+    private function appointmentRoute(User $user): string
+    {
+        return match (true) {
+            $user->isStaff() => 'staff.appointments.show',
+            $user->isReceptionist() => 'reception.appointments.show',
+            default => 'admin.appointments.show',
+        };
+    }
+}

@@ -14,15 +14,25 @@
     $navGroups = match (true) {
         $user->isAdmin() => [
             [
-                'label' => 'Manage',
+                'label' => 'Today',
                 'items' => [
                     ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard'],
                     ['label' => 'Schedule', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'admin.customers.index', 'active' => 'admin.customers.*'],
+                ],
+            ],
+            [
+                'label' => 'Operations',
+                'items' => [
                     ['label' => 'Team & Services', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => ['admin.staff.*', 'admin.services.*'], 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'admin.transactions.index', 'active' => 'admin.transactions.*'],
                     ['label' => 'Commissions', 'icon' => 'payments', 'route' => 'admin.commissions.index', 'active' => 'admin.commissions.*'],
                     ['label' => 'Attendance', 'icon' => 'team', 'route' => 'admin.attendance.index', 'active' => 'admin.attendance.*'],
+                ],
+            ],
+            [
+                'label' => 'Insights',
+                'items' => [
                     ['label' => 'Insights', 'icon' => 'insights', 'route' => 'admin.promotions.index', 'active' => ['admin.promotions.*', 'admin.feedback.*', 'admin.reports.*'], 'preload' => true],
                 ],
             ],
@@ -64,8 +74,13 @@
         ],
     };
 
+    $notificationLink = $user->isAdmin() || $user->isReceptionist() || $user->isStaff()
+        ? [['label' => 'Notifications', 'icon' => 'notifications', 'route' => 'notifications.index', 'active' => 'notifications.*', 'badge' => $unreadNotificationCount ?? 0]]
+        : [];
+
     $accountLinks = $user->isAdmin()
         ? [
+            ...$notificationLink,
             ...($user->isSuperAdmin() ? [
                 ['label' => 'User access', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
                 ['label' => 'System errors', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $unresolvedSystemErrorCount ?? 0],
@@ -74,6 +89,7 @@
             ['label' => 'Profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
         ]
         : [
+            ...$notificationLink,
             ['label' => 'Profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
         ];
 

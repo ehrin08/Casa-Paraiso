@@ -19,6 +19,8 @@ class LandingServiceCatalogTest extends TestCase
             ->assertOk()
             ->assertSee('<title>Casa Paraiso Body and Wellness Spa</title>', false)
             ->assertSee('Book an appointment')
+            ->assertSee('Login')
+            ->assertSee('href="'.route('login').'"', false)
             ->assertSee('Instant confirmation')
             ->assertSee('A successful booking immediately reserves your appointment.')
             ->assertSee('data-landing-catalog-cta', false)
@@ -42,10 +44,24 @@ class LandingServiceCatalogTest extends TestCase
             ->assertSee('PHP 749.00')
             ->assertSee('PHP 849.00')
             ->assertSee('These signature packages are shown for reference.')
-            ->assertSee('Contact for availability')
+            ->assertSee('Book an appointment')
+            ->assertSee('Login')
+            ->assertSee('href="'.route('login').'"', false)
+            ->assertDontSee('>Contact for availability</a>', false)
             ->assertSee('Current availability')
-            ->assertDontSee('Book an appointment')
             ->assertDontSee('Instant confirmation');
+    }
+
+    public function test_authenticated_visitors_see_their_workspace_action_without_guest_ctas(): void
+    {
+        $customer = User::factory()->customer()->create();
+
+        $this->actingAs($customer)
+            ->get('/')
+            ->assertOk()
+            ->assertSee('Open workspace')
+            ->assertDontSee('>Login</a>', false)
+            ->assertDontSee('>Book an appointment</a>', false);
     }
 
     public function test_landing_page_uses_current_active_service_prices_after_an_admin_update(): void

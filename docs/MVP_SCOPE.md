@@ -55,7 +55,7 @@ Users authenticate with either a verified Google account or a verified email and
 
 ### Application Settings
 
-- Admin and Super Administrator can maintain the public business name, contact details, address, and the payment method used to prefill new Admin and Receptionist payment forms.
+- Admin and Super Administrator can maintain the public business name, contact details, address, company history, role-based organizational chart, and the payment method used to prefill new Admin and Receptionist payment forms.
 - Operating hours, booking intervals, timezone, commission rate, authorization, and scheduling invariants remain code-controlled safeguards rather than editable business fields.
 - Only the protected Super Administrator can provision users, change roles, or activate and deactivate accounts.
 

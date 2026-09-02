@@ -11,6 +11,7 @@ use App\Models\StaffProfile;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class RoleWorkspaceTest extends TestCase
@@ -251,6 +252,42 @@ class RoleWorkspaceTest extends TestCase
             ->assertSee('Hilot Massage')
             ->assertSee('PHP 1,200.00')
             ->assertSee('1 customer reward available');
+    }
+
+    public function test_admin_dashboard_prioritizes_confirmed_visits_that_are_today_or_overdue(): void
+    {
+        Carbon::setTestNow('2026-08-20 15:00:00');
+
+        try {
+            $admin = User::factory()->admin()->create();
+            $customerProfile = CustomerProfile::factory()->create();
+            $service = Service::factory()->create();
+
+            Appointment::factory()->for($customerProfile)->for($service)->create([
+                'status' => Appointment::STATUS_CONFIRMED,
+                'scheduled_start_at' => now()->subHour(),
+                'scheduled_end_at' => now(),
+            ]);
+            Appointment::factory()->for($customerProfile)->for($service)->create([
+                'status' => Appointment::STATUS_CONFIRMED,
+                'scheduled_start_at' => now()->addHour(),
+                'scheduled_end_at' => now()->addHours(2),
+            ]);
+            Appointment::factory()->for($customerProfile)->for($service)->create([
+                'status' => Appointment::STATUS_CONFIRMED,
+                'scheduled_start_at' => now()->addDay(),
+                'scheduled_end_at' => now()->addDay()->addHour(),
+            ]);
+
+            $this->actingAs($admin)
+                ->get('/admin/dashboard')
+                ->assertOk()
+                ->assertSeeInOrder(['Needs attention', '1', 'Confirmed today', '2'])
+                ->assertSee('Confirmed visits past their start time')
+                ->assertSee('Visits to keep moving today');
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function legacy_staff_dashboard_shows_assigned_pending_and_completed_counts(): void

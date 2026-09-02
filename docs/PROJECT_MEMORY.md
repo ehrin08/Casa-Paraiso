@@ -1,6 +1,6 @@
 # Casa Paraiso Project Memory
 
-> Last reviewed: 2026-08-02
+> Last reviewed: 2026-08-24
 > Role: orientation and routing; verify current source before changing behavior.
 
 ## Current Shape
@@ -28,8 +28,10 @@ Earlier native-client, versioned API, device-token, database, tunnel, and hosted
 - Business invariants are implemented in services including `AppointmentWorkflow`, `AppointmentAvailability`, `AppointmentCompletion`, `TransactionWorkflow`, `AttendanceWorkflow`, `RfmPromotionGenerator`, and `SentimentClassifier`.
 - `config/casa.php` owns business hours, pagination, reward presets, and security switches.
 - The public landing page displays active `Service` records when available. If none are active, it displays the four `casa.service_packages` as informational reference cards only; fallback packages are never bookable or written to the database.
+- Admin Settings stores optional plain-text company history and a role-based Owner → Administrator → Team organizational chart. The landing page exposes one About section and navigation link only after an admin publishes at least one of those content areas; it never derives public chart entries from staff accounts.
 - `tests/Feature` contains the primary behavioral coverage.
 - Super-administrator error inbox routes are `admin.system-errors.index`, `admin.system-errors.show`, `admin.system-errors.resolve`, and `admin.system-errors.reopen`; no current business route is intentionally marked unavailable.
+- Customer self-bookings create retained database notifications for the assigned therapist and active admins, super admins, and receptionists. Operational users access the inbox at `notifications.index`; opening an item marks it read and redirects to the recipient's scoped appointment detail page.
 
 ## Durable Rules
 

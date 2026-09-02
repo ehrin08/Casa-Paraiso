@@ -20,6 +20,7 @@ class AdminSettingsTest extends TestCase
             ->get(route('admin.settings.index'))
             ->assertOk()
             ->assertSee('Business profile')
+            ->assertSee('Company history and organizational chart')
             ->assertSee('Security readiness')
             ->assertSee('Default payment method');
 
@@ -33,6 +34,15 @@ class AdminSettingsTest extends TestCase
                 'facebook_url' => 'https://www.facebook.com/61579320037378',
                 'messenger_url' => 'https://m.me/61579320037378',
                 'map_url' => 'https://www.google.com/maps/search/?api=1&query=Casa+Paraiso',
+                'company_history' => 'Casa Paraiso began with a commitment to thoughtful, restorative care.',
+                'organization_chart' => [
+                    'owner' => ['title' => 'Owner / Super Administrator', 'description' => 'Guides the spa mission.'],
+                    'admin' => ['title' => 'Administrator', 'description' => 'Coordinates daily operations.'],
+                    'team' => [
+                        ['title' => 'Receptionist', 'description' => 'Welcomes and assists guests.'],
+                        ['title' => 'Therapists', 'description' => 'Deliver each wellness ritual.'],
+                    ],
+                ],
                 'default_payment_method' => Transaction::METHOD_GCASH,
             ])
             ->assertRedirect()
@@ -47,6 +57,12 @@ class AdminSettingsTest extends TestCase
             'default_payment_method' => Transaction::METHOD_GCASH,
             'updated_by' => $admin->id,
         ]);
+
+        $settings = ApplicationSetting::query()->firstOrFail();
+
+        $this->assertSame('Casa Paraiso began with a commitment to thoughtful, restorative care.', $settings->company_history);
+        $this->assertSame('Owner / Super Administrator', data_get($settings->organization_chart, 'owner.title'));
+        $this->assertSame('Therapists', data_get($settings->organization_chart, 'team.1.title'));
     }
 
     public function test_settings_validation_rejects_invalid_values(): void
@@ -64,6 +80,12 @@ class AdminSettingsTest extends TestCase
                 'facebook_url' => 'http://facebook.com/61579320037378',
                 'messenger_url' => 'https://facebook.com/messages',
                 'map_url' => 'https://maps.example.com/casa-paraiso',
+                'company_history' => str_repeat('a', 6001),
+                'organization_chart' => [
+                    'owner' => ['title' => '', 'description' => str_repeat('a', 301)],
+                    'admin' => ['title' => str_repeat('a', 101), 'description' => null],
+                    'team' => array_fill(0, 9, ['title' => 'Team role', 'description' => null]),
+                ],
                 'default_payment_method' => 'Cryptocurrency',
             ])
             ->assertRedirect(route('admin.settings.index'))
@@ -76,8 +98,43 @@ class AdminSettingsTest extends TestCase
                 'facebook_url',
                 'messenger_url',
                 'map_url',
+                'company_history',
+                'organization_chart.owner.title',
+                'organization_chart.owner.description',
+                'organization_chart.admin.title',
+                'organization_chart.team',
                 'default_payment_method',
             ]);
+    }
+
+    public function test_admin_managed_company_profile_is_rendered_safely_on_the_landing_page(): void
+    {
+        ApplicationSetting::factory()->create([
+            'id' => 1,
+            'company_history' => "Founded around restorative care.\n\n<script>alert('unsafe')</script>",
+            'organization_chart' => [
+                'owner' => ['title' => 'Owner / Super Administrator', 'description' => 'Sets the direction.'],
+                'admin' => ['title' => 'Administrator', 'description' => 'Leads daily operations.'],
+                'team' => [
+                    ['title' => 'Receptionist', 'description' => 'Supports every arrival.'],
+                    ['title' => 'Therapists', 'description' => 'Provide wellness care.'],
+                ],
+            ],
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('href="#about"', false)
+            ->assertSee('data-landing-company-profile', false)
+            ->assertSee('data-company-history', false)
+            ->assertSee('data-organization-chart', false)
+            ->assertSee('Founded around restorative care.')
+            ->assertSee('Owner / Super Administrator')
+            ->assertSee('Administrator')
+            ->assertSee('Receptionist')
+            ->assertSee('Therapists')
+            ->assertSee('&lt;script&gt;alert(&#039;unsafe&#039;)&lt;/script&gt;', false)
+            ->assertDontSee("<script>alert('unsafe')</script>", false);
     }
 
     public function test_non_admin_roles_cannot_read_or_update_settings(): void

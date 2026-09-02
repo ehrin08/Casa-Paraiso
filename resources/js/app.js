@@ -1048,6 +1048,39 @@ window.attendanceStation = (config) => ({
     async refreshQr() { try { this.qr = (await window.axios.get(config.qrUrl)).data.qr; await this.render(); } catch { this.error = 'The live QR could not refresh.'; } },
 });
 
+window.organizationChartEditor = () => ({
+    team: [],
+
+    init() {
+        try {
+            const team = JSON.parse(this.$root.dataset.initialTeam || '[]');
+            this.team = Array.isArray(team) ? team : [];
+        } catch {
+            this.team = [];
+        }
+
+        if (this.team.length === 0) {
+            this.addRole();
+        }
+    },
+
+    addRole() {
+        if (this.team.length >= 8) {
+            return;
+        }
+
+        this.team.push({ title: '', description: '' });
+    },
+
+    removeRole(index) {
+        this.team.splice(index, 1);
+
+        if (this.team.length === 0) {
+            this.addRole();
+        }
+    },
+});
+
 Alpine.start();
 
 let loadingRevealTimer = null;
