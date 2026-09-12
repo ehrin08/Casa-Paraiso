@@ -19,10 +19,10 @@ class LandingServiceCatalogTest extends TestCase
             ->assertOk()
             ->assertSee('<title>Casa Paraiso Body and Wellness Spa</title>', false)
             ->assertSee('Book an appointment')
-            ->assertSee('Login')
+            ->assertSee('>Log in</a>', false)
             ->assertSee('href="'.route('login').'"', false)
             ->assertSee('Instant confirmation')
-            ->assertSee('A successful booking immediately reserves your appointment.')
+            ->assertSee('Select your ritual, therapist, and preferred schedule with real-time availability.')
             ->assertSee('data-landing-catalog-cta', false)
             ->assertDontSee('Request an appointment')
             ->assertDontSee('Request-first care');
@@ -45,7 +45,7 @@ class LandingServiceCatalogTest extends TestCase
             ->assertSee('PHP 849.00')
             ->assertSee('These signature packages are shown for reference.')
             ->assertSee('Book an appointment')
-            ->assertSee('Login')
+            ->assertSee('>Log in</a>', false)
             ->assertSee('href="'.route('login').'"', false)
             ->assertDontSee('>Contact for availability</a>', false)
             ->assertSee('Current availability')
@@ -60,7 +60,7 @@ class LandingServiceCatalogTest extends TestCase
             ->get('/')
             ->assertOk()
             ->assertSee('Open workspace')
-            ->assertDontSee('>Login</a>', false)
+            ->assertDontSee('>Log in</a>', false)
             ->assertDontSee('>Book an appointment</a>', false);
     }
 

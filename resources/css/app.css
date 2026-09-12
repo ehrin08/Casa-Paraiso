@@ -1050,3 +1050,45 @@ body[data-workspace-role] .casa-list-toolbar > :last-child {
         animation-iteration-count: 1 !important;
     }
 }
+
+/* ── Org chart scroll-reveal animation ── */
+@keyframes org-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[data-org-animate] {
+    opacity: 0;
+}
+
+[data-org-animate].is-visible {
+    animation: org-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--org-delay, 0s);
+}
+
+/* ── Org chart avatar initials gradient backgrounds ── */
+.org-avatar-initials {
+    background: linear-gradient(135deg, var(--color-casa-brass) 0%, var(--color-casa-cacao) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.org-avatar-initials-team {
+    background: linear-gradient(135deg, var(--color-casa-palm) 0%, var(--color-casa-charcoal) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    text-transform: uppercase;
+}

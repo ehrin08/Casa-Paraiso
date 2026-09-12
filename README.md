@@ -24,4 +24,4 @@ Run tests and build assets with:
 .\scripts\casa-docker.ps1 compose exec -T app npm run build
 ```
 
-See [the Docker workflow](docs/DOCKER_WORKFLOW.md), [project memory](docs/PROJECT_MEMORY.md), and [AGENTS.md](AGENTS.md) for operational rules.
+See [the Docker workflow](docs/DOCKER_WORKFLOW.md), [Render and Oracle deployment](docs/RENDER_ORACLE_DEPLOYMENT.md), [project memory](docs/PROJECT_MEMORY.md), and [AGENTS.md](AGENTS.md) for operational rules.

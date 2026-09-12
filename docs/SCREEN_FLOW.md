@@ -41,6 +41,7 @@ Route prefixes:
 - Keep operational tables inside labeled, keyboard-focusable horizontal-scroll regions. Calendar week strips and customer month grids may scroll horizontally when seven full-size date targets do not fit.
 - Appointment calendars, dashboard previews, service queues, detail-history previews, and form selector collections remain unpaginated.
 - All role dashboards should show only actions the current role is allowed to perform.
+- Admin, receptionist, and therapist sidebars show their unread customer-booking number beside Schedule, Appointments, or My Schedule. The number updates live and clears after the schedule page is displayed; the Notifications inbox remains available as history without its own badge.
 - Avoid SPA-only navigation patterns; pages should work as standard Laravel routes.
 
 ## Receptionist Screens
@@ -72,7 +73,7 @@ Purpose:
 
 Primary actions:
 
-- When active services are available, guests use the `Book an appointment` action in the desktop header, mobile public menu, treatment catalog, and visit panel to open the login page. Otherwise, these guest actions direct visitors to `#visit` to contact Casa Paraiso for current availability.
+- Guests use the `Log in` action in the desktop header and mobile public menu. When active services are available, `Book an appointment` actions in the treatment catalog and visit panel open the login page; otherwise, those booking actions direct visitors to `#visit` to contact Casa Paraiso for current availability.
 - Authenticated users open their role workspace.
 - Book an available appointment after authentication.
 

@@ -85,7 +85,7 @@ class ApplicationSetting extends Model
         ];
     }
 
-    /** @return array{owner?: array{title: string, description?: string|null}, admin?: array{title: string, description?: string|null}, team: array<int, array{title: string, description?: string|null}>} */
+    /** @return array{owner?: array{title: string, name?: string|null, description?: string|null, photo?: string|null}, admin?: array{title: string, name?: string|null, description?: string|null, photo?: string|null}, team: array<int, array{title: string, name?: string|null, description?: string|null, photo?: string|null}>} */
     public function publicOrganizationChart(): array
     {
         $chart = is_array($this->organization_chart) ? $this->organization_chart : [];
@@ -99,6 +99,20 @@ class ApplicationSetting extends Model
             'admin' => is_array($chart['admin'] ?? null) && filled($chart['admin']['title'] ?? null) ? $chart['admin'] : null,
             'team' => $team,
         ], static fn (mixed $value, string $key): bool => $key === 'team' || $value !== null, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /** Get the public URL for an org chart photo path, or null if the path is empty or file doesn't exist. */
+    public static function orgChartPhotoUrl(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        if (! \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
     }
 
     public function hasPublicCompanyProfile(): bool

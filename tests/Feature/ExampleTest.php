@@ -24,6 +24,14 @@ class ExampleTest extends TestCase
         $this->assertStringContainsString('const panelCacheTtl = 60000', $script);
         $this->assertStringContainsString('panelCache.clear()', $script);
         $this->assertStringNotContainsString("prefetch.rel = 'prefetch'", $script);
+        $this->assertStringContainsString("initializeBookingNotifications", $script);
+
+        $notifications = file_get_contents(resource_path('js/booking-notifications.js'));
+
+        $this->assertIsString($notifications);
+        $this->assertStringContainsString("booking-notifications.changed", $notifications);
+        $this->assertStringContainsString("bookingNotificationsCountUrl", $notifications);
+        $this->assertStringContainsString("bookingNotificationsReadUrl", $notifications);
     }
 
     /**

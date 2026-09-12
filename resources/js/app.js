@@ -1,4 +1,5 @@
 import './bootstrap';
+import { initializeBookingNotifications } from './booking-notifications';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -1069,7 +1070,7 @@ window.organizationChartEditor = () => ({
             return;
         }
 
-        this.team.push({ title: '', description: '' });
+        this.team.push({ title: '', name: '', description: '', photoUrl: '' });
     },
 
     removeRole(index) {
@@ -1081,7 +1082,54 @@ window.organizationChartEditor = () => ({
     },
 });
 
+window.orgPhotoUpload = (existingUrl) => ({
+    previewUrl: existingUrl || '',
+    hasExisting: !!existingUrl,
+    removing: false,
+
+    handleFileChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.previewUrl = URL.createObjectURL(file);
+            this.removing = false;
+        }
+    },
+});
+
+/* ── Org chart scroll animation (landing page) ── */
+if (typeof IntersectionObserver !== 'undefined') {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReducedMotion) {
+        const orgObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        orgObserver.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.15 },
+        );
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-org-animate]').forEach((el) => {
+                orgObserver.observe(el);
+            });
+        });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-org-animate]').forEach((el) => {
+                el.classList.add('is-visible');
+            });
+        });
+    }
+}
+
 Alpine.start();
+
+document.addEventListener('DOMContentLoaded', initializeBookingNotifications);
 
 let loadingRevealTimer = null;
 let loadingFallbackTimer = null;
@@ -1497,6 +1545,7 @@ document.addEventListener('turbo:visit', () => {
 });
 
 document.addEventListener('turbo:load', () => {
+    initializeBookingNotifications();
     prepareFastNavigation();
     hidePageLoading();
     if (performance.getEntriesByName('casa-web-navigation-start').length) {

@@ -43,6 +43,11 @@ class AdminSettingsTest extends TestCase
                         ['title' => 'Therapists', 'description' => 'Deliver each wellness ritual.'],
                     ],
                 ],
+                'organization_chart_remove_photos' => [
+                    'owner' => '',
+                    'admin' => '',
+                    'team' => [0 => ''],
+                ],
                 'default_payment_method' => Transaction::METHOD_GCASH,
             ])
             ->assertRedirect()
@@ -105,6 +110,10 @@ class AdminSettingsTest extends TestCase
                 'organization_chart.team',
                 'default_payment_method',
             ]);
+
+        $this->get(route('admin.settings.index'))
+            ->assertOk()
+            ->assertSee('Please review the highlighted settings and try again.');
     }
 
     public function test_admin_managed_company_profile_is_rendered_safely_on_the_landing_page(): void

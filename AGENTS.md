@@ -8,9 +8,19 @@ Earlier client, API, database, and hosted-pilot integrations are retired. The ar
 
 ## Required Reading
 
-For every task, read this file, then `docs/PROJECT_MEMORY.md`, then the relevant authoritative document and representative tests. Update project memory with durable changes to routes, models, migrations, services, Docker workflow, or verification steps.
+For every task, read this file, then `docs/PROJECT_MEMORY.md` once; reuse their contents while unchanged. Read only task-relevant sections of authoritative documents and representative tests. Documentation-only work does not require application-test inspection. Update project memory with durable changes to routes, models, migrations, services, Docker workflow, or verification steps.
 
 Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_DESIGN.md`, `docs/SCREEN_FLOW.md`, `docs/DOCKER_WORKFLOW.md`, `docs/IMPLEMENTATION_ROADMAP.md`, `docs/BRAND_UI_GUIDE.md`, and `docs/SECURITY_HARDENING.md`.
+
+## Efficient Agent Workflow
+
+- Call `ctx_compose` before individual reads or searches, using a focused question and the narrowest useful directory. Expand discovery only to resolve missing dependencies or unanswered questions.
+- Route file reads, searches, and shell output through lean-ctx. Reuse source already returned; fetch exact source when needed for edits or evidence. Never treat compressed summaries as exact content; use `lean-ctx raw` for exact shell evidence.
+- Batch independent reads and searches. Retrieve only relevant tool definitions and avoid repeated metadata dumps.
+- Keep generated output, dependencies, logs, and archived material out of ordinary discovery unless the task concerns them.
+- After a permanent tool failure, use an available supported alternative rather than retrying an unchanged call.
+- Stop exploration once implementation and verification needs are established; investigate further when new evidence warrants it.
+- Keep progress updates concise. Report the outcome, verification, and remaining limitations at delivery.
 
 ## Local Runtime
 
@@ -36,6 +46,8 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 
 ## Verification and Delivery
 
-- Verify relevant tests first, then `php artisan test`, `npm run build`, and the Docker startup path.
+- Documentation-only changes: check accuracy, referenced paths, instruction consistency, and whitespace errors with `git diff --check`. Skip application tests, asset builds, and Docker startup.
+- Application changes: verify relevant tests first, then the full Laravel suite (`php artisan test`), asset build (`npm run build`), and Docker startup path through the existing Docker wrapper.
+- Reuse successful checks within the same task while their relevant code and environment remain unchanged. Rerun checks when subsequent changes or failures invalidate their evidence. Investigate a failed targeted test and rerun it after correction before proceeding to the full verification gate; report unresolved failures.
 - Do not expose secrets in source, logs, documentation, commits, or the browser.
 - Commit only scoped changes. The fresh web-only history is published to `ehrin08/Casa-Paraiso`; the prior remote remains an archive.

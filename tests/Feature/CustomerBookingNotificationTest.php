@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Events\BookingNotificationsChanged;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Service;
@@ -10,6 +11,7 @@ use App\Models\StaffWeeklySchedule;
 use App\Models\User;
 use App\Notifications\NewCustomerBookingNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
@@ -25,6 +27,7 @@ class CustomerBookingNotificationTest extends TestCase
         $receptionist = User::factory()->receptionist()->create();
         $inactiveAdmin = User::factory()->admin()->inactive()->create();
         $unassignedTherapist = StaffProfile::factory()->create();
+        Event::fake([BookingNotificationsChanged::class]);
 
         $response = $this->actingAs($customer->user)->post(route('customer.appointments.store', absolute: false), [
             'service_id' => $service->id,
@@ -46,6 +49,7 @@ class CustomerBookingNotificationTest extends TestCase
         $this->assertSame(0, $customer->user->notifications()->count());
         $this->assertSame(0, $inactiveAdmin->notifications()->count());
         $this->assertSame(0, $unassignedTherapist->user->notifications()->count());
+        Event::assertDispatchedTimes(BookingNotificationsChanged::class, 4);
     }
 
     public function test_notifications_inbox_marks_an_item_read_and_opens_the_scoped_booking(): void
@@ -120,6 +124,66 @@ class CustomerBookingNotificationTest extends TestCase
             ->assertRedirect(route('notifications.index', absolute: false));
 
         $this->assertSame(0, $therapist->user->unreadNotifications()->count());
+    }
+
+    public function test_operational_users_can_fetch_and_acknowledge_only_their_unread_booking_count(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        $appointment = Appointment::factory()
+            ->confirmed()
+            ->for($customer)
+            ->for($service)
+            ->for($therapist, 'staffProfile')
+            ->create([
+                'scheduled_start_at' => $start,
+                'scheduled_end_at' => $start->copy()->addHour(),
+            ]);
+
+        $therapist->user->notify(new NewCustomerBookingNotification($appointment));
+        $therapist->user->notify(new NewCustomerBookingNotification($appointment));
+
+        $this->actingAs($therapist->user)
+            ->getJson(route('notifications.bookings.count', absolute: false))
+            ->assertOk()
+            ->assertExactJson(['count' => 2]);
+
+        $this->actingAs($therapist->user)
+            ->patchJson(route('notifications.bookings.read', absolute: false))
+            ->assertOk()
+            ->assertExactJson(['count' => 0]);
+
+        $this->assertSame(0, $therapist->user->unreadNotifications()
+            ->where('type', NewCustomerBookingNotification::class)
+            ->count());
+
+        $this->actingAs($customer->user)
+            ->getJson(route('notifications.bookings.count', absolute: false))
+            ->assertForbidden();
+    }
+
+    public function test_schedule_badge_is_rendered_for_operational_users_but_not_the_notifications_link(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        $appointment = Appointment::factory()
+            ->confirmed()
+            ->for($customer)
+            ->for($service)
+            ->for($therapist, 'staffProfile')
+            ->create([
+                'scheduled_start_at' => $start,
+                'scheduled_end_at' => $start->copy()->addHour(),
+            ]);
+
+        $therapist->user->notify(new NewCustomerBookingNotification($appointment));
+
+        $this->actingAs($therapist->user)
+            ->get(route('staff.appointments.index', absolute: false))
+            ->assertOk()
+            ->assertSee('data-booking-notifications', false)
+            ->assertSee('data-booking-schedule-link', false)
+            ->assertSee('data-booking-notification-badge', false)
+            ->assertSee('1 unread booking notifications', false)
+            ->assertSee('Notifications');
     }
 
     public function test_staff_created_bookings_do_not_create_customer_booking_notifications(): void

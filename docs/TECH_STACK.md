@@ -2,7 +2,7 @@
 
 ## Approved Stack
 
-- Backend and web UI: Laravel 12, PHP 8.2, Blade, Tailwind CSS v4, Alpine.js, Turbo Drive, and Vite.
+- Backend and web UI: Laravel 12, PHP 8.2, Blade, Tailwind CSS v4, Alpine.js, Turbo Drive, Vite, and Laravel Reverb/Echo for private same-origin booking-count updates.
 - Database: MySQL 8.4 with `utf8mb4_unicode_ci` collation.
 - Authentication: Laravel Breeze email/password authentication, verification, password recovery, and Laravel Socialite Google OAuth.
 - Local runtime: Docker Desktop Compose project `casa-paraiso-web` with Apache/PHP, MySQL, and Mailpit.

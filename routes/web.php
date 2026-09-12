@@ -184,6 +184,8 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,recepti
 Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,receptionist,staff', MeasureApplicationRequest::class])
     ->group(function (): void {
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/bookings/count', [NotificationController::class, 'bookingCount'])->name('notifications.bookings.count');
+        Route::patch('/notifications/bookings/read', [NotificationController::class, 'acknowledgeBookings'])->name('notifications.bookings.read');
         Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
         Route::patch('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     });

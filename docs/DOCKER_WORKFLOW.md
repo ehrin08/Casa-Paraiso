@@ -4,7 +4,7 @@
 
 The Docker Desktop `desktop-linux` Compose project is `casa-paraiso-web`.
 
-- `app`: Apache/PHP 8.2 with Composer, Node 24, and required Laravel extensions at `http://localhost:18001`.
+- `app`: Apache/PHP 8.2 with Composer, Node 24, and required Laravel extensions at `http://localhost:18001`. Supervisor also runs Reverb on loopback; Apache proxies the same-origin WebSocket paths, so no separate public port is exposed.
 - `mysql`: MySQL 8.4 at `127.0.0.1:13306`; database `casa_paraiso`.
 - `mailpit`: SMTP at `127.0.0.1:11026`; dashboard at `http://localhost:18025`.
 

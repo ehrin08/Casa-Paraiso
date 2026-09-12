@@ -67,8 +67,7 @@
                                         @auth
                                             <a href="{{ $homeUrl }}" class="casa-button-primary mb-2 w-full" x-on:click="open = false">{{ __('Open workspace') }}</a>
                                         @else
-                                            <a href="{{ $guestBookingUrl }}" class="casa-button-primary mb-2 w-full" x-on:click="open = false">{{ $guestBookingLabel }}</a>
-                                            <a href="{{ route('login') }}" class="casa-button-secondary mb-2 w-full" x-on:click="open = false">{{ __('Login') }}</a>
+                                            <a href="{{ $guestBookingUrl }}" class="casa-button-primary mb-2 w-full" x-on:click="open = false">{{ __('Log in') }}</a>
                                         @endauth
                                         @if ($showCompanyProfile)
                                             <a href="#about" class="flex min-h-[44px] items-center rounded-xl px-3 text-sm font-bold text-casa-text transition hover:bg-casa-sand/60" x-on:click="open = false">About</a>
@@ -84,8 +83,7 @@
                             @auth
                                 <a href="{{ $homeUrl }}" class="casa-button-primary">{{ __('Open workspace') }}</a>
                             @else
-                                <a href="{{ route('login') }}" class="casa-button-secondary">{{ __('Login') }}</a>
-                                <a href="{{ $guestBookingUrl }}" class="casa-button-primary">{{ $guestBookingLabel }}</a>
+                                <a href="{{ $guestBookingUrl }}" class="casa-button-primary">{{ __('Log in') }}</a>
                             @endauth
                             </nav>
                         </div>
@@ -98,10 +96,13 @@
                     <div class="absolute -start-24 top-12 size-80 rounded-full bg-casa-brass/8 blur-3xl"></div>
                     <div class="mx-auto grid max-w-[90rem] gap-10 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(34rem,1.12fr)] lg:items-center lg:px-8 lg:py-20 xl:gap-16 xl:py-24">
                         <div class="relative z-10">
-                            <p class="casa-eyebrow">{{ $applicationSettings->business_name }}</p>
+                            <p class="casa-eyebrow">Spa &amp; Wellness</p>
                             <h1 class="mt-6 max-w-3xl font-editorial text-5xl font-semibold leading-[0.93] text-casa-ink sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
-                                Let the day<br><span class="italic text-casa-cacao">soften here.</span>
+                                {{ $applicationSettings->business_name }}
                             </h1>
+                            <p class="mt-4 max-w-xl font-editorial text-2xl italic leading-snug text-casa-cacao sm:text-3xl">
+                                Let the day soften here.
+                            </p>
                             <p class="mt-7 max-w-xl text-base leading-8 text-casa-muted sm:text-lg">
                                 Thoughtful full-body massage rituals, prepared around your pace and confirmed as soon as you book.
                             </p>
@@ -176,8 +177,13 @@
                                 <p class="mt-6 max-w-2xl text-sm leading-7 text-casa-muted sm:text-base">Discover the story behind {{ $applicationSettings->business_name }} and the roles that keep every visit thoughtful, organized, and welcoming.</p>
                             </div>
 
-                            <div class="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
-                                @if (filled($applicationSettings->company_history))
+                            @php
+                                $hasHistory = filled($applicationSettings->company_history);
+                                $hasChart = isset($organizationChart['owner']) || isset($organizationChart['admin']) || $organizationChart['team'] !== [];
+                            @endphp
+
+                            <div class="mt-10 grid gap-6 {{ $hasHistory && $hasChart ? 'lg:grid-cols-2' : '' }} lg:items-start">
+                                @if ($hasHistory)
                                     <article class="casa-editorial-card p-6 sm:p-8" data-company-history>
                                         <p class="casa-eyebrow">Company history</p>
                                         <h3 class="mt-4 font-editorial text-4xl font-semibold leading-tight text-casa-cacao">How Casa Paraiso came to care.</h3>
@@ -185,20 +191,38 @@
                                     </article>
                                 @endif
 
-                                @if (isset($organizationChart['owner']) || isset($organizationChart['admin']) || $organizationChart['team'] !== [])
-                                    <article class="rounded-[28px] bg-casa-charcoal p-6 text-white shadow-casa-lift sm:p-8" data-organization-chart>
+                                @if ($hasChart)
+                                    <article class="rounded-[28px] bg-casa-charcoal p-6 text-white shadow-casa-lift sm:p-8 {{ !$hasHistory ? 'lg:col-span-2' : '' }}" data-organization-chart>
                                         <p class="casa-eyebrow text-casa-brass-light before:bg-casa-brass">Organizational chart</p>
                                         <h3 class="mt-4 font-editorial text-4xl font-semibold leading-tight">The team behind each visit.</h3>
 
+                                        @php $animDelay = 0; @endphp
                                         <div class="mt-8" role="list" aria-label="Casa Paraiso reporting structure">
                                             @if (isset($organizationChart['owner']))
-                                                <div class="mx-auto max-w-sm rounded-2xl border border-casa-brass/45 bg-white/[0.07] p-5 text-center" role="listitem">
+                                                @php
+                                                    $ownerPhotoUrl = \App\Models\ApplicationSetting::orgChartPhotoUrl($organizationChart['owner']['photo'] ?? null);
+                                                    $ownerInitial = strtoupper(substr($organizationChart['owner']['name'] ?? $organizationChart['owner']['title'] ?? 'O', 0, 1));
+                                                @endphp
+                                                <div class="mx-auto max-w-md rounded-2xl border border-casa-brass/45 bg-white/[0.07] p-5 text-center" role="listitem" data-org-animate style="--org-delay: {{ $animDelay }}s">
+                                                    <div class="mx-auto mb-4 h-20 w-20 overflow-hidden rounded-full ring-[3px] ring-casa-brass ring-offset-2 ring-offset-casa-charcoal">
+                                                        @if ($ownerPhotoUrl)
+                                                            <img src="{{ $ownerPhotoUrl }}" alt="{{ $organizationChart['owner']['name'] ?? $organizationChart['owner']['title'] }}" class="h-full w-full object-cover" loading="lazy">
+                                                        @else
+                                                            <span class="org-avatar-initials h-full w-full text-2xl">{{ $ownerInitial }}</span>
+                                                        @endif
+                                                    </div>
                                                     <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-casa-brass-light">Leadership</p>
-                                                    <h4 class="mt-2 text-lg font-extrabold text-white">{{ $organizationChart['owner']['title'] }}</h4>
+                                                    @if (filled($organizationChart['owner']['name'] ?? null))
+                                                        <h4 class="mt-2 text-lg font-extrabold text-white">{{ $organizationChart['owner']['name'] }}</h4>
+                                                        <p class="text-sm font-semibold text-white/65">{{ $organizationChart['owner']['title'] }}</p>
+                                                    @else
+                                                        <h4 class="mt-2 text-lg font-extrabold text-white">{{ $organizationChart['owner']['title'] }}</h4>
+                                                    @endif
                                                     @if (filled($organizationChart['owner']['description'] ?? null))
                                                         <p class="mt-2 text-sm leading-6 text-white/75">{{ $organizationChart['owner']['description'] }}</p>
                                                     @endif
                                                 </div>
+                                                @php $animDelay += 0.1; @endphp
                                             @endif
 
                                             @if (isset($organizationChart['owner']) && isset($organizationChart['admin']))
@@ -206,23 +230,57 @@
                                             @endif
 
                                             @if (isset($organizationChart['admin']))
-                                                <div class="mx-auto max-w-sm rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-center" role="listitem">
+                                                @php
+                                                    $adminPhotoUrl = \App\Models\ApplicationSetting::orgChartPhotoUrl($organizationChart['admin']['photo'] ?? null);
+                                                    $adminInitial = strtoupper(substr($organizationChart['admin']['name'] ?? $organizationChart['admin']['title'] ?? 'A', 0, 1));
+                                                @endphp
+                                                <div class="mx-auto max-w-md rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-center" role="listitem" data-org-animate style="--org-delay: {{ $animDelay }}s">
+                                                    <div class="mx-auto mb-4 h-20 w-20 overflow-hidden rounded-full ring-2 ring-white/30 ring-offset-2 ring-offset-casa-charcoal">
+                                                        @if ($adminPhotoUrl)
+                                                            <img src="{{ $adminPhotoUrl }}" alt="{{ $organizationChart['admin']['name'] ?? $organizationChart['admin']['title'] }}" class="h-full w-full object-cover" loading="lazy">
+                                                        @else
+                                                            <span class="org-avatar-initials h-full w-full text-2xl">{{ $adminInitial }}</span>
+                                                        @endif
+                                                    </div>
                                                     <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-casa-brass-light">Administration</p>
-                                                    <h4 class="mt-2 text-lg font-extrabold text-white">{{ $organizationChart['admin']['title'] }}</h4>
+                                                    @if (filled($organizationChart['admin']['name'] ?? null))
+                                                        <h4 class="mt-2 text-lg font-extrabold text-white">{{ $organizationChart['admin']['name'] }}</h4>
+                                                        <p class="text-sm font-semibold text-white/65">{{ $organizationChart['admin']['title'] }}</p>
+                                                    @else
+                                                        <h4 class="mt-2 text-lg font-extrabold text-white">{{ $organizationChart['admin']['title'] }}</h4>
+                                                    @endif
                                                     @if (filled($organizationChart['admin']['description'] ?? null))
                                                         <p class="mt-2 text-sm leading-6 text-white/75">{{ $organizationChart['admin']['description'] }}</p>
                                                     @endif
                                                 </div>
+                                                @php $animDelay += 0.1; @endphp
                                             @endif
 
                                             @if ($organizationChart['team'] !== [])
                                                 <div class="mx-auto h-8 w-px bg-casa-brass/65" aria-hidden="true"></div>
-                                                <div class="relative grid gap-3 sm:grid-cols-2" role="list" aria-label="Team roles">
-                                                    <div class="absolute inset-x-[25%] -top-4 hidden h-px bg-casa-brass/50 sm:block" aria-hidden="true"></div>
+                                                <div class="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-3" role="list" aria-label="Team roles">
+                                                    <div class="absolute inset-x-[15%] -top-4 hidden h-px bg-casa-brass/50 sm:block" aria-hidden="true"></div>
                                                     @foreach ($organizationChart['team'] as $role)
-                                                        <div class="relative rounded-2xl border border-white/12 bg-black/10 p-4 text-center" role="listitem">
+                                                        @php
+                                                            $teamPhotoUrl = \App\Models\ApplicationSetting::orgChartPhotoUrl($role['photo'] ?? null);
+                                                            $teamInitial = strtoupper(substr($role['name'] ?? $role['title'] ?? 'T', 0, 1));
+                                                            $animDelay += 0.08;
+                                                        @endphp
+                                                        <div class="relative rounded-2xl border border-white/12 bg-black/10 p-4 text-center" role="listitem" data-org-animate style="--org-delay: {{ $animDelay }}s">
                                                             <span class="absolute -top-4 start-1/2 hidden h-4 w-px -translate-x-1/2 bg-casa-brass/50 sm:block" aria-hidden="true"></span>
-                                                            <h4 class="font-extrabold text-white">{{ $role['title'] }}</h4>
+                                                            <div class="mx-auto mb-3 h-20 w-20 overflow-hidden rounded-full ring-2 ring-white/30 ring-offset-2 ring-offset-casa-charcoal">
+                                                                @if ($teamPhotoUrl)
+                                                                    <img src="{{ $teamPhotoUrl }}" alt="{{ $role['name'] ?? $role['title'] }}" class="h-full w-full object-cover" loading="lazy">
+                                                                @else
+                                                                    <span class="org-avatar-initials-team h-full w-full text-xl">{{ $teamInitial }}</span>
+                                                                @endif
+                                                            </div>
+                                                            @if (filled($role['name'] ?? null))
+                                                                <h4 class="font-extrabold text-white">{{ $role['name'] }}</h4>
+                                                                <p class="text-sm font-semibold text-white/65">{{ $role['title'] }}</p>
+                                                            @else
+                                                                <h4 class="font-extrabold text-white">{{ $role['title'] }}</h4>
+                                                            @endif
                                                             @if (filled($role['description'] ?? null))
                                                                 <p class="mt-2 text-sm leading-6 text-white/75">{{ $role['description'] }}</p>
                                                             @endif
@@ -245,7 +303,7 @@
                                 <p class="casa-eyebrow">Signature treatments</p>
                                 <h2 class="mt-5 font-editorial text-5xl font-semibold leading-none text-casa-ink sm:text-6xl">Treatments made for your return to yourself.</h2>
                             </div>
-                            <p class="max-w-2xl text-sm leading-7 text-casa-muted lg:justify-self-end sm:text-base">Each ritual keeps its time, inclusions, and price clear. @if ($servicesAreBookable) Add-ons can be coordinated with our team before your visit. @else Contact our team for current availability before planning your visit. @endif</p>
+                            <p class="max-w-2xl text-sm leading-7 text-casa-muted lg:justify-self-end sm:text-base">Each ritual keeps its time, inclusions, and upfront price transparent. @if (! $servicesAreBookable) Contact our team for current availability before planning your visit. @endif</p>
                         </div>
 
                         <div class="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -309,21 +367,21 @@
                     <div class="mx-auto grid max-w-[90rem] gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)] lg:items-center lg:px-8 xl:gap-20">
                         <div class="order-1 lg:order-2">
                             <p class="casa-eyebrow">A considered booking flow</p>
-                            <h2 class="mt-5 max-w-2xl font-editorial text-5xl font-semibold leading-[0.98] text-casa-ink sm:text-6xl">Simple to book.<br>Confirmed right away.</h2>
-                            <p class="mt-6 max-w-xl text-sm leading-7 text-casa-muted sm:text-base">Choose your service, therapist, and time. A successful booking immediately reserves your appointment.</p>
+                            <h2 class="mt-5 max-w-2xl font-editorial text-5xl font-semibold leading-[0.98] text-casa-ink sm:text-6xl">Effortless booking.<br>Seamless care.</h2>
+                            <p class="mt-6 max-w-xl text-sm leading-7 text-casa-muted sm:text-base">Select your ritual, therapist, and preferred schedule with real-time availability.</p>
 
                             <ol class="mt-9 space-y-4">
                                 <li class="grid grid-cols-[3rem_minmax(0,1fr)] gap-4 rounded-2xl border border-casa-border bg-casa-paper p-5">
                                     <span class="grid size-12 place-items-center rounded-full bg-casa-cacao text-sm font-extrabold text-white">01</span>
-                                    <span><strong class="block text-base text-casa-text">Choose your ritual and preferred time.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Available dates and times are shown from active therapist schedules.</span></span>
+                                    <span><strong class="block text-base text-casa-text">Choose your ritual and preferred time.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Explore signature therapies and select your ideal schedule from live therapist calendars.</span></span>
                                 </li>
                                 <li class="grid grid-cols-[3rem_minmax(0,1fr)] gap-4 rounded-2xl border border-casa-border bg-casa-paper p-5">
                                     <span class="grid size-12 place-items-center rounded-full bg-casa-palm text-sm font-extrabold text-white">02</span>
-                                    <span><strong class="block text-base text-casa-text">Your visit is confirmed.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Booking immediately reserves an eligible therapist and the selected schedule.</span></span>
+                                    <span><strong class="block text-base text-casa-text">Guaranteed reservation.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Your therapist and appointment time are immediately locked in with zero waiting.</span></span>
                                 </li>
                                 <li class="grid grid-cols-[3rem_minmax(0,1fr)] gap-4 rounded-2xl border border-casa-border bg-casa-paper p-5">
                                     <span class="grid size-12 place-items-center rounded-full bg-casa-brass text-sm font-extrabold text-casa-charcoal">03</span>
-                                    <span><strong class="block text-base text-casa-text">Return to your account anytime.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Your confirmed appointment and wellness history stay organized in one place.</span></span>
+                                    <span><strong class="block text-base text-casa-text">Return to your account anytime.</strong><span class="mt-1 block text-sm leading-6 text-casa-muted">Access your upcoming appointments, visit receipts, and wellness journey in your private dashboard.</span></span>
                                 </li>
                             </ol>
                         </div>
@@ -360,8 +418,6 @@
                                     <a href="{{ $applicationSettings->map_url }}" target="_blank" rel="noopener noreferrer" class="casa-button-secondary w-full">{{ __('Get directions') }}</a>
                                 @endif
                             </div>
-                            <div class="casa-divider my-7"></div>
-                            <p class="font-editorial text-3xl font-semibold italic leading-tight text-casa-cacao">{{ config('casa.marketing_line') }}</p>
                             @guest
                                 @if ($servicesAreBookable)
                                     <a href="{{ route('login') }}" class="casa-button-primary mt-7 w-full">{{ __('Book an appointment') }}</a>
@@ -386,16 +442,26 @@
                 </section>
             </main>
 
-            <footer class="border-t border-casa-border bg-casa-paper">
-                <div class="mx-auto flex max-w-[90rem] flex-col gap-6 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-                    <img src="{{ asset('images/casa_paraiso_logo.jpg') }}" alt="Casa Paraiso Body and Wellness Spa" class="h-14 w-52 object-cover object-center">
-                    <div class="text-sm leading-6 text-casa-muted md:text-right">
-                        <p class="font-bold text-casa-text">Open every day · 1:00 PM to 12:00 MN</p>
-                        <p>{{ $applicationSettings->business_address }}</p>
-                        @if (filled($applicationSettings->map_url))
-                            <a href="{{ $applicationSettings->map_url }}" target="_blank" rel="noopener noreferrer" class="font-bold text-casa-palm underline underline-offset-4">{{ __('Get directions') }}</a>
-                        @endif
+            <footer class="border-t border-casa-border bg-casa-paper py-8">
+                <div class="mx-auto flex max-w-[90rem] flex-col items-center justify-between gap-6 px-4 sm:px-6 md:flex-row lg:px-8">
+                    <div class="flex flex-col items-center gap-3 sm:flex-row sm:gap-6 md:items-center">
+                        <a href="/" class="rounded-xl bg-white px-2 py-1">
+                            <img src="{{ asset('images/casa_paraiso_logo.jpg') }}" alt="Casa Paraiso Body and Wellness Spa" class="h-10 w-32 object-cover object-center sm:h-12 sm:w-44">
+                        </a>
+                        <p class="text-xs font-semibold text-casa-muted text-center sm:text-left">&copy; {{ date('Y') }} {{ $applicationSettings->business_name }}. {{ __('All rights reserved.') }}</p>
                     </div>
+
+                    <nav class="flex flex-wrap items-center justify-center gap-6 text-sm font-bold text-casa-muted" aria-label="Footer navigation">
+                        @if ($showCompanyProfile)
+                            <a href="#about" class="transition hover:text-casa-cacao">About</a>
+                        @endif
+                        <a href="#treatments" class="transition hover:text-casa-cacao">Treatments</a>
+                        <a href="#how-it-works" class="transition hover:text-casa-cacao">How it works</a>
+                        <a href="#visit" class="transition hover:text-casa-cacao">Visit &amp; contact</a>
+                        @guest
+                            <a href="{{ route('login') }}" class="transition hover:text-casa-cacao">{{ __('Login') }}</a>
+                        @endguest
+                    </nav>
                 </div>
             </footer>
         </div>

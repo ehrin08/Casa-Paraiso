@@ -15,6 +15,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        @if (filled(config('broadcasting.connections.reverb.key')))
+            <meta name="reverb-app-key" content="{{ config('broadcasting.connections.reverb.key') }}">
+        @endif
 
         <title>{{ $documentTitle ? $documentTitle.' · '.$applicationName : $applicationName }}</title>
 

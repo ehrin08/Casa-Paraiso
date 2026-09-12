@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\SystemErrorReport;
+use App\Services\BookingNotificationState;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -60,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
 
             try {
                 $unreadNotificationCount = $receivesBookingNotifications
-                    ? $user->unreadNotifications()->count()
+                    ? app(BookingNotificationState::class)->unreadCount($user)
                     : 0;
             } catch (\Throwable) {
                 $unreadNotificationCount = 0;
