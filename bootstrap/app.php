@@ -4,17 +4,23 @@ use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
+use App\Http\Middleware\MonitorErrorResponses;
+use App\Services\SystemErrorResponseFinalizer;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        channels: __DIR__.'/../routes/channels.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(MonitorErrorResponses::class);
         $middleware->append(AddSecurityHeaders::class);
 
         $middleware->trustHosts(
@@ -31,5 +37,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // The web application uses Laravel's standard HTML exception responses.
+        $exceptions->dontReportDuplicates();
+
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
+            return app(SystemErrorResponseFinalizer::class)->finalize($request, $response, $exception);
+        });
     })->create();

@@ -64,13 +64,16 @@ class PromotionController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data, $request): void {
+            $current = ApplicationSetting::current();
+
             ApplicationSetting::updateCurrent(
                 [
-                    'business_name' => ApplicationSetting::current()->business_name,
-                    'contact_email' => ApplicationSetting::current()->contact_email,
-                    'contact_phone' => ApplicationSetting::current()->contact_phone,
-                    'business_address' => ApplicationSetting::current()->business_address,
-                    'default_payment_method' => ApplicationSetting::current()->default_payment_method,
+                    ...ApplicationSetting::defaults(),
+                    ...$current->only([
+                        'business_name', 'contact_email', 'contact_phone', 'business_address',
+                        'location_landmarks', 'facebook_url', 'messenger_url', 'map_url',
+                        'company_history', 'organization_chart', 'default_payment_method',
+                    ]),
                     'promotion_voucher_validity_days' => $data['promotion_voucher_validity_days'],
                     'updated_by' => $request->user()->id,
                 ],

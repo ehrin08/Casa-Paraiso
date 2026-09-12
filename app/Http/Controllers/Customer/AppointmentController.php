@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerAppointmentStoreRequest;
-use App\Models\Appointment;
 use App\Models\Addon;
+use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Services\AppointmentAvailability;
 use App\Services\AppointmentWorkflow;
+use App\Services\CustomerBookingNotifier;
 use App\Services\RfmAddonVoucher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -136,8 +137,11 @@ class AppointmentController extends Controller
         );
     }
 
-    public function store(CustomerAppointmentStoreRequest $request, AppointmentWorkflow $workflow): RedirectResponse
-    {
+    public function store(
+        CustomerAppointmentStoreRequest $request,
+        AppointmentWorkflow $workflow,
+        CustomerBookingNotifier $notifier,
+    ): RedirectResponse {
         $customerProfile = $request->user()->customerProfile;
 
         abort_unless($customerProfile, 403);
@@ -172,6 +176,8 @@ class AppointmentController extends Controller
             'customer_notes' => filled($data['customer_notes'] ?? null) ? trim((string) $data['customer_notes']) : null,
             'created_by' => $request->user()->id,
         ], $service, $requestedStart, $preferredStaffProfileId, $request->user()->id);
+
+        $notifier->notify($appointment);
 
         return redirect()
             ->route('customer.appointments.history')

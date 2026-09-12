@@ -4,11 +4,14 @@
 
 The Docker Desktop `desktop-linux` Compose project is `casa-paraiso-web`.
 
-- `app`: Apache/PHP 8.2 with Composer, Node 24, and required Laravel extensions at `http://localhost:18001`.
+- `app`: Apache/PHP 8.2 with Composer, Node 24, and required Laravel extensions at `http://localhost:18001`. Supervisor also runs Reverb on loopback; Apache proxies the same-origin WebSocket paths, so no separate public port is exposed.
 - `mysql`: MySQL 8.4 at `127.0.0.1:13306`; database `casa_paraiso`.
 - `mailpit`: SMTP at `127.0.0.1:11026`; dashboard at `http://localhost:18025`.
 
-All ports bind to loopback. Named volumes preserve MySQL data and container-side dependencies.
+All ports bind to loopback. Named volumes preserve MySQL data, container-side dependencies,
+and Laravel logs. The application source is a Windows bind mount, so `storage/logs` uses its
+own Docker-managed volume; the app entrypoint assigns it to Apache's `www-data` user. Logging
+channel file modes are managed by that volume rather than passed to Monolog.
 
 ## First Setup
 

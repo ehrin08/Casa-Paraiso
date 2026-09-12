@@ -27,6 +27,7 @@ switch ($Action) {
         }
 
         Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'migrate', '--force') | Write-Output
+        Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'storage:link', '--force') | Write-Output
         Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'npm', 'run', 'build') | Write-Output
     }
     'start' {

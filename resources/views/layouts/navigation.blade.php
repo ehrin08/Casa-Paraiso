@@ -2,6 +2,7 @@
     $user = Auth::user();
     $dashboardRoute = $user->homeRouteName();
     $isCustomer = $user->isCustomer();
+    $receivesBookingNotifications = $user->isAdmin() || $user->isReceptionist() || $user->isStaff();
 
     $roleLabel = match (true) {
         $user->isSuperAdmin() => 'Super admin workspace',
@@ -14,15 +15,25 @@
     $navGroups = match (true) {
         $user->isAdmin() => [
             [
-                'label' => 'Manage',
+                'label' => 'Today',
                 'items' => [
                     ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard'],
-                    ['label' => 'Schedule', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true],
+                    ['label' => 'Schedule', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'admin.customers.index', 'active' => 'admin.customers.*'],
+                ],
+            ],
+            [
+                'label' => 'Operations',
+                'items' => [
                     ['label' => 'Team & Services', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => ['admin.staff.*', 'admin.services.*'], 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'admin.transactions.index', 'active' => 'admin.transactions.*'],
                     ['label' => 'Commissions', 'icon' => 'payments', 'route' => 'admin.commissions.index', 'active' => 'admin.commissions.*'],
                     ['label' => 'Attendance', 'icon' => 'team', 'route' => 'admin.attendance.index', 'active' => 'admin.attendance.*'],
+                ],
+            ],
+            [
+                'label' => 'Insights',
+                'items' => [
                     ['label' => 'Insights', 'icon' => 'insights', 'route' => 'admin.promotions.index', 'active' => ['admin.promotions.*', 'admin.feedback.*', 'admin.reports.*'], 'preload' => true],
                 ],
             ],
@@ -33,7 +44,7 @@
                 'items' => [
                     ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'staff.dashboard', 'active' => 'staff.dashboard'],
                     ['label' => 'Attendance', 'icon' => 'team', 'route' => 'staff.attendance.show', 'active' => 'staff.attendance.*'],
-                    ['label' => 'My Schedule', 'icon' => 'calendar', 'route' => 'staff.appointments.index', 'active' => 'staff.appointments.*', 'preload' => true],
+                    ['label' => 'My Schedule', 'icon' => 'calendar', 'route' => 'staff.appointments.index', 'active' => 'staff.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'staff.customers.index', 'active' => 'staff.customers.*', 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'staff.transactions.index', 'active' => 'staff.transactions.*'],
                     ['label' => 'My Commissions', 'icon' => 'payments', 'route' => 'staff.commissions.index', 'active' => 'staff.commissions.*'],
@@ -47,7 +58,7 @@
                 'items' => [
                     ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'reception.dashboard', 'active' => 'reception.dashboard'],
                     ['label' => 'Attendance', 'icon' => 'team', 'route' => 'reception.attendance.station', 'active' => 'reception.attendance.*'],
-                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'reception.appointments.index', 'active' => 'reception.appointments.*', 'preload' => true],
+                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'reception.appointments.index', 'active' => 'reception.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'reception.customers.index', 'active' => 'reception.customers.*', 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'reception.transactions.index', 'active' => 'reception.transactions.*'],
                 ],
@@ -64,13 +75,22 @@
         ],
     };
 
+    $notificationLink = $receivesBookingNotifications
+        ? [['label' => 'Notifications', 'icon' => 'notifications', 'route' => 'notifications.index', 'active' => 'notifications.*']]
+        : [];
+
     $accountLinks = $user->isAdmin()
         ? [
-            ...($user->isSuperAdmin() ? [['label' => 'User access', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*']] : []),
+            ...$notificationLink,
+            ...($user->isSuperAdmin() ? [
+                ['label' => 'User access', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
+                ['label' => 'System errors', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $unresolvedSystemErrorCount ?? 0],
+            ] : []),
             ['label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*'],
             ['label' => 'Profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
         ]
         : [
+            ...$notificationLink,
             ['label' => 'Profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
         ];
 
@@ -81,7 +101,7 @@
         ->implode('');
 @endphp
 
-<nav x-data="{ open: false }" x-on:keydown.escape.window="open = false" data-role-navigation="{{ $user->role }}">
+<nav x-data="{ open: false }" x-on:keydown.escape.window="open = false" data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
     <div class="sticky top-0 z-40 border-b border-casa-border/80 bg-casa-paper/94 px-4 py-2 backdrop-blur-xl lg:hidden">
         <div class="flex items-center justify-between gap-4">
             <a href="{{ route($dashboardRoute) }}" class="min-w-0 rounded-xl bg-white px-2 py-1">
@@ -125,9 +145,14 @@
                     <div class="mt-2 space-y-1">
                         @foreach ($group['items'] as $item)
                             @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                            <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
+                            <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif>
                                 <x-nav-icon :name="$item['icon']" />
                                 <span>{{ $item['label'] }}</span>
+                                @if ($item['booking_schedule'] ?? false)
+                                    <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => ($item['badge'] ?? 0) === 0]) aria-label="{{ $item['badge'] }} unread booking notifications"><span data-booking-notification-badge-value>{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span></span>
+                                @elseif (($item['badge'] ?? 0) > 0)
+                                    <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
+                                @endif
                             </a>
                         @endforeach
                     </div>
@@ -142,6 +167,9 @@
                         <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
                             <x-nav-icon :name="$item['icon']" />
                             <span>{{ $item['label'] }}</span>
+                            @if (($item['badge'] ?? 0) > 0)
+                                <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
+                            @endif
                         </a>
                     @endforeach
                 </div>
@@ -186,9 +214,14 @@
                         <div class="mt-2 space-y-1">
                             @foreach ($group['items'] as $item)
                                 @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                                <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @click="open = false">
+                                <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif @click="open = false">
                                     <x-nav-icon :name="$item['icon']" />
                                     <span>{{ $item['label'] }}</span>
+                                    @if ($item['booking_schedule'] ?? false)
+                                        <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => ($item['badge'] ?? 0) === 0]) aria-label="{{ $item['badge'] }} unread booking notifications"><span data-booking-notification-badge-value>{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span></span>
+                                    @elseif (($item['badge'] ?? 0) > 0)
+                                        <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
+                                    @endif
                                 </a>
                             @endforeach
                         </div>
@@ -203,6 +236,9 @@
                             <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @click="open = false">
                                 <x-nav-icon :name="$item['icon']" />
                                 <span>{{ $item['label'] }}</span>
+                                @if (($item['badge'] ?? 0) > 0)
+                                    <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
+                                @endif
                             </a>
                         @endforeach
                     </div>

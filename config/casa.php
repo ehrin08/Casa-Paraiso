@@ -19,6 +19,11 @@ return [
         'hsts' => (bool) env('HSTS_ENABLED', false),
         'trusted_hosts' => $trustedHosts,
     ],
+    'error_reporting' => [
+        'enabled' => (bool) env('SYSTEM_ERROR_REPORTING_ENABLED', true),
+        'retention_days' => (int) env('SYSTEM_ERROR_RETENTION_DAYS', 30),
+        'badge_cache_seconds' => (int) env('SYSTEM_ERROR_BADGE_CACHE_SECONDS', 30),
+    ],
     'business_hours' => [
         'summary' => 'Open every day',
         'window' => '1:00 PM to 12:00 MN',

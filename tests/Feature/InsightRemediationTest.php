@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Appointment;
+use App\Models\ApplicationSetting;
 use App\Models\CustomerProfile;
 use App\Models\Feedback;
 use App\Models\PromotionRule;
@@ -125,6 +126,13 @@ class InsightRemediationTest extends TestCase
             ->assertRedirect();
 
         $this->assertDatabaseHas('rfm_segments', ['preset_key' => 'high_value', 'addon_code' => 'hot-compress', 'is_active' => true]);
+        $this->assertDatabaseHas('application_settings', [
+            'id' => 1,
+            'business_name' => config('casa.business_name'),
+            'business_address' => ApplicationSetting::defaults()['business_address'],
+            'default_payment_method' => Transaction::METHOD_CASH,
+            'promotion_voucher_validity_days' => 60,
+        ]);
     }
 
     public function test_report_dates_use_displayed_business_fields_and_customer_filters_show_all_metrics(): void

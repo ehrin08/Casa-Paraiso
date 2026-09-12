@@ -56,6 +56,10 @@
         text-rendering: optimizeLegibility;
     }
 
+    body.casa-landing-body {
+        min-width: 0;
+    }
+
     button,
     input,
     select,
@@ -104,8 +108,6 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-block-size: calc(100vh - var(--casa-landing-header-height));
-        min-block-size: calc(100dvh - var(--casa-landing-header-height));
         scroll-margin-block-start: var(--casa-landing-header-height);
     }
 
@@ -928,6 +930,13 @@ body[data-workspace-role] .casa-list-toolbar > :last-child {
     }
 }
 
+@media (min-width: 1024px) {
+    .casa-landing-screen-section {
+        min-block-size: calc(100vh - var(--casa-landing-header-height));
+        min-block-size: calc(100dvh - var(--casa-landing-header-height));
+    }
+}
+
 .casa-app-page [data-page-content] .grid,
 .casa-app-page [data-page-content] .grid > *,
 .casa-app-page [data-page-content] .casa-card,
@@ -1040,4 +1049,46 @@ body[data-workspace-role] .casa-list-toolbar > :last-child {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
+}
+
+/* ── Org chart scroll-reveal animation ── */
+@keyframes org-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[data-org-animate] {
+    opacity: 0;
+}
+
+[data-org-animate].is-visible {
+    animation: org-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--org-delay, 0s);
+}
+
+/* ── Org chart avatar initials gradient backgrounds ── */
+.org-avatar-initials {
+    background: linear-gradient(135deg, var(--color-casa-brass) 0%, var(--color-casa-cacao) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.org-avatar-initials-team {
+    background: linear-gradient(135deg, var(--color-casa-palm) 0%, var(--color-casa-charcoal) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    text-transform: uppercase;
 }

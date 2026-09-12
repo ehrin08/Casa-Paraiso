@@ -1,4 +1,5 @@
 import './bootstrap';
+import { initializeBookingNotifications } from './booking-notifications';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -1048,7 +1049,87 @@ window.attendanceStation = (config) => ({
     async refreshQr() { try { this.qr = (await window.axios.get(config.qrUrl)).data.qr; await this.render(); } catch { this.error = 'The live QR could not refresh.'; } },
 });
 
+window.organizationChartEditor = () => ({
+    team: [],
+
+    init() {
+        try {
+            const team = JSON.parse(this.$root.dataset.initialTeam || '[]');
+            this.team = Array.isArray(team) ? team : [];
+        } catch {
+            this.team = [];
+        }
+
+        if (this.team.length === 0) {
+            this.addRole();
+        }
+    },
+
+    addRole() {
+        if (this.team.length >= 8) {
+            return;
+        }
+
+        this.team.push({ title: '', name: '', description: '', photoUrl: '' });
+    },
+
+    removeRole(index) {
+        this.team.splice(index, 1);
+
+        if (this.team.length === 0) {
+            this.addRole();
+        }
+    },
+});
+
+window.orgPhotoUpload = (existingUrl) => ({
+    previewUrl: existingUrl || '',
+    hasExisting: !!existingUrl,
+    removing: false,
+
+    handleFileChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.previewUrl = URL.createObjectURL(file);
+            this.removing = false;
+        }
+    },
+});
+
+/* ── Org chart scroll animation (landing page) ── */
+if (typeof IntersectionObserver !== 'undefined') {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReducedMotion) {
+        const orgObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        orgObserver.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.15 },
+        );
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-org-animate]').forEach((el) => {
+                orgObserver.observe(el);
+            });
+        });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-org-animate]').forEach((el) => {
+                el.classList.add('is-visible');
+            });
+        });
+    }
+}
+
 Alpine.start();
+
+document.addEventListener('DOMContentLoaded', initializeBookingNotifications);
 
 let loadingRevealTimer = null;
 let loadingFallbackTimer = null;
@@ -1231,6 +1312,15 @@ const panelElements = () => {
 
 const panelCache = new Map();
 const panelCacheTtl = 60000;
+let panelTrigger = null;
+
+const panelFocusTarget = (trigger) => {
+    if (trigger instanceof HTMLElement && trigger.isConnected) {
+        return trigger;
+    }
+
+    return document.querySelector('#main-content');
+};
 
 const closeModalWithin = (root) => {
     if (!root || !modalStore().active) {
@@ -1310,8 +1400,10 @@ const setPanelLoading = (url) => {
     window.setTimeout(() => dialog?.focus(), 20);
 };
 
-const closePanel = () => {
+const closePanel = ({ restoreFocus = true } = {}) => {
     const { host, content } = panelElements();
+    const trigger = panelTrigger;
+    panelTrigger = null;
 
     if (!host) {
         return;
@@ -1324,6 +1416,10 @@ const closePanel = () => {
 
     if (content) {
         content.innerHTML = '';
+    }
+
+    if (restoreFocus) {
+        window.requestAnimationFrame(() => panelFocusTarget(trigger)?.focus({ preventScroll: true }));
     }
 };
 
@@ -1369,12 +1465,17 @@ const renderPanelHtml = (pageHtml) => {
     return true;
 };
 
-const openPanel = async (url) => {
+const openPanel = async (url, trigger = document.activeElement) => {
     let { host, content } = panelElements();
 
     if (!host || !content || !isPanelEligibleUrl(url)) {
+        panelTrigger = null;
         window.location.href = url.href;
         return;
+    }
+
+    if (!host.classList.contains('is-open') || !(panelTrigger instanceof HTMLElement && panelTrigger.isConnected)) {
+        panelTrigger = trigger instanceof HTMLElement ? trigger : null;
     }
 
     const cached = panelCache.get(url.href);
@@ -1444,6 +1545,7 @@ document.addEventListener('turbo:visit', () => {
 });
 
 document.addEventListener('turbo:load', () => {
+    initializeBookingNotifications();
     prepareFastNavigation();
     hidePageLoading();
     if (performance.getEntriesByName('casa-web-navigation-start').length) {
@@ -1453,7 +1555,7 @@ document.addEventListener('turbo:load', () => {
 });
 
 document.addEventListener('turbo:before-cache', () => {
-    closePanel();
+    closePanel({ restoreFocus: false });
     hidePageLoading();
 });
 
@@ -1481,7 +1583,7 @@ document.addEventListener('click', (event) => {
     }
 
     event.preventDefault();
-    openPanel(url);
+    openPanel(url, link);
 });
 
 document.addEventListener('keydown', (event) => {

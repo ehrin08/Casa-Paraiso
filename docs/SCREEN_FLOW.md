@@ -41,6 +41,7 @@ Route prefixes:
 - Keep operational tables inside labeled, keyboard-focusable horizontal-scroll regions. Calendar week strips and customer month grids may scroll horizontally when seven full-size date targets do not fit.
 - Appointment calendars, dashboard previews, service queues, detail-history previews, and form selector collections remain unpaginated.
 - All role dashboards should show only actions the current role is allowed to perform.
+- Admin, receptionist, and therapist sidebars show their unread customer-booking number beside Schedule, Appointments, or My Schedule. The number updates live and clears after the schedule page is displayed; the Notifications inbox remains available as history without its own badge.
 - Avoid SPA-only navigation patterns; pages should work as standard Laravel routes.
 
 ## Receptionist Screens
@@ -66,14 +67,22 @@ Access: guest and authenticated users.
 Purpose:
 
 - Introduce Casa Paraiso - Body and Wellness Spa.
+- Show the admin-managed company history and role-based organizational chart when either has been published.
 - Show the four massage packages, add-on price list, business hours, and call to action.
 - Use the marketing line: "Reserve your spot. You deserve this."
 
 Primary actions:
 
-- Guests use the single `Reserve` navigation action to open the login page.
+- Guests use the `Log in` action in the desktop header and mobile public menu. When active services are available, `Book an appointment` actions in the treatment catalog and visit panel open the login page; otherwise, those booking actions direct visitors to `#visit` to contact Casa Paraiso for current availability.
 - Authenticated users open their role workspace.
 - Book an available appointment after authentication.
+
+Responsive behavior:
+
+- Desktop exposes About when company-profile content is published, plus Treatments, How it works, and Visit & contact in the fixed header; small screens use an accessible compact public menu with the same available links and primary action.
+- The About section combines a plain-text company narrative with an Owner → Administrator → Team chart. Blank content is not exposed publicly.
+- The booking-flow copy precedes its image on small screens, while visit hours and contact details precede optional add-ons.
+- When no services are active, the Treatments section continues to show the four configured signature packages as display-only reference cards, with a contact-for-availability notice and `#visit` action. Active database services completely replace these fallback cards when one or more are available.
 
 Main data:
 
@@ -81,6 +90,7 @@ Main data:
 - Add-ons as static customer-facing content only.
 - Business hours: Open every day, 1:00 PM to 12:00 MN.
 - Basic business information.
+- Admin-managed company history and organizational role labels, summaries, and ordering.
 
 ### Service Listing
 
@@ -697,3 +707,4 @@ Primary actions:
 - RFM promotion suggestions are covered by admin configuration/reporting and customer add-on voucher selection during booking.
 - Feedback and sentiment analytics are covered by customer feedback and admin feedback screens.
 - Reports and exports are covered by admin reports.
+- Super administrators can review grouped system-error reports at `/admin/system-errors`, inspect sanitized occurrence history, and resolve or reopen reports. Customers and staff receive safe branded error pages with a request reference instead of technical diagnostics.

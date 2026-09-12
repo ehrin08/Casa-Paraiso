@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\AppointmentCalendarController as AdminAppointmentCalendarController;
 use App\Http\Controllers\Admin\AddonController as AdminAddonController;
+use App\Http\Controllers\Admin\AppointmentCalendarController as AdminAppointmentCalendarController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Admin\StaffScheduleExceptionController as AdminStaffScheduleExceptionController;
 use App\Http\Controllers\Admin\StaffWeeklyScheduleController as AdminStaffWeeklyScheduleController;
+use App\Http\Controllers\Admin\SystemErrorReportController as AdminSystemErrorReportController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserManagementController as AdminUserManagementController;
 use App\Http\Controllers\Admin\WeeklyRosterController as AdminWeeklyRosterController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Auth\GooglePasswordSetupController;
 use App\Http\Controllers\Customer\AppointmentCalendarController as CustomerAppointmentCalendarController;
 use App\Http\Controllers\Customer\AppointmentController as CustomerAppointmentController;
 use App\Http\Controllers\Customer\FeedbackController as CustomerFeedbackController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reception\AppointmentCalendarController as ReceptionAppointmentCalendarController;
 use App\Http\Controllers\Reception\AppointmentController as ReceptionAppointmentController;
@@ -36,20 +38,27 @@ use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\FeedbackController as StaffFeedbackController;
 use App\Http\Controllers\Staff\TransactionController as StaffTransactionController;
 use App\Http\Controllers\WebAttendanceController;
-use App\Models\ApplicationSetting;
-use App\Models\Addon;
-use App\Models\Service;
 use App\Http\Middleware\MeasureApplicationRequest;
+use App\Models\Addon;
+use App\Models\ApplicationSetting;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    $activeServices = Service::query()
+        ->where('is_active', true)
+        ->orderBy('name')
+        ->get();
+
+    $servicesAreBookable = $activeServices->isNotEmpty();
+
     return view('welcome', [
         'applicationSettings' => ApplicationSetting::current(),
-        'services' => Service::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(),
+        'services' => $servicesAreBookable
+            ? $activeServices
+            : collect(config('casa.service_packages', []))->map(static fn (array $package): object => (object) $package),
+        'servicesAreBookable' => $servicesAreBookable,
         'addons' => Addon::tableAvailable()
             ? Addon::query()->where('is_active', true)->orderBy('name')->get()
             : collect(),
@@ -131,6 +140,10 @@ Route::middleware(['auth', 'active', 'verified', 'super_admin', MeasureApplicati
     ->name('admin.')
     ->group(function () {
         Route::resource('users', AdminUserManagementController::class)->only(['index', 'store', 'update']);
+        Route::get('/system-errors', [AdminSystemErrorReportController::class, 'index'])->name('system-errors.index');
+        Route::get('/system-errors/{systemErrorReport}', [AdminSystemErrorReportController::class, 'show'])->name('system-errors.show');
+        Route::patch('/system-errors/{systemErrorReport}/resolve', [AdminSystemErrorReportController::class, 'resolve'])->name('system-errors.resolve');
+        Route::patch('/system-errors/{systemErrorReport}/reopen', [AdminSystemErrorReportController::class, 'reopen'])->name('system-errors.reopen');
     });
 
 Route::middleware(['auth', 'active', 'verified', 'role:staff', MeasureApplicationRequest::class])
@@ -166,6 +179,15 @@ Route::middleware(['auth', 'active', 'verified', 'role:receptionist', MeasureApp
 Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,receptionist'])
     ->prefix('attendance-station')->name('attendance-station.')->group(function (): void {
         Route::get('/qr', [WebAttendanceController::class, 'qr'])->name('qr');
+    });
+
+Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,receptionist,staff', MeasureApplicationRequest::class])
+    ->group(function (): void {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/bookings/count', [NotificationController::class, 'bookingCount'])->name('notifications.bookings.count');
+        Route::patch('/notifications/bookings/read', [NotificationController::class, 'acknowledgeBookings'])->name('notifications.bookings.read');
+        Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::patch('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     });
 
 Route::middleware(['auth', 'active', 'verified', 'role:customer', MeasureApplicationRequest::class])

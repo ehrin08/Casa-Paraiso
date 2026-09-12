@@ -12,6 +12,12 @@ class AddSecurityHeaders
     {
         $response = $next($request);
 
+        return self::apply($request, $response);
+    }
+
+    public static function apply(Request $request, Response $response): Response
+    {
+
         $permissionsPolicy = $request->routeIs('staff.attendance.show')
             ? 'camera=(self), microphone=(), geolocation=()'
             : 'camera=(), microphone=(), geolocation=()';

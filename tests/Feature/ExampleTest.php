@@ -24,6 +24,14 @@ class ExampleTest extends TestCase
         $this->assertStringContainsString('const panelCacheTtl = 60000', $script);
         $this->assertStringContainsString('panelCache.clear()', $script);
         $this->assertStringNotContainsString("prefetch.rel = 'prefetch'", $script);
+        $this->assertStringContainsString("initializeBookingNotifications", $script);
+
+        $notifications = file_get_contents(resource_path('js/booking-notifications.js'));
+
+        $this->assertIsString($notifications);
+        $this->assertStringContainsString("booking-notifications.changed", $notifications);
+        $this->assertStringContainsString("bookingNotificationsCountUrl", $notifications);
+        $this->assertStringContainsString("bookingNotificationsReadUrl", $notifications);
     }
 
     /**
@@ -52,12 +60,17 @@ class ExampleTest extends TestCase
         $this->assertIsString($html);
         $this->assertIsString($css);
         $this->assertStringContainsString('data-landing-header="fixed"', $html);
+        $this->assertStringContainsString('data-landing-mobile-menu', $html);
+        $this->assertStringContainsString('aria-controls="landing-mobile-navigation"', $html);
+        $this->assertStringContainsString('id="landing-mobile-navigation"', $html);
         $this->assertStringContainsString('class="casa-landing-main"', $html);
         $this->assertSame(4, substr_count($html, 'data-landing-screen-section'));
         $this->assertStringContainsString('id="treatments"', $html);
         $this->assertStringContainsString('id="how-it-works"', $html);
         $this->assertStringContainsString('id="visit"', $html);
         $this->assertStringContainsString('.casa-landing-header', $css);
+        $this->assertStringContainsString('body.casa-landing-body', $css);
+        $this->assertStringContainsString('@media (min-width: 1024px)', $css);
         $this->assertStringContainsString('min-block-size: calc(100dvh - var(--casa-landing-header-height));', $css);
         $this->assertStringContainsString('scroll-margin-block-start: var(--casa-landing-header-height);', $css);
     }
@@ -66,8 +79,8 @@ class ExampleTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('aria-label="Account navigation"', false)
-            ->assertSee('href="'.route('login').'" class="casa-button-primary">Login</a>', false)
+            ->assertSee('data-landing-mobile-menu', false)
+            ->assertSee('aria-controls="landing-mobile-navigation"', false)
             ->assertDontSee('>Reserve</a>', false);
 
         $login = $this->get('/login');

@@ -25,8 +25,61 @@ class ApplicationSettingRequest extends FormRequest
             'facebook_url' => ['nullable', 'url:https', 'max:2048', $this->urlHostRule(['facebook.com', 'www.facebook.com'])],
             'messenger_url' => ['nullable', 'url:https', 'max:2048', $this->urlHostRule(['m.me', 'www.m.me'])],
             'map_url' => ['nullable', 'url:https', 'max:2048', $this->urlHostRule(['google.com', 'www.google.com', 'maps.google.com'])],
+            'company_history' => ['nullable', 'string', 'max:6000'],
+            'organization_chart' => ['nullable', 'array'],
+            'organization_chart.owner' => ['required_with:organization_chart', 'array'],
+            'organization_chart.owner.title' => ['required_with:organization_chart', 'string', 'max:100'],
+            'organization_chart.owner.name' => ['nullable', 'string', 'max:100'],
+            'organization_chart.owner.description' => ['nullable', 'string', 'max:300'],
+            'organization_chart.owner.photo' => ['nullable', 'string', 'max:255'],
+            'organization_chart.admin' => ['required_with:organization_chart', 'array'],
+            'organization_chart.admin.title' => ['required_with:organization_chart', 'string', 'max:100'],
+            'organization_chart.admin.name' => ['nullable', 'string', 'max:100'],
+            'organization_chart.admin.description' => ['nullable', 'string', 'max:300'],
+            'organization_chart.admin.photo' => ['nullable', 'string', 'max:255'],
+            'organization_chart.team' => ['nullable', 'array', 'max:8'],
+            'organization_chart.team.*' => ['array'],
+            'organization_chart.team.*.title' => ['required', 'string', 'max:100'],
+            'organization_chart.team.*.name' => ['nullable', 'string', 'max:100'],
+            'organization_chart.team.*.description' => ['nullable', 'string', 'max:300'],
+            'organization_chart.team.*.photo' => ['nullable', 'string', 'max:255'],
             'default_payment_method' => ['required', Rule::in(Transaction::PAYMENT_METHODS)],
+            'organization_chart_photos' => ['nullable', 'array'],
+            'organization_chart_photos.owner' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'organization_chart_photos.admin' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'organization_chart_photos.team' => ['nullable', 'array'],
+            'organization_chart_photos.team.*' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'organization_chart_remove_photos' => ['nullable', 'array'],
+            'organization_chart_remove_photos.owner' => ['nullable', 'boolean'],
+            'organization_chart_remove_photos.admin' => ['nullable', 'boolean'],
+            'organization_chart_remove_photos.team' => ['nullable', 'array', 'max:8'],
+            'organization_chart_remove_photos.team.*' => ['nullable', 'boolean'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $chart = $this->input('organization_chart');
+
+        if (! is_array($chart)) {
+            return;
+        }
+
+        $team = collect($chart['team'] ?? [])
+            ->filter(static fn (mixed $role): bool => is_array($role)
+                && (filled($role['title'] ?? null) || filled($role['description'] ?? null)))
+            ->values()
+            ->all();
+
+        $chart['team'] = $team;
+
+        $hasChartContent = filled(data_get($chart, 'owner.title'))
+            || filled(data_get($chart, 'owner.description'))
+            || filled(data_get($chart, 'admin.title'))
+            || filled(data_get($chart, 'admin.description'))
+            || $team !== [];
+
+        $this->merge(['organization_chart' => $hasChartContent ? $chart : null]);
     }
 
     /** @param array<int, string> $hosts */
