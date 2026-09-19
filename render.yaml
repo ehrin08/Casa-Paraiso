@@ -63,26 +63,6 @@ services:
         value: database
       - key: QUEUE_CONNECTION
         value: sync
-      - key: BROADCAST_CONNECTION
-        value: reverb
-      - key: REVERB_APP_ID
-        sync: false
-      - key: REVERB_APP_KEY
-        sync: false
-      - key: REVERB_APP_SECRET
-        sync: false
-      - key: REVERB_HOST
-        value: 127.0.0.1
-      - key: REVERB_PORT
-        value: "8080"
-      - key: REVERB_SCHEME
-        value: http
-      - key: REVERB_SERVER_HOST
-        value: 127.0.0.1
-      - key: REVERB_SERVER_PORT
-        value: "8080"
-      - key: REVERB_ALLOWED_ORIGINS
-        sync: false
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL

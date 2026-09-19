@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Notification;
 
 class CustomerBookingNotifier
 {
-    public function __construct(private readonly BookingNotificationState $state) {}
-
     public function notify(Appointment $appointment): void
     {
         $appointment->loadMissing(['customerProfile.user', 'service', 'staffProfile.user']);
@@ -28,8 +26,6 @@ class CustomerBookingNotifier
 
         if ($recipients->isNotEmpty()) {
             Notification::send($recipients, new NewCustomerBookingNotification($appointment));
-
-            $recipients->each(fn (User $recipient) => $this->state->notifyChanged($recipient));
         }
     }
 }

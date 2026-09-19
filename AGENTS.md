@@ -2,7 +2,7 @@
 
 ## Project Direction
 
-Casa Paraiso is a Laravel 12, Blade, Tailwind, and MySQL web application. The repository contains the customer, receptionist, therapist, administrator, and super-administrator workspaces for spa scheduling, transactions, attendance, feedback, RFM rewards, and reports.
+Casa Paraiso is a Laravel 12, Blade, Tailwind, and MariaDB web application. The repository contains the customer, receptionist, therapist, administrator, and super-administrator workspaces for spa scheduling, transactions, attendance, feedback, RFM rewards, and reports.
 
 Earlier client, API, database, and hosted-pilot integrations are retired. The archived predecessor repository and its databases remain rollback evidence and must not be changed from this repository.
 
@@ -25,16 +25,18 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 ## Local Runtime
 
 - Use Docker Desktop's `desktop-linux` context through `scripts\casa-docker.ps1`.
-- The Compose project is `casa-paraiso-web` with `app`, `mysql`, and `mailpit` services.
+- The Compose project is `casa-paraiso-web` with `app`, `mariadb`, and `mailpit` services.
 - Run `./scripts/casa-docker.ps1 setup` for a clean checkout; it installs dependencies, creates the ignored `.env` when needed, creates an app key, migrates, and builds web assets. It never seeds or wipes the database.
 - Use `./scripts/casa-docker.ps1 compose exec -T app php artisan ...` for Artisan and `./scripts/casa-docker.ps1 compose exec -T app npm run build` for assets.
 
 ## Database Safety
 
-- MySQL 8.4 is the application and test database. `phpunit.xml` targets the isolated `testing` database.
+- MariaDB 10.11 LTS is the application and test database. `phpunit.xml` targets the isolated `testing` database.
 - Never run `migrate:fresh`, `db:wipe`, truncation, or bulk deletion against an account-bearing database. Those commands are allowed only against the dedicated testing database.
 - Preserve existing accounts and business data. Use additive migrations and idempotent seeders.
-- Any one-time transfer from the archived source must use uncommitted credentials, a read-only source, checked backups, dry-run validation, and a separately verified MySQL target. Never commit exports, CA files, or credentials.
+- Laravel retains the `mysql` connection and `pdo_mysql` driver for MariaDB; local `DB_HOST` is `mariadb`.
+- Any one-time transfer from the archived source must use uncommitted credentials, a read-only source, checked backups, dry-run validation, and a separately verified MariaDB target. Never commit exports, CA files, or credentials.
+- Follow `docs/MARIADB_MIGRATION.md` for existing MySQL installations. Never mount the old `mysql-data` volume into MariaDB or delete it during cutover.
 
 ## Application Rules
 

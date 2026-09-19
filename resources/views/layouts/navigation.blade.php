@@ -101,7 +101,7 @@
         ->implode('');
 @endphp
 
-<nav x-data="{ open: false }" x-on:keydown.escape.window="open = false" data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
+<nav x-data="{ open: false }" x-on:keydown.escape.window="open = false; $store.sidebar.hideTooltip()" data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
     <div class="sticky top-0 z-40 border-b border-casa-border/80 bg-casa-paper/94 px-4 py-2 backdrop-blur-xl lg:hidden">
         <div class="flex items-center justify-between gap-4">
             <a href="{{ route($dashboardRoute) }}" class="min-w-0 rounded-xl bg-white px-2 py-1">
@@ -122,15 +122,26 @@
         </div>
     </div>
 
-    <aside data-desktop-sidebar class="casa-wood-panel fixed inset-y-0 start-0 z-30 hidden w-64 flex-col overflow-y-auto border-e border-white/10 p-3 lg:flex">
-        <a href="{{ route($dashboardRoute) }}" class="rounded-xl bg-casa-paper px-2.5 py-2 shadow-casa-card">
-            <x-application-logo class="origin-left scale-[0.82]" />
-        </a>
+    <aside id="desktop-workspace-navigation" data-desktop-sidebar aria-label="Desktop workspace navigation" class="casa-wood-panel fixed inset-y-0 start-0 z-30 hidden flex-col overflow-y-auto border-e border-white/10 p-3 lg:flex"
+        @mouseover="$store.sidebar.showTooltip($event)" @focusin="$store.sidebar.showTooltip($event)"
+        @mouseout="$store.sidebar.deferHideTooltip()" @focusout="$store.sidebar.deferHideTooltip()">
+        <div class="casa-sidebar-heading flex items-center justify-between gap-2">
+            <a href="{{ route($dashboardRoute) }}" class="casa-sidebar-logo min-w-0 rounded-xl bg-casa-paper px-2.5 py-2 shadow-casa-card">
+                <x-application-logo />
+            </a>
+            <button type="button" x-cloak class="casa-icon-button border-white/15 bg-white/10 text-white" aria-controls="desktop-workspace-navigation"
+                :aria-expanded="!$store.sidebar.collapsed" :aria-label="$store.sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                :title="$store.sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'" @click="$store.sidebar.toggle()">
+                <svg class="size-5" :class="{ 'rotate-180': $store.sidebar.collapsed }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 4H4v16h5M15 8l-4 4 4 4M11 12h9" />
+                </svg>
+            </button>
+        </div>
 
-        <div class="mt-3 rounded-xl border border-white/10 bg-white/[0.065] p-3">
+        <div class="casa-sidebar-account mt-3 rounded-xl border border-white/10 bg-white/[0.065] p-3">
             <div class="flex items-center gap-3">
                 <span class="grid size-9 shrink-0 place-items-center rounded-full border border-casa-brass/35 bg-casa-brass/15 text-sm font-extrabold tracking-[0.04em] text-casa-sand">{{ $initials }}</span>
-                <span class="min-w-0">
+                <span class="casa-sidebar-expanded-only min-w-0">
                     <span class="block text-sm font-extrabold uppercase tracking-[0.05em] text-casa-brass-light">{{ $roleLabel }}</span>
                     <span class="mt-1 block truncate text-sm font-semibold text-white">{{ $user->name }}</span>
                     <span class="mt-0.5 block truncate text-sm text-white/65">{{ $user->email }}</span>
@@ -141,13 +152,13 @@
         <div class="mt-4 space-y-4">
             @foreach ($navGroups as $group)
                 <section aria-label="{{ $group['label'] }} navigation">
-                    <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">{{ $group['label'] }}</p>
+                    <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">{{ $group['label'] }}</p>
                     <div class="mt-2 space-y-1">
                         @foreach ($group['items'] as $item)
                             @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                            <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif>
+                            <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif>
                                 <x-nav-icon :name="$item['icon']" />
-                                <span>{{ $item['label'] }}</span>
+                                <span class="casa-sidebar-link-label">{{ $item['label'] }}</span>
                                 @if ($item['booking_schedule'] ?? false)
                                     <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => ($item['badge'] ?? 0) === 0]) aria-label="{{ $item['badge'] }} unread booking notifications"><span data-booking-notification-badge-value>{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span></span>
                                 @elseif (($item['badge'] ?? 0) > 0)
@@ -160,13 +171,13 @@
             @endforeach
 
             <section aria-label="Account navigation">
-                <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">Account</p>
+                <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">Account</p>
                 <div class="mt-2 space-y-1">
                     @foreach ($accountLinks as $item)
                         @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                        <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
+                        <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
                             <x-nav-icon :name="$item['icon']" />
-                            <span>{{ $item['label'] }}</span>
+                            <span class="casa-sidebar-link-label">{{ $item['label'] }}</span>
                             @if (($item['badge'] ?? 0) > 0)
                                 <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
                             @endif
@@ -177,15 +188,21 @@
         </div>
 
         <div class="mt-auto pt-4">
-            <p class="mb-2 px-2 text-sm leading-5 text-white/65">Open every day<br><span class="font-bold text-white/80">1:00 PM to 12:00 MN</span></p>
+            <p class="casa-sidebar-expanded-only mb-2 px-2 text-sm leading-5 text-white/65">Open every day<br><span class="font-bold text-white/80">1:00 PM to 12:00 MN</span></p>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="casa-button-secondary w-full border-white/15 bg-white/8 text-white hover:bg-white/14 hover:text-white">
-                    Log out
+                <button type="submit" data-sidebar-label="Log out" class="casa-sidebar-logout casa-button-secondary w-full border-white/15 bg-white/8 text-white hover:bg-white/14 hover:text-white">
+                    <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v16h5M15 8l4 4-4 4M9 12h10" /></svg>
+                    <span class="casa-sidebar-link-label">Log out</span>
                 </button>
             </form>
         </div>
     </aside>
+
+    <div x-cloak x-show="$store.sidebar.tooltip" class="casa-sidebar-tooltip" aria-hidden="true"
+        :style="{ top: ($store.sidebar.tooltip?.top ?? 0) + 'px', left: ($store.sidebar.tooltip?.left ?? 0) + 'px' }"
+        @mouseenter="$store.sidebar.keepTooltip()" @mouseleave="$store.sidebar.deferHideTooltip()"
+        x-text="$store.sidebar.tooltip?.label"></div>
 
     <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 lg:hidden" style="display: none;">
         <div class="absolute inset-0 bg-casa-charcoal/72 backdrop-blur-sm" @click="open = false"></div>

@@ -7,7 +7,7 @@ Casa Paraiso runs as a free Render Docker web service in Singapore with an Oracl
 - `Dockerfile.render` builds Composer dependencies and Vite assets into a production Apache/PHP image.
 - `docker/app/render-entrypoint.sh` configures Apache to listen on Render's `PORT`, warms Laravel caches, and only migrates when `RUN_MIGRATIONS=true`.
 - `render.yaml` creates the new `casa-paraiso-web` service from `main`; it contains no secrets.
-- The image runs Apache and Reverb under Supervisor. Render exposes only Apache's assigned public port; Apache proxies `/app` and `/apps` to loopback Reverb for same-origin secure WebSocket connections.
+- The image runs Apache directly. Booking notification badges use authenticated HTTP polling every 30 seconds while visible; no WebSocket process or proxy is required.
 
 ## Oracle Cloud setup
 
@@ -25,7 +25,7 @@ Casa Paraiso runs as a free Render Docker web service in Singapore with an Oracl
 4. Add the Oracle CA secret file in the service Environment page. Do not store it in Git.
 5. Configure a transactional mail provider, then set its values in Render. Free Render services cannot send to SMTP ports 25, 465, or 587; use the provider's supported alternate submission port or HTTP mail API integration.
 6. Register `https://<render-host>/auth/google/callback` in Google Cloud Console and use that same URL for `GOOGLE_REDIRECT_URI`.
-7. Set `REVERB_APP_ID`, `REVERB_APP_KEY`, `REVERB_APP_SECRET`, and `REVERB_ALLOWED_ORIGINS` in Render. Use the exact public application origin for allowed origins; do not commit production Reverb credentials.
+7. Existing deployments can remove obsolete `REVERB_*` and `BROADCAST_CONNECTION` environment variables after deploying the polling release.
 
 ## First migration and verification
 

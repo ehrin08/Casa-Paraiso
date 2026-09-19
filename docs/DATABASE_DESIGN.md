@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the MySQL 8.4 schema implemented through Laravel migrations.
+Define the MariaDB 10.11 LTS schema implemented through Laravel migrations.
 
 This design supports customer login, therapist scheduling, immediately confirmed appointments, receptionist operations, manual transactions, therapist commissions, RFM promotion suggestions, feedback sentiment, and management reporting.
 
@@ -14,7 +14,7 @@ This design supports customer login, therapist scheduling, immediately confirmed
 - Use `deleted_at` soft deletes only for records that should be hidden without losing history, such as services, profiles, and promotion rules.
 - Store money as `decimal(10,2)`.
 - Store dates and times in server time for MVP; use Asia/Manila as the business timezone in application config.
-- Use MySQL 8.4-compatible column types and index names no longer than 64 characters.
+- Use MariaDB 10.11 LTS-compatible column types and index names no longer than 64 characters.
 - Treat 1:00 PM to 12:00 midnight as the hard booking boundary and generate appointment starts at 30-minute intervals.
 
 ## Status Values

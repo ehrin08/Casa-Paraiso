@@ -11,6 +11,107 @@
     display: none !important;
 }
 
+:root {
+    --casa-sidebar-width: 16rem;
+}
+
+html[data-sidebar-collapsed="true"] {
+    --casa-sidebar-width: 5rem;
+}
+
+.casa-sidebar-tooltip {
+    position: fixed;
+    z-index: 45;
+    max-width: 16rem;
+    transform: translateY(-50%);
+    border: 1px solid var(--color-casa-border);
+    border-radius: 10px;
+    background: var(--color-casa-paper);
+    padding: 0.5rem 0.75rem;
+    color: var(--color-casa-ink);
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-casa-card);
+}
+
+@media (min-width: 1024px) {
+    [data-desktop-sidebar] {
+        width: var(--casa-sidebar-width);
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-casa-muted) transparent;
+    }
+
+    .casa-workspace-content {
+        padding-inline-start: var(--casa-sidebar-width);
+    }
+
+    .casa-sidebar-animating [data-desktop-sidebar] {
+        transition: width 180ms ease;
+    }
+
+    .casa-sidebar-animating .casa-workspace-content {
+        transition: padding-inline-start 180ms ease;
+    }
+
+    .casa-sidebar-logo img {
+        width: 100%;
+        min-width: 120px;
+    }
+
+    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-sidebar-expanded-only,
+    [data-sidebar-collapsed="true"] .casa-sidebar-logo {
+        display: none;
+    }
+
+    [data-sidebar-collapsed="true"] .casa-sidebar-heading,
+    [data-sidebar-collapsed="true"] .casa-sidebar-account > div {
+        justify-content: center;
+    }
+
+    [data-sidebar-collapsed="true"] .casa-sidebar-account {
+        padding: 0.5rem 0;
+        border-color: transparent;
+        background: transparent;
+    }
+
+    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-nav-link,
+    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-sidebar-logout {
+        min-height: 3.25rem;
+        justify-content: center;
+        gap: 0;
+        padding-inline: 0;
+    }
+
+    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-nav-link:hover {
+        transform: none;
+    }
+
+    [data-sidebar-collapsed="true"] .casa-sidebar-link-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-nav-link > .ms-auto {
+        position: absolute;
+        top: -0.25rem;
+        inset-inline-end: -0.125rem;
+        margin: 0;
+        padding: 0 0.25rem;
+    }
+}
+
+@media (max-width: 1023px) {
+    .casa-sidebar-tooltip {
+        display: none !important;
+    }
+}
+
 @theme {
     --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
@@ -486,28 +587,45 @@
         background: color-mix(in srgb, var(--color-casa-palm) 9%, white);
     }
 
+    /* Calendar event blocks — gradient fill + left accent strip */
     .casa-calendar-event-confirmed {
-        border-color: color-mix(in srgb, var(--color-casa-palm) 64%, var(--color-casa-border));
+        border-color: color-mix(in srgb, var(--color-casa-palm) 40%, transparent);
+        border-left-color: color-mix(in srgb, var(--color-casa-palm) 90%, black);
         background: linear-gradient(145deg, var(--color-casa-palm), var(--color-casa-palm-dark));
         color: #fff;
     }
 
     .casa-calendar-event-completed {
-        border-color: color-mix(in srgb, var(--color-casa-palm) 32%, var(--color-casa-border));
+        border-color: color-mix(in srgb, var(--color-casa-palm) 25%, var(--color-casa-border));
+        border-left-color: var(--color-casa-palm);
         background: color-mix(in srgb, var(--color-casa-palm) 12%, white);
         color: var(--color-casa-palm-dark);
     }
 
     .casa-calendar-event-cancelled {
         border-color: #E2B7B2;
+        border-left-color: #c0392b;
         background: #FFF5F3;
         color: #842018;
     }
 
     .casa-calendar-event-blocker {
-        border-color: color-mix(in srgb, var(--color-casa-cacao) 58%, var(--color-casa-border));
+        border-color: color-mix(in srgb, var(--color-casa-cacao) 45%, transparent);
+        border-left-color: color-mix(in srgb, var(--color-casa-cacao) 90%, black);
         background: color-mix(in srgb, var(--color-casa-cacao) 84%, black);
         color: #fff;
+    }
+
+    /* Time range label inside event blocks */
+    .casa-calendar-event-time {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.65rem;
+        line-height: 1;
+        opacity: 0.82;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .casa-calendar-availability,

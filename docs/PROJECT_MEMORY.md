@@ -1,11 +1,11 @@
 # Casa Paraiso Project Memory
 
-> Last reviewed: 2026-09-03
+> Last reviewed: 2026-09-12
 > Role: orientation and routing; verify current source before changing behavior.
 
 ## Current Shape
 
-Casa Paraiso is a Laravel 12 server-rendered web application using MySQL 8.4. It supports customer, receptionist, therapist, administrator, and super-administrator workspaces. Core modules are services, staff and customers, weekly availability, calendar appointments, transactions, attendance, commissions, feedback and sentiment, RFM rewards, settings, reports, and CSV export.
+Casa Paraiso is a Laravel 12 server-rendered web application using MariaDB 10.11 LTS. It supports customer, receptionist, therapist, administrator, and super-administrator workspaces. Core modules are services, staff and customers, weekly availability, calendar appointments, transactions, attendance, commissions, feedback and sentiment, RFM rewards, settings, reports, and CSV export.
 
 Earlier native-client, versioned API, device-token, database, tunnel, and hosted-pilot integrations are retired. The previous repository and database infrastructure remain archival rollback sources only.
 
@@ -33,20 +33,24 @@ Earlier native-client, versioned API, device-token, database, tunnel, and hosted
 - `tests/Feature` contains the primary behavioral coverage.
 - Super-administrator error inbox routes are `admin.system-errors.index`, `admin.system-errors.show`, `admin.system-errors.resolve`, and `admin.system-errors.reopen`; no current business route is intentionally marked unavailable.
 - Customer self-bookings create retained database notifications for the assigned therapist and active admins, super admins, and receptionists. Operational users access the inbox at `notifications.index`; opening an item marks it read and redirects to the recipient's scoped appointment detail page.
-- Operational sidebars show a live, private-Reverb unread customer-booking count on their Schedule/Appointments link. The browser reconciles through `notifications.bookings.count`, acknowledges displayed schedule pages through `notifications.bookings.read`, and retains the separate inbox without a badge.
+- Operational sidebars show an unread customer-booking count refreshed through authenticated HTTP polling every 30 seconds while visible on their Schedule/Appointments link. The browser reconciles through `notifications.bookings.count`, acknowledges displayed schedule pages through `notifications.bookings.read`, and retains the separate inbox without a badge.
+- All roles share a collapsible desktop sidebar: 256px expanded or an 80px icon rail at 1024px and above. `resources/js/sidebar.js` owns the Alpine state and hover/focus labels; the app layout restores `casa.sidebar.collapsed` from localStorage before rendering. Mobile drawers and the customer dock remain independent.
 
 ## Durable Rules
 
-- MySQL is the runtime and test database. Do not add a second database platform configuration to the application.
-- `phpunit.xml` always targets `mysql/testing`; never use destructive test commands against real data.
+- MariaDB 10.11 LTS is the local runtime and test database. Keep Laravel's existing `mysql` connection and `pdo_mysql`; do not add a second application database connection.
+- `phpunit.xml` always targets host `mariadb`, database `testing`; isolation coverage checks the actual server is MariaDB. Never use destructive test commands against real data.
+- MariaDB uses `mariadb-data`; the original `mysql-data` volume and ignored migration backups remain rollback evidence. Setup/start reject legacy `DB_HOST=mysql`. See `MARIADB_MIGRATION.md` for transfer and recovery.
+- The 2026-09-12 local cutover restored 37 tables/84 rows to MariaDB 10.11.19 with matching fingerprints, financial totals, constraints, sequence values, and audit results. All 243 Laravel tests and seven polling tests passed; see the migration runbook for retained backup location and verification details.
 - Appointment capacity is transactional. Asia/Manila hours are 1:00 PM through midnight with 30-minute starts.
 - Continue using Blade, shared workspace components, and fixed 15-record pagination.
 - Browser attendance camera access is limited to the staff attendance page.
 - Existing account and business data must be preserved; source imports require an external, read-only cutover process and are never committed.
 - Local demo data uses `http://localhost:18001`, service `app`, and additive `php artisan db:seed` only on a verified disposable local database; never use `migrate:fresh` or `db:wipe` for demo setup.
 - The app source is bind-mounted from Windows for local Docker. `storage/logs` is a Docker-managed `storage-logs` volume initialized for `www-data`; the `single` and `daily` Monolog channels leave file modes to that volume instead of requesting `chmod`.
-- Apache and Laravel Reverb run under Supervisor in the `app` container. Apache proxies the same-origin `/app` and `/apps` WebSocket paths to Reverb on loopback; production Reverb credentials and allowed origins are provider-managed secrets.
-- Production deployment uses the separate `casa-paraiso-web` Render service from `main` and an Oracle Cloud Always Free MySQL HeatWave DB System over TLS. `Dockerfile.render`, `docker/app/render-entrypoint.sh`, `render.yaml`, and `RENDER_ORACLE_DEPLOYMENT.md` own this workflow; the archived `casa-paraiso-supabase-api-poc` service must remain unchanged. Render secrets and Oracle CA files are only configured in provider dashboards. `RUN_MIGRATIONS` is false except for one controlled deploy that runs additive `migrate --force`.
+- Apache runs directly in the app container. Booking-count polling pauses on hidden pages and navigation, aborts stale requests, and refreshes on return. No WebSocket server, broadcast credentials, or broadcast authorization route is required.
+- The next deployment target is Hostinger Web/Cloud hosting with managed MariaDB; `HOSTINGER_DEPLOYMENT.md` documents database preparation. Local MariaDB 10.11 is provisional until the actual hosting version is verified. Hosting cutover has not been performed.
+- The existing Render/Oracle workflow is retained as historical deployment evidence in `Dockerfile.render`, `docker/app/render-entrypoint.sh`, `render.yaml`, and `RENDER_ORACLE_DEPLOYMENT.md`. This local migration does not change those provider services or the archived `casa-paraiso-supabase-api-poc` service.
 
 ## Verification
 
@@ -55,5 +59,6 @@ Follow [AGENTS.md](../AGENTS.md#verification-and-delivery) for check selection a
 ```powershell
 .\scripts\casa-docker.ps1 setup
 .\scripts\casa-docker.ps1 compose exec -T app php artisan test
+.\scripts\casa-docker.ps1 compose exec -T app node --test tests/js/booking-notifications.test.mjs
 .\scripts\casa-docker.ps1 compose exec -T app npm run build
 ```

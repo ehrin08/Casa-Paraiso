@@ -10,6 +10,7 @@ use App\Models\Feedback;
 use App\Models\PromotionSuggestion;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -315,6 +316,93 @@ class ReportController extends Controller
         }
 
         return $value;
+    }
+
+    public function insights(Request $request): JsonResponse
+    {
+        $period = (string) $request->query('period', '30');
+        if (! in_array($period, ['7', '30', '90', 'all'], true)) {
+            $period = '30';
+        }
+
+        [$from, $to] = $this->insightsPeriodDates($period);
+
+        // Revenue over time (daily)
+        $revenueQuery = Transaction::query()
+            ->where('payment_status', Transaction::PAYMENT_PAID)
+            ->whereNotNull('paid_at')
+            ->when($from, fn ($q) => $q->where('paid_at', '>=', $from))
+            ->selectRaw('DATE(paid_at) as date, SUM(amount) as total')
+            ->groupByRaw('DATE(paid_at)')
+            ->orderByRaw('DATE(paid_at)')
+            ->get()
+            ->map(fn ($r) => ['date' => $r->date, 'total' => (float) $r->total]);
+
+        // Appointments by status
+        $appointmentsByStatus = Appointment::query()
+            ->when($from, fn ($q) => $q->where('created_at', '>=', $from))
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->orderBy('status')
+            ->get()
+            ->map(fn ($r) => ['status' => $r->status, 'count' => (int) $r->count]);
+
+        // Feedback sentiment breakdown
+        $sentiment = Feedback::query()
+            ->when($from, fn ($q) => $q->where('submitted_at', '>=', $from))
+            ->selectRaw('sentiment_label as label, COUNT(*) as count')
+            ->groupBy('sentiment_label')
+            ->orderBy('sentiment_label')
+            ->get()
+            ->map(fn ($r) => ['label' => $r->label ?? 'unrated', 'count' => (int) $r->count]);
+
+        // Top 7 services by appointment count
+        $topServices = Appointment::query()
+            ->when($from, fn ($q) => $q->where('appointments.created_at', '>=', $from))
+            ->join('services', 'services.id', '=', 'appointments.service_id')
+            ->selectRaw('services.name, COUNT(appointments.id) as count')
+            ->groupBy('services.id', 'services.name')
+            ->orderByDesc('count')
+            ->limit(7)
+            ->get()
+            ->map(fn ($r) => ['name' => $r->name, 'count' => (int) $r->count]);
+
+        // RFM segment distribution
+        $rfmSegments = PromotionSuggestion::query()
+            ->when($from, fn ($q) => $q->where('promotion_suggestions.created_at', '>=', $from))
+            ->leftJoin('rfm_segments', 'rfm_segments.id', '=', 'promotion_suggestions.rfm_segment_id')
+            ->selectRaw('COALESCE(rfm_segments.name, "Unassigned") as name, COUNT(promotion_suggestions.id) as count')
+            ->groupBy('rfm_segments.id', 'rfm_segments.name')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn ($r) => ['name' => $r->name, 'count' => (int) $r->count]);
+
+        return response()->json([
+            'period'               => $period,
+            'revenue'              => $revenueQuery,
+            'appointments_status'  => $appointmentsByStatus,
+            'sentiment'            => $sentiment,
+            'top_services'         => $topServices,
+            'rfm_segments'         => $rfmSegments,
+        ]);
+    }
+
+    /**
+     * Return the Carbon start timestamp for the insights period, or null for all-time.
+     *
+     * @return array{0: \Illuminate\Support\Carbon|null, 1: \Illuminate\Support\Carbon}
+     */
+    private function insightsPeriodDates(string $period): array
+    {
+        $to = now();
+        $from = match ($period) {
+            '7'  => $to->copy()->subDays(7)->startOfDay(),
+            '90' => $to->copy()->subDays(90)->startOfDay(),
+            'all' => null,
+            default => $to->copy()->subDays(30)->startOfDay(),
+        };
+
+        return [$from, $to];
     }
 
     protected function validateFilters(Request $request): void

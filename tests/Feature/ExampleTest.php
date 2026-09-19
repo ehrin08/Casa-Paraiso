@@ -29,7 +29,6 @@ class ExampleTest extends TestCase
         $notifications = file_get_contents(resource_path('js/booking-notifications.js'));
 
         $this->assertIsString($notifications);
-        $this->assertStringContainsString("booking-notifications.changed", $notifications);
         $this->assertStringContainsString("bookingNotificationsCountUrl", $notifications);
         $this->assertStringContainsString("bookingNotificationsReadUrl", $notifications);
     }

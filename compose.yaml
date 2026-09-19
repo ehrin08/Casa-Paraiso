@@ -14,28 +14,28 @@ services:
       - 'node_modules:/var/www/html/node_modules'
       - 'storage-logs:/var/www/html/storage/logs'
     depends_on:
-      mysql:
+      mariadb:
         condition: service_healthy
       mailpit:
         condition: service_started
     networks:
       - casa
 
-  mysql:
-    image: 'mysql:8.4'
+  mariadb:
+    image: 'mariadb:10.11'
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - '127.0.0.1:${FORWARD_DB_PORT:-13306}:3306'
     environment:
-      MYSQL_DATABASE: '${DB_DATABASE:-casa_paraiso}'
-      MYSQL_USER: '${DB_USERNAME:-sail}'
-      MYSQL_PASSWORD: '${DB_PASSWORD:-password}'
-      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD:-rootpassword}'
+      MARIADB_DATABASE: '${DB_DATABASE:-casa_paraiso}'
+      MARIADB_USER: '${DB_USERNAME:-sail}'
+      MARIADB_PASSWORD: '${DB_PASSWORD:-password}'
+      MARIADB_ROOT_PASSWORD: '${MARIADB_ROOT_PASSWORD:-rootpassword}'
     volumes:
-      - 'mysql-data:/var/lib/mysql'
-      - './docker/mysql/init/01-create-testing-database.sql:/docker-entrypoint-initdb.d/01-create-testing-database.sql:ro'
+      - 'mariadb-data:/var/lib/mysql'
+      - './docker/mariadb/init/01-create-testing-database.sql:/docker-entrypoint-initdb.d/01-create-testing-database.sql:ro'
     healthcheck:
-      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent']
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
       interval: 5s
       timeout: 5s
       retries: 20
@@ -55,7 +55,8 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data:
+  # The retired mysql-data volume is deliberately not reused or deleted.
+  mariadb-data:
     driver: local
   vendor:
     driver: local

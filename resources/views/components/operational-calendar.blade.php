@@ -30,15 +30,15 @@
     class="space-y-5"
     data-operational-calendar
 >
-    <section class="casa-card p-4 sm:p-5">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <section class="casa-card p-3">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div class="space-y-3">
                 @if ($isOperationsCalendar)
                     <div class="inline-flex rounded-xl border border-casa-border bg-casa-sand/55 p-1" role="group" aria-label="{{ __('Schedule mode') }}">
-                        <button type="button" class="min-h-11 rounded-lg px-4 text-sm font-extrabold uppercase tracking-[0.05em] transition" x-on:click="setMode('bookings')" x-bind:aria-pressed="mode === 'bookings'" x-bind:class="mode === 'bookings' ? 'bg-casa-palm text-white shadow-sm' : 'text-casa-muted hover:text-casa-cacao'">
+                        <button type="button" class="min-h-9 rounded-lg px-3 text-xs font-extrabold uppercase tracking-[0.05em] transition" x-on:click="setMode('bookings')" x-bind:aria-pressed="mode === 'bookings'" x-bind:class="mode === 'bookings' ? 'bg-casa-palm text-white shadow-sm' : 'text-casa-muted hover:text-casa-cacao'">
                             {{ __('Bookings') }}
                         </button>
-                        <button type="button" class="min-h-11 rounded-lg px-4 text-sm font-extrabold uppercase tracking-[0.05em] transition" x-on:click="setMode('availability')" x-bind:aria-pressed="mode === 'availability'" x-bind:class="mode === 'availability' ? 'bg-casa-cacao text-white shadow-sm' : 'text-casa-muted hover:text-casa-cacao'">
+                        <button type="button" class="min-h-9 rounded-lg px-3 text-xs font-extrabold uppercase tracking-[0.05em] transition" x-on:click="setMode('availability')" x-bind:aria-pressed="mode === 'availability'" x-bind:class="mode === 'availability' ? 'bg-casa-cacao text-white shadow-sm' : 'text-casa-muted hover:text-casa-cacao'">
                             {{ __('Availability') }}
                         </button>
                     </div>
@@ -48,9 +48,9 @@
                     <button type="button" class="casa-icon-button" x-on:click="previousWeek()" aria-label="{{ __('Previous week') }}">
                         <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <div class="min-w-0 flex-1 text-center sm:min-w-44 sm:flex-none">
-                        <p class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ __('Schedule week') }}</p>
-                        <p class="mt-1 font-display text-lg font-black text-casa-text" x-text="weekLabel"></p>
+                    <div class="min-w-0 flex-1 text-center sm:min-w-36 sm:flex-none">
+                        <p class="text-xs font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ __('Schedule week') }}</p>
+                        <p class="mt-0.5 font-display text-sm font-black text-casa-text" x-text="weekLabel"></p>
                     </div>
                     <button type="button" class="casa-icon-button" x-on:click="nextWeek()" aria-label="{{ __('Next week') }}">
                         <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -59,7 +59,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-2 sm:grid-cols-2 xl:flex xl:items-end">
+            <div class="grid gap-2 sm:grid-cols-2 lg:flex lg:items-end">
                 @if ($isOperationsCalendar)
                     <label class="block min-w-44">
                         <span class="casa-label">{{ __('Therapist') }}</span>
@@ -92,12 +92,12 @@
             </div>
         </div>
 
-        <div class="mt-5 overflow-x-auto rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-casa-palm" tabindex="0" role="region" aria-label="{{ __('Scrollable days in selected week') }}" data-calendar-scroll>
-            <div class="grid min-w-[22rem] grid-cols-[repeat(7,minmax(2.75rem,1fr))] gap-1.5" role="tablist" aria-label="{{ __('Days in selected week') }}">
+        <div class="mt-3 overflow-x-auto rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-casa-palm" tabindex="0" role="region" aria-label="{{ __('Scrollable days in selected week') }}" data-calendar-scroll>
+            <div class="grid min-w-[20rem] grid-cols-[repeat(7,minmax(2.25rem,1fr))] gap-1" role="tablist" aria-label="{{ __('Days in selected week') }}">
                 <template x-for="day in dayOptions" x-bind:key="day.date">
                     <button
                         type="button"
-                        class="min-h-14 min-w-11 rounded-xl border px-1.5 py-2 text-center transition"
+                        class="min-h-10 min-w-9 rounded-lg border px-1 py-1.5 text-center transition"
                         x-on:click="selectedDate = day.date"
                         x-on:keydown.right.prevent="moveSelectedDay(day.date, 1)"
                         x-on:keydown.left.prevent="moveSelectedDay(day.date, -1)"
@@ -109,8 +109,8 @@
                         x-bind:class="selectedDate === day.date ? 'border-casa-palm bg-casa-palm text-white shadow-sm' : day.isToday ? 'border-casa-brass bg-casa-sand/65 text-casa-cacao' : 'border-casa-border bg-casa-paper text-casa-muted hover:border-casa-brass'"
                         role="tab"
                     >
-                        <span class="block text-sm font-extrabold uppercase tracking-[0.04em]" x-text="day.weekday"></span>
-                        <span class="mt-1 block text-sm font-bold" x-text="day.label"></span>
+                        <span class="block text-xs font-extrabold uppercase tracking-[0.04em]" x-text="day.weekday"></span>
+                        <span class="mt-0.5 block text-xs font-bold" x-text="day.label"></span>
                     </button>
                 </template>
             </div>
@@ -164,12 +164,12 @@
 
         <div class="hidden overflow-x-auto lg:block" data-calendar-scroll>
             <div class="min-w-max">
-                <div class="sticky top-0 z-30 grid border-b border-casa-border bg-casa-paper" x-bind:style="`grid-template-columns:5.5rem repeat(${Math.max(resources.length, 1)}, minmax(13rem, 1fr))`">
-                    <div class="sticky start-0 z-40 border-e border-casa-border bg-casa-paper p-3 text-center text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ __('Time') }}</div>
+                <div class="sticky top-0 z-30 grid border-b border-casa-border bg-casa-sand/70 shadow-sm" x-bind:style="`grid-template-columns:5.5rem repeat(${Math.max(resources.length, 1)}, minmax(13rem, 1fr))`">
+                    <div class="sticky start-0 z-40 border-e border-casa-border bg-casa-sand/70 p-2 text-center text-xs font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ __('Time') }}</div>
                     <template x-for="resource in resources" x-bind:key="resource.id">
-                        <div class="border-e border-casa-border px-3 py-2 text-center">
-                            <p class="text-sm font-extrabold text-casa-text" x-text="resource.name"></p>
-                            <p class="mt-0.5 text-sm font-bold text-casa-muted" x-text="resource.subtitle"></p>
+                        <div class="border-e border-casa-border px-2 py-2.5 text-center">
+                            <p class="text-sm font-black text-casa-text" x-text="resource.name"></p>
+                            <p class="mt-0.5 text-xs font-bold text-casa-muted" x-text="resource.subtitle"></p>
                         </div>
                     </template>
                 </div>
@@ -177,7 +177,12 @@
                 <div class="grid" x-bind:style="`grid-template-columns:5.5rem repeat(${Math.max(resources.length, 1)}, minmax(13rem, 1fr))`">
                     <div class="sticky start-0 z-20 border-e border-casa-border bg-casa-paper">
                         <template x-for="slot in timeSlots" x-bind:key="slot.time">
-                            <div class="h-11 border-b border-casa-border/70 px-2 pt-1.5 text-end text-sm font-bold text-casa-muted" x-text="slot.label"></div>
+                            <div
+                                x-bind:class="slot.minutes % 60 === 0
+                                    ? 'h-8 border-b border-casa-border px-2 pt-1 text-end text-xs font-bold text-casa-muted'
+                                    : 'h-8 border-b border-casa-border/20 px-2'"
+                                x-text="slot.minutes % 60 === 0 ? slot.label : ''"
+                            ></div>
                         </template>
                     </div>
 
@@ -185,7 +190,7 @@
                         <div class="relative border-e border-casa-border bg-casa-paper" x-bind:style="`height:${timelineHeight}px`">
                             <div class="absolute inset-0 z-0">
                                 <template x-for="slot in timeSlots" x-bind:key="slot.time">
-                                    <div class="h-11 border-b border-casa-border/70">
+                                    <div x-bind:class="slot.minutes % 60 === 0 ? 'h-8 border-b border-casa-border bg-casa-sand/20' : 'h-8 border-b border-casa-border/20'">
                                         <button
                                             x-show="slotCanCreate(resource.id, slot)"
                                             type="button"
@@ -219,12 +224,13 @@
                             <template x-for="event in positionedEvents(resource.id)" x-bind:key="event.id">
                                 <a
                                     x-bind:href="event.detail_url"
-                                    class="absolute z-20 overflow-hidden rounded-xl border p-2 text-left shadow-sm transition hover:z-30 hover:shadow-casa-card"
+                                    class="absolute z-20 overflow-hidden rounded-xl border border-l-4 px-3 py-2 text-left shadow-sm transition hover:z-30 hover:shadow-casa-card"
                                     x-bind:class="eventClass(event)"
                                     x-bind:style="eventStyle(event)"
                                     x-bind:aria-label="`${statusLabel(event.status)}: ${event.title}, ${eventTimeRange(event)}`"
                                 >
-                                    <span class="block truncate text-sm font-extrabold" x-text="event.title"></span>
+                                    <span class="block truncate text-xs font-extrabold leading-tight" x-text="event.title"></span>
+                                    <span class="casa-calendar-event-time" x-text="eventTimeRange(event)"></span>
                                 </a>
                             </template>
                         </div>

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\BookingNotificationsChanged;
 use App\Models\User;
 use App\Notifications\NewCustomerBookingNotification;
 
@@ -17,19 +16,10 @@ class BookingNotificationState
 
     public function acknowledge(User $user): int
     {
-        $updated = $user->unreadNotifications()
+        $user->unreadNotifications()
             ->where('type', NewCustomerBookingNotification::class)
             ->update(['read_at' => now()]);
 
-        if ($updated > 0) {
-            $this->notifyChanged($user);
-        }
-
         return $this->unreadCount($user);
-    }
-
-    public function notifyChanged(User $user): void
-    {
-        event(new BookingNotificationsChanged($user->id));
     }
 }

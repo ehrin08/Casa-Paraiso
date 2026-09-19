@@ -15,9 +15,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        @if (filled(config('broadcasting.connections.reverb.key')))
-            <meta name="reverb-app-key" content="{{ config('broadcasting.connections.reverb.key') }}">
-        @endif
 
         <title>{{ $documentTitle ? $documentTitle.' · '.$applicationName : $applicationName }}</title>
 
@@ -26,6 +23,13 @@
         <link href="https://fonts.bunny.net/css?family=cormorant-garamond:600,700|manrope:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        <script>
+            try {
+                document.documentElement.dataset.sidebarCollapsed = localStorage.getItem('casa.sidebar.collapsed') === 'true' ? 'true' : 'false';
+            } catch {
+                document.documentElement.dataset.sidebarCollapsed = 'false';
+            }
+        </script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased" data-workspace-role="{{ Auth::user()?->role }}">
@@ -46,7 +50,7 @@
             <div @class([
                 'min-h-screen',
                 'pb-24 lg:pb-0' => $isCustomer,
-                'lg:ps-64' => $usesSidebar,
+                'casa-workspace-content' => $usesSidebar,
             ])>
                 <!-- Page Heading -->
                 @isset($header)
@@ -65,5 +69,6 @@
                 </main>
             </div>
         </div>
+        @stack('scripts')
     </body>
 </html>

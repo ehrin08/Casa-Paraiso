@@ -1,7 +1,9 @@
-let subscribedUserId = null;
-let latestSyncRequest = 0;
+const POLL_INTERVAL_MS = 30_000;
+let pollTimer = null;
+let activeRequest = null;
+let generation = 0;
 let lastAcknowledgedLocation = null;
-let reconnectBound = false;
+let navigating = false;
 
 const notificationRoot = () => document.querySelector('[data-booking-notifications]');
 
@@ -21,79 +23,97 @@ const applyCount = (count) => {
     });
 };
 
-const syncCount = async () => {
+const stopPolling = () => {
+    generation += 1;
+    window.clearTimeout(pollTimer);
+    pollTimer = null;
+    activeRequest?.abort();
+    activeRequest = null;
+};
+
+const refreshCount = async () => {
     const root = notificationRoot();
     const countUrl = root?.dataset.bookingNotificationsCountUrl;
 
-    if (!countUrl) {
+    if (!countUrl || document.hidden || navigating || activeRequest) {
         return;
     }
 
-    const request = ++latestSyncRequest;
-
-    try {
-        const response = await window.axios.get(countUrl, { headers: { Accept: 'application/json' } });
-
-        if (request === latestSyncRequest) {
-            applyCount(response.data.count);
-        }
-    } catch {
-        // The server-rendered badge remains available until the next successful sync.
-    }
-};
-
-const acknowledgeSchedule = async () => {
-    const root = notificationRoot();
-    const readUrl = root?.dataset.bookingNotificationsReadUrl;
-    const isSchedule = document.querySelector('[data-booking-schedule-link][aria-current="page"]');
+    const requestGeneration = generation;
+    const controller = new AbortController();
+    activeRequest = controller;
+    const options = {
+        signal: controller.signal,
+        timeout: 10_000,
+        headers: { Accept: 'application/json' },
+    };
     const locationKey = window.location.href;
-
-    if (!readUrl || !isSchedule || lastAcknowledgedLocation === locationKey) {
-        return;
-    }
-
-    lastAcknowledgedLocation = locationKey;
+    const readUrl = root.dataset.bookingNotificationsReadUrl;
+    const isSchedule = document.querySelector('[data-booking-schedule-link][aria-current="page"]');
+    const shouldAcknowledge = readUrl && isSchedule && lastAcknowledgedLocation !== locationKey;
+    let shouldContinue = true;
 
     try {
-        const response = await window.axios.patch(readUrl, {}, {
-            headers: {
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-        });
+        // Acknowledge on entering a schedule; subsequent polls only read the count.
+        // Serializing these requests prevents a stale count overwriting the acknowledgement.
+        const response = shouldAcknowledge
+            ? await window.axios.patch(readUrl, {}, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            })
+            : await window.axios.get(countUrl, options);
+
+        if (requestGeneration !== generation || root !== notificationRoot()) {
+            return;
+        }
+
+        // An expired session may redirect to HTML. Preserve the last known badge.
+        if (!Number.isInteger(response.data?.count) || response.data.count < 0) {
+            shouldContinue = false;
+            return;
+        }
+
+        if (shouldAcknowledge) {
+            lastAcknowledgedLocation = locationKey;
+        }
 
         applyCount(response.data.count);
-    } catch {
-        lastAcknowledgedLocation = null;
+    } catch (error) {
+        shouldContinue = ![401, 403, 419].includes(error.response?.status);
+    } finally {
+        if (requestGeneration === generation) {
+            activeRequest = null;
+
+            if (shouldContinue && !document.hidden && !navigating && root === notificationRoot()) {
+                pollTimer = window.setTimeout(refreshCount, POLL_INTERVAL_MS);
+            }
+        }
     }
 };
 
-const subscribe = () => {
-    const root = notificationRoot();
-    const userId = root?.dataset.bookingNotificationsUserId;
-
-    if (!userId || !window.Echo) {
-        return;
-    }
-
-    if (subscribedUserId !== userId) {
-        if (subscribedUserId) {
-            window.Echo.leave(`users.${subscribedUserId}.booking-notifications`);
-        }
-
-        subscribedUserId = userId;
-        window.Echo.private(`users.${userId}.booking-notifications`)
-            .listen('.booking-notifications.changed', syncCount);
-    }
-
-    if (!reconnectBound) {
-        window.Echo.connector.pusher.connection.bind('connected', syncCount);
-        reconnectBound = true;
-    }
+const restartPolling = () => {
+    stopPolling();
+    void refreshCount();
 };
 
 export const initializeBookingNotifications = () => {
-    subscribe();
-    void syncCount();
-    void acknowledgeSchedule();
+    navigating = false;
+    restartPolling();
 };
+
+document.addEventListener('visibilitychange', restartPolling);
+window.addEventListener('online', restartPolling);
+window.addEventListener('pageshow', restartPolling);
+window.addEventListener('pagehide', stopPolling);
+
+const pauseForNavigation = () => {
+    navigating = true;
+    lastAcknowledgedLocation = null;
+    stopPolling();
+};
+
+document.addEventListener('turbo:before-visit', pauseForNavigation);
+document.addEventListener('turbo:before-cache', pauseForNavigation);

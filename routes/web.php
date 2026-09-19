@@ -129,6 +129,7 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::resource('promotions', AdminPromotionController::class)->only(['index', 'show']);
         Route::resource('feedback', AdminFeedbackController::class)->only(['index', 'show']);
         Route::patch('/feedback/{feedback}/review', [AdminFeedbackController::class, 'review'])->name('feedback.review');
+        Route::get('/reports/insights', [AdminReportController::class, 'insights'])->name('reports.insights');
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');

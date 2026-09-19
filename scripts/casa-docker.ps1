@@ -9,6 +9,14 @@ param(
 
 Import-Module (Join-Path $PSScriptRoot 'CasaDocker.psm1') -Force
 
+function Assert-CasaMariaDbEnvironment {
+    $environmentPath = Join-Path (Get-CasaProjectPath) '.env'
+    if ((Test-Path $environmentPath) -and
+        (Select-String -Path $environmentPath -Pattern '^\s*DB_HOST\s*=\s*["\x27]?mysql["\x27]?\s*(?:#.*)?$' -Quiet)) {
+        throw 'This checkout now uses MariaDB. Preserve and migrate the existing MySQL database before changing DB_HOST; see docs/MARIADB_MIGRATION.md. Setup/start will not migrate or replace existing data.'
+    }
+}
+
 switch ($Action) {
     'setup' {
         $projectPath = Get-CasaProjectPath
@@ -17,6 +25,7 @@ switch ($Action) {
             Copy-Item (Join-Path $projectPath '.env.example') $environmentPath
         }
 
+        Assert-CasaMariaDbEnvironment
         Invoke-CasaCompose -EnsureEngine -Arguments @('up', '--build', '-d') | Write-Output
 
         Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'composer', 'install', '--no-interaction', '--prefer-dist') | Write-Output
@@ -31,6 +40,7 @@ switch ($Action) {
         Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'npm', 'run', 'build') | Write-Output
     }
     'start' {
+        Assert-CasaMariaDbEnvironment
         Invoke-CasaCompose -EnsureEngine -Arguments @('up', '-d') | Write-Output
     }
     'stop' {

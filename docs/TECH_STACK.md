@@ -2,10 +2,10 @@
 
 ## Approved Stack
 
-- Backend and web UI: Laravel 12, PHP 8.2, Blade, Tailwind CSS v4, Alpine.js, Turbo Drive, Vite, and Laravel Reverb/Echo for private same-origin booking-count updates.
-- Database: MySQL 8.4 with `utf8mb4_unicode_ci` collation.
+- Backend and web UI: Laravel 12, PHP 8.2, Blade, Tailwind CSS v4, Alpine.js, Turbo Drive, Vite, and authenticated HTTP polling for booking-count updates.
+- Database: MariaDB 10.11 LTS with `utf8mb4_unicode_ci` collation.
 - Authentication: Laravel Breeze email/password authentication, verification, password recovery, and Laravel Socialite Google OAuth.
-- Local runtime: Docker Desktop Compose project `casa-paraiso-web` with Apache/PHP, MySQL, and Mailpit.
+- Local runtime: Docker Desktop Compose project `casa-paraiso-web` with Apache/PHP, MariaDB, and Mailpit.
 - Package management: Composer for PHP and npm for compiled web assets. Node is a build dependency, not a production service requirement.
 
 ## Web Boundaries
@@ -16,9 +16,10 @@ Maintain responsive layouts for small screens, but do not add a native client, p
 
 ## Database Rules
 
-- Laravel migrations are the source of truth for MySQL schema changes.
-- MySQL is the default application connection and the `testing` database is the PHPUnit target.
-- Keep schema changes portable within MySQL and use migrations/seeders instead of manual dashboard edits.
+- Laravel migrations are the source of truth for MariaDB schema changes.
+- Laravel's `mysql` connection and `pdo_mysql` extension connect to MariaDB; local `DB_HOST=mariadb`. The isolated `testing` database is the PHPUnit target.
+- MariaDB 10.11 is the provisional Hostinger baseline. Verify the actual hosting server version before deployment; see `HOSTINGER_DEPLOYMENT.md`.
+- Keep schema changes portable within MariaDB and use migrations/seeders instead of manual dashboard edits.
 - Database credentials, backups, source exports, and one-time migration settings remain uncommitted.
 
 ## Local Verification

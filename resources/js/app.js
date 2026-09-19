@@ -1,5 +1,6 @@
 import './bootstrap';
 import { initializeBookingNotifications } from './booking-notifications';
+import { initializeSidebar } from './sidebar';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -9,6 +10,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 turboSession.drive = false;
 
 window.Alpine = Alpine;
+initializeSidebar(Alpine);
 
 const modalStoreName = 'casaModal';
 
@@ -167,7 +169,7 @@ window.operationalCalendar = (config) => ({
     loading: false,
     error: '',
     availabilitySelection: null,
-    slotHeight: 44,
+    slotHeight: 32,
     openingMinutes: 13 * 60,
     closingMinutes: 24 * 60,
 

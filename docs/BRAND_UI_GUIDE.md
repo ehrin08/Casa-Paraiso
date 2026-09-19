@@ -51,7 +51,7 @@ Compact density applies only inside the authenticated application shell. Public 
 
 | Element | Authenticated standard |
 | --- | --- |
-| Desktop sidebar | 256px (`16rem`) |
+| Desktop sidebar | 256px (`16rem`) expanded; 80px (`5rem`) collapsed icon rail, at 1024px and above |
 | Page and section rhythm | 12–16px gaps; 16px base card padding, increasing to 20px where a form needs it |
 | Operational card radius | 14–16px with a light, low-spread shadow; compact controls may use 10–12px |
 | Page title | 24–30px |
@@ -60,6 +60,7 @@ Compact density applies only inside the authenticated application shell. Public 
 | Buttons, fields, tabs, and page controls | 44px minimum interaction target |
 
 - Use the shared `page-heading` component for authenticated page titles. Customer headings may use its editorial variant; admin and staff headings use the operational variant.
+- All roles share a desktop sidebar toggle with a browser-local preference (`casa.sidebar.collapsed`), initially expanded. The collapsed rail retains accessible link names, hover/focus labels, active states, badges, account initials, and logout. Mobile navigation stays independent. Sidebar and page offset animate together for 180ms only on a user toggle, respecting reduced motion.
 - Use `stat-strip` for compact context on detail pages and appointment calendars. Reserve larger metric cards for dashboards, feedback, customer rewards, transactions, and reports.
 - Put record totals and useful status counts in toolbar chips. Do not add generic “Showing” or “Search Ready” metric cards above lists.
 - List filters collapse below the 1024px breakpoint. The toggle exposes an accessible expanded state and active-filter count; render “Clear filters” only when at least one filter is active.

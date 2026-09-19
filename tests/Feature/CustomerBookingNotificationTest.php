@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Events\BookingNotificationsChanged;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Service;
@@ -11,7 +10,6 @@ use App\Models\StaffWeeklySchedule;
 use App\Models\User;
 use App\Notifications\NewCustomerBookingNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
@@ -27,7 +25,6 @@ class CustomerBookingNotificationTest extends TestCase
         $receptionist = User::factory()->receptionist()->create();
         $inactiveAdmin = User::factory()->admin()->inactive()->create();
         $unassignedTherapist = StaffProfile::factory()->create();
-        Event::fake([BookingNotificationsChanged::class]);
 
         $response = $this->actingAs($customer->user)->post(route('customer.appointments.store', absolute: false), [
             'service_id' => $service->id,
@@ -49,7 +46,6 @@ class CustomerBookingNotificationTest extends TestCase
         $this->assertSame(0, $customer->user->notifications()->count());
         $this->assertSame(0, $inactiveAdmin->notifications()->count());
         $this->assertSame(0, $unassignedTherapist->user->notifications()->count());
-        Event::assertDispatchedTimes(BookingNotificationsChanged::class, 4);
     }
 
     public function test_notifications_inbox_marks_an_item_read_and_opens_the_scoped_booking(): void
@@ -142,6 +138,9 @@ class CustomerBookingNotificationTest extends TestCase
         $therapist->user->notify(new NewCustomerBookingNotification($appointment));
         $therapist->user->notify(new NewCustomerBookingNotification($appointment));
 
+        $otherRecipient = User::factory()->admin()->create();
+        $otherRecipient->notify(new NewCustomerBookingNotification($appointment));
+
         $this->actingAs($therapist->user)
             ->getJson(route('notifications.bookings.count', absolute: false))
             ->assertOk()
@@ -155,6 +154,15 @@ class CustomerBookingNotificationTest extends TestCase
         $this->assertSame(0, $therapist->user->unreadNotifications()
             ->where('type', NewCustomerBookingNotification::class)
             ->count());
+
+        $this->assertSame(1, $otherRecipient->unreadNotifications()->count());
+        $therapist->user->notify(new NewCustomerBookingNotification($appointment));
+        $poll = $this->actingAs($therapist->user)
+            ->getJson(route('notifications.bookings.count', absolute: false))
+            ->assertOk()
+            ->assertExactJson(['count' => 1]);
+        $this->assertStringContainsString('no-store', $poll->headers->get('Cache-Control'));
+        $this->assertSame(1, $therapist->user->unreadNotifications()->count());
 
         $this->actingAs($customer->user)
             ->getJson(route('notifications.bookings.count', absolute: false))
