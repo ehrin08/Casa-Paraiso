@@ -9,12 +9,12 @@
     </x-slot>
 
     <x-app-card>
-        <x-list-toolbar eyebrow="{{ __('My appointments') }}" title="{{ __('Appointment history') }}" :count="$appointments->total()" :reset-url="route('customer.appointments.history')" :active-filters="collect([$appointmentStatus, $appointmentDateFrom, $appointmentDateTo])->filter(fn ($value) => filled($value))->count()" :collapsible="true">
-            <form method="GET" action="{{ route('customer.appointments.history') }}" class="casa-filter-grid sm:grid-cols-2 xl:grid-cols-[minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
+        <x-list-toolbar eyebrow="{{ __('My appointments') }}" title="{{ __('Appointment history') }}" :count="$appointments->total()" :reset-url="route('customer.appointments.history')" :active-filters="collect([$appointmentStatus, $appointmentDateFrom, $appointmentDateTo])->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
+            <form method="GET" action="{{ route('customer.appointments.history') }}" class="casa-filter-form">
                 <label><span class="sr-only">{{ __('Filter appointment status') }}</span><select name="status" class="casa-input" aria-label="{{ __('Filter appointment status') }}"><option value="">{{ __('All appointment statuses') }}</option>@foreach (\App\Models\Appointment::STATUSES as $status)<option value="{{ $status }}" @selected($appointmentStatus === $status)>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>@endforeach</select></label>
                 <label><span class="sr-only">{{ __('From date') }}</span><input type="date" name="date_from" value="{{ $appointmentDateFrom }}" class="casa-input" aria-label="{{ __('From date') }}"><x-input-error :messages="$errors->get('date_from')" class="mt-1" /></label>
                 <label><span class="sr-only">{{ __('To date') }}</span><input type="date" name="date_to" value="{{ $appointmentDateTo }}" class="casa-input" aria-label="{{ __('To date') }}"><x-input-error :messages="$errors->get('date_to')" class="mt-1" /></label>
-                <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
             </form>
         </x-list-toolbar>
 

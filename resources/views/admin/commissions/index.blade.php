@@ -15,13 +15,13 @@
         </section>
 
         <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Commissions') }}" title="{{ __('Commission records') }}" :count="$commissions->total()" :reset-url="route('admin.commissions.index')" :active-filters="collect(request()->only(['staff_profile_id', 'status', 'date_from', 'date_to']))->filter(fn ($value) => filled($value))->count()" :collapsible="true">
-                <form method="GET" action="{{ route('admin.commissions.index') }}" class="casa-filter-grid lg:min-w-[52rem]">
-                    <select name="staff_profile_id" class="casa-input"><option value="">{{ __('All therapists') }}</option>@foreach($staffProfiles as $staff)<option value="{{ $staff->id }}" @selected($staffProfileId === $staff->id)>{{ $staff->user?->name }}</option>@endforeach</select>
-                    <select name="status" class="casa-input"><option value="">{{ __('All statuses') }}</option>@foreach(\App\Models\TherapistCommission::STATUSES as $option)<option value="{{ $option }}" @selected($status === $option)>{{ ucfirst($option) }}</option>@endforeach</select>
+            <x-list-toolbar eyebrow="{{ __('Commissions') }}" title="{{ __('Commission records') }}" :count="$commissions->total()" :reset-url="route('admin.commissions.index')" :active-filters="collect(request()->only(['staff_profile_id', 'status', 'date_from', 'date_to']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
+                <form method="GET" action="{{ route('admin.commissions.index') }}" class="casa-filter-form">
+                    <select name="staff_profile_id" class="casa-input" aria-label="{{ __('Therapist') }}"><option value="">{{ __('All therapists') }}</option>@foreach($staffProfiles as $staff)<option value="{{ $staff->id }}" @selected($staffProfileId === $staff->id)>{{ $staff->user?->name }}</option>@endforeach</select>
+                    <select name="status" class="casa-input" aria-label="{{ __('Commission status') }}"><option value="">{{ __('All statuses') }}</option>@foreach(\App\Models\TherapistCommission::STATUSES as $option)<option value="{{ $option }}" @selected($status === $option)>{{ ucfirst($option) }}</option>@endforeach</select>
                     <input type="date" name="date_from" value="{{ $dateFrom }}" class="casa-input" aria-label="{{ __('Earned from') }}">
                     <input type="date" name="date_to" value="{{ $dateTo }}" class="casa-input" aria-label="{{ __('Earned through') }}">
-                    <button class="casa-button-secondary">{{ __('Filter') }}</button>
+                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
                 </form>
             </x-list-toolbar>
 

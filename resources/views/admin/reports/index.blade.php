@@ -168,12 +168,15 @@
             </div>
         </section>
 
-        <x-app-card x-data="{ filtersOpen: false }">
+        <x-app-card x-data="{ filtersOpen: {{ $reportActiveFilters > 0 ? 'true' : 'false' }} }">
 
             <div class="flex flex-col gap-3 border-b border-casa-border pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="casa-section-label">{{ __('Filters') }}</p>
                     <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Report controls') }}</h2>
+                    @if ($reportActiveFilters > 0)
+                        <a href="{{ route('admin.reports.index', ['type' => $type]) }}" class="casa-filter-chip mt-2 hover:border-casa-gold hover:text-casa-primary">{{ __('Clear filters') }}</a>
+                    @endif
                 </div>
                 <button
                     type="button"
@@ -205,7 +208,7 @@
                 };
             @endphp
 
-            <form id="report-filters" method="GET" action="{{ route('admin.reports.index') }}" class="mt-4 hidden gap-3 lg:grid lg:grid-cols-6" x-bind:class="filtersOpen ? '!grid' : ''">
+            <form id="report-filters" method="GET" action="{{ route('admin.reports.index') }}" class="casa-filter-form casa-report-filter-form mt-4 hidden lg:flex" x-bind:class="filtersOpen ? '!flex' : ''">
                 <input type="hidden" name="sort" value="{{ $filters['sort'] ?? '' }}">
                 <input type="hidden" name="direction" value="{{ $filters['direction'] ?? '' }}">
                 <div>
@@ -216,9 +219,9 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="lg:col-span-2">
+                <div class="casa-report-filter-search">
                     <x-input-label for="q" :value="__('Search')" />
-                    <x-text-input id="q" name="q" type="search" class="mt-2" :value="$filters['q'] ?? null" placeholder="{{ __('Customer, number, service, offer') }}" />
+                    <x-filter-search input-id="q" class="mt-2" :value="$filters['q'] ?? ''" placeholder="{{ __('Customer, number, service, offer') }}" label="{{ __('Search reports') }}" />
                 </div>
                 <div>
                     <x-input-label for="date_from" :value="__('From')" />
@@ -261,9 +264,9 @@
                     </select>
                 </div>
                 @endif
-                <p class="text-xs leading-5 text-casa-muted lg:col-span-6">{{ $dateContext }}</p>
-                <div class="lg:col-span-6">
-                    <button type="submit" class="casa-button-secondary">{{ __('Apply filters') }}</button>
+                <p class="text-xs leading-5 text-casa-muted casa-report-filter-note">{{ $dateContext }}</p>
+                <div class="casa-report-filter-actions">
+                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
                 </div>
             </form>
         </x-app-card>

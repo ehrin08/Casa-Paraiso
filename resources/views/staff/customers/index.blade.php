@@ -10,12 +10,12 @@
     </x-slot>
 
     <x-app-card>
-        <x-list-toolbar eyebrow="{{ __('Lookup') }}" title="{{ __('Operational customer list') }}" :count="$customers->total()" :reset-url="route('staff.customers.index')" :active-filters="collect(request()->only(['q']))->filter(fn ($value) => filled($value))->count()" :collapsible="true">
-            <form method="GET" action="{{ route('staff.customers.index') }}" class="casa-filter-grid sm:grid-cols-[minmax(12rem,1fr)_auto] lg:min-w-[36rem]">
+        <x-list-toolbar eyebrow="{{ __('Lookup') }}" title="{{ __('Operational customer list') }}" :count="$customers->total()" :reset-url="route('staff.customers.index')" :active-filters="collect(request()->only(['q']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
+            <form method="GET" action="{{ route('staff.customers.index') }}" class="casa-filter-form">
                 <input type="hidden" name="sort" value="{{ $sort }}">
                 <input type="hidden" name="direction" value="{{ $direction }}">
-                <input type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Search customers') }}" aria-label="{{ __('Search customers') }}">
-                <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                <x-filter-search :value="$search" placeholder="{{ __('Search customers') }}" label="{{ __('Search customers') }}" />
+                <button type="submit" class="casa-button-primary">{{ __('Search') }}</button>
             </form>
         </x-list-toolbar>
 

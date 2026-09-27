@@ -11,17 +11,17 @@
 
     <div class="space-y-6">
         <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Customer records') }}" title="{{ __('Profile list') }}" :count="$customers->total()" :reset-url="route('admin.customers.index')" :active-filters="collect(request()->only(['q', 'status']))->filter(fn ($value) => filled($value))->count()" :collapsible="true">
-                <form method="GET" action="{{ route('admin.customers.index') }}" class="casa-filter-grid sm:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:min-w-[42rem]">
+            <x-list-toolbar eyebrow="{{ __('Customer records') }}" title="{{ __('Profile list') }}" :count="$customers->total()" :reset-url="route('admin.customers.index')" :active-filters="collect(request()->only(['q', 'status']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
+                <form method="GET" action="{{ route('admin.customers.index') }}" class="casa-filter-form">
                     <input type="hidden" name="sort" value="{{ $sort }}">
                     <input type="hidden" name="direction" value="{{ $direction }}">
-                    <input type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Search customers') }}" aria-label="{{ __('Search customers') }}">
-                    <select name="status" class="casa-input">
+                    <x-filter-search :value="$search" placeholder="{{ __('Search customers') }}" label="{{ __('Search customers') }}" />
+                    <select name="status" class="casa-input" aria-label="{{ __('Account status') }}">
                         <option value="">{{ __('All accounts') }}</option>
                         <option value="active" @selected($status === 'active')>{{ __('Active') }}</option>
                         <option value="inactive" @selected($status === 'inactive')>{{ __('Inactive') }}</option>
                     </select>
-                    <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
                 </form>
             </x-list-toolbar>
 

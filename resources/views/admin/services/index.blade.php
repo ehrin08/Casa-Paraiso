@@ -13,21 +13,21 @@
 
     <div class="space-y-6">
         <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Catalog') }}" title="{{ __('Treatment list') }}" :count="$services->total()" :reset-url="route('admin.services.index')" :active-filters="collect(request()->only(['q', 'status']))->filter(fn ($value) => filled($value))->count()" :collapsible="true">
+            <x-list-toolbar eyebrow="{{ __('Catalog') }}" title="{{ __('Treatment list') }}" :count="$services->total()" :reset-url="route('admin.services.index')" :active-filters="collect(request()->only(['q', 'status']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
                 <x-slot name="meta">
                     <span class="casa-filter-chip">{{ __(':count active', ['count' => $activeCount]) }}</span>
                     <span class="casa-filter-chip">{{ __(':count inactive', ['count' => $inactiveCount]) }}</span>
                 </x-slot>
-                <form method="GET" action="{{ route('admin.services.index') }}" class="casa-filter-grid sm:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:min-w-[42rem]">
+                <form method="GET" action="{{ route('admin.services.index') }}" class="casa-filter-form">
                     <input type="hidden" name="sort" value="{{ $sort }}">
                     <input type="hidden" name="direction" value="{{ $direction }}">
-                    <input type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Search service, slug, description') }}" aria-label="{{ __('Search services') }}">
-                    <select name="status" class="casa-input">
+                    <x-filter-search :value="$search" placeholder="{{ __('Search service, slug, description') }}" label="{{ __('Search services') }}" />
+                    <select name="status" class="casa-input" aria-label="{{ __('Service status') }}">
                         <option value="">{{ __('All statuses') }}</option>
                         <option value="active" @selected($status === 'active')>{{ __('Active') }}</option>
                         <option value="inactive" @selected($status === 'inactive')>{{ __('Inactive') }}</option>
                     </select>
-                    <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
                 </form>
             </x-list-toolbar>
 

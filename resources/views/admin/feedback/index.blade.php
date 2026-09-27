@@ -40,14 +40,14 @@
         </section>
 
         <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Reviews') }}" title="{{ __('Customer feedback') }}" :count="$feedback->total()" :reset-url="route('admin.feedback.index')" :active-filters="collect(request()->only(['q', 'sentiment_label', 'date_from', 'date_to', 'service_id', 'topic']))->filter(fn ($value) => filled($value))->count()" :collapsible="true">
-                <form method="GET" action="{{ route('admin.feedback.index') }}" class="casa-filter-grid sm:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:min-w-[42rem]">
+            <x-list-toolbar eyebrow="{{ __('Reviews') }}" title="{{ __('Customer feedback') }}" :count="$feedback->total()" :reset-url="route('admin.feedback.index')" :active-filters="collect(request()->only(['q', 'sentiment_label', 'date_from', 'date_to', 'service_id', 'topic']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
+                <form method="GET" action="{{ route('admin.feedback.index') }}" class="casa-filter-form">
                     <input type="hidden" name="sort" value="{{ $sort }}">
                     <input type="hidden" name="direction" value="{{ $direction }}">
-                    <input type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Search customer, service, comment') }}" aria-label="{{ __('Search feedback') }}">
+                    <x-filter-search :value="$search" placeholder="{{ __('Search customer, service, comment') }}" label="{{ __('Search feedback') }}" />
                     <input type="date" name="date_from" value="{{ $dateFrom }}" class="casa-input" aria-label="{{ __('From date') }}">
                     <input type="date" name="date_to" value="{{ $dateTo }}" class="casa-input" aria-label="{{ __('To date') }}">
-                    <select name="sentiment_label" class="casa-input">
+                    <select name="sentiment_label" class="casa-input" aria-label="{{ __('Sentiment') }}">
                         <option value="">{{ __('All sentiment') }}</option>
                         @foreach (\App\Models\Feedback::SENTIMENT_LABELS as $option)
                             <option value="{{ $option }}" @selected($sentiment === $option)>{{ ucfirst($option) }}</option>
@@ -65,7 +65,7 @@
                             <option value="{{ $option }}" @selected($topic === $option)>{{ str($option)->replace('_', ' ')->title() }}</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
                 </form>
             </x-list-toolbar>
 

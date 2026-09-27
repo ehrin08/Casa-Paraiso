@@ -8,16 +8,16 @@
     </x-slot>
 
     <x-app-card>
-        <x-list-toolbar eyebrow="{{ __('Error inbox') }}" title="{{ __('Captured responses') }}" :count="$reports->total()" :reset-url="route('admin.system-errors.index')" :active-filters="collect($filters)->filter(fn ($value) => filled($value))->count()" :collapsible="true">
-            <form method="GET" action="{{ route('admin.system-errors.index') }}" class="casa-filter-grid lg:min-w-[48rem]">
-                <input type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Reference, route, path, or exception') }}" aria-label="{{ __('Search system errors') }}">
+        <x-list-toolbar eyebrow="{{ __('Error inbox') }}" title="{{ __('Captured responses') }}" :count="$reports->total()" :reset-url="route('admin.system-errors.index')" :active-filters="collect($filters)->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
+            <form method="GET" action="{{ route('admin.system-errors.index') }}" class="casa-filter-form">
+                <x-filter-search :value="$search" placeholder="{{ __('Reference, route, path, or exception') }}" label="{{ __('Search system errors') }}" />
                 <select name="state" class="casa-input" aria-label="{{ __('Filter by state') }}"><option value="">{{ __('All states') }}</option><option value="open" @selected(($filters['state'] ?? null) === 'open')>{{ __('Open') }}</option><option value="resolved" @selected(($filters['state'] ?? null) === 'resolved')>{{ __('Resolved') }}</option></select>
                 <select name="family" class="casa-input" aria-label="{{ __('Filter by error family') }}"><option value="">{{ __('All responses') }}</option><option value="4xx" @selected(($filters['family'] ?? null) === '4xx')>4xx</option><option value="5xx" @selected(($filters['family'] ?? null) === '5xx')>5xx</option></select>
                 <input type="number" name="status" min="400" max="599" value="{{ $filters['status'] ?? null }}" class="casa-input" placeholder="{{ __('Status') }}" aria-label="{{ __('HTTP status') }}">
                 <select name="category" class="casa-input" aria-label="{{ __('Filter by category') }}"><option value="">{{ __('All categories') }}</option>@foreach ([\App\Models\SystemErrorReport::CATEGORY_CLIENT_ERROR => __('Client error'), \App\Models\SystemErrorReport::CATEGORY_SERVER_ERROR => __('Server error'), \App\Models\SystemErrorReport::CATEGORY_FEATURE_UNAVAILABLE => __('Feature unavailable')] as $value => $label)<option value="{{ $value }}" @selected(($filters['category'] ?? null) === $value)>{{ $label }}</option>@endforeach</select>
                 <input type="date" name="date_from" value="{{ $filters['date_from'] ?? null }}" class="casa-input" aria-label="{{ __('From date') }}">
                 <input type="date" name="date_to" value="{{ $filters['date_to'] ?? null }}" class="casa-input" aria-label="{{ __('To date') }}">
-                <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
             </form>
         </x-list-toolbar>
 

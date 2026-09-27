@@ -16,27 +16,27 @@
 
     <div class="space-y-6">
         <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Team') }}" title="{{ __('Therapist profiles') }}" :count="$staffProfiles->total()" :reset-url="route('admin.staff.index')" :active-filters="collect(request()->only(['q', 'status', 'bookable']))->filter(fn ($value) => filled($value))->count()" :collapsible="true">
+            <x-list-toolbar eyebrow="{{ __('Team') }}" title="{{ __('Therapist profiles') }}" :count="$staffProfiles->total()" :reset-url="route('admin.staff.index')" :active-filters="collect(request()->only(['q', 'status', 'bookable']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
                 <x-slot name="meta">
                     <span class="casa-filter-chip">{{ __(':count active', ['count' => $activeAccountCount]) }}</span>
                     <span class="casa-filter-chip">{{ __(':count bookable', ['count' => $bookableCount]) }}</span>
                     <span class="casa-filter-chip">{{ __(':count services', ['count' => $activeServiceCount]) }}</span>
                 </x-slot>
-                <form method="GET" action="{{ route('admin.staff.index') }}" class="casa-filter-grid sm:grid-cols-[minmax(12rem,1fr)_auto_auto_auto] lg:min-w-[48rem]">
+                <form method="GET" action="{{ route('admin.staff.index') }}" class="casa-filter-form">
                     <input type="hidden" name="sort" value="{{ $sort }}">
                     <input type="hidden" name="direction" value="{{ $direction }}">
-                    <input type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Search therapists') }}" aria-label="{{ __('Search therapists') }}">
-                    <select name="status" class="casa-input">
+                    <x-filter-search :value="$search" placeholder="{{ __('Search therapists') }}" label="{{ __('Search therapists') }}" />
+                    <select name="status" class="casa-input" aria-label="{{ __('Account status') }}">
                         <option value="">{{ __('All accounts') }}</option>
                         <option value="active" @selected($status === 'active')>{{ __('Active') }}</option>
                         <option value="inactive" @selected($status === 'inactive')>{{ __('Inactive') }}</option>
                     </select>
-                    <select name="bookable" class="casa-input">
+                    <select name="bookable" class="casa-input" aria-label="{{ __('Booking availability') }}">
                         <option value="">{{ __('Any bookable') }}</option>
                         <option value="yes" @selected($bookable === 'yes')>{{ __('Bookable') }}</option>
                         <option value="no" @selected($bookable === 'no')>{{ __('Not bookable') }}</option>
                     </select>
-                    <button type="submit" class="casa-button-secondary">{{ __('Filter') }}</button>
+                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
                 </form>
             </x-list-toolbar>
 

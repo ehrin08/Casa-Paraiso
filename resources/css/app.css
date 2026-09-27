@@ -1210,3 +1210,108 @@ body[data-workspace-role] .casa-list-toolbar > :last-child {
     font-weight: 800;
     text-transform: uppercase;
 }
+
+/* Record filters use one toolbar layout across operational and customer lists. */
+body[data-workspace-role] .casa-list-toolbar.casa-list-toolbar--filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+}
+
+.casa-list-toolbar--filters > :first-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+}
+
+.casa-list-toolbar--filters > :first-child > .casa-section-label {
+    flex-basis: 100%;
+}
+
+.casa-list-toolbar--filters > :first-child > h2,
+.casa-list-toolbar--filters > :first-child > div {
+    margin-top: 0;
+}
+
+.casa-list-toolbar--filters > :first-child > div {
+    min-width: 0;
+}
+
+body[data-workspace-role] .casa-list-toolbar.casa-list-toolbar--filters > :last-child {
+    width: 100%;
+    flex: none;
+}
+
+.casa-filter-form {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.casa-filter-form:not(.casa-report-filter-form) {
+    display: flex;
+}
+
+.casa-filter-form > :not([type="hidden"]) {
+    min-width: 0;
+    flex: 1 1 11rem;
+}
+
+.casa-filter-form > .casa-filter-search {
+    flex: 2 1 20rem;
+}
+
+.casa-filter-form > button[type="submit"] {
+    flex: 0 0 auto;
+    margin-left: auto;
+    white-space: nowrap;
+    box-shadow: none;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.casa-filter-search {
+    position: relative;
+    min-width: 0;
+}
+
+.casa-filter-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.875rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    transform: translateY(-50%);
+    color: var(--color-casa-muted);
+    pointer-events: none;
+}
+
+.casa-filter-search > .casa-input {
+    padding-left: 2.75rem;
+}
+
+.casa-report-filter-form > .casa-report-filter-search {
+    flex: 2 1 20rem;
+}
+
+.casa-report-filter-form > .casa-report-filter-note,
+.casa-report-filter-form > .casa-report-filter-actions {
+    flex-basis: 100%;
+}
+
+.casa-report-filter-actions > button {
+    box-shadow: none;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+@media (max-width: 767px) {
+    .casa-filter-form > :not([type="hidden"]) {
+        flex-basis: 100%;
+    }
+
+    .casa-filter-form > button[type="submit"] {
+        flex-basis: 100%;
+        margin-left: 0;
+    }
+}

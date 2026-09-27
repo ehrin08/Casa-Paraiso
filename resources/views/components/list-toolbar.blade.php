@@ -13,7 +13,7 @@
 @endphp
 
 <div
-    @if ($collapsible) x-data="{ filtersOpen: @js($activeFilters > 0) }" @endif
+    @if ($collapsible) x-data="{ filtersOpen: {{ $activeFilters > 0 ? 'true' : 'false' }} }" @endif
     data-active-filters="{{ $activeFilters }}"
     {{ $attributes->merge(['class' => 'casa-list-toolbar']) }}
 >
