@@ -326,36 +326,36 @@
                                 <tr class="casa-table-row">
                                     @if ($type === 'transactions')
                                         <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->transaction_number }}</td>
-                                        <td class="px-4 py-4 text-casa-muted">{{ $record->customerProfile?->user?->name }}</td>
+                                        <td class="px-4 py-4 text-casa-muted">{{ $record->customerProfile?->display_name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->service?->name }}</td>
                                         <td class="px-4 py-4 font-semibold text-casa-text">PHP {{ number_format((float) $record->amount, 2) }}</td>
                                         <td class="px-4 py-4"><x-status-badge>{{ ucfirst($record->payment_status) }}</x-status-badge></td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->paid_at?->format('M d, Y g:i A') ?: __('Not paid') }}</td>
                                     @elseif ($type === 'customers')
                                         <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->customer_code }}</td>
-                                        <td class="px-4 py-4 text-casa-muted">{{ $record->user?->name }}</td>
-                                        <td class="px-4 py-4 text-casa-muted">{{ $record->user?->email }}</td>
+                                        <td class="px-4 py-4 text-casa-muted">{{ $record->display_name }}</td>
+                                        <td class="px-4 py-4 text-casa-muted">{{ $record->display_email ?: __('No account') }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->created_at?->format('M d, Y') }}</td>
-                                        <td class="px-4 py-4"><x-status-badge :tone="$record->user?->is_active ? 'success' : 'dark'">{{ $record->user?->is_active ? __('Active') : __('Inactive') }}</x-status-badge></td>
+                                        <td class="px-4 py-4"><x-status-badge :tone="$record->user?->is_active ? 'success' : 'dark'">{{ $record->is_guest ? __('Guest') : ($record->user?->is_active ? __('Active') : __('Inactive')) }}</x-status-badge></td>
                                         <td class="px-4 py-4 text-casa-muted">{{ trans_choice(':count appointment|:count appointments', $record->appointments_count) }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ trans_choice(':count transaction|:count transactions', $record->transactions_count) }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ trans_choice(':count feedback|:count feedback', $record->feedback_count) }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ trans_choice(':count reward|:count rewards', $record->promotion_suggestions_count) }}</td>
                                     @elseif ($type === 'promotions')
-                                        <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->customerProfile?->user?->name }}</td>
+                                        <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->customerProfile?->display_name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->rfmSegment?->name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->addonName() ?: $record->suggested_offer }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ __(':days days · :visits paid visits', ['days' => $record->recency_days ?? __('N/A'), 'visits' => $record->frequency_count ?? 0]) }}</td>
                                         <td class="px-4 py-4"><x-status-badge>{{ ucfirst($record->lifecycle()) }}</x-status-badge></td>
                                     @elseif ($type === 'feedback')
-                                        <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->customerProfile?->user?->name }}</td>
+                                        <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->customerProfile?->display_name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->service?->name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->rating }}/5</td>
                                         <td class="px-4 py-4"><x-status-badge>{{ ucfirst($record->sentiment_label) }}</x-status-badge></td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->submitted_at?->format('M d, Y') }}</td>
                                     @else
                                         <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->appointment_number }}</td>
-                                        <td class="px-4 py-4 text-casa-muted">{{ $record->customerProfile?->user?->name }}</td>
+                                        <td class="px-4 py-4 text-casa-muted">{{ $record->customerProfile?->display_name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $record->service?->name }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ ($record->scheduled_start_at ?? $record->requested_start_at)?->format('M d, Y g:i A') }}</td>
                                         <td class="px-4 py-4"><x-status-badge>{{ ucfirst(str_replace('_', ' ', $record->status)) }}</x-status-badge></td>

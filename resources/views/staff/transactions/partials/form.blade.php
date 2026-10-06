@@ -19,7 +19,7 @@
                     <option value="">{{ __('Select appointment') }}</option>
                     @foreach ($appointments as $appointment)
                         <option value="{{ $appointment->id }}" @selected((int) old('appointment_id', $transaction->appointment_id) === $appointment->id)>
-                            {{ $appointment->appointment_number }} · {{ $appointment->customerProfile?->user?->name }} · {{ $appointment->service?->name }}
+                            {{ $appointment->appointment_number }} · {{ $appointment->customerProfile?->display_name }} · {{ $appointment->service?->name }}
                         </option>
                     @endforeach
                 </select>

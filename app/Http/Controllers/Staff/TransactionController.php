@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\HandlesIndexSorting;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TransactionRequest;
 use App\Models\Appointment;
+use App\Models\CustomerProfile;
 use App\Models\Transaction;
 use App\Services\TransactionNumber;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +26,7 @@ class TransactionController extends Controller
         $search = trim((string) $request->query('q'));
         $sorts = [
             'number' => 'transactions.transaction_number',
-            'customer' => 'transaction_customers.name',
+            'customer' => 'customer_display_name',
             'service' => 'transaction_services.name',
             'amount' => 'transactions.amount',
             'status' => 'transactions.payment_status',
@@ -40,6 +41,7 @@ class TransactionController extends Controller
             ->leftJoin('users as transaction_customers', 'transaction_customers.id', '=', 'transaction_customer_profiles.user_id')
             ->leftJoin('services as transaction_services', 'transaction_services.id', '=', 'transactions.service_id')
             ->select('transactions.*')
+            ->selectRaw(CustomerProfile::displayNameSql('transaction_customers', 'transaction_customer_profiles').' as customer_display_name')
             ->where(function ($query) use ($request, $staffProfile): void {
                 $query->where('transactions.recorded_by', $request->user()->id)
                     ->orWhereHas('appointment', fn ($appointmentQuery) => $appointmentQuery->where('staff_profile_id', $staffProfile?->id ?? 0));
@@ -47,7 +49,7 @@ class TransactionController extends Controller
             ->when(in_array($status, Transaction::PAYMENT_STATUSES, true), fn ($query) => $query->where('transactions.payment_status', $status))
             ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
                 $query->where('transactions.transaction_number', 'like', "%{$search}%")
-                    ->orWhere('transaction_customers.name', 'like', "%{$search}%")
+                    ->orWhereHas('customerProfile', fn ($customer) => $customer->search($search))
                     ->orWhere('transaction_services.name', 'like', "%{$search}%");
             }))
             ->orderBy($sorts[$sort], $direction)

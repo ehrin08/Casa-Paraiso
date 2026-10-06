@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Therapist module') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Customer lookup') }}</h1>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Customers') }}</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">
                 {{ __('Find customer contact details, appointment history, and feedback needed for daily operations.') }}
             </p>
@@ -37,12 +37,12 @@
                             <tr class="casa-table-row">
                                 <td class="px-4 py-4">
                                     <a href="{{ route('staff.customers.show', $customer) }}" class="font-bold text-casa-text hover:text-casa-primary">
-                                        {{ $customer->user->name }}
+                                        {{ $customer->display_name }}
                                     </a>
                                     <p class="mt-1 text-xs text-casa-muted">{{ $customer->customer_code }}</p>
                                 </td>
                                 <td class="px-4 py-4 text-casa-muted">
-                                    <p>{{ $customer->user->phone ?: __('No phone') }}</p>
+                                    <p>{{ $customer->display_phone ?: __('No phone') }}</p>
                                     <p>{{ $customer->contact_preference ?: __('No preference') }}</p>
                                 </td>
                                 <td class="px-4 py-4 text-casa-muted">

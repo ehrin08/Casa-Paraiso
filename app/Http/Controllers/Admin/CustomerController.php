@@ -19,7 +19,7 @@ class CustomerController extends Controller
         $search = trim((string) $request->query('q'));
         $status = (string) $request->query('status');
         $sorts = [
-            'name' => 'users.name',
+            'name' => 'customer_display_name',
             'code' => 'customer_profiles.customer_code',
             'appointments' => 'appointments_count',
             'transactions' => 'transactions_count',
@@ -32,22 +32,15 @@ class CustomerController extends Controller
 
         $customers = CustomerProfile::query()
             ->with('user')
-            ->withCount(['appointments', 'transactions', 'feedback', 'promotionSuggestions'])
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($query) use ($search): void {
-                    $query->where('customer_code', 'like', "%{$search}%")
-                        ->orWhereHas('user', fn ($userQuery) => $userQuery
-                            ->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%"));
-                });
-            })
-            ->join('users', 'users.id', '=', 'customer_profiles.user_id')
+            ->when($search !== '', fn ($query) => $query->search($search))
+            ->leftJoin('users', 'users.id', '=', 'customer_profiles.user_id')
             ->select('customer_profiles.*')
+            ->selectRaw(CustomerProfile::displayNameSql().' as customer_display_name')
+            ->withCount(['appointments', 'transactions', 'feedback', 'promotionSuggestions'])
             ->when($status === 'active', fn ($query) => $query->where('users.is_active', true))
             ->when($status === 'inactive', fn ($query) => $query->where('users.is_active', false))
             ->orderBy($sorts[$sort], $direction)
-            ->orderBy('users.name')
+            ->orderBy('customer_display_name')
             ->paginate((int) config('casa.pagination.per_page', 15))
             ->withQueryString();
 

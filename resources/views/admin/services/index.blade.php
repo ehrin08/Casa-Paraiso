@@ -1,81 +1,120 @@
 <x-app-layout>
     <x-slot name="header">
-        <div>
-            <p class="casa-section-label">{{ __('Admin module') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Services') }}</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">
-                {{ __('Maintain Casa Paraiso treatments, pricing, duration, and booking availability.') }}
+        <div class="services-heading">
+            <h1>{{ __('Services') }}</h1>
+            <p>
+                {{ __('Manage your treatment catalog, durations and prices.') }}
             </p>
         </div>
 
-        <a href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
+        <a href="{{ route('admin.services.create') }}" class="casa-button-primary services-add-button">
+            <x-nav-icon name="plus" />
+            {{ __('Add service') }}
+        </a>
     </x-slot>
 
-    <div class="space-y-6">
-        <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Catalog') }}" title="{{ __('Treatment list') }}" :count="$services->total()" :reset-url="route('admin.services.index')" :active-filters="collect(request()->only(['q', 'status']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
-                <x-slot name="meta">
-                    <span class="casa-filter-chip">{{ __(':count active', ['count' => $activeCount]) }}</span>
-                    <span class="casa-filter-chip">{{ __(':count inactive', ['count' => $inactiveCount]) }}</span>
-                </x-slot>
-                <form method="GET" action="{{ route('admin.services.index') }}" class="casa-filter-form">
+    @php
+        $activeFilters = collect([$search, $status])->filter(fn ($value) => filled($value))->count();
+        $hasCatalog = $activeCount + $inactiveCount > 0;
+    @endphp
+
+    <div class="services-workspace" data-services-workspace>
+        <x-list-toolbar :reset-url="route('admin.services.index')" :active-filters="$activeFilters" :collapsible="true" class="services-toolbar casa-list-toolbar--filters">
+                <form method="GET" action="{{ route('admin.services.index') }}" class="services-filter-form" x-data>
                     <input type="hidden" name="sort" value="{{ $sort }}">
                     <input type="hidden" name="direction" value="{{ $direction }}">
-                    <x-filter-search :value="$search" placeholder="{{ __('Search service, slug, description') }}" label="{{ __('Search services') }}" />
-                    <select name="status" class="casa-input" aria-label="{{ __('Service status') }}">
-                        <option value="">{{ __('All statuses') }}</option>
-                        <option value="active" @selected($status === 'active')>{{ __('Active') }}</option>
-                        <option value="inactive" @selected($status === 'inactive')>{{ __('Inactive') }}</option>
-                    </select>
-                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
+                    <div class="services-search">
+                        <label for="service-search" class="sr-only">{{ __('Search services') }}</label>
+                        <input id="service-search" type="search" name="q" value="{{ $search }}" class="casa-input" placeholder="{{ __('Search services…') }}">
+                        <button type="submit" class="services-search-submit" aria-label="{{ __('Search services') }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <circle cx="10.75" cy="10.75" r="6.75" />
+                                <path stroke-linecap="round" d="m16 16 4.25 4.25" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="services-status-filter">
+                        <label for="service-status">{{ __('Status') }}</label>
+                        <select id="service-status" name="status" class="casa-input" x-on:change="$el.form.requestSubmit()">
+                            <option value="">{{ __('All statuses') }}</option>
+                            <option value="active" @selected($status === 'active')>{{ __('Active') }}</option>
+                            <option value="inactive" @selected($status === 'inactive')>{{ __('Inactive') }}</option>
+                        </select>
+                    </div>
+                    <noscript><button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button></noscript>
                 </form>
-            </x-list-toolbar>
+        </x-list-toolbar>
+        <noscript><style>.services-toolbar [data-filter-panel] { display: block; } .services-toolbar [data-filter-toggle] { display: none; }</style></noscript>
 
-            <div class="mt-5">
+            <section class="services-catalog" aria-label="{{ __('Treatment catalog') }}">
                 @if ($services->isEmpty())
                     <x-empty-state
-                        title="{{ __('No services yet') }}"
-                        description="{{ __('Add the first treatment with duration and pricing before therapist assignments and appointments are connected.') }}"
+                        :title="$hasCatalog ? __('No services found') : __('No services yet')"
+                        :description="$hasCatalog ? __('Try another search or clear the filters to find a treatment.') : __('Add the first treatment with duration and pricing before therapist assignments and appointments are connected.')"
                     >
                         <x-slot name="action">
-                            <a href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
+                            @if ($hasCatalog)
+                                <a href="{{ route('admin.services.index') }}" class="casa-button-secondary">{{ __('Clear filters') }}</a>
+                            @else
+                                <a href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
+                            @endif
                         </x-slot>
                     </x-empty-state>
                 @else
-                    <x-table-shell>
-                        <thead class="bg-casa-bg text-left text-xs font-black uppercase tracking-[0.1em] text-casa-muted">
+                    <x-table-shell class="services-table" label="{{ __('Scrollable treatment records') }}">
+                        <thead>
                             <tr>
-                                <x-sortable-th sort="name">{{ __('Service') }}</x-sortable-th>
-                                <x-sortable-th sort="duration">{{ __('Duration') }}</x-sortable-th>
-                                <x-sortable-th sort="price">{{ __('Price') }}</x-sortable-th>
-                                <x-sortable-th sort="staff">{{ __('Usage') }}</x-sortable-th>
-                                <x-sortable-th sort="status">{{ __('Status') }}</x-sortable-th>
-                                <th class="px-4 py-3">{{ __('Actions') }}</th>
+                                @foreach (['name' => __('Treatment'), 'duration' => __('Duration'), 'price' => __('Price'), 'status' => __('Status')] as $column => $label)
+                                    @php
+                                        $isSorted = $sort === $column;
+                                        $nextDirection = $isSorted && $direction === 'asc' ? 'desc' : 'asc';
+                                        $sortUrl = route('admin.services.index', array_merge(request()->only(['q', 'status']), ['sort' => $column, 'direction' => $nextDirection]));
+                                    @endphp
+                                    <th scope="col" aria-sort="{{ $isSorted ? ($direction === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+                                        <a href="{{ $sortUrl }}">
+                                            {{ $label }}
+                                            @if ($isSorted)
+                                                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                                    <path d="{{ $direction === 'asc' ? 'm6 12 4-4 4 4' : 'm6 8 4 4 4-4' }}" />
+                                                </svg>
+                                            @endif
+                                        </a>
+                                    </th>
+                                @endforeach
+                                <th scope="col">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-casa-border text-sm">
+                        <tbody>
                             @foreach ($services as $service)
-                                <tr class="casa-table-row">
-                                    <td class="px-4 py-4">
-                                        <a href="{{ route('admin.services.show', $service) }}" class="font-bold text-casa-text hover:text-casa-primary">
+                                @php
+                                    $formattedPrice = number_format((float) $service->price, 2);
+                                    if (str_ends_with($formattedPrice, '.00')) {
+                                        $formattedPrice = substr($formattedPrice, 0, -3);
+                                    }
+                                @endphp
+                                <tr>
+                                    <td class="services-treatment">
+                                        <a href="{{ route('admin.services.show', $service) }}">
                                             {{ $service->name }}
                                         </a>
-                                        <p class="mt-1 text-xs text-casa-muted">{{ $service->slug }}</p>
+                                        @if (filled($service->description))
+                                            <p>{{ $service->description }}</p>
+                                        @endif
                                     </td>
-                                    <td class="px-4 py-4 text-casa-muted">{{ $service->duration_minutes }} {{ __('min') }}</td>
-                                    <td class="px-4 py-4 font-semibold text-casa-text">PHP {{ number_format((float) $service->price, 2) }}</td>
-                                    <td class="px-4 py-4 text-casa-muted">
-                                        {{ trans_choice(':count therapist|:count therapists', $service->staff_profiles_count) }},
-                                        {{ trans_choice(':count appointment|:count appointments', $service->appointments_count) }}
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <x-status-badge :tone="$service->is_active ? 'success' : 'dark'">
+                                    <td class="services-duration">{{ $service->duration_minutes }} {{ __('min') }}</td>
+                                    <td class="services-price">₱{{ $formattedPrice }}</td>
+                                    <td>
+                                        <span @class(['services-status', 'services-status--active' => $service->is_active, 'services-status--inactive' => ! $service->is_active])>
+                                            <span class="services-status-dot" aria-hidden="true"></span>
                                             {{ $service->is_active ? __('Active') : __('Inactive') }}
-                                        </x-status-badge>
+                                        </span>
                                     </td>
-                                    <td class="px-4 py-4">
-                                        <div class="flex flex-wrap gap-2">
-                                            <a href="{{ route('admin.services.edit', $service) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark">
+                                    <td>
+                                        <div class="services-actions">
+                                            <a href="{{ route('admin.services.edit', $service) }}" class="services-action services-action--edit" aria-label="{{ __('Edit :name', ['name' => $service->name]) }}">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                    <path d="m16 4 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6 5-2" />
+                                                </svg>
                                                 {{ __('Edit') }}
                                             </a>
                                             <x-confirm-action
@@ -85,7 +124,20 @@
                                                 :confirm-title="$service->is_active ? __('Deactivate service?') : __('Activate service?')"
                                                 :confirm-message="$service->is_active ? __('Customers will no longer be able to book this service until it is activated again.') : __('Customers will be able to request this service once it is active.')"
                                                 :confirm-button="$service->is_active ? __('Deactivate') : __('Activate')"
-                                            />
+                                                :button-class="$service->is_active ? 'services-action services-action--deactivate' : 'services-action services-action--activate'"
+                                            >
+                                                <x-slot name="trigger">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                        @if ($service->is_active)
+                                                            <circle cx="12" cy="12" r="9" /><path d="m5.6 5.6 12.8 12.8" />
+                                                        @else
+                                                            <path d="m7 4 13 8-13 8V4Z" />
+                                                        @endif
+                                                    </svg>
+                                                    <span>{{ $service->is_active ? __('Deactivate') : __('Activate') }}</span>
+                                                    <span class="sr-only">{{ $service->name }}</span>
+                                                </x-slot>
+                                            </x-confirm-action>
                                         </div>
                                     </td>
                                 </tr>
@@ -93,11 +145,8 @@
                         </tbody>
                     </x-table-shell>
 
-                    <div class="mt-5">
-                        {{ $services->links() }}
-                    </div>
                 @endif
-            </div>
-        </x-app-card>
+            </section>
+            {{ $services->links() }}
     </div>
 </x-app-layout>

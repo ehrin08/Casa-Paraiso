@@ -95,12 +95,14 @@ Relationships:
 
 ### `customer_profiles`
 
-Customer profile linked to a login account.
+Reusable customer identity, optionally linked to a login account. Operational bookings can create guest profiles without accounts.
 
 Key columns:
 
 - `id`
-- `user_id` unique foreign key to `users.id`
+- `user_id` nullable unique foreign key to `users.id`; existing account links remain authoritative
+- `guest_name` nullable string (255); trimmed and required for new guests
+- `guest_phone` nullable string (50); optional guest contact
 - `customer_code` unique
 - `birth_date` nullable
 - `address` nullable
@@ -117,8 +119,15 @@ Indexes:
 
 Relationships:
 
-- Belongs to user.
+- Optionally belongs to a user. Guests retain the same customer codes and appointment/payment/reward foreign keys as enrolled profiles.
 - Has many appointments, transactions, feedback records, and promotion suggestions.
+
+Guest booking rules:
+
+- Explicitly selecting an existing guest or enrolled profile reuses its ID without changing saved identity or contacts. Matching names alone never merge records.
+- New guest profiles are created only on final operational submission, in the appointment transaction; rejection rolls back both records. Customer self-booking always uses the signed-in account profile.
+- Shared display/search helpers use linked user identity or guest fields. Reception contact edits write `guest_phone` for guests.
+- The additive `2026_10_04_155329_add_guest_identity_to_customer_profiles_table` migration preserves existing links, codes, and foreign keys. Reversing it refuses to proceed while any guest profiles remain, including soft-deleted guests.
 
 ## Services
 

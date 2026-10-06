@@ -47,13 +47,13 @@
                                 <tr class="casa-table-row">
                                     <td class="px-4 py-4">
                                         <a href="{{ route('admin.customers.show', $customer) }}" class="font-bold text-casa-text hover:text-casa-primary">
-                                            {{ $customer->user->name }}
+                                            {{ $customer->display_name }}
                                         </a>
                                         <p class="mt-1 text-xs text-casa-muted">{{ $customer->customer_code }}</p>
                                     </td>
                                     <td class="px-4 py-4 text-casa-muted">
-                                        <p>{{ $customer->user->email }}</p>
-                                        <p>{{ $customer->user->phone ?: __('No phone') }}</p>
+                                        <p>{{ $customer->display_email }}</p>
+                                        <p>{{ $customer->display_phone ?: __('No phone') }}</p>
                                     </td>
                                     <td class="px-4 py-4 text-casa-muted">
                                         {{ trans_choice(':count appointment|:count appointments', $customer->appointments_count) }},

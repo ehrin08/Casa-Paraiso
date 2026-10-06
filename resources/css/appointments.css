@@ -1,0 +1,66 @@
+.casa-appointment-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    font-variant-numeric: tabular-nums;
+}
+.casa-appointment-stat {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 112px;
+    border: 1px solid var(--color-casa-border);
+    border-radius: 14px;
+    padding: 18px 20px;
+}
+.casa-appointment-stat-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e5f2e3;
+    color: #294b2d;
+}
+.casa-appointment-stat-icon.is-cancelled { background: #ffe3df; color: #9c2924; }
+.casa-appointment-stat dt { font-size: 16px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--color-casa-text); }
+.casa-appointment-stat dd { font-size: 36px; line-height: 1.15; color: var(--color-casa-text); }
+.casa-appointments-all-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px; font-weight: 600; }
+.casa-appointments-all-link:hover { color: var(--color-casa-palm); }
+.casa-appointment-status { display: inline-block; border-radius: 8px; padding: 4px 12px; background: #e3f2e0; color: #25472a; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.casa-appointments button:disabled { opacity: .5; cursor: not-allowed; }
+.casa-week-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.casa-week-therapist { min-width: 180px; }
+.casa-week-mode { min-height: 44px; padding: 8px 12px; border-radius: 8px; color: var(--color-casa-muted); font-size: 14px; font-weight: 700; }
+.casa-week-mode[aria-pressed="true"] { background: var(--color-casa-palm); color: white; }
+.casa-week-day-tab { min-height: 52px; border: 1px solid var(--color-casa-border); border-radius: 8px; background: var(--color-casa-paper); padding: 4px; font-size: 14px; }
+.casa-week-day-tab[aria-selected="true"] { background: var(--color-casa-palm); color: white; }
+.casa-week-viewport { overflow: auto; max-height: 530px; border: 1px solid var(--color-casa-border); border-radius: 10px; }
+.casa-week-grid { min-width: 1060px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.casa-week-grid-header, .casa-week-grid-body { display: grid; grid-template-columns: 80px repeat(7, minmax(140px, 1fr)); }
+.casa-week-grid-header { position: sticky; top: 0; z-index: 30; background: var(--color-casa-paper); border-bottom: 1px solid var(--color-casa-border); }
+.casa-week-column-heading { padding: 8px; text-align: center; border-left: 1px solid var(--color-casa-border); }
+.casa-week-column-heading.is-today { background: #e5f2e3; color: #25472a; }
+.casa-week-time-heading { display: grid; place-items: center; position: sticky; left: 0; background: var(--color-casa-paper); }
+.casa-week-time-column { position: sticky; left: 0; z-index: 20; background: var(--color-casa-paper); }
+.casa-week-time { padding: 5px 8px; white-space: nowrap; text-align: right; color: var(--color-casa-muted); border-bottom: 1px dashed var(--color-casa-border); }
+.casa-week-day-column { position: relative; border-left: 1px solid var(--color-casa-border); }
+.casa-week-slot { border-bottom: 1px dashed var(--color-casa-border); }
+.casa-week-event { position: absolute; z-index: 10; border-radius: 5px; border-left: 3px solid; padding: 3px 6px; overflow: hidden; font-size: 14px; line-height: 1.1; }
+.casa-week-event span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.casa-week-event-status { position: absolute; bottom: 2px; left: 6px; right: 2px; background: inherit; font-weight: 600; }
+.casa-week-event:hover, .casa-week-event:focus-visible { z-index: 25; outline: 2px solid var(--color-casa-palm); outline-offset: 1px; }
+.casa-week-event-tone-0 { background: #e5f2e3; border-color: #448247; color: #224529; }
+.casa-week-event-tone-1 { background: #fbe3e8; border-color: #ad4b68; color: #702c43; }
+.casa-week-event-tone-2 { background: #fff0c9; border-color: #ac791a; color: #624611; }
+.casa-week-event-tone-3 { background: #deedfd; border-color: #4a80b4; color: #254c76; }
+.casa-week-event-tone-4 { background: #eee5fa; border-color: #8762b1; color: #583b7d; }
+.casa-week-agenda-event { display: block; padding: 14px; border: 1px solid var(--color-casa-border); border-radius: 10px; background: var(--color-casa-paper); }
+.casa-week-schedule :focus-visible, .casa-appointments :focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; }
+@media (max-width: 767px) {
+    .casa-appointment-stats { grid-template-columns: 1fr; }
+    .casa-appointment-stat { min-height: 94px; gap: 20px; padding: 14px 16px; }
+    .casa-week-toolbar > div { width: 100%; }
+    .casa-week-therapist { flex: 1 1 100%; }
+}

@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div>
             <p class="casa-eyebrow">{{ __('Customer lounge') }}</p>
-            <h1 class="mt-3 font-editorial text-4xl font-semibold text-casa-text">{{ __('My appointment calendar') }}</h1>
+            <h1 class="mt-3 font-editorial text-4xl font-semibold text-casa-text">{{ __('My appointments') }}</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Follow confirmed, completed, and cancelled visits in one calm monthly view.') }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="{{ route('customer.appointments.history') }}" class="casa-button-secondary">{{ __('My appointments') }}</a>
+            <a href="{{ route('customer.appointments.history') }}" class="casa-button-secondary">{{ __('View history') }}</a>
             <a href="{{ route('customer.appointments.create') }}" class="casa-button-primary" data-panel-link data-turbo="false">
                 <x-nav-icon name="calendar" class="size-4" />
                 {{ __('Book appointment') }}

@@ -148,7 +148,7 @@ class AdminServiceManagementTest extends TestCase
             ->get('/admin/services')
             ->assertOk()
             ->assertSee('Aromatherapy Massage')
-            ->assertSee('PHP 1,200.00')
+            ->assertSee('₱1,200')
             ->assertSee('Active');
 
         $this->actingAs($admin)

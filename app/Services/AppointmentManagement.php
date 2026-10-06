@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Models\CustomerProfile;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AppointmentManagement
@@ -17,6 +19,17 @@ class AppointmentManagement
 
     /** @param array<string, mixed> $data */
     public function persist(Appointment $appointment, array $data, int $actorId): Appointment
+    {
+        return DB::transaction(function () use ($appointment, $data, $actorId): Appointment {
+            if (empty($data['customer_profile_id'])) {
+                $data['customer_profile_id'] = CustomerProfile::createGuest($data['customer_name'], $data['customer_phone'] ?? null)->id;
+            }
+
+            return $this->persistResolved($appointment, $data, $actorId);
+        });
+    }
+
+    private function persistResolved(Appointment $appointment, array $data, int $actorId): Appointment
     {
         $appointment->loadMissing(['addons', 'promotionSuggestion']);
         $service = Service::query()->findOrFail($data['service_id']);
@@ -82,6 +95,10 @@ class AppointmentManagement
 
         if (in_array($originalStatus, [Appointment::STATUS_COMPLETED, Appointment::STATUS_CANCELLED, Appointment::STATUS_NO_SHOW], true) && $terminalRecordChanged) {
             throw ValidationException::withMessages(['status' => __('Completed, cancelled, and no-show appointment details are historical. Only notes may be edited.')]);
+        }
+
+        if (! $isNew && ($originalScheduledStart ?? $originalRequestedStart)?->lte(now()) && $terminalRecordChanged) {
+            throw ValidationException::withMessages(['scheduled_start_at' => __('Historical booking details are read-only. Only notes and permitted status changes may be saved.')]);
         }
 
         if ($originalStatus === Appointment::STATUS_CONFIRMED

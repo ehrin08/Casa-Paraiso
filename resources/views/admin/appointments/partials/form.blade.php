@@ -1,173 +1,95 @@
 @php
-    $modalName = $modalName ?? null;
     $fixedStatus = $fixedStatus ?? null;
-    $initialScheduledStart = old('scheduled_start_at', optional($appointment->scheduled_start_at ?? $appointment->requested_start_at)->format('Y-m-d\TH:i'));
+    $storedStart = $appointment->scheduled_start_at ?? $appointment->requested_start_at;
+    $scheduleLocked = $appointment->exists && ($appointment->status !== \App\Models\Appointment::STATUS_CONFIRMED || $storedStart?->lte(now('Asia/Manila')));
+    $initialScheduledStart = $scheduleLocked ? $storedStart?->format('Y-m-d\TH:i') : old('scheduled_start_at', ($appointment->exists || request()->filled('scheduled_start_at')) ? $storedStart?->format('Y-m-d\TH:i') : null);
+    $initialMonth = substr($initialScheduledStart ?: optional($appointment->scheduled_start_at)->format('Y-m-d\TH:i') ?: now('Asia/Manila')->addDay()->format('Y-m-d'), 0, 7);
     $staffNames = $staffProfiles->mapWithKeys(fn ($staff) => [(string) $staff->id => $staff->user?->name])->all();
-    $initialAddonCodes = old('addon_codes', $appointment->addons->pluck('addon_code')->all());
+    $initialCustomerId = (string) ($scheduleLocked ? $appointment->customer_profile_id : old('customer_profile_id', $appointment->customer_profile_id));
+    $selectedCustomer = $customers->firstWhere('id', $initialCustomerId) ?? ($initialCustomerId === (string) $appointment->customer_profile_id ? $appointment->customerProfile : null);
+    $initialCustomerName = $selectedCustomer?->display_name ?? old('customer_name', '');
+    $initialCustomerPhone = $selectedCustomer?->display_phone ?? old('customer_phone', '');
+    $initialAddonCodes = $scheduleLocked ? $appointment->addons->pluck('addon_code')->all() : old('addon_codes', $appointment->addons->pluck('addon_code')->all());
     $availableTherapistsUrl = $availableTherapistsUrl ?? route('admin.appointments.available-therapists');
+    $availabilityUrl = $availabilityUrl ?? route('admin.appointments.availability');
+    $customerLookupUrl = route(request()->routeIs('reception.*') ? 'reception.customers.lookup' : 'admin.customers.lookup');
     $cancelUrl = $cancelUrl ?? route('admin.appointments.index');
+    $serviceOptions = $services->map(fn ($service) => ['id' => (string) $service->id, 'name' => $service->name, 'price' => (float) $service->price, 'duration' => $service->duration_minutes])->values();
+    $initialStep = $errors->hasAny(['customer_profile_id', 'customer_name', 'customer_phone', 'service_id', 'preferred_staff_profile_id', 'addon_codes', 'addon_codes.*']) ? 1 : ($errors->hasAny(['scheduled_start_at', 'requested_start_at', 'staff_profile_id']) ? 2 : ($errors->any() ? 3 : 1));
+    $voucherDuration = $appointment->promotionSuggestion?->addon_code ? (int) (collect($addons)->firstWhere('code', $appointment->promotionSuggestion->addon_code)['duration_minutes'] ?? 0) : 0;
 @endphp
 
-<form
-    method="POST"
-    action="{{ $action }}"
-    @class(['grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]', 'casa-modal-form' => $modalName])
+<form method="POST" action="{{ $action }}" class="casa-appointment-form booking-wizard" data-booking-form data-booking-title="{{ $appointment->exists ? __('Edit appointment') : __('Create appointment') }}" data-turbo="false"
     x-data="adminAppointmentForm({
-        availableUrl: @js($availableTherapistsUrl),
-        appointmentId: @js($appointment->id),
-        initialServiceId: @js((string) old('service_id', $appointment->service_id)),
-        initialScheduledStart: @js($initialScheduledStart),
-        initialStaffId: @js((string) old('staff_profile_id', $appointment->staff_profile_id)),
+        availabilityUrl: @js($availabilityUrl), availableUrl: @js($availableTherapistsUrl),
+        appointmentId: @js($appointment->id), initialMonth: @js($initialMonth), initialStep: @js($initialStep),
+        initialServiceId: @js((string) ($scheduleLocked ? $appointment->service_id : old('service_id', $appointment->service_id))), initialScheduledStart: @js($initialScheduledStart),
+        initialStaffId: @js((string) ($scheduleLocked ? $appointment->staff_profile_id : old('staff_profile_id', $appointment->staff_profile_id))),
         persistedServiceId: @js($appointment->exists ? (string) $appointment->service_id : ''),
-        persistedScheduledStart: @js($appointment->exists ? optional($appointment->scheduled_start_at)->format('Y-m-d\TH:i') : ''),
+        persistedScheduledStart: @js($appointment->exists ? optional($appointment->scheduled_start_at ?? $appointment->requested_start_at)->format('Y-m-d\TH:i') : ''),
+        persistedScheduledEnd: @js($appointment->exists ? optional($appointment->scheduled_end_at)->format('Y-m-d\TH:i') : ''),
         persistedStaffId: @js($appointment->exists ? (string) $appointment->staff_profile_id : ''),
-        staffNames: @js($staffNames),
-        addonOptions: @js($addons),
-        initialAddonCodes: @js($initialAddonCodes)
-    })"
-    x-init="init()"
-    x-on:calendar-booking-selected.window="applyCalendarSelection($event.detail)"
->
+        persistedAddonCodes: @js($appointment->addons->pluck('addon_code')->all()), persistedVoucherDuration: @js($voucherDuration), persistedVoucherName: @js($appointment->promotionSuggestion?->addonName()),
+        staffNames: @js($staffNames), services: @js($serviceOptions), customerLookupUrl: @js($customerLookupUrl),
+        initialCustomerId: @js($initialCustomerId), initialCustomerName: @js($initialCustomerName), initialCustomerPhone: @js($initialCustomerPhone),
+        initialCustomerCode: @js($selectedCustomer?->customer_code), initialCustomerIsGuest: @js($selectedCustomer?->is_guest),
+        initialStatus: @js($fixedStatus ?? old('status', $appointment->status)), scheduleLocked: @js($scheduleLocked),
+        addonOptions: @js($addons), initialAddonCodes: @js($initialAddonCodes)
+    })" x-bind:novalidate="true" x-on:submit="submitBooking($event)" x-on:calendar-booking-selected.window="applyCalendarSelection($event.detail)">
     @csrf
-    @if ($method !== 'POST')
-        @method($method)
+    <input type="hidden" name="_booking_addons_present" value="1">
+    @if ($method !== 'POST') @method($method) @endif
+    <input type="hidden" name="scheduled_start_at" value="{{ $initialScheduledStart }}" x-bind:value="scheduledStart">
+    @if ($scheduleLocked)
+        @foreach (['customer_profile_id', 'service_id', 'staff_profile_id', 'preferred_staff_profile_id'] as $field)<input type="hidden" name="{{ $field }}" value="{{ $appointment->$field }}">@endforeach
+        @foreach ($appointment->addons as $addon)<input type="hidden" name="addon_codes[]" value="{{ $addon->addon_code }}">@endforeach
     @endif
-    @if ($modalName)<input type="hidden" name="_modal" value="{{ $modalName }}">@endif
 
-    <x-app-card>
-        <div class="border-b border-casa-border pb-5">
-            <p class="casa-section-label">{{ __('Appointment details') }}</p>
-            <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Booking information') }}</h2>
-        </div>
-
-        <div class="mt-5 grid gap-5">
-            <div class="grid gap-5 sm:grid-cols-2">
-                <div>
-                    <x-input-label for="customer_profile_id" :value="__('Customer')" />
-                    <select id="customer_profile_id" name="customer_profile_id" class="casa-input mt-2" required>
-                        <option value="">{{ __('Select customer') }}</option>
-                        @foreach ($customers as $customer)
-                            <option value="{{ $customer->id }}" @selected((int) old('customer_profile_id', $appointment->customer_profile_id) === $customer->id)>
-                                {{ $customer->user->name }} ({{ $customer->customer_code }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('customer_profile_id')" />
+    <x-booking-stepper />
+    <div class="booking-wizard-body">
+        <p class="booking-step-error" x-show="stepError" x-cloak role="alert" x-text="stepError"></p>
+        <section data-booking-step="1" x-show="step === 1">
+            <div class="booking-step-heading"><h2 data-step-heading tabindex="-1">{{ __('Treatment details') }}</h2><p>{{ __('Choose the customer and care for this visit.') }}</p></div>
+            @if ($scheduleLocked)<p class="booking-info">{{ __('This appointment is historical. Booking details are read-only; notes can be updated in the final step.') }}</p>@endif
+            <fieldset @disabled($scheduleLocked) class="booking-fields">
+                <x-booking-customer />
+                <div class="booking-field-row">
+                    <div><x-input-label for="service_id" :value="__('Service')" /><select id="service_id" name="service_id" class="casa-input mt-2" required x-model="serviceId" x-on:change="serviceChanged()"><option value="">{{ __('Select service') }}</option>@foreach ($services as $service)<option value="{{ $service->id }}" @selected((int) old('service_id', $appointment->service_id) === $service->id)>{{ $service->name }} · {{ $service->duration_minutes }} min</option>@endforeach</select><x-input-error class="mt-2" :messages="$errors->get('service_id')" /></div>
+                <div class="booking-preference"><x-input-label for="preferred_staff_profile_id" :value="__('Customer therapist preference (optional)')" /><select id="preferred_staff_profile_id" name="preferred_staff_profile_id" class="casa-input mt-2"><option value="">{{ __('No preference') }}</option>@foreach ($staffProfiles as $staff)<option value="{{ $staff->id }}" @selected((int) old('preferred_staff_profile_id', $appointment->preferred_staff_profile_id) === $staff->id)>{{ $staff->user->name }}</option>@endforeach</select><p class="mt-2 text-sm text-casa-muted">{{ __('A preference does not override eligibility or conflicts.') }}</p><x-input-error class="mt-2" :messages="$errors->get('preferred_staff_profile_id')" /></div>
                 </div>
-
-                <div>
-                    <x-input-label for="service_id" :value="__('Service')" />
-                    <select id="service_id" name="service_id" class="casa-input mt-2" required x-model="serviceId" x-on:change="refreshTherapists()">
-                        <option value="">{{ __('Select service') }}</option>
-                        @foreach ($services as $service)
-                            <option value="{{ $service->id }}">{{ $service->name }} · {{ $service->duration_minutes }} min</option>
-                        @endforeach
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('service_id')" />
-                </div>
-            </div>
-
-            <fieldset class="rounded-2xl border border-casa-border bg-casa-sand/45 p-4">
-                <legend class="casa-label px-1">{{ __('Paid add-ons') }}</legend>
-                <p class="mt-1 text-sm leading-6 text-casa-muted">{{ __('Select any add-ons needed for this visit. Back Massage extends the appointment by 30 minutes.') }}</p>
-                <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                    @foreach ($addons as $addon)
-                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-casa-border bg-casa-paper px-4 py-3">
-                            <input type="checkbox" name="addon_codes[]" value="{{ $addon['code'] }}" x-model="addonCodes" x-on:change="addonChanged()" class="mt-1 rounded border-casa-border text-casa-primary focus:ring-casa-gold">
-                            <span><strong class="block text-sm text-casa-text">{{ $addon['name'] }}</strong><span class="mt-1 block text-xs text-casa-muted">PHP {{ number_format((float) $addon['price'], 2) }}@if (($addon['duration_minutes'] ?? 0) > 0) · +{{ $addon['duration_minutes'] }} {{ __('minutes') }}@endif</span></span>
-                        </label>
-                    @endforeach
-                </div>
-                <p class="mt-3 text-sm font-bold text-casa-text">{{ __('Selected add-ons:') }} <span x-text="`PHP ${paidAddonTotal.toFixed(2)}`"></span><span x-show="addonDurationMinutes" x-text="` · +${addonDurationMinutes} min`"></span></p>
-                <x-input-error class="mt-3" :messages="$errors->get('addon_codes')" />
+                <x-booking-addons :addons="$addons" :selected-codes="$initialAddonCodes" />
             </fieldset>
+        </section>
 
-            <div>
-                <x-input-label for="scheduled_start_at" :value="__('Appointment time')" />
-                <x-text-input id="scheduled_start_at" name="scheduled_start_at" type="datetime-local" class="mt-2" :value="$initialScheduledStart" x-model="scheduledStart" x-on:change="refreshTherapists()" required />
-                <x-input-error class="mt-2" :messages="$errors->get('scheduled_start_at')" />
-            </div>
-
-            <div class="grid gap-5 sm:grid-cols-2">
-                <div>
-                    <x-input-label for="preferred_staff_profile_id" :value="__('Customer therapist preference')" />
-                    <select id="preferred_staff_profile_id" name="preferred_staff_profile_id" class="casa-input mt-2">
-                        <option value="">{{ __('No preference') }}</option>
-                        @foreach ($staffProfiles as $staffProfile)
-                            <option value="{{ $staffProfile->id }}" @selected((int) old('preferred_staff_profile_id', $appointment->preferred_staff_profile_id) === $staffProfile->id)>{{ $staffProfile->user->name }}</option>
-                        @endforeach
-                    </select>
-                    <p class="mt-2 text-xs leading-5 text-casa-muted">{{ __('A preference is visible during confirmation but does not override eligibility or conflicts.') }}</p>
-                    <x-input-error class="mt-2" :messages="$errors->get('preferred_staff_profile_id')" />
-                </div>
-
-                <div>
-                    <x-input-label for="staff_profile_id" :value="__('Assigned therapist')" />
-                    <select id="staff_profile_id" name="staff_profile_id" class="casa-input mt-2" x-model="staffId" @required($fixedStatus)>
-                        <option value="">{{ __('Select assigned therapist') }}</option>
-                        @foreach ($staffProfiles as $staffProfile)
-                            <option value="{{ $staffProfile->id }}" x-bind:disabled="!staffIsAvailable('{{ $staffProfile->id }}')">{{ $staffProfile->user->name }}</option>
-                        @endforeach
-                    </select>
-                    <p class="mt-2 text-xs leading-5 text-casa-muted" x-show="loadingTherapists">{{ __('Checking therapist availability…') }}</p>
-                    <p class="mt-2 text-xs leading-5 text-red-700" x-show="therapistError" x-text="therapistError"></p>
-                    <x-input-error class="mt-2" :messages="$errors->get('staff_profile_id')" />
-                </div>
-            </div>
-
-            @if ($fixedStatus)
-                <input type="hidden" name="status" value="{{ $fixedStatus }}">
-                <div class="rounded-2xl border border-casa-palm/25 bg-casa-palm/5 p-4">
-                    <p class="casa-section-label">{{ __('Reservation status') }}</p>
-                    <p class="mt-2 font-bold text-casa-palm">{{ __('Confirmed reservation') }}</p>
-                    <p class="mt-1 text-xs leading-5 text-casa-muted">{{ __('Saving reserves the assigned therapist and time immediately.') }}</p>
-                </div>
-            @else
-                <div>
-                    <x-input-label for="status" :value="__('Status')" />
-                    <select id="status" name="status" class="casa-input mt-2">
-                        @foreach ($appointment->allowedTargetStatuses() as $option)
-                            <option value="{{ $option }}" @selected(old('status', $appointment->status) === $option)>{{ ucfirst(str_replace('_', ' ', $option)) }}</option>
-                        @endforeach
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('status')" />
-                </div>
+        <section data-booking-step="2" x-show="step === 2">
+            <div class="booking-step-heading"><h2 data-step-heading tabindex="-1">{{ __('Date and time') }}</h2><p>{{ __('Choose an open date, start time, and available therapist.') }}</p></div>
+            @if ($appointment->exists)
+                <div class="booking-info" x-show="canUsePersistedSchedule"><strong>{{ __('Current schedule') }}</strong><span x-text="summaryDate + ' · ' + summaryTime + '–' + summaryEndTime + ' · ' + assignedStaffName"></span><span>{{ __('You can keep this schedule for notes or permitted status changes.') }}</span></div>
             @endif
+            @unless ($scheduleLocked)<x-booking-calendar :show-staff-count="true"><x-slot:assignment>
+            <fieldset class="booking-therapist-field">
+                <x-input-label for="staff_profile_id" :value="__('Assigned therapist')" />
+                <select id="staff_profile_id" name="staff_profile_id" class="casa-input mt-2" x-model="staffId" x-bind:disabled="assignmentDisabled"><option value="">{{ __('Select assigned therapist') }}</option>@foreach ($staffProfiles as $staff)<option value="{{ $staff->id }}" @selected((int) old('staff_profile_id', $appointment->staff_profile_id) === $staff->id) x-bind:disabled="!staffIsAvailable('{{ $staff->id }}')">{{ $staff->user->name }}</option>@endforeach</select>
+                <p class="mt-2 text-sm text-casa-muted" x-show="loadingTherapists">{{ __('Checking therapist availability…') }}</p>
+                <div class="booking-calendar-error" x-show="therapistError" x-cloak role="alert"><p x-text="therapistError"></p><button type="button" class="booking-text-button" x-on:click="refreshTherapists()">{{ __('Retry') }}</button></div>
+                <x-input-error class="mt-2" :messages="$errors->get('staff_profile_id')" />
+            </fieldset>
+            </x-slot:assignment></x-booking-calendar>@endunless
+            <x-input-error class="mt-3" :messages="$errors->get('scheduled_start_at')" /><x-input-error class="mt-3" :messages="$errors->get('requested_start_at')" />
+            @unless ($scheduleLocked)<noscript><div class="mt-4"><x-input-label for="appointment_date" :value="__('Appointment date and time')" /><input id="appointment_date" name="scheduled_start_at" type="datetime-local" class="casa-input mt-2" value="{{ $initialScheduledStart ?: optional($appointment->scheduled_start_at)->format('Y-m-d\TH:i') }}" required><p class="mt-2 text-sm text-casa-muted">{{ __('The server will verify this time when saved.') }}</p></div></noscript>@endunless
+        </section>
 
-            <div>
-                <x-input-label for="customer_notes" :value="__('Customer notes')" />
-                <textarea id="customer_notes" name="customer_notes" rows="4" class="casa-input mt-2">{{ old('customer_notes', $appointment->customer_notes) }}</textarea>
-                <x-input-error class="mt-2" :messages="$errors->get('customer_notes')" />
+        <section data-booking-step="3" x-show="step === 3">
+            <div class="booking-step-heading"><h2 data-step-heading tabindex="-1">{{ __('Review and save') }}</h2><p>{{ __('Check the booking and add any notes before saving.') }}</p></div>
+            <div class="booking-review-layout">
+                <x-booking-review :operations="true" />
+                <div class="booking-fields">
+                    @if ($fixedStatus)<input type="hidden" name="status" value="{{ $fixedStatus }}">@else<div><x-input-label for="status" :value="__('Status')" /><select id="status" name="status" class="casa-input mt-2" x-model="status">@foreach ($appointment->allowedTargetStatuses() as $option)<option value="{{ $option }}" @selected(old('status', $appointment->status) === $option)>{{ ucfirst(str_replace('_', ' ', $option)) }}</option>@endforeach</select><x-input-error class="mt-2" :messages="$errors->get('status')" /></div>@endif
+                    <div><x-input-label for="customer_notes" :value="__('Customer notes (optional)')" /><textarea id="customer_notes" name="customer_notes" rows="3" maxlength="5000" class="casa-input mt-2" placeholder="{{ __('Special requests for this visit') }}">{{ old('customer_notes', $appointment->customer_notes) }}</textarea><x-input-error class="mt-2" :messages="$errors->get('customer_notes')" /></div>
+                    <div><x-input-label for="internal_notes" :value="__('Internal notes (optional)')" /><textarea id="internal_notes" name="internal_notes" rows="3" maxlength="5000" class="casa-input mt-2" placeholder="{{ __('Visible only to the spa team') }}">{{ old('internal_notes', $appointment->internal_notes) }}</textarea><x-input-error class="mt-2" :messages="$errors->get('internal_notes')" /></div>
+                </div>
             </div>
-
-            <div>
-                <x-input-label for="internal_notes" :value="__('Internal notes')" />
-                <textarea id="internal_notes" name="internal_notes" rows="4" class="casa-input mt-2">{{ old('internal_notes', $appointment->internal_notes) }}</textarea>
-                <x-input-error class="mt-2" :messages="$errors->get('internal_notes')" />
-            </div>
-        </div>
-    </x-app-card>
-
-    <aside class="space-y-4">
-        <x-app-card data-modal-actions>
-            <p class="casa-section-label">{{ $fixedStatus ? __('Selected calendar time') : __('Confirmation rule') }}</p>
-            @if ($fixedStatus)
-                <p class="mt-3 font-display text-lg font-black text-casa-text" x-text="scheduleSummary"></p>
-            @endif
-            <p class="mt-3 text-sm leading-6 text-casa-muted">
-                {{ __('Confirmed appointments require an eligible therapist inside business and working hours. The server rechecks overlaps while locking that therapist’s schedule.') }}
-            </p>
-        </x-app-card>
-
-        <x-app-card>
-            <div class="flex flex-col gap-3">
-                <button type="submit" class="casa-button-primary w-full">{{ $submitLabel }}</button>
-                @if ($modalName)
-                    <button type="button" class="casa-button-secondary w-full" x-on:click="$dispatch('close-modal', '{{ $modalName }}')">{{ __('Cancel') }}</button>
-                @else
-                    <a href="{{ $cancelUrl }}" class="casa-button-secondary w-full">{{ __('Cancel') }}</a>
-                @endif
-            </div>
-        </x-app-card>
-    </aside>
+        </section>
+    </div>
+    <x-booking-footer :submit-label="$submitLabel" :cancel-url="$cancelUrl" />
 </form>

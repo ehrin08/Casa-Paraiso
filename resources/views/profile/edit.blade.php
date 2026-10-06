@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">Account settings</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">Profile</h1>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">My profile</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">Keep your contact details and sign-in security current.</p>
         </div>
     </x-slot>

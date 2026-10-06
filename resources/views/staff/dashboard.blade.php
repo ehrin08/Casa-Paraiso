@@ -2,13 +2,13 @@
     <x-slot name="header">
         <div>
             <p class="casa-eyebrow">{{ __('Therapist workspace') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Daily dashboard') }}</h1>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Today') }}</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('See today’s assigned care, requests waiting for action, and recently completed services.') }}</p>
         </div>
 
         <div class="flex w-full flex-nowrap gap-2 sm:w-auto sm:gap-3">
             <a href="{{ route('staff.customers.index') }}" class="casa-button-secondary min-w-0 flex-1 px-2 sm:flex-none sm:px-[0.9rem]">{{ __('Customer lookup') }}</a>
-            <a href="{{ route('staff.appointments.index') }}" class="casa-button-primary min-w-0 flex-1 px-2 sm:flex-none sm:px-[0.9rem]">{{ __('Open schedule') }}</a>
+            <a href="{{ route('staff.appointments.index') }}" class="casa-button-primary min-w-0 flex-1 px-2 sm:flex-none sm:px-[0.9rem]">{{ __('My appointments') }}</a>
         </div>
     </x-slot>
 
@@ -69,7 +69,7 @@
                                     <tr class="casa-table-row">
                                         <td class="px-4 py-4 font-semibold text-casa-text">{{ $appointment->appointment_number }}</td>
                                         <td class="px-4 py-4 font-semibold text-casa-text">{{ $appointment->scheduled_start_at?->format('g:i A') }}</td>
-                                        <td class="px-4 py-4 text-casa-muted">{{ $appointment->customerProfile?->user?->name ?? __('Customer') }}</td>
+                                        <td class="px-4 py-4 text-casa-muted">{{ $appointment->customerProfile?->display_name ?? __('Customer') }}</td>
                                         <td class="px-4 py-4 text-casa-muted">{{ $appointment->service?->name ?? __('Service') }}</td>
                                         <td class="px-4 py-4"><x-status-badge tone="success">{{ __(ucfirst($appointment->status)) }}</x-status-badge></td>
                                         <td class="px-4 py-4"><a href="{{ route('staff.appointments.show', $appointment) }}" class="font-bold text-casa-cacao hover:text-casa-cacao-dark" data-panel-link data-turbo="false">{{ __('Open') }}</a></td>

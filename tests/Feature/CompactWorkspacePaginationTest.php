@@ -70,59 +70,130 @@ class CompactWorkspacePaginationTest extends TestCase
         $this->assertSame(2, $secondPage->currentPage());
     }
 
-    public function test_team_and_services_uses_two_independent_paginators(): void
+    public function test_therapists_use_the_fixed_page_size_and_reset_selection_when_paging(): void
     {
         $admin = User::factory()->admin()->create();
         $this->createStaffAndServices(16);
+        $selectedStaff = StaffProfile::query()->firstOrFail();
+
+        $parameters = [
+            'q' => 'Therapist',
+            'status' => 'active',
+            'bookable' => 'yes',
+            'sort' => 'name',
+            'direction' => 'asc',
+            'per_page' => 1,
+            'selected' => $selectedStaff->id,
+            'tab' => 'services',
+        ];
 
         $firstResponse = $this->actingAs($admin)
-            ->get(route('admin.staff.index', absolute: false))
+            ->get(route('admin.staff.index', $parameters, false))
             ->assertOk()
             ->assertSee('Therapist 01')
             ->assertSee('Therapist 15')
             ->assertDontSee('Therapist 16')
-            ->assertSee('services_page=2', false)
-            ->assertSee('#service-catalog', false);
+            ->assertSee('data-first="1"', false)
+            ->assertSee('data-last="15"', false)
+            ->assertSee('data-total="16"', false)
+            ->assertSee('Page 1 of 2')
+            ->assertDontSee('services_page=', false)
+            ->assertDontSee('service-catalog', false);
 
         /** @var LengthAwarePaginator $staffPage */
         $staffPage = $firstResponse->viewData('staffProfiles');
-        /** @var LengthAwarePaginator $servicePage */
-        $servicePage = $firstResponse->viewData('serviceCatalog');
 
         $this->assertSame('page', $staffPage->getPageName());
-        $this->assertSame('services_page', $servicePage->getPageName());
         $this->assertCount(15, $staffPage->items());
-        $this->assertCount(15, $servicePage->items());
+        $this->assertSame(16, $staffPage->total());
+        $this->assertSame(15, $staffPage->perPage());
         $this->assertSame('Therapist 01', $staffPage->getCollection()->first()->user->name);
         $this->assertSame('Therapist 15', $staffPage->getCollection()->last()->user->name);
-        $this->assertSame('Service 01', $servicePage->getCollection()->first()->name);
-        $this->assertSame('Service 15', $servicePage->getCollection()->last()->name);
-        $this->assertSame('service-catalog', parse_url($servicePage->url(2), PHP_URL_FRAGMENT));
+
+        parse_str((string) parse_url($staffPage->url(2), PHP_URL_QUERY), $pageTwoQuery);
+        $this->assertSame('Therapist', $pageTwoQuery['q']);
+        $this->assertSame('active', $pageTwoQuery['status']);
+        $this->assertSame('yes', $pageTwoQuery['bookable']);
+        $this->assertSame('name', $pageTwoQuery['sort']);
+        $this->assertSame('asc', $pageTwoQuery['direction']);
+        $this->assertSame('2', (string) $pageTwoQuery['page']);
+        $this->assertArrayNotHasKey('selected', $pageTwoQuery);
+        $this->assertArrayNotHasKey('tab', $pageTwoQuery);
 
         $secondResponse = $this->actingAs($admin)
-            ->get(route('admin.staff.index', ['page' => 2, 'services_page' => 2], false))
+            ->get($staffPage->url(2))
             ->assertOk()
-            ->assertSee('Therapist 16');
+            ->assertSee('Therapist 16')
+            ->assertDontSee('Therapist 01')
+            ->assertSee('data-first="16"', false)
+            ->assertSee('data-last="16"', false)
+            ->assertSee('data-total="16"', false)
+            ->assertSee('Page 2 of 2');
 
         /** @var LengthAwarePaginator $secondStaffPage */
         $secondStaffPage = $secondResponse->viewData('staffProfiles');
-        /** @var LengthAwarePaginator $secondServicePage */
-        $secondServicePage = $secondResponse->viewData('serviceCatalog');
 
         $this->assertSame(2, $secondStaffPage->currentPage());
-        $this->assertSame(2, $secondServicePage->currentPage());
         $this->assertCount(1, $secondStaffPage->items());
-        $this->assertCount(1, $secondServicePage->items());
         $this->assertSame('Therapist 16', $secondStaffPage->getCollection()->first()->user->name);
-        $this->assertSame('Service 16', $secondServicePage->getCollection()->first()->name);
+        $this->assertSame('profile', $secondResponse->viewData('selectedTab'));
+        $this->assertSame($secondStaffPage->getCollection()->first()->id, $secondResponse->viewData('selectedStaffProfile')->id);
+    }
 
-        parse_str((string) parse_url($secondStaffPage->url(1), PHP_URL_QUERY), $staffQuery);
-        parse_str((string) parse_url($secondServicePage->url(1), PHP_URL_QUERY), $serviceQuery);
-        $this->assertSame('1', (string) $staffQuery['page']);
-        $this->assertSame('2', (string) $staffQuery['services_page']);
-        $this->assertSame('2', (string) $serviceQuery['page']);
-        $this->assertSame('1', (string) $serviceQuery['services_page']);
-        $this->assertSame('service-catalog', parse_url($secondServicePage->url(1), PHP_URL_FRAGMENT));
+    public function test_services_use_their_own_fixed_pagination_and_keep_filter_and_sort_state(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->createStaffAndServices(16);
+        $parameters = [
+            'q' => 'Service',
+            'status' => 'active',
+            'sort' => 'name',
+            'direction' => 'asc',
+            'per_page' => 1,
+        ];
+
+        $firstResponse = $this->actingAs($admin)
+            ->get(route('admin.services.index', $parameters, false))
+            ->assertOk()
+            ->assertSee('Service 01')
+            ->assertSee('Service 15')
+            ->assertDontSee('Service 16')
+            ->assertSee('data-first="1"', false)
+            ->assertSee('data-last="15"', false)
+            ->assertSee('data-total="16"', false)
+            ->assertSee('Page 1 of 2');
+
+        /** @var LengthAwarePaginator $servicePage */
+        $servicePage = $firstResponse->viewData('services');
+        $this->assertSame('page', $servicePage->getPageName());
+        $this->assertCount(15, $servicePage->items());
+        $this->assertSame(16, $servicePage->total());
+        $this->assertSame(15, $servicePage->perPage());
+        $this->assertSame('Service 01', $servicePage->getCollection()->first()->name);
+        $this->assertSame('Service 15', $servicePage->getCollection()->last()->name);
+
+        parse_str((string) parse_url($servicePage->url(2), PHP_URL_QUERY), $pageTwoQuery);
+        $this->assertSame('Service', $pageTwoQuery['q']);
+        $this->assertSame('active', $pageTwoQuery['status']);
+        $this->assertSame('name', $pageTwoQuery['sort']);
+        $this->assertSame('asc', $pageTwoQuery['direction']);
+        $this->assertSame('2', (string) $pageTwoQuery['page']);
+
+        $secondResponse = $this->actingAs($admin)
+            ->get($servicePage->url(2))
+            ->assertOk()
+            ->assertSee('Service 16')
+            ->assertDontSee('Service 01')
+            ->assertSee('data-first="16"', false)
+            ->assertSee('data-last="16"', false)
+            ->assertSee('data-total="16"', false)
+            ->assertSee('Page 2 of 2');
+
+        /** @var LengthAwarePaginator $secondServicePage */
+        $secondServicePage = $secondResponse->viewData('services');
+        $this->assertSame(2, $secondServicePage->currentPage());
+        $this->assertCount(1, $secondServicePage->items());
+        $this->assertSame('Service 16', $secondServicePage->getCollection()->first()->name);
     }
 
     public function test_pager_ranges_empty_results_and_filter_disclosure_are_accessible(): void

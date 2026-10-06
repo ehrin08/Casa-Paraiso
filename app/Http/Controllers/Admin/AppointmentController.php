@@ -8,21 +8,21 @@ use App\Http\Requests\AdminAppointmentOutcomeRequest;
 use App\Http\Requests\AdminAppointmentStoreRequest;
 use App\Http\Requests\AdminAppointmentUpdateRequest;
 use App\Http\Requests\AdminCalendarAppointmentStoreRequest;
-use App\Models\ApplicationSetting;
 use App\Models\Addon;
+use App\Models\ApplicationSetting;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\Transaction;
 use App\Services\AppointmentCompletion;
-use App\Services\AppointmentAddons;
 use App\Services\AppointmentManagement;
 use App\Services\AppointmentWorkflow;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -30,19 +30,47 @@ class AppointmentController extends Controller
 {
     public function index(Request $request): View
     {
-        $mode = in_array($request->query('mode'), ['bookings', 'availability'], true)
-            ? (string) $request->query('mode')
+        $today = now('Asia/Manila')->startOfDay();
+        $requestedMode = $request->old('return_to') === 'index'
+            ? $request->old('mode', $request->query('mode'))
+            : $request->query('mode');
+        $mode = in_array($requestedMode, ['bookings', 'availability'], true)
+            ? (string) $requestedMode
             : 'bookings';
 
         $summary = Appointment::query()
+            ->where('scheduled_start_at', '>=', $today)
+            ->where('scheduled_start_at', '<', $today->copy()->addDay())
             ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS confirmed', [Appointment::STATUS_CONFIRMED])
             ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS completed', [Appointment::STATUS_COMPLETED])
             ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS cancelled', [Appointment::STATUS_CANCELLED])
             ->first();
 
+        $serviceQueue = Appointment::query()
+            ->with(['customerProfile.user', 'service', 'staffProfile.user', 'addons'])
+            ->where('status', Appointment::STATUS_CONFIRMED)
+            ->where('scheduled_start_at', '<', $today->copy()->addDay())
+            ->orderBy('scheduled_start_at')->orderBy('id')
+            ->paginate((int) config('casa.pagination.per_page', 15), ['*'], 'queue_page')
+            ->withQueryString()->fragment('service-queue');
+        $completionAppointments = $serviceQueue->getCollection()
+            ->filter(fn (Appointment $appointment) => $appointment->scheduled_start_at?->lte(now()));
+
+        // Keep validation recovery available if concurrent queue changes move the row off this page.
+        if (preg_match('/^admin-appointment-completion-(\d+)$/', (string) $request->old('_modal'), $matches)
+            && ! $completionAppointments->contains('id', (int) $matches[1])) {
+            $recoveryAppointment = Appointment::query()
+                ->with(['customerProfile.user', 'service', 'addons'])->find((int) $matches[1]);
+            if ($recoveryAppointment) {
+                $completionAppointments->push($recoveryAppointment);
+            }
+        }
+
         return view('admin.appointments.index', [
             'mode' => $mode,
-            'initialWeek' => now()->startOfWeek(Carbon::SUNDAY)->toDateString(),
+            'initialWeek' => $today->copy()->startOfWeek(Carbon::MONDAY)->toDateString(),
+            'today' => $today,
+            'transaction' => new Transaction(['payment_method' => ApplicationSetting::current()->default_payment_method]),
             'summary' => ['confirmed' => (int) $summary?->confirmed, 'completed' => (int) $summary?->completed, 'cancelled' => (int) $summary?->cancelled],
             'services' => Service::query()->where('is_active', true)->orderBy('name')->get(),
             'staffProfiles' => StaffProfile::query()
@@ -51,13 +79,38 @@ class AppointmentController extends Controller
                 ->whereHas('user', fn ($query) => $query->where('is_active', true))
                 ->get()
                 ->sortBy('user.name'),
-            'serviceQueue' => Appointment::query()
-                ->with(['customerProfile.user', 'service', 'staffProfile.user', 'addons'])
-                ->where('status', Appointment::STATUS_CONFIRMED)
-                ->orderBy('scheduled_start_at')
-                ->paginate((int) config('casa.pagination.per_page', 15), ['*'], 'queue_page')
-                ->withQueryString()
-                ->fragment('service-queue'),
+            'serviceQueue' => $serviceQueue,
+            'completionAppointments' => $completionAppointments,
+        ]);
+    }
+
+    public function records(Request $request): View
+    {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:150'],
+            'status' => ['nullable', Rule::in(Appointment::STATUSES)],
+            'staff_profile_id' => ['nullable', 'integer', 'exists:staff_profiles,id'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d', ...($request->filled('from') ? ['after_or_equal:from'] : [])],
+        ]);
+        $search = trim($filters['q'] ?? '');
+        $appointments = Appointment::query()
+            ->with(['customerProfile.user', 'service', 'staffProfile.user'])
+            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
+                $query->where('appointment_number', 'like', '%'.$search.'%')
+                    ->orWhereHas('customerProfile', fn ($query) => $query->search($search));
+            }))
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->when($filters['staff_profile_id'] ?? null, fn ($query, $id) => $query->where('staff_profile_id', $id))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->where('scheduled_start_at', '>=', Carbon::parse($date, 'Asia/Manila')->startOfDay()))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->where('scheduled_start_at', '<', Carbon::parse($date, 'Asia/Manila')->addDay()->startOfDay()))
+            ->orderByDesc('scheduled_start_at')->orderByDesc('id')
+            ->paginate((int) config('casa.pagination.per_page', 15))->withQueryString();
+
+        return view('admin.appointments.records', [
+            'appointments' => $appointments,
+            'filters' => $filters,
+            'staffProfiles' => StaffProfile::query()->with('user')->get()->sortBy('user.name'),
         ]);
     }
 
@@ -97,7 +150,7 @@ class AppointmentController extends Controller
             ->with('status', 'appointment-created');
     }
 
-    public function show(Appointment $appointment): View
+    public function show(Request $request, Appointment $appointment): View
     {
         $appointment->load([
             'customerProfile.user',
@@ -109,10 +162,29 @@ class AppointmentController extends Controller
             'transactions.recorder',
             'feedback',
             'statusLogs.changedBy',
+            'creator',
         ]);
 
+        $activity = $appointment->statusLogs->map(fn ($log) => [
+            'label' => __('Appointment :status', ['status' => str_replace('_', '-', $log->to_status)]),
+            'actor' => $log->changedBy?->name ?: __('System'),
+            'at' => $log->created_at,
+            'order' => $log->id,
+            'status' => $log->to_status,
+        ])->push([
+            'label' => __('Booking created'),
+            'actor' => $appointment->creator?->name ?: __('System'),
+            'at' => $appointment->created_at,
+            'order' => 0,
+            'status' => null,
+        ])->sortBy([['at', 'desc'], ['order', 'desc']])->values();
+
         return view('admin.appointments.show', [
+            'isPreview' => $request->header('X-Casa-Panel') === '1' && $request->query('preview') === '1',
             'appointment' => $appointment,
+            'activity' => $activity,
+            'latestTransaction' => $appointment->transactions->sortByDesc('id')->first(),
+            'voucherName' => $appointment->promotionSuggestion?->addonName(),
             'transaction' => new Transaction([
                 'payment_method' => ApplicationSetting::current()->default_payment_method,
             ]),
@@ -140,7 +212,12 @@ class AppointmentController extends Controller
         Appointment $appointment,
         AppointmentCompletion $completion,
     ): RedirectResponse {
-        $transaction = $completion->complete($appointment, $request->validated(), $request->user()->id);
+        $data = $request->validated();
+        $transaction = $completion->complete($appointment, $data, $request->user()->id);
+
+        if (($data['return_to'] ?? null) === 'index') {
+            return $this->redirectToQueue($data, 'appointment-completed');
+        }
 
         return redirect()
             ->route('admin.transactions.show', $transaction)
@@ -165,7 +242,26 @@ class AppointmentController extends Controller
 
         $workflow->changeStatus($appointment, $data['status'], $request->user()->id, $data['reason'] ?? null);
 
+        if (($data['return_to'] ?? null) === 'index') {
+            return $this->redirectToQueue($data, 'appointment-updated');
+        }
+
         return redirect()->route('admin.appointments.index')->with('status', 'appointment-updated');
+    }
+
+    private function redirectToQueue(array $context, string $status): RedirectResponse
+    {
+        $remaining = Appointment::query()
+            ->where('status', Appointment::STATUS_CONFIRMED)
+            ->where('scheduled_start_at', '<', now('Asia/Manila')->startOfDay()->addDay())
+            ->count();
+        $lastPage = max(1, (int) ceil($remaining / (int) config('casa.pagination.per_page', 15)));
+        $parameters = [
+            'queue_page' => min((int) ($context['queue_page'] ?? 1), $lastPage),
+            'mode' => $context['mode'] ?? 'bookings',
+        ];
+
+        return redirect()->to(route('admin.appointments.index', $parameters).'#service-queue')->with('status', $status);
     }
 
     public function availableTherapists(Request $request, AppointmentWorkflow $workflow): JsonResponse
@@ -188,6 +284,9 @@ class AppointmentController extends Controller
 
         $start = Carbon::parse($data['starts_at']);
         $addonCodes = $data['addon_codes'] ?? [];
+        if ($appointment?->promotionSuggestion?->addon_code) {
+            $addonCodes = array_values(array_unique([...$addonCodes, $appointment->promotionSuggestion->addon_code]));
+        }
         $workflow->assertBookableStart($start, $service, 'starts_at', true, $addonCodes);
         $end = $workflow->scheduledEnd($start, $service, $addonCodes);
 
@@ -214,7 +313,7 @@ class AppointmentController extends Controller
      */
     private function formData(Appointment $appointment): array
     {
-        $customers = CustomerProfile::query()->with('user')->get();
+        $customers = CustomerProfile::query()->with('user')->whereKey((int) old('customer_profile_id', $appointment->customer_profile_id))->get();
         $services = Service::query()->where('is_active', true)->orderBy('name')->get();
         $staffProfiles = StaffProfile::query()
             ->with(['user', 'services'])
@@ -239,7 +338,7 @@ class AppointmentController extends Controller
 
         return [
             'appointment' => $appointment,
-            'customers' => $customers->sortBy('user.name')->values(),
+            'customers' => $customers->sortBy('display_name')->values(),
             'services' => $services->sortBy('name')->values(),
             'staffProfiles' => $staffProfiles->sortBy('user.name')->values(),
             'addons' => $this->addonSelectors($appointment),
@@ -254,6 +353,7 @@ class AppointmentController extends Controller
                 $addons->push(new Addon(['code' => $snapshot->addon_code, 'name' => $snapshot->addon_name, 'price' => $snapshot->price, 'duration_minutes' => $snapshot->duration_minutes, 'is_active' => false]));
             }
         }
+
         return $addons->sortBy('name')->values();
     }
 }

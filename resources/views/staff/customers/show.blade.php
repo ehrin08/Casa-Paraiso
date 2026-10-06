@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Customer detail') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $customer->user->name }}</h1>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $customer->display_name }}</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">
                 {{ __('Operational context for appointment service and customer care.') }}
             </p>
@@ -21,7 +21,7 @@
                 <dl class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div class="rounded-2xl bg-casa-bg p-4">
                         <dt class="text-xs font-black uppercase tracking-[0.12em] text-casa-muted">{{ __('Phone') }}</dt>
-                        <dd class="mt-2 font-semibold text-casa-text">{{ $customer->user->phone ?: __('Not set') }}</dd>
+                        <dd class="mt-2 font-semibold text-casa-text">{{ $customer->display_phone ?: __('Not set') }}</dd>
                     </div>
                     <div class="rounded-2xl bg-casa-bg p-4">
                         <dt class="text-xs font-black uppercase tracking-[0.12em] text-casa-muted">{{ __('Preference') }}</dt>

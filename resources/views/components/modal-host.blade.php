@@ -10,13 +10,13 @@
     >
         <div class="casa-panel__bar">
             <div class="min-w-0">
-                <p class="casa-section-label">{{ __('Workspace panel') }}</p>
+                <p data-panel-eyebrow class="casa-section-label">{{ __('Workspace panel') }}</p>
                 <h2 id="casa-panel-title" data-panel-title class="truncate font-display text-lg font-black text-casa-text">
                     {{ __('Loading') }}
                 </h2>
             </div>
 
-            <button type="button" data-panel-close class="casa-icon-button" aria-label="{{ __('Close panel') }}">
+            <button type="button" data-panel-close class="casa-icon-button" aria-label="{{ __('Close dialog') }}">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>

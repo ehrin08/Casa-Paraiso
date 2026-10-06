@@ -78,7 +78,15 @@ class RoleWorkspaceTest extends TestCase
             $this->assertSame($expectedGridCount, substr_count($content, 'data-metric-grid'));
             $this->assertStringContainsString('data-metric-card', $content);
             $this->assertStringContainsString('data-metric-meta', $content);
-            $this->assertStringContainsString('hidden text-sm font-semibold leading-5 text-casa-muted sm:block', $content);
+            if ($path === '/admin/transactions') {
+                $this->assertSame(2, substr_count($content, 'data-metric-card'));
+                $this->assertStringContainsString('Unpaid total', $content);
+            } elseif ($path === '/admin/promotions') {
+                $this->assertSame(4, substr_count($content, 'data-metric-card'));
+                $this->assertStringContainsString('Filtered reward totals', $content);
+            } else {
+                $this->assertStringContainsString('hidden text-sm font-semibold leading-5 text-casa-muted sm:block', $content);
+            }
         }
 
         $staffContent = $this->actingAs($staff)
@@ -129,7 +137,7 @@ class RoleWorkspaceTest extends TestCase
             ->assertSee('data-turbo-preload', false)
             ->assertSee('data-mobile-customer-navigation', false)
             ->assertSee('Customer lounge')
-            ->assertSeeInOrder(['Appointments', 'Feedback', 'Profile'])
+            ->assertSeeInOrder(['My appointments', 'My feedback', 'My profile'])
             ->assertSee(route('customer.appointments.index'), false)
             ->assertSee(route('customer.appointments.create'), false)
             ->assertSee(route('customer.feedback.index'), false)
@@ -138,6 +146,62 @@ class RoleWorkspaceTest extends TestCase
 
         $html = $this->actingAs($customer)->get('/customer/appointments')->getContent();
         $this->assertSame(2, substr_count($html, 'data-turbo-preload'));
+    }
+
+    public function test_admin_navigation_links_directly_to_each_manage_and_review_page(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $therapistsPage = $this->actingAs($admin)
+            ->get(route('admin.staff.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Daily work', 'Manage', 'Review', 'Account'])
+            ->assertSee('href="'.route('admin.staff.index').'" data-sidebar-label="Therapists"', false)
+            ->assertSee('href="'.route('admin.services.index').'" data-sidebar-label="Services"', false)
+            ->assertSee('href="'.route('admin.promotions.index').'" data-sidebar-label="Customer rewards"', false)
+            ->assertSee('href="'.route('admin.feedback.index').'" data-sidebar-label="Feedback"', false)
+            ->assertSee('href="'.route('admin.reports.index').'" data-sidebar-label="Reports"', false)
+            ->assertDontSee('data-sidebar-label="User accounts"', false);
+
+        $this->assertMatchesRegularExpression('/<a[^>]*data-sidebar-label="Therapists"[^>]*aria-current="page"/', $therapistsPage->getContent());
+        $this->assertDoesNotMatchRegularExpression('/<a[^>]*data-sidebar-label="Services"[^>]*aria-current="page"/', $therapistsPage->getContent());
+
+        $servicesPage = $this->actingAs($admin)
+            ->get(route('admin.services.index'))
+            ->assertOk();
+
+        $this->assertMatchesRegularExpression('/<a[^>]*data-sidebar-label="Services"[^>]*aria-current="page"/', $servicesPage->getContent());
+        $this->assertDoesNotMatchRegularExpression('/<a[^>]*data-sidebar-label="Therapists"[^>]*aria-current="page"/', $servicesPage->getContent());
+    }
+
+    public function test_each_role_gets_plain_language_navigation_for_its_work(): void
+    {
+        $receptionist = User::factory()->receptionist()->create();
+        $staff = User::factory()->staff()->create();
+        $customer = User::factory()->customer()->create();
+
+        $this->actingAs($receptionist)
+            ->get(route('reception.dashboard'))
+            ->assertOk()
+            ->assertSee('data-sidebar-label="Staff attendance"', false)
+            ->assertSee('data-sidebar-label="Appointments"', false)
+            ->assertDontSee('data-sidebar-label="Reports"', false);
+
+        $this->actingAs($staff)
+            ->get(route('staff.dashboard'))
+            ->assertOk()
+            ->assertSee('data-sidebar-label="My appointments"', false)
+            ->assertSee('data-sidebar-label="My attendance"', false)
+            ->assertSee('data-sidebar-label="My commissions"', false);
+
+        $this->actingAs($customer)
+            ->get(route('customer.appointments.index'))
+            ->assertOk()
+            ->assertSee('data-sidebar-label="My appointments"', false)
+            ->assertSee('data-sidebar-label="My feedback"', false)
+            ->assertSee('data-mobile-customer-navigation', false)
+            ->assertSee('<span>My profile</span>', false)
+            ->assertDontSee('data-sidebar-label="Payments"', false);
     }
 
     public function test_authenticated_web_responses_include_application_database_and_query_timing(): void
@@ -250,7 +314,7 @@ class RoleWorkspaceTest extends TestCase
             ->assertOk()
             ->assertSee('APT-UPCOMING')
             ->assertSee('Hilot Massage')
-            ->assertSee('PHP 1,200.00')
+            ->assertSee('₱1,200.00')
             ->assertSee('1 customer reward available');
     }
 
@@ -282,9 +346,9 @@ class RoleWorkspaceTest extends TestCase
             $this->actingAs($admin)
                 ->get('/admin/dashboard')
                 ->assertOk()
-                ->assertSeeInOrder(['Needs attention', '1', 'Confirmed today', '2'])
-                ->assertSee('Confirmed visits past their start time')
-                ->assertSee('Visits to keep moving today');
+                ->assertViewHas('summary', fn ($summary) => $summary['confirmedToday'] === 2 && $summary['overdueConfirmed'] === 1)
+                ->assertSee('1 overdue confirmed visit')
+                ->assertSee('Scheduled today');
         } finally {
             Carbon::setTestNow();
         }

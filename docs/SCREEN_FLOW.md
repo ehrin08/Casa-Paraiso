@@ -30,19 +30,34 @@ Route prefixes:
 - Use Laravel Blade server-rendered pages with Tailwind CSS.
 - Use a shared authenticated layout shell with a compact 256px role-specific desktop sidebar and consistent page-heading wrapper.
 - Admin and staff collapse the sidebar into a mobile drawer.
-- Customer small-screen navigation uses a persistent three-item bottom bar for Appointments, Feedback, and Profile.
-- Admin and staff pages should use the persistent sidebar with module navigation, page title, search/filter area where needed, and clear primary action buttons.
-- Customer pages should stay simpler and appointment-first, with sidebar navigation focused on appointments, feedback, and profile.
-- Complex management CRUD uses dedicated create/edit pages. Keep modals for contextual calendar booking, the atomic Admin Finish service flow, short feedback or note entry, and destructive/action confirmation.
+- Customer small-screen navigation uses a persistent three-item bottom bar for My appointments, My feedback, and My profile.
+- Admin and staff pages should use the persistent sidebar with task-based navigation, page title, search/filter area where needed, and clear primary action buttons.
+- Customer pages should stay simpler and appointment-first, with sidebar navigation focused on My appointments, My feedback, and My profile.
+- Complex management CRUD uses dedicated create/edit pages. Appointment create and admin/reception edit actions use the centered booking wizard with full-page route fallbacks. Other contextual dialogs include the atomic Admin Finish service flow, short feedback or note entry, and destructive/action confirmation.
 - Use compact stat strips for detail and calendar context; reserve larger metric cards for dashboards and analytics-heavy summaries.
 - Paginate authenticated record lists at the fixed server-controlled size of 15. Preserve filters and sorting across pages, show the result range on every non-empty page, and do not expose a page-size selector.
 - On screens narrower than 1024px, list filters collapse behind a labeled toggle that exposes its expanded state and active-filter count. Show Clear filters only when a filter is active.
 - Desktop pagination uses numbered controls; mobile pagination uses Previous, Page X of Y, and Next. Empty result sets show their empty state without pagination.
-- Keep operational tables inside labeled, keyboard-focusable horizontal-scroll regions. Calendar week strips and customer month grids may scroll horizontally when seven full-size date targets do not fit.
-- Appointment calendars, dashboard previews, service queues, detail-history previews, and form selector collections remain unpaginated.
+- Keep operational tables inside labeled, keyboard-focusable horizontal-scroll regions. Workspace calendar week strips and customer month grids may scroll horizontally when seven full-size date targets do not fit; booking wizard calendars fit seven columns without horizontal scrolling.
+- Appointment calendars, dashboard previews, detail-history previews, and form selector collections remain unpaginated. The admin service queue uses 15-record pagination with `queue_page` and `#service-queue`.
 - All role dashboards should show only actions the current role is allowed to perform.
-- Admin, receptionist, and therapist sidebars show their unread customer-booking number beside Schedule, Appointments, or My Schedule. The number updates live and clears after the schedule page is displayed; the Notifications inbox remains available as history without its own badge.
+- Admin, receptionist, and therapist sidebars show their unread customer-booking number beside Appointments or My appointments. The number updates live and clears after the appointment page is displayed; the Notifications inbox remains available as history without its own badge.
 - Avoid SPA-only navigation patterns; pages should work as standard Laravel routes.
+
+### Workspace navigation
+
+- Admin: Daily work (Today, Appointments, Customers); Manage (Therapists, Services, Payments, Commissions, Attendance); Review (Customer rewards, Feedback, Reports); Account (Notifications, Settings, My profile). Super admins also see User accounts and System issues under Account.
+- Receptionist: Daily work (Today, Appointments, Customers, Payments, Staff attendance); Account (Notifications, My profile).
+- Therapist: Daily work (Today, My appointments, My attendance); Review (Customers, Payments, My commissions, Feedback); Account (Notifications, My profile).
+- Customer: My care (My appointments, My feedback); Account (My profile). The mobile bottom navigation uses those same three labels.
+- Each menu choice opens its own existing route and highlights only its related pages. The desktop sidebar, mobile drawer, and customer bottom navigation retain their current responsive behavior.
+
+## Admin Attendance
+
+- `/admin/attendance` opens today's date in Asia/Manila. GET `date=YYYY-MM-DD` selects a day; `all_dates=1` opens history and takes precedence. Therapist and On duty/Completed filters combine with the date mode. Legacy inclusive `date_from`/`date_to` URLs remain supported without a new date mode.
+- The page uses separate filters and a fixed 15-record list beside selected record details, stacking below 1280px. Rows sort by attendance date then ID descending. GET `selected` selects only within the current page, defaults to its first record, and resets on filtering/pagination; `selected=0` closes the panel. Clear filters opens all history.
+- Correct record opens the selected correction form with an action, corrected Manila date/time, reason category, and up to 300 characters of details (required for Other). The existing PATCH route also accepts legacy free-text reasons. Corrections preserve date/time-order restrictions, transaction locking, actor/source, and prior audit events. Validation errors retain values on that record; successful corrections preserve filters, clamp an empty last page, and select a remaining matching row if needed. Cancel resets the form. The panel shows current saved values and audit activity.
+- Reception retains its QR station; therapists retain their immediate verified scan page. Camera access and role restrictions are unchanged.
 
 ## Receptionist Screens
 
@@ -54,8 +69,12 @@ Route prefixes:
 
 ## Embedded Booking And Commission Screens
 
-- Customer booking opens as a modal from My Appointments and the selected-day panel; `/customer/appointments/create` remains the fallback.
-- Admin `/admin/commissions`: filtered pending/paid/adjustment records, totals, source links, and external payout recording.
+- Booking opens in a centered three-step modal for admin, super-admin, reception, and customers. Create buttons, operational calendar selections, and admin/reception detail edit links open it. Direct create/edit URLs remain full-page fallbacks. Other workspace dialogs retain their existing presentation.
+- Treatment details starts with a typed customer name and optional phone for admin, super-admin, and reception. Debounced, keyboard-accessible suggestions show existing guest/enrolled name, phone, code, and profile type; only explicit selection reuses a profile. Editing the name clears that identity. Unmatched names create reusable guests on final save, with no account required. Customer self-booking stays under the signed-in profile. Service, paid add-ons, therapist preference, and customer vouchers retain their rules.
+- Date and time places the calendar on the left and a native Start time dropdown on the right, with operational Assigned therapist immediately below. Dates follow the store's every-day 1:00 PM–midnight Manila hours, independent of staff capacity. All 30-minute starts appear; lead-time, closing/duration, roster, and capacity rejections are disabled and labeled Unavailable. New times and therapist assignments require verified availability. Customer assignment remains automatic. Review shows treatment, start/end, therapist, add-ons, total, notes, operational internal notes, and permitted edit-status controls.
+- Steps preserve values and validate before advancing; only the final action submits the existing Laravel form. Failed validation restores entries and the earliest affected step. Availability changes with service, duration, preference, and voucher selections; loading, failure with Retry, and empty states block unverified new selections. Confirmed reservations are rechecked transactionally on save. Historical booking details are read-only, and unchanged existing schedules allow permitted notes/status edits with retained inactive selections.
+- The title, step indicator, and footer remain visible while the body scrolls. Small screens stack the calendar and time/therapist column without horizontal scrolling. Customer suggestions support Up/Down, Enter to select, and Escape to close suggestions before closing the modal. Keyboard focus stays within visible controls, returns to the opening control on close, and Escape dismisses the dialog; dismissed requests cannot reopen it.
+- Admin `/admin/commissions`: filtered Pending/Paid/Net total cards, therapist/status/inclusive earned-date filters, and a fixed 15-record table beside selected payout details. Individual rows display stored basis, rate, and commission; signed adjustments retain source links. Selection uses GET `selected` within the current page and resets on filtering or pagination. The native Mark as paid disclosure records an external payout date and optional note through the existing PATCH route; errors preserve values and reopen the form. Validated list context preserves filters and clamps an empty last page after payout. Standalone details reuse the panel. `/admin/commissions/export` downloads all filtered records in table order as CSV with payout metadata and formula-safe text. Other roles retain their existing commission permissions.
 - Therapist `/staff/commissions`: read-only personal pending, paid, and net totals plus personal history.
 
 ## Public Screens
@@ -184,21 +203,32 @@ Purpose:
 
 Screens:
 
-- Calendar-only weekly schedule with Bookings and Availability modes.
-- In-page confirmed appointment modal opened from Add appointment or an available therapist/time cell.
+- Manila-local daily status cards, followed by today's plus overdue confirmed visits in a full-width, 15-record table.
+- Monday–Sunday booking schedule with therapist selection, expandable service/status filters, week navigation, and existing Availability mode.
+- Add appointment opens the existing creation panel; availability retains its therapist/time-cell workflows.
 - Appointment detail.
 - Create appointment.
 - Service queue plus appointment detail, reschedule, and cancellation controls.
 - Mark completed or no-show.
+- Finish opens the atomic completion/payment form; Finish and No-show remain disabled until the visit starts.
+- View all appointments opens `/admin/appointments/records`: customer/number search, status/therapist/scheduled-date filters, and fixed 15-record pagination.
 
 Responsive behavior:
 
 - The seven-day selector is a labeled, horizontally scrollable tab list with Left/Right and Home/End keyboard movement.
-- Desktop shows the therapist timeline. Mobile shows the selected day's agenda and the Add appointment on this day action.
+- Desktop Bookings shows seven day columns and separate lanes for simultaneous appointments, from 1 PM through midnight. Availability shows the selected-day therapist timeline. Mobile shows the selected day's agenda and the Add appointment on this day action.
 
 Main data:
 
 - Appointment number, customer, service, staff, appointment time, status, notes.
+
+Appointment detail (`/admin/appointments/{appointment}`):
+
+- Customer identity, booking date/time in Asia/Manila, assigned/preferred therapist, base and scheduled durations, treatment and paid add-on rows, and separate complimentary RFM vouchers.
+- Customer/internal notes and newest-first creation/status activity with actor names.
+- Visit status with Finish service, No-show, and Cancel controls; Finish and No-show are disabled before the visit starts, and terminal visits have no transition controls.
+- Expected booking total, latest transaction status/amount, links to all transactions, and feedback availability. Partial payment status does not imply a tracked paid amount or balance.
+- Desktop uses booking and visit/payment columns; below 1280px the cards stack. Shared navigation stays unchanged.
 
 Primary actions:
 
@@ -252,7 +282,7 @@ Purpose:
 
 Screens:
 
-- Team & Services workspace with independently paginated staff and embedded service-catalog lists.
+- Therapists workspace with a 15-record list beside a selected profile and Profile, Services, Schedule, and Availability sections; service catalog management has its own Services workspace.
 - Staff detail.
 - Create/edit staff account.
 - Weekly schedule editor.
@@ -262,7 +292,7 @@ Screens:
 Main data:
 
 - Staff user, profile, bookable status, assigned services, weekly availability, exceptions.
-- Staff results use the standard `page` query key. The embedded service catalog uses `services_page` and returns to `#service-catalog` after paging.
+- Staff results use the standard `page` query key. Optional `selected` identifies a therapist on the current result page; `tab` selects the detail section. Filter, sort, and page changes reset selection. Search includes assigned service names, and weekly summaries show effective Sunday–Saturday working hours in Asia/Manila.
 
 Primary actions:
 
@@ -319,6 +349,14 @@ Primary actions:
 - Update payment status.
 - View customer transaction history.
 
+Payments list:
+
+- Paid total and Unpaid total summarize the filtered results across all pages. Only `paid` and `unpaid` amounts contribute to their respective cards; partial, refunded, and void amounts are excluded.
+- Search transaction number, customer name/email, or service; filter payment status and optional `visit_month` (`YYYY-MM`). Visit-month boundaries use the linked appointment's scheduled start in Asia/Manila; All dates includes unlinked transactions.
+- Table rows show ID, customer name/email, Manila visit date/time, peso amount, method, status, and View/Edit actions. Unlinked records show No linked visit and missing methods show Not set.
+- Keep fixed 15-record pagination, sorting, full-page payment forms, and a secondary Revenue report link.
+- `admin.transactions.export` (`GET /admin/transactions/export`) streams every matching payment in the selected order with ID, Customer, Email, Visit date, Amount, Payment method, and Status columns. It applies CSV formula protection. Reports retain their separate payment-date export.
+
 ### Customer Rewards
 
 Route group: `/admin/promotions`
@@ -330,17 +368,21 @@ Purpose:
 Screens:
 
 - Customer rewards workspace.
-- Read-only customer reward detail.
+- Automatic reward settings form at `/admin/promotions/settings` (`admin.promotions.settings.edit`).
+- Customer reward detail with confirmed dismissal for available vouchers.
 
 Main data:
 
 - Customer, plain-language group, paid-visit snapshot, complimentary add-on, expiry, and derived reward status.
+- The workspace displays four filtered lifecycle counts and customer/contact, reward, issued date, expiry, status, and View columns beside a read-only settings summary. Search, lifecycle, and optional inclusive Manila issued-date ranges share the fixed 15-record history; the default is all dates.
 
 Primary actions:
 
 - Activate/deactivate a fixed group.
 - Choose its future complimentary add-on and the global reward validity.
 - View reward usage and dismiss an available reward.
+- Open the dedicated settings form from Automatic reward settings or Edit. Save future configuration through the existing PATCH route and return to history; validation keeps form values and existing rewards are preserved.
+- View opens the existing detail page; its confirmed Dismiss reward action appears only for an available, usable voucher.
 
 ### Feedback
 

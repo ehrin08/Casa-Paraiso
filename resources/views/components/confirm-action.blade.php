@@ -16,10 +16,10 @@
 
 <div @class(['block w-full' => str_contains($buttonClass, 'w-full'), 'inline' => ! str_contains($buttonClass, 'w-full')])>
     <button type="button" class="{{ $buttonClass }}" x-data="" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')">
-        {{ $label }}
+        {{ $trigger ?? $label }}
     </button>
 
-    <x-modal :name="$modalName" :maxWidth="$modalWidth">
+    <x-modal :name="$modalName" :maxWidth="$modalWidth" focusable>
         <form method="POST" action="{{ $action }}" class="p-6">
             @csrf
             @if ($spoofMethod !== 'POST')

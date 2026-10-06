@@ -24,7 +24,7 @@ class NewCustomerBookingNotification extends Notification
         return [
             'appointment_id' => $this->appointment->id,
             'appointment_number' => $this->appointment->appointment_number,
-            'customer_name' => $this->appointment->customerProfile?->user?->name,
+            'customer_name' => $this->appointment->customerProfile?->display_name,
             'service_name' => $this->appointment->service?->name,
             'therapist_name' => $this->appointment->staffProfile?->user?->name,
             'scheduled_start_at' => $this->appointment->scheduled_start_at?->toIso8601String(),

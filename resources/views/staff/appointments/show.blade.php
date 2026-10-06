@@ -5,7 +5,7 @@
             <p class="casa-section-label">{{ __('Therapist appointment') }}</p>
             <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $appointment->appointment_number }}</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">
-                {{ $appointment->customerProfile?->user?->name }} · {{ $appointment->service?->name }}
+                {{ $appointment->customerProfile?->display_name }} · {{ $appointment->service?->name }}
             </p>
         </div>
     </x-slot>
@@ -30,7 +30,7 @@
                     </div>
                     <div class="rounded-2xl bg-casa-bg p-4">
                         <dt class="text-xs font-black uppercase tracking-[0.12em] text-casa-muted">{{ __('Customer phone') }}</dt>
-                        <dd class="mt-2 font-semibold text-casa-text">{{ $appointment->customerProfile?->user?->phone ?: __('Not set') }}</dd>
+                        <dd class="mt-2 font-semibold text-casa-text">{{ $appointment->customerProfile?->display_phone ?: __('Not set') }}</dd>
                     </div>
                     <div class="rounded-2xl bg-casa-bg p-4 sm:col-span-2">
                         <dt class="text-xs font-black uppercase tracking-[0.12em] text-casa-muted">{{ __('Therapist preference') }}</dt>
@@ -164,7 +164,7 @@
 
             <x-app-card>
                 <p class="casa-section-label">{{ __('Customer') }}</p>
-                <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ $appointment->customerProfile?->user?->name }}</h2>
+                <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ $appointment->customerProfile?->display_name }}</h2>
                 @if ($appointment->customerProfile)
                     <a href="{{ route('staff.customers.show', $appointment->customerProfile) }}" class="mt-5 casa-button-secondary w-full">{{ __('Open customer') }}</a>
                 @endif

@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Super administrator') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('System errors') }}</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Review grouped application failures and the individual requests that triggered them.') }}</p>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('System issues') }}</h1>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Review site problems and the requests where they occurred.') }}</p>
         </div>
     </x-slot>
 

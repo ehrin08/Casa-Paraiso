@@ -19,7 +19,7 @@ class AdminAppointmentStoreRequest extends AppointmentRequest
     public function rules(): array
     {
         return [
-            'customer_profile_id' => ['required', 'integer', Rule::exists('customer_profiles', 'id')->whereNull('deleted_at')],
+            ...$this->operationalCustomerRules(),
             'service_id' => ['required', 'integer', $this->activeServiceRule()],
             'staff_profile_id' => ['required', 'integer', $this->activeStaffProfileRule()],
             'preferred_staff_profile_id' => ['nullable', 'integer', $this->activeStaffProfileRule()],

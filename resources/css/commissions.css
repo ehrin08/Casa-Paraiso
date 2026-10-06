@@ -1,0 +1,103 @@
+/* Commission presentation stays within the existing Casa workspace. */
+.casa-page-heading .commissions-heading h1 { font-size: clamp(1.75rem, 2.5vw, 2rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
+.commissions-heading p { margin-top: 0.4rem; color: var(--color-casa-muted); font-size: 1rem; line-height: 1.5; }
+.commissions-export { gap: 0.65rem; text-transform: none; letter-spacing: normal; box-shadow: none; }
+.commissions-workspace { display: grid; gap: 1rem; min-width: 0; color: var(--color-casa-text); }
+.commissions-workspace .commissions-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.commissions-metrics .casa-appointment-stat { min-height: 108px; gap: 1.25rem; padding: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); }
+.commissions-metrics .casa-appointment-stat-icon { width: 4rem; height: 4rem; flex: 0 0 auto; color: var(--color-casa-palm-dark); background: color-mix(in srgb, var(--color-casa-palm) 13%, var(--color-casa-paper)); }
+.commissions-metrics .casa-appointment-stat > div { min-width: 0; }
+.commissions-metrics .casa-appointment-stat dt { font-size: 1rem; font-weight: 500; text-transform: none; letter-spacing: normal; }
+.commissions-metrics .casa-appointment-stat dd { font-size: clamp(1.5rem, 2.4vw, 2.25rem); line-height: 1.25; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.commissions-toolbar, .commissions-records, .commissions-detail { min-width: 0; border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); }
+body[data-workspace-role] .commissions-workspace .commissions-toolbar { display: block; padding: 1rem 1.25rem; }
+.commissions-toolbar > .min-w-0:empty { display: none; }
+.commissions-filter-form { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(140px, 0.85fr) minmax(280px, 1.4fr) auto; align-items: end; gap: 1rem; }
+.commissions-field { display: grid; min-width: 0; gap: 0.35rem; }
+.commissions-field label, .commissions-date-range legend { font-size: 0.875rem; font-weight: 600; }
+.commissions-date-range { min-width: 0; }
+.commissions-date-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.35rem; }
+.commissions-date-inputs label { color: var(--color-casa-muted); }
+.commissions-filter-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.commissions-filter-actions button { white-space: nowrap; }
+.commissions-clear { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-casa-muted); font-size: 0.875rem; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.commissions-workspace .casa-input { width: 100%; min-width: 0; min-height: 44px; font-size: 0.875rem; }
+.commissions-workspace .casa-button-primary, .commissions-workspace .casa-button-secondary { text-transform: none; letter-spacing: normal; box-shadow: none; }
+.commissions-grid { display: grid; grid-template-columns: minmax(0, 63fr) minmax(0, 37fr); align-items: stretch; gap: 1rem; }
+.commissions-records, .commissions-detail { padding: 1rem 1.25rem; }
+.commissions-records-heading { margin-bottom: 0.75rem; }
+.commissions-records-heading h2, .commissions-detail h2 { font-size: 1.25rem; line-height: 1.35; font-weight: 800; letter-spacing: -0.02em; }
+.commissions-records-heading p { margin-top: 0.2rem; font-size: 0.875rem; color: var(--color-casa-muted); }
+body[data-workspace-role] .commissions-workspace .casa-table-wrap { border: 0; border-radius: 0; scrollbar-width: thin; scrollbar-color: var(--color-casa-muted) var(--color-casa-paper); }
+.commissions-table table { width: 100%; min-width: 660px; font-size: 0.875rem; }
+.commissions-table thead, .commissions-breakdown-table thead { background: color-mix(in srgb, var(--color-casa-sand) 50%, var(--color-casa-paper)); }
+body[data-workspace-role] .commissions-workspace .casa-table-wrap th { height: 44px; padding: 0.5rem 0.625rem; text-align: left; font-weight: 600; text-transform: none; letter-spacing: normal; }
+.commissions-workspace .casa-table-wrap th:first-child { border-radius: 6px 0 0 6px; }
+.commissions-workspace .casa-table-wrap th:last-child { border-radius: 0 6px 6px 0; }
+body[data-workspace-role] .commissions-workspace .casa-table-wrap td { padding: 0.625rem; vertical-align: middle; border-bottom: 1px solid var(--color-casa-border); }
+.commissions-row.is-selected { background: color-mix(in srgb, var(--color-casa-palm) 9%, var(--color-casa-paper)); }
+.commissions-row:hover { background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--color-casa-paper)); }
+.commissions-therapist { min-width: 120px; max-width: 180px; overflow-wrap: anywhere; }
+.commissions-therapist > a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.commissions-adjustment { display: block; margin-top: 0.1rem; color: var(--color-casa-cacao); font-size: 0.875rem; }
+.commissions-earned { min-width: 112px; }
+.commissions-earned time span, .commissions-breakdown-table time { display: block; margin-top: 0.2rem; color: var(--color-casa-muted); }
+.commissions-amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.commissions-net { font-weight: 700; }
+.commissions-status { display: inline-flex; align-items: center; justify-content: center; min-width: 4.5rem; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; }
+.commissions-status--pending { background: #ffecd0; color: #7a3e14; }
+.commissions-status--paid { background: color-mix(in srgb, var(--color-casa-palm) 14%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
+.commissions-view { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; }
+.commissions-view:hover { background: var(--color-casa-sand); color: var(--color-casa-palm-dark); }
+.commissions-pagination { margin-top: 1rem; }
+.commissions-detail { scroll-margin-top: 1rem; }
+.commissions-detail-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+.commissions-identity { margin-top: 1rem; overflow-wrap: anywhere; }
+.commissions-identity h3 { font-size: 1.75rem; line-height: 1.25; font-weight: 800; letter-spacing: -0.03em; }
+.commissions-identity p { margin-top: 0.35rem; font-size: 0.875rem; color: var(--color-casa-muted); }
+.commissions-detail-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-block: 1rem; padding-block: 1rem; border-block: 1px solid var(--color-casa-border); font-size: 0.875rem; }
+.commissions-detail dt { color: var(--color-casa-muted); }
+.commissions-detail dd { margin-top: 0.3rem; overflow-wrap: anywhere; }
+.commissions-breakdown h3, .commissions-notes h3 { margin-bottom: 0.65rem; font-size: 1rem; line-height: 1.4; font-weight: 800; }
+.commissions-breakdown-table table { width: 100%; min-width: 360px; font-size: 0.875rem; }
+.commissions-breakdown-table td:first-child { min-width: 115px; max-width: 180px; overflow-wrap: anywhere; }
+.commissions-breakdown-table td:not(:first-child) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+body[data-workspace-role] .commissions-workspace .commissions-breakdown-table tfoot th, body[data-workspace-role] .commissions-workspace .commissions-breakdown-table tfoot td { height: 52px; border: 0; font-weight: 800; }
+.commissions-source-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-casa-border); font-size: 0.875rem; }
+.commissions-source-details a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-casa-palm-dark); font-weight: 700; overflow-wrap: anywhere; }
+.commissions-related-adjustments { display: grid; gap: 0.25rem; }
+.commissions-notes { margin-top: 1rem; font-size: 0.875rem; }
+.commissions-notes p { white-space: pre-line; overflow-wrap: anywhere; color: var(--color-casa-muted); }
+.commissions-payout { margin-top: 1.25rem; }
+.commissions-payout summary { display: flex; width: 100%; gap: 0.75rem; cursor: pointer; list-style: none; }
+.commissions-payout summary::-webkit-details-marker { display: none; }
+.commissions-payout-form { display: grid; gap: 1rem; margin-top: 1rem; }
+.commissions-payout-form > p, .commissions-payout-state { color: var(--color-casa-muted); font-size: 0.875rem; line-height: 1.5; }
+.commissions-payout-state { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-casa-border); }
+.commissions-empty-detail { min-height: 240px; }
+.commissions-empty-detail > svg { width: 3rem; height: 3rem; margin-top: 2rem; color: var(--color-casa-palm); }
+.commissions-empty-detail > p { margin-top: 1rem; color: var(--color-casa-muted); font-size: 0.875rem; line-height: 1.5; }
+.commissions-standalone { max-width: 48rem; margin-inline: auto; }
+.commissions-workspace a:focus-visible, .commissions-workspace button:focus-visible, .commissions-workspace summary:focus-visible, .commissions-export:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: 8px; }
+.commissions-clear:hover, .commissions-source-details a:hover, .commissions-therapist > a:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 1535px) {
+    .commissions-filter-form { grid-template-columns: minmax(130px, 1fr) minmax(120px, 0.85fr) minmax(270px, 1.6fr); }
+    .commissions-filter-actions { grid-column: 1 / -1; justify-content: flex-end; }
+}
+@media (max-width: 1279px) {
+    .commissions-grid { grid-template-columns: minmax(0, 1fr); }
+    .commissions-metrics .casa-appointment-stat { gap: 0.75rem; padding: 1rem; }
+    .commissions-metrics .casa-appointment-stat-icon { width: 3rem; height: 3rem; }
+}
+@media (max-width: 639px) {
+    .commissions-workspace .commissions-metrics, .commissions-filter-form { grid-template-columns: minmax(0, 1fr); }
+    .commissions-filter-actions { justify-content: flex-start; }
+    .commissions-filter-actions button { flex: 1; }
+    .commissions-metrics .casa-appointment-stat { min-height: 94px; }
+    .commissions-metrics .casa-appointment-stat-icon { width: 3.25rem; height: 3.25rem; }
+    body[data-workspace-role] .commissions-workspace .commissions-toolbar, .commissions-records, .commissions-detail { padding: 1rem; }
+    .commissions-export { width: 100%; }
+}
+@media (max-width: 359px) {
+    .commissions-date-inputs, .commissions-detail-summary, .commissions-source-details { grid-template-columns: minmax(0, 1fr); }
+}

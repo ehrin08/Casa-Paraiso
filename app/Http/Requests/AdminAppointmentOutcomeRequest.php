@@ -18,6 +18,9 @@ class AdminAppointmentOutcomeRequest extends FormRequest
         return [
             'status' => ['required', Rule::in([Appointment::STATUS_NO_SHOW, Appointment::STATUS_CANCELLED])],
             'reason' => ['nullable', 'string', 'max:500'],
+            'return_to' => ['nullable', Rule::in(['index'])],
+            'queue_page' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'mode' => ['nullable', Rule::in(['bookings', 'availability'])],
         ];
     }
 }

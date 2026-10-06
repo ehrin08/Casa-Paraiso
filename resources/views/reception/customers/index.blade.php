@@ -25,8 +25,8 @@
                     <tbody class="divide-y divide-casa-border text-sm">
                         @foreach ($customers as $customer)
                             <tr class="casa-table-row">
-                                <td class="px-4 py-4"><strong>{{ $customer->user?->name }}</strong><span class="block text-casa-muted">{{ $customer->customer_code }}</span></td>
-                                <td class="px-4 py-4">{{ $customer->user?->phone ?: __('Not set') }}</td>
+                                <td class="px-4 py-4"><strong>{{ $customer->display_name }}</strong><span class="block text-casa-muted">{{ $customer->customer_code }}</span></td>
+                                <td class="px-4 py-4">{{ $customer->display_phone ?: __('Not set') }}</td>
                                 <td class="px-4 py-4">{{ $customer->appointments_count }}</td>
                                 <td class="px-4 py-4">{{ $customer->transactions_count }}</td>
                                 <td class="px-4 py-4"><a class="font-bold text-casa-primary" href="{{ route('reception.customers.show', $customer) }}">{{ __('Open') }}</a></td>

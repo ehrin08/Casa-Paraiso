@@ -40,7 +40,7 @@
                 <tbody class="divide-y divide-casa-border text-sm">
                     @foreach ($feedback as $item)
                         <tr class="casa-table-row">
-                            <td class="px-4 py-4 font-semibold text-casa-text">{{ $item->customerProfile?->user?->name }}</td>
+                            <td class="px-4 py-4 font-semibold text-casa-text">{{ $item->customerProfile?->display_name }}</td>
                             <td class="px-4 py-4 text-casa-muted">{{ $item->service?->name }}</td>
                             <td class="px-4 py-4 text-casa-muted">{{ $item->rating }}/5</td>
                                     <td class="px-4 py-4">

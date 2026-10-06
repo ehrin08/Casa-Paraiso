@@ -64,7 +64,7 @@ class PhaseFiveToTenWorkflowTest extends TestCase
             ->assertSee('previewSlots', false)
             ->assertSee('moreSlotsLabel(day)', false)
             ->assertSee('slot.label', false)
-            ->assertSee('eligibleStaff', false);
+            ->assertSee('id="preferred_staff_profile_id"', false);
     }
 
     public function test_customer_availability_excludes_confirmed_overlap_and_honors_preferred_staff(): void

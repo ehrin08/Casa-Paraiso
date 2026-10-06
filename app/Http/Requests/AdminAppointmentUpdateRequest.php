@@ -22,7 +22,7 @@ class AdminAppointmentUpdateRequest extends AppointmentRequest
         $appointment = $this->route('appointment');
 
         return [
-            'customer_profile_id' => ['required', 'integer', $this->customerProfileRuleForUpdate($appointment)],
+            ...$this->operationalCustomerRules($appointment),
             'service_id' => ['required', 'integer', $this->serviceRuleForUpdate($appointment)],
             'staff_profile_id' => ['nullable', 'integer', $this->staffProfileRuleForUpdate($appointment, 'staff_profile_id')],
             'preferred_staff_profile_id' => ['nullable', 'integer', $this->staffProfileRuleForUpdate($appointment, 'preferred_staff_profile_id')],

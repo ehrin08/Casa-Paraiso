@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">Protected administration</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">User access</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">Pre-authorize team emails and assign their workspace before team members sign in.</p>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">User accounts</h1>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">Add team members by email and choose their access before they sign in.</p>
         </div>
     </x-slot>
 

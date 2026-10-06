@@ -1,197 +1,152 @@
 <x-app-layout>
     <x-slot name="header">
-        <div>
-            <p class="casa-section-label">{{ __('Admin module') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Team & Services') }}</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">
-                {{ __('Manage therapists, treatment eligibility, service pricing, and availability foundations in one workspace.') }}
+        <div class="therapists-heading">
+            <p class="casa-section-label">{{ __('Manage') }}</p>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Therapists') }}</h1>
+            <p class="mt-2 text-sm leading-6 text-casa-muted">
+                {{ __('Manage your team of therapists, their services, schedules, and availability.') }}
             </p>
         </div>
-
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('admin.services.create') }}" class="casa-button-secondary">{{ __('Add service') }}</a>
-            @if(auth()->user()->isSuperAdmin())<a href="{{ route('admin.staff.create') }}" class="casa-button-primary">{{ __('Add therapist') }}</a>@endif
-        </div>
+        @if (auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.staff.create') }}" class="casa-button-primary">
+                <x-nav-icon name="plus" />
+                {{ __('Add therapist') }}
+            </a>
+        @endif
     </x-slot>
 
-    <div class="space-y-6">
-        <x-app-card>
-            <x-list-toolbar eyebrow="{{ __('Team') }}" title="{{ __('Therapist profiles') }}" :count="$staffProfiles->total()" :reset-url="route('admin.staff.index')" :active-filters="collect(request()->only(['q', 'status', 'bookable']))->filter(fn ($value) => filled($value))->count()" :collapsible="true" class="casa-list-toolbar--filters">
-                <x-slot name="meta">
-                    <span class="casa-filter-chip">{{ __(':count active', ['count' => $activeAccountCount]) }}</span>
-                    <span class="casa-filter-chip">{{ __(':count bookable', ['count' => $bookableCount]) }}</span>
-                    <span class="casa-filter-chip">{{ __(':count services', ['count' => $activeServiceCount]) }}</span>
-                </x-slot>
-                <form method="GET" action="{{ route('admin.staff.index') }}" class="casa-filter-form">
-                    <input type="hidden" name="sort" value="{{ $sort }}">
-                    <input type="hidden" name="direction" value="{{ $direction }}">
-                    <x-filter-search :value="$search" placeholder="{{ __('Search therapists') }}" label="{{ __('Search therapists') }}" />
-                    <select name="status" class="casa-input" aria-label="{{ __('Account status') }}">
-                        <option value="">{{ __('All accounts') }}</option>
+    @php
+        $activeFilters = collect([$search, $status, $bookable])->filter(fn ($value) => filled($value))->count();
+        $selectionQuery = request()->only(['q', 'status', 'bookable', 'sort', 'direction', 'page']);
+        $initials = fn ($name) => \Illuminate\Support\Str::of($name)->squish()->explode(' ')
+            ->filter()->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('');
+    @endphp
+
+    <div class="therapists-workspace" data-therapists-workspace>
+        <x-list-toolbar :count="$staffProfiles->total()" :reset-url="route('admin.staff.index')" :active-filters="$activeFilters" :collapsible="true" class="therapists-toolbar casa-list-toolbar--filters">
+            <x-slot name="meta">
+                <span class="casa-filter-chip">{{ __(':count active', ['count' => $activeAccountCount]) }}</span>
+                <span class="casa-filter-chip">{{ __(':count bookable', ['count' => $bookableCount]) }}</span>
+            </x-slot>
+            <form method="GET" action="{{ route('admin.staff.index') }}" class="therapists-filter-form">
+                <input type="hidden" name="sort" value="{{ $sort }}">
+                <input type="hidden" name="direction" value="{{ $direction }}">
+                <div class="therapists-filter-field">
+                    <label for="therapist-search" class="sr-only">{{ __('Search therapists') }}</label>
+                    <x-filter-search input-id="therapist-search" :value="$search" placeholder="{{ __('Search therapists by name or service…') }}" label="{{ __('Search therapists') }}" />
+                </div>
+                <div class="therapists-filter-field">
+                    <label for="therapist-status">{{ __('Account status') }}</label>
+                    <select id="therapist-status" name="status" class="casa-input">
+                        <option value="">{{ __('All statuses') }}</option>
                         <option value="active" @selected($status === 'active')>{{ __('Active') }}</option>
                         <option value="inactive" @selected($status === 'inactive')>{{ __('Inactive') }}</option>
                     </select>
-                    <select name="bookable" class="casa-input" aria-label="{{ __('Booking availability') }}">
-                        <option value="">{{ __('Any bookable') }}</option>
+                </div>
+                <div class="therapists-filter-field">
+                    <label for="therapist-bookable">{{ __('Bookability') }}</label>
+                    <select id="therapist-bookable" name="bookable" class="casa-input">
+                        <option value="">{{ __('All availability') }}</option>
                         <option value="yes" @selected($bookable === 'yes')>{{ __('Bookable') }}</option>
-                        <option value="no" @selected($bookable === 'no')>{{ __('Not bookable') }}</option>
+                        <option value="no" @selected($bookable === 'no')>{{ __('Unavailable') }}</option>
                     </select>
-                    <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
-                </form>
-            </x-list-toolbar>
+                </div>
+                <button type="submit" class="casa-button-primary">{{ __('Apply filters') }}</button>
+            </form>
+        </x-list-toolbar>
+        <noscript><style>.therapists-toolbar [data-filter-panel] { display: block; } .therapists-toolbar [data-filter-toggle] { display: none; }</style></noscript>
 
-            <div class="mt-5">
+        <div class="therapists-grid">
+            <section class="therapists-list" aria-label="{{ __('Therapist list') }}">
                 @if ($staffProfiles->isEmpty())
                     <x-empty-state
-                        title="{{ __('No therapist profiles yet') }}"
-                        description="{{ __('Create therapist accounts before assigning services, schedules, and appointment responsibilities.') }}"
+                        :title="$activeFilters ? __('No therapists found') : __('No therapist profiles yet')"
+                        :description="$activeFilters ? __('Try another search or clear the filters to find a therapist.') : __('Create therapist accounts before assigning services and working hours.')"
                     >
                         <x-slot name="action">
-                            @if(auth()->user()->isSuperAdmin())<a href="{{ route('admin.staff.create') }}" class="casa-button-primary">{{ __('Add therapist') }}</a>@endif
+                            @if ($activeFilters)
+                                <a href="{{ route('admin.staff.index') }}" class="casa-button-secondary">{{ __('Clear filters') }}</a>
+                            @elseif (auth()->user()->isSuperAdmin())
+                                <a href="{{ route('admin.staff.create') }}" class="casa-button-primary">{{ __('Add therapist') }}</a>
+                            @endif
                         </x-slot>
                     </x-empty-state>
                 @else
-                    <x-table-shell>
-                        <thead class="bg-casa-bg text-left text-xs font-black uppercase tracking-[0.1em] text-casa-muted">
+                    <x-table-shell class="therapists-table" label="{{ __('Scrollable therapist records') }}">
+                        <thead>
                             <tr>
-                                <x-sortable-th sort="name">{{ __('Therapist') }}</x-sortable-th>
-                                <x-sortable-th sort="position">{{ __('Role') }}</x-sortable-th>
-                                <x-sortable-th sort="services">{{ __('Services') }}</x-sortable-th>
-                                <x-sortable-th sort="appointments">{{ __('Appointments') }}</x-sortable-th>
-                                <x-sortable-th sort="status">{{ __('Status') }}</x-sortable-th>
-                                <th class="px-4 py-3">{{ __('Actions') }}</th>
+                                @foreach (['name' => __('Therapist'), 'services' => __('Services'), 'status' => __('Account status'), 'bookable' => __('Bookability')] as $column => $label)
+                                    @php
+                                        $isSorted = $sort === $column;
+                                        $nextDirection = $isSorted && $direction === 'asc' ? 'desc' : 'asc';
+                                        $sortUrl = route('admin.staff.index', array_merge(request()->only(['q', 'status', 'bookable']), ['sort' => $column, 'direction' => $nextDirection]));
+                                    @endphp
+                                    <th scope="col" aria-sort="{{ $isSorted ? ($direction === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+                                        <a href="{{ $sortUrl }}">
+                                            {{ $label }}
+                                            <span aria-hidden="true">{{ $isSorted ? ($direction === 'asc' ? '↑' : '↓') : '↕' }}</span>
+                                        </a>
+                                    </th>
+                                @endforeach
+                                <th scope="col">{{ __('Schedule') }}</th>
+                                <th scope="col"><span class="sr-only">{{ __('View therapist') }}</span></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-casa-border text-sm">
+                        <tbody>
                             @foreach ($staffProfiles as $staffProfile)
-                                <tr class="casa-table-row">
-                                    <td class="px-4 py-4">
-                                        <a href="{{ route('admin.staff.show', $staffProfile) }}" class="font-bold text-casa-text hover:text-casa-primary">
-                                            {{ $staffProfile->user->name }}
+                                @php
+                                    $isSelected = $selectedStaffProfile?->id === $staffProfile->id;
+                                    $selectionUrl = route('admin.staff.index', array_merge($selectionQuery, ['selected' => $staffProfile->id, 'tab' => $selectedTab])).'#therapist-detail';
+                                @endphp
+                                <tr @class(['therapists-row', 'is-selected' => $isSelected]) data-therapist-id="{{ $staffProfile->id }}">
+                                    <td>
+                                        <a href="{{ $selectionUrl }}" class="therapists-row-link therapists-person" @if ($isSelected) aria-current="true" @endif>
+                                            <span class="therapists-avatar" aria-hidden="true">{{ mb_strtoupper($initials($staffProfile->user->name)) }}</span>
+                                            <span>{{ $staffProfile->user->name }}</span>
                                         </a>
-                                        <p class="mt-1 text-xs text-casa-muted">{{ $staffProfile->user->email }}</p>
-                                        <x-status-badge class="mt-2">{{ ucfirst($staffProfile->staff_type) }}</x-status-badge>
                                     </td>
-                                    <td class="px-4 py-4 text-casa-muted">
-                                        <p class="font-semibold text-casa-text">{{ $staffProfile->position ?: __('Therapist') }}</p>
-                                        <p class="mt-1 text-xs">{{ $staffProfile->specialization ?: __('No specialization yet') }}</p>
+                                    <td>{{ trans_choice(':count service|:count services', $staffProfile->services_count) }}</td>
+                                    <td>
+                                        <span @class(['therapists-pill', 'therapists-pill--active' => $staffProfile->user->is_active, 'therapists-pill--inactive' => ! $staffProfile->user->is_active])>
+                                            {{ $staffProfile->user->is_active ? __('Active') : __('Inactive') }}
+                                        </span>
                                     </td>
-                                    <td class="px-4 py-4">
-                                        <div class="flex flex-wrap gap-2">
-                                            @forelse ($staffProfile->services as $service)
-                                                <x-status-badge :tone="$service->is_active ? 'success' : 'dark'">{{ $service->name }}</x-status-badge>
-                                            @empty
-                                                <span class="text-casa-muted">{{ __('No services') }}</span>
-                                            @endforelse
-                                        </div>
-                                        <p class="mt-2 text-xs text-casa-muted">{{ trans_choice(':count service|:count services', $staffProfile->services_count) }}</p>
+                                    <td>
+                                        <span @class(['therapists-pill', 'therapists-pill--active' => $staffProfile->is_bookable, 'therapists-pill--unavailable' => ! $staffProfile->is_bookable])>
+                                            {{ $staffProfile->is_bookable ? __('Bookable') : __('Unavailable') }}
+                                        </span>
                                     </td>
-                                    <td class="px-4 py-4 text-casa-muted">{{ trans_choice(':count appointment|:count appointments', $staffProfile->appointments_count) }}</td>
-                                    <td class="px-4 py-4">
-                                        <div class="flex flex-wrap gap-2">
-                                            <x-status-badge :tone="$staffProfile->user->is_active ? 'success' : 'dark'">
-                                                {{ $staffProfile->user->is_active ? __('Active') : __('Inactive') }}
-                                            </x-status-badge>
-                                            <x-status-badge :tone="$staffProfile->is_bookable ? 'success' : 'warning'">
-                                                {{ $staffProfile->is_bookable ? __('Bookable') : __('Not bookable') }}
-                                            </x-status-badge>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <a href="{{ route('admin.staff.edit', $staffProfile) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark">{{ __('Edit') }}</a>
+                                    <td class="therapists-muted">{{ $scheduleSummaries[$staffProfile->id]['daysLabel'] }}</td>
+                                    <td>
+                                        <a href="{{ $selectionUrl }}" class="therapists-chevron" aria-label="{{ __('View :name', ['name' => $staffProfile->user->name]) }}">
+                                            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" /></svg>
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </x-table-shell>
-
-                    <div class="mt-5">
-                        {{ $staffProfiles->links() }}
-                    </div>
+                    <div class="therapists-list-footer">{{ $staffProfiles->links() }}</div>
                 @endif
-            </div>
-        </x-app-card>
+            </section>
 
-        <x-app-card id="service-catalog">
-            <div class="flex flex-col gap-3 border-b border-casa-border pb-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="casa-section-label">{{ __('Catalog') }}</p>
-                    <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Service catalog') }}</h2>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">
-                        {{ __('Keep treatment duration, pricing, and booking visibility close to therapist eligibility decisions.') }}
-                    </p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="casa-filter-chip">{{ trans_choice(':count service|:count services', $serviceCatalog->total()) }}</span>
-                    <a href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                @if ($serviceCatalog->isEmpty())
-                    <x-empty-state
-                        title="{{ __('No services yet') }}"
-                        description="{{ __('Add the first treatment before assigning therapist eligibility and appointment workflows.') }}"
-                    >
-                        <x-slot name="action">
-                            <a href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
-                        </x-slot>
-                    </x-empty-state>
-                @else
-                    <x-table-shell>
-                        <thead class="bg-casa-bg text-left text-xs font-black uppercase tracking-[0.1em] text-casa-muted">
-                            <tr>
-                                <th class="px-4 py-3">{{ __('Service') }}</th>
-                                <th class="px-4 py-3">{{ __('Duration') }}</th>
-                                <th class="px-4 py-3">{{ __('Price') }}</th>
-                                <th class="px-4 py-3">{{ __('Usage') }}</th>
-                                <th class="px-4 py-3">{{ __('Status') }}</th>
-                                <th class="px-4 py-3">{{ __('Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-casa-border text-sm">
-                            @foreach ($serviceCatalog as $service)
-                                <tr class="casa-table-row">
-                                    <td class="px-4 py-4">
-                                        <a href="{{ route('admin.services.show', $service) }}" class="font-bold text-casa-text hover:text-casa-primary">
-                                            {{ $service->name }}
-                                        </a>
-                                        <p class="mt-1 text-xs text-casa-muted">{{ $service->slug }}</p>
-                                    </td>
-                                    <td class="px-4 py-4 text-casa-muted">{{ $service->duration_minutes }} {{ __('min') }}</td>
-                                    <td class="px-4 py-4 font-semibold text-casa-text">PHP {{ number_format((float) $service->price, 2) }}</td>
-                                    <td class="px-4 py-4 text-casa-muted">
-                                        {{ trans_choice(':count therapist|:count therapists', $service->staff_profiles_count) }},
-                                        {{ trans_choice(':count appointment|:count appointments', $service->appointments_count) }}
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <x-status-badge :tone="$service->is_active ? 'success' : 'dark'">
-                                            {{ $service->is_active ? __('Active') : __('Inactive') }}
-                                        </x-status-badge>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <div class="flex flex-wrap gap-3">
-                                            <a href="{{ route('admin.services.edit', $service) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark">{{ __('Edit') }}</a>
-                                            <x-confirm-action
-                                                :action="route('admin.services.toggle', $service)"
-                                                method="PATCH"
-                                                :label="$service->is_active ? __('Deactivate') : __('Activate')"
-                                                :confirm-title="$service->is_active ? __('Deactivate service?') : __('Activate service?')"
-                                                :confirm-message="$service->is_active ? __('Customers will no longer be able to book this service until it is activated again.') : __('Customers will be able to request this service once it is active.')"
-                                                :confirm-button="$service->is_active ? __('Deactivate') : __('Activate')"
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </x-table-shell>
-
-                    <div class="mt-4">
-                        {{ $serviceCatalog->links() }}
-                    </div>
-                @endif
-            </div>
-        </x-app-card>
+            @if ($selectedStaffProfile)
+                <x-therapist-detail
+                    :staff-profile="$selectedStaffProfile"
+                    :selected-tab="$selectedTab"
+                    :selection-query="$selectionQuery"
+                    :schedule="$scheduleSummaries[$selectedStaffProfile->id]"
+                    :week-start="$scheduleWeekStart"
+                    :week-end="$scheduleWeekEnd"
+                    :upcoming-exceptions="$upcomingExceptions"
+                />
+            @else
+                <aside id="therapist-detail" class="therapists-detail therapists-empty-detail">
+                    <x-nav-icon name="team" class="size-10 text-casa-palm" />
+                    <h2 class="text-lg font-extrabold">{{ __('Therapist details') }}</h2>
+                    <p class="therapists-muted">{{ __('A therapist profile will appear here when there are matching records.') }}</p>
+                </aside>
+            @endif
+        </div>
     </div>
 </x-app-layout>

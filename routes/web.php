@@ -24,6 +24,8 @@ use App\Http\Controllers\Customer\AppointmentCalendarController as CustomerAppoi
 use App\Http\Controllers\Customer\AppointmentController as CustomerAppointmentController;
 use App\Http\Controllers\Customer\FeedbackController as CustomerFeedbackController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OperationalAppointmentAvailabilityController;
+use App\Http\Controllers\OperationalCustomerLookupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reception\AppointmentCalendarController as ReceptionAppointmentCalendarController;
 use App\Http\Controllers\Reception\AppointmentController as ReceptionAppointmentController;
@@ -94,6 +96,7 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::get('/attendance/station', [WebAttendanceController::class, 'station'])->name('attendance.station');
         Route::patch('/attendance/{attendance}/correct', [WebAttendanceController::class, 'correct'])->name('attendance.correct');
         Route::get('/appointments/calendar', AdminAppointmentCalendarController::class)->name('appointments.calendar');
+        Route::get('/appointments/records', [AdminAppointmentController::class, 'records'])->name('appointments.records');
         Route::get('/staff-schedule-roster', [AdminWeeklyRosterController::class, 'show'])->name('staff-roster.show');
         Route::post('/staff-schedule-roster/copy', [AdminWeeklyRosterController::class, 'copy'])->name('staff-roster.copy');
         Route::post('/staff-schedule-roster/{scheduleWeek}/shifts', [AdminWeeklyRosterController::class, 'storeShift'])->name('staff-roster.shifts.store');
@@ -101,10 +104,12 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::post('/staff-schedule-roster/{scheduleWeek}/publish', [AdminWeeklyRosterController::class, 'publish'])->name('staff-roster.publish');
         Route::post('/appointments/calendar', [AdminAppointmentController::class, 'storeFromCalendar'])->name('appointments.calendar.store');
         Route::get('/appointments/available-therapists', [AdminAppointmentController::class, 'availableTherapists'])->name('appointments.available-therapists');
+        Route::get('/appointments/availability', OperationalAppointmentAvailabilityController::class)->name('appointments.availability');
         Route::post('/appointments/{appointment}/complete', [AdminAppointmentController::class, 'complete'])->name('appointments.complete');
         Route::patch('/appointments/{appointment}/outcome', [AdminAppointmentController::class, 'outcome'])->name('appointments.outcome');
         Route::resource('appointments', AdminAppointmentController::class)->except('destroy');
-        Route::resource('customers', AdminCustomerController::class)->only(['index', 'show', 'update']);
+    Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
+    Route::resource('customers', AdminCustomerController::class)->only(['index', 'show', 'update']);
         Route::get('/staff/{staff}/weekly-schedules/create', [AdminStaffWeeklyScheduleController::class, 'create'])->name('staff.weekly-schedules.create');
         Route::post('/staff/{staff}/weekly-schedules', [AdminStaffWeeklyScheduleController::class, 'store'])->name('staff.weekly-schedules.store');
         Route::get('/staff/{staff}/weekly-schedules/{weeklySchedule}/edit', [AdminStaffWeeklyScheduleController::class, 'edit'])->name('staff.weekly-schedules.edit');
@@ -120,10 +125,13 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::resource('services', AdminServiceController::class)->except('destroy');
         Route::patch('/addons/{addon}/toggle', [AdminAddonController::class, 'toggle'])->name('addons.toggle');
         Route::resource('addons', AdminAddonController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+        Route::get('/transactions/export', [AdminTransactionController::class, 'export'])->name('transactions.export');
         Route::resource('transactions', AdminTransactionController::class)->except('destroy');
         Route::get('/commissions', [AdminCommissionController::class, 'index'])->name('commissions.index');
+        Route::get('/commissions/export', [AdminCommissionController::class, 'export'])->name('commissions.export');
         Route::get('/commissions/{commission}', [AdminCommissionController::class, 'show'])->name('commissions.show');
         Route::patch('/commissions/{commission}/pay', [AdminCommissionController::class, 'pay'])->name('commissions.pay');
+        Route::get('/promotions/settings', [AdminPromotionController::class, 'editSettings'])->name('promotions.settings.edit');
         Route::patch('/promotions/settings', [AdminPromotionController::class, 'updateSettings'])->name('promotions.settings.update');
         Route::patch('/promotions/{promotion}/dismiss', [AdminPromotionController::class, 'dismiss'])->name('promotions.dismiss');
         Route::resource('promotions', AdminPromotionController::class)->only(['index', 'show']);
@@ -170,10 +178,12 @@ Route::middleware(['auth', 'active', 'verified', 'role:receptionist', MeasureApp
         Route::get('/attendance', [WebAttendanceController::class, 'station'])->name('attendance.station');
         Route::get('/appointments/calendar', ReceptionAppointmentCalendarController::class)->name('appointments.calendar');
         Route::get('/appointments/available-therapists', [ReceptionAppointmentController::class, 'availableTherapists'])->name('appointments.available-therapists');
+        Route::get('/appointments/availability', OperationalAppointmentAvailabilityController::class)->name('appointments.availability');
         Route::post('/appointments/{appointment}/complete', [ReceptionAppointmentController::class, 'complete'])->name('appointments.complete');
         Route::patch('/appointments/{appointment}/outcome', [ReceptionAppointmentController::class, 'outcome'])->name('appointments.outcome');
         Route::resource('appointments', ReceptionAppointmentController::class)->except('destroy');
-        Route::resource('customers', ReceptionCustomerController::class)->only(['index', 'show', 'update']);
+    Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
+    Route::resource('customers', ReceptionCustomerController::class)->only(['index', 'show', 'update']);
         Route::resource('transactions', ReceptionTransactionController::class)->except('destroy');
     });
 

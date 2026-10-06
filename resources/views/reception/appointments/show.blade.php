@@ -3,10 +3,10 @@
         <div>
             <p class="casa-section-label">{{ __('Appointment detail') }}</p>
             <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $appointment->appointment_number }}</h1>
-            <p class="mt-2 text-sm text-casa-muted">{{ $appointment->customerProfile?->user?->name }} · {{ $appointment->service?->name }}</p>
+            <p class="mt-2 text-sm text-casa-muted">{{ $appointment->customerProfile?->display_name }} · {{ $appointment->service?->name }}</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('reception.appointments.edit', $appointment) }}" class="casa-button-primary">{{ __('Edit') }}</a>
+        <a href="{{ route('reception.appointments.edit', $appointment) }}" class="casa-button-primary" data-panel-link data-turbo="false">{{ __('Edit') }}</a>
             <a href="{{ route('reception.appointments.index') }}" class="casa-button-secondary">{{ __('Calendar') }}</a>
         </div>
     </x-slot>

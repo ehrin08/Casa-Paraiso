@@ -26,6 +26,9 @@ class AdminAppointmentCompletionRequest extends FormRequest
             'payment_method' => ['nullable', Rule::in(Transaction::PAYMENT_METHODS)],
             'paid_at' => ['nullable', 'date', 'before_or_equal:now'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'return_to' => ['nullable', Rule::in(['index'])],
+            'queue_page' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'mode' => ['nullable', Rule::in(['bookings', 'availability'])],
         ];
     }
 

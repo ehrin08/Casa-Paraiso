@@ -150,9 +150,9 @@
                                 <path d="M48 73C31 72 24 60 23 48c17 0 29 9 25 25Zm19-20C55 40 57 25 66 15c12 12 13 27 1 38Zm17-15c1-16 12-25 24-28 3 16-5 27-24 28Zm-50 52c-13-2-21-11-22-22 13-1 23 7 22 22Z" fill="currentColor" opacity=".42"/>
                             </svg>
                             <div class="casa-canopy aspect-[4/4.25] sm:aspect-[5/4.8] lg:aspect-[6/5.3]">
-                                <picture>
-                                    <source media="(max-width: 768px)" srcset="{{ asset('images/spa/spa-hero-960.webp') }}">
-                                    <img src="{{ asset('images/spa/spa-hero-1600.webp') }}" srcset="{{ asset('images/spa/spa-hero-960.webp') }} 960w, {{ asset('images/spa/spa-hero-1600.webp') }} 1600w" sizes="(max-width: 1024px) 92vw, 52vw" width="1600" height="854" alt="A warm linen compress being prepared in a tropical spa treatment room" class="object-[62%_center]" fetchpriority="high">
+                                <picture class="block h-full w-full">
+                                    <source media="(max-width: 768px)" srcset="{{ asset('images/spa/casa-lobby-960.webp') }}">
+                                    <img src="{{ asset('images/spa/casa-lobby-1600.webp') }}" srcset="{{ asset('images/spa/casa-lobby-960.webp') }} 960w, {{ asset('images/spa/casa-lobby-1600.webp') }} 1600w" sizes="(max-width: 1024px) 92vw, 52vw" width="1600" height="1200" alt="Casa Paraiso reception and lounge with comfortable seating and woven pendant lights" class="object-[40%_center]" loading="eager" fetchpriority="high">
                                 </picture>
                             </div>
                             <div class="absolute -bottom-5 start-4 max-w-[17rem] rounded-2xl border border-white/55 bg-casa-paper/94 p-4 shadow-casa-lift backdrop-blur sm:start-8 sm:p-5">
@@ -386,10 +386,10 @@
                             </ol>
                         </div>
 
-                        <div class="casa-ritual-image order-2 aspect-[4/3] lg:order-1 lg:aspect-[4/4.1]">
-                            <picture>
-                                <source media="(max-width: 768px)" srcset="{{ asset('images/spa/spa-ritual-800.webp') }}">
-                                <img src="{{ asset('images/spa/spa-ritual-1400.webp') }}" srcset="{{ asset('images/spa/spa-ritual-800.webp') }} 800w, {{ asset('images/spa/spa-ritual-1400.webp') }} 1400w" sizes="(max-width: 1024px) 92vw, 42vw" width="1400" height="933" alt="Botanical oil, warm towels, and massage stones being prepared for a spa ritual" class="h-full w-full object-cover" loading="lazy">
+                        <div class="casa-ritual-image order-2 aspect-square lg:order-1">
+                            <picture class="block h-full w-full">
+                                <source media="(max-width: 768px)" srcset="{{ asset('images/spa/casa-treatment-room-800.webp') }}">
+                                <img src="{{ asset('images/spa/casa-treatment-room-1200.webp') }}" srcset="{{ asset('images/spa/casa-treatment-room-800.webp') }} 800w, {{ asset('images/spa/casa-treatment-room-1200.webp') }} 1200w" sizes="(max-width: 1024px) 92vw, 42vw" width="1200" height="1200" alt="Casa Paraiso treatment room with a prepared massage bed and the spa logo" class="h-full w-full object-cover" loading="lazy">
                             </picture>
                         </div>
                     </div>

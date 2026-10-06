@@ -2,16 +2,23 @@
 
 namespace App\Services;
 
-use App\Models\{StaffAttendance, StaffAttendanceEvent, StaffAttendanceScanRequest, StaffProfile, User};
+use App\Models\StaffAttendance;
+use App\Models\StaffAttendanceEvent;
+use App\Models\StaffAttendanceScanRequest;
+use App\Models\StaffProfile;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AttendanceWorkflow
 {
     public function scanAndVerify(StaffProfile $staff, User $actor, string $payload): StaffAttendance
     {
         abort_unless($staff->staff_type === StaffProfile::TYPE_THERAPIST && $staff->user?->is_active, 422, 'Only active therapists can use attendance scanning.');
-        $bucket = app(AttendanceQr::class)->validate($payload); $now = CarbonImmutable::now('Asia/Manila');
+        $bucket = app(AttendanceQr::class)->validate($payload);
+        $now = CarbonImmutable::now('Asia/Manila');
+
         return DB::transaction(function () use ($staff, $actor, $bucket, $now): StaffAttendance {
             $existingScan = StaffAttendanceScanRequest::query()
                 ->where('staff_profile_id', $staff->id)
@@ -54,12 +61,23 @@ class AttendanceWorkflow
 
     public function correct(StaffAttendance $attendance, string $action, CarbonImmutable $occurredAt, string $reason, User $actor): StaffAttendance
     {
+        $occurredAt = $occurredAt->timezone('Asia/Manila');
+
         return DB::transaction(function () use ($attendance, $action, $occurredAt, $reason, $actor): StaffAttendance {
             $attendance = StaffAttendance::query()->lockForUpdate()->findOrFail($attendance->id);
-            abort_unless($occurredAt->timezone('Asia/Manila')->toDateString() === $attendance->attendance_date->toDateString(), 422, 'Correction time must be within the attendance date.');
-            if ($action === 'time_in') { abort_if($attendance->time_out_at && $occurredAt->greaterThan($attendance->time_out_at), 422, 'Time in cannot be after time out.'); $attendance->update(['time_in_at' => $occurredAt]); }
-            else { abort_if(! $attendance->time_in_at, 422, 'Time out requires a time in.'); abort_if($occurredAt->lessThan($attendance->time_in_at), 422, 'Time out cannot be before time in.'); $attendance->update(['time_out_at' => $occurredAt]); }
+            $error = match (true) {
+                $occurredAt->timezone('Asia/Manila')->toDateString() !== $attendance->attendance_date->toDateString() => 'Correction time must be within the attendance date.',
+                $action === 'time_in' && $attendance->time_out_at && $occurredAt->greaterThan($attendance->time_out_at) => 'Time in cannot be after time out.',
+                $action === 'time_out' && ! $attendance->time_in_at => 'Time out requires a time in.',
+                $action === 'time_out' && $occurredAt->lessThan($attendance->time_in_at) => 'Time out cannot be before time in.',
+                default => null,
+            };
+            if ($error) {
+                throw ValidationException::withMessages(['occurred_at' => $error]);
+            }
+            $attendance->update([$action === 'time_in' ? 'time_in_at' : 'time_out_at' => $occurredAt]);
             StaffAttendanceEvent::create(['staff_attendance_id' => $attendance->id, 'staff_profile_id' => $attendance->staff_profile_id, 'event_type' => $action, 'source' => 'admin_correction', 'occurred_at' => $occurredAt, 'recorded_by' => $actor->id, 'reason' => $reason]);
+
             return $attendance->fresh(['staffProfile.user', 'events.recorder']);
         });
     }

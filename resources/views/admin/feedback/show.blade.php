@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Feedback detail') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $feedback->customerProfile?->user?->name }}</h1>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $feedback->customerProfile?->display_name }}</h1>
             <p class="mt-2 text-sm text-casa-muted">{{ $feedback->service?->name }}</p>
         </div>
 

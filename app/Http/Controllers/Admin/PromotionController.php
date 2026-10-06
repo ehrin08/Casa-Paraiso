@@ -3,58 +3,78 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\PromotionIndexRequest;
 use App\Http\Requests\Admin\PromotionSettingsRequest;
-use App\Models\ApplicationSetting;
 use App\Models\Addon;
+use App\Models\ApplicationSetting;
 use App\Models\Appointment;
 use App\Models\PromotionSuggestion;
 use App\Models\RfmSegment;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PromotionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(PromotionIndexRequest $request): View
     {
-        $search = trim((string) $request->query('q'));
-        $lifecycle = (string) $request->query('lifecycle');
-        $suggestions = $this->activityQuery($lifecycle)
-            ->with(['customerProfile.user', 'rfmSegment', 'appointments:id,promotion_suggestion_id,status'])
+        $filters = $request->validated();
+        $search = trim((string) ($filters['q'] ?? ''));
+        $lifecycle = (string) ($filters['lifecycle'] ?? '');
+        $dateFrom = (string) ($filters['date_from'] ?? '');
+        $dateTo = (string) ($filters['date_to'] ?? '');
+        $query = PromotionSuggestion::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('suggested_offer', 'like', "%{$search}%")
-                        ->orWhereHas('customerProfile.user', fn (Builder $users) => $users->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('customerProfile', fn (Builder $customers) => $customers->search($search))
                         ->orWhereHas('rfmSegment', fn (Builder $segments) => $segments->where('name', 'like', "%{$search}%"));
                 });
-            })
+            });
+
+        if ($dateFrom !== '') {
+            $query->where('created_at', '>=', CarbonImmutable::parse($dateFrom, 'Asia/Manila')->startOfDay()->timezone(config('app.timezone')));
+        }
+
+        if ($dateTo !== '') {
+            $query->where('created_at', '<', CarbonImmutable::parse($dateTo, 'Asia/Manila')->addDay()->startOfDay()->timezone(config('app.timezone')));
+        }
+
+        $query = $this->activityQuery($lifecycle, $query);
+        $suggestions = (clone $query)
+            ->with(['customerProfile.user', 'appointments:id,promotion_suggestion_id,status'])
             ->latest('created_at')
+            ->latest('id')
             ->paginate((int) config('casa.pagination.per_page', 15))
             ->withQueryString();
 
-        $segments = RfmSegment::query()
-            ->whereNotNull('preset_key')
-            ->get()
-            ->keyBy('preset_key');
-
         return view('admin.promotions.index', [
-            'presets' => collect(config('casa.customer_rewards.presets', []))->map(fn (array $preset) => [
-                ...$preset,
-                'segment' => $segments->get($preset['key']),
-            ]),
+            'presets' => $this->presets(),
             'settings' => ApplicationSetting::current(),
             'suggestions' => $suggestions,
+            'addonNames' => Addon::query()->whereIn('code', $suggestions->getCollection()->pluck('addon_code')->filter()->unique())->pluck('name', 'code'),
             'search' => $search,
             'lifecycle' => $lifecycle,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
             'summary' => [
-                'available' => $this->activityQuery('available')->count(),
-                'reserved' => $this->activityQuery('reserved')->count(),
-                'used' => $this->activityQuery('used')->count(),
-                'expired' => $this->activityQuery('expired')->count(),
+                'available' => $this->activityQuery('available', clone $query)->count(),
+                'reserved' => $this->activityQuery('reserved', clone $query)->count(),
+                'used' => $this->activityQuery('used', clone $query)->count(),
+                'expired' => $this->activityQuery('expired', clone $query)->count(),
             ],
+        ]);
+    }
+
+    public function editSettings(): View
+    {
+        return view('admin.promotions.settings', [
+            'presets' => $this->presets(),
+            'settings' => ApplicationSetting::current(),
             'addons' => Addon::query()->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
@@ -89,14 +109,18 @@ class PromotionController extends Controller
             }
         });
 
-        return back()->with('status', 'customer-rewards-updated');
+        return to_route('admin.promotions.index')->with('status', 'customer-rewards-updated');
     }
 
     public function show(PromotionSuggestion $promotion): View
     {
         $promotion->load(['customerProfile.user', 'rfmSegment', 'appointments.service']);
 
-        return view('admin.promotions.show', ['suggestion' => $promotion]);
+        return view('admin.promotions.show', [
+            'suggestion' => $promotion,
+            'rewardName' => $promotion->addonName() ?: $promotion->suggested_offer,
+            'canDismiss' => $promotion->isAvailableVoucher(),
+        ]);
     }
 
     public function dismiss(PromotionSuggestion $promotion): RedirectResponse
@@ -119,9 +143,19 @@ class PromotionController extends Controller
         return back()->with('status', 'customer-reward-dismissed');
     }
 
-    private function activityQuery(string $lifecycle): Builder
+    private function presets(): Collection
     {
-        $query = PromotionSuggestion::query();
+        $segments = RfmSegment::query()->whereNotNull('preset_key')->get()->keyBy('preset_key');
+
+        return collect(config('casa.customer_rewards.presets', []))->map(fn (array $preset) => [
+            ...$preset,
+            'segment' => $segments->get($preset['key']),
+        ]);
+    }
+
+    private function activityQuery(string $lifecycle, ?Builder $query = null): Builder
+    {
+        $query ??= PromotionSuggestion::query();
 
         return match ($lifecycle) {
             'available' => $query->where('status', PromotionSuggestion::STATUS_SUGGESTED)

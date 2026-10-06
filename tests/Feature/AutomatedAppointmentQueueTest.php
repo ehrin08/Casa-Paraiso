@@ -156,6 +156,7 @@ class AutomatedAppointmentQueueTest extends TestCase
 
     public function test_admin_service_queue_uses_the_fixed_fifteen_record_page_size(): void
     {
+        $this->travelTo(now('Asia/Manila')->setTime(16, 0));
         $admin = User::factory()->admin()->create();
         $staff = StaffProfile::factory()->create();
         $customer = CustomerProfile::factory()->create();
@@ -165,8 +166,8 @@ class AutomatedAppointmentQueueTest extends TestCase
             Appointment::factory()->for($customer)->for($service)->for($staff, 'staffProfile')->create([
                 'appointment_number' => sprintf('APT-PAGED-%02d', $offset),
                 'status' => Appointment::STATUS_CONFIRMED,
-                'scheduled_start_at' => now()->addDays($offset),
-                'scheduled_end_at' => now()->addDays($offset)->addHour(),
+                'scheduled_start_at' => now()->subDays(17 - $offset)->setTime(13, 0),
+                'scheduled_end_at' => now()->subDays(17 - $offset)->setTime(14, 0),
             ]);
         }
 

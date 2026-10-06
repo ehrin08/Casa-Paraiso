@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div>
             <p class="casa-eyebrow">{{ __('Customer lounge') }}</p>
-            <h1 class="mt-3 font-editorial text-4xl font-semibold text-casa-text">{{ __('Feedback') }}</h1>
+            <h1 class="mt-3 font-editorial text-4xl font-semibold text-casa-text">{{ __('My feedback') }}</h1>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Share how your completed visit felt and revisit the care notes you have already sent.') }}</p>
         </div>
         <button type="button" class="casa-button-primary" x-data="" x-on:click="$dispatch('open-modal', '{{ $submitFeedbackModal }}')">

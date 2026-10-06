@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Customer detail') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $customer->user?->name }}</h1>
-            <p class="mt-2 text-sm text-casa-muted">{{ $customer->customer_code }} &middot; {{ $customer->user?->email }}</p>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $customer->display_name }}</h1>
+            <p class="mt-2 text-sm text-casa-muted">{{ $customer->customer_code }} &middot; {{ $customer->display_email }}</p>
         </div>
         <a href="{{ route('reception.customers.index') }}" class="casa-button-secondary">{{ __('Customers') }}</a>
     </x-slot>
@@ -16,7 +16,7 @@
                 @method('PATCH')
                 <div>
                     <x-input-label for="phone" value="Phone"/>
-                    <input id="phone" name="phone" value="{{ old('phone', $customer->user?->phone) }}" class="casa-input mt-2">
+                    <input id="phone" name="phone" value="{{ old('phone', $customer->display_phone) }}" class="casa-input mt-2">
                     <x-input-error class="mt-2" :messages="$errors->get('phone')"/>
                 </div>
                 <div>

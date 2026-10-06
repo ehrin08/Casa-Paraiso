@@ -25,7 +25,7 @@
                         @foreach ($transactions as $payment)
                             <tr class="casa-table-row">
                                 <td class="px-4 py-4 font-semibold">{{ $payment->transaction_number }}</td>
-                                <td class="px-4 py-4">{{ $payment->customerProfile?->user?->name }}</td>
+                                <td class="px-4 py-4">{{ $payment->customerProfile?->display_name }}</td>
                                 <td class="px-4 py-4">{{ $payment->service?->name }}</td>
                                 <td class="px-4 py-4">PHP {{ number_format((float) $payment->amount, 2) }}</td>
                                 <td class="px-4 py-4"><x-status-badge>{{ ucfirst($payment->payment_status) }}</x-status-badge></td>

@@ -142,7 +142,7 @@ class SystemErrorReportingTest extends TestCase
         ]);
 
         $this->actingAs($admin)->get(route('admin.system-errors.index'))->assertForbidden();
-        $this->actingAs($superAdmin)->get(route('admin.system-errors.index'))->assertOk()->assertSee('System errors');
+        $this->actingAs($superAdmin)->get(route('admin.system-errors.index'))->assertOk()->assertSee('System issues');
         $this->actingAs($superAdmin)->get(route('admin.dashboard'))->assertOk()->assertSee('1 unresolved server errors');
         $this->actingAs($superAdmin)->patch(route('admin.system-errors.resolve', $report))->assertRedirect();
         $this->assertNotNull($report->fresh()->resolved_at);

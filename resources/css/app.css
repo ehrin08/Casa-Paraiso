@@ -1,4 +1,14 @@
 @import "tailwindcss";
+@import "./admin-dashboard.css";
+@import "./appointments.css";
+@import "./appointment-form.css";
+@import "./appointment-detail.css";
+@import "./therapists.css";
+@import "./services.css";
+@import "./payments.css";
+@import "./commissions.css";
+@import "./attendance.css";
+@import "./rewards.css";
 
 @plugin "@tailwindcss/forms";
 

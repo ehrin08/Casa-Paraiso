@@ -22,7 +22,7 @@ class AdminCalendarAppointmentStoreRequest extends AppointmentRequest
     public function rules(): array
     {
         return [
-            'customer_profile_id' => ['required', 'integer', $this->customerProfileRule()],
+            ...$this->operationalCustomerRules(),
             'service_id' => ['required', 'integer', $this->activeServiceRule()],
             'staff_profile_id' => ['required', 'integer', $this->activeStaffProfileRule()],
             'preferred_staff_profile_id' => ['nullable', 'integer', $this->activeStaffProfileRule()],

@@ -42,8 +42,8 @@
                 'lg:h-dvh lg:min-h-0' => $fitDesktopViewport,
             ])>
                 <picture class="absolute inset-0">
-                    <source media="(max-width: 1200px)" srcset="{{ asset('images/spa/spa-auth-720.webp') }}">
-                    <img src="{{ asset('images/spa/spa-auth-1024.webp') }}" alt="" class="h-full w-full object-cover" fetchpriority="high">
+                    <source media="(max-width: 1200px)" srcset="{{ asset('images/spa/casa-towel-detail-720.webp') }}">
+                    <img src="{{ asset('images/spa/casa-towel-detail-1024.webp') }}" width="1024" height="768" alt="" class="h-full w-full object-cover object-[50%_65%]" loading="eager" fetchpriority="high">
                 </picture>
                 <div class="absolute inset-0 bg-gradient-to-t from-casa-charcoal via-casa-charcoal/22 to-casa-charcoal/15"></div>
 
@@ -86,7 +86,7 @@
                 ])>
                     <div class="mb-5 overflow-hidden rounded-[24px] bg-casa-charcoal lg:hidden">
                         <div class="relative h-28">
-                            <img src="{{ asset('images/spa/spa-auth-720.webp') }}" alt="A warmly lit tropical spa treatment room" class="h-full w-full object-cover object-center">
+                            <img src="{{ asset('images/spa/casa-towel-detail-720.webp') }}" width="720" height="540" alt="Prepared towels on a massage table at Casa Paraiso" class="h-full w-full object-cover object-[50%_65%]">
                             <div class="absolute inset-0 bg-gradient-to-r from-casa-charcoal/65 to-transparent"></div>
                             <a href="/" class="absolute start-4 top-4 inline-flex rounded-xl bg-casa-paper p-2">
                                 <img src="{{ asset('images/casa_paraiso_logo.jpg') }}" alt="Casa Paraiso Body and Wellness Spa" class="h-10 w-40 object-cover object-center">

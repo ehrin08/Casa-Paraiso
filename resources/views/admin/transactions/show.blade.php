@@ -3,7 +3,7 @@
         <div>
             <p class="casa-section-label">{{ __('Transaction detail') }}</p>
             <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $transaction->transaction_number }}</h1>
-            <p class="mt-2 text-sm text-casa-muted">{{ $transaction->customerProfile?->user?->name }}</p>
+            <p class="mt-2 text-sm text-casa-muted">{{ $transaction->customerProfile?->display_name }}</p>
         </div>
 
         <div class="flex flex-wrap gap-3">

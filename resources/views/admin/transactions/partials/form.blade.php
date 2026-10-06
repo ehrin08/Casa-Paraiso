@@ -20,7 +20,7 @@
                     <option value="">{{ __('No appointment link') }}</option>
                     @foreach ($appointments as $appointment)
                         <option value="{{ $appointment->id }}" @selected((int) old('appointment_id', $transaction->appointment_id) === $appointment->id)>
-                            {{ $appointment->appointment_number }} · {{ $appointment->customerProfile?->user?->name }} · {{ $appointment->service?->name }}
+                            {{ $appointment->appointment_number }} · {{ $appointment->customerProfile?->display_name }} · {{ $appointment->service?->name }}
                         </option>
                     @endforeach
                 </select>
@@ -34,7 +34,7 @@
                         <option value="">{{ __('Select customer') }}</option>
                         @foreach ($customers as $customer)
                             <option value="{{ $customer->id }}" @selected((int) old('customer_profile_id', $transaction->customer_profile_id) === $customer->id)>
-                                {{ $customer->user->name }} ({{ $customer->customer_code }})
+                                {{ $customer->display_name }} ({{ $customer->customer_code }})
                             </option>
                         @endforeach
                     </select>

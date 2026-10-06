@@ -3,7 +3,7 @@
         <x-page-heading>
             <div>
                 <p class="casa-section-label">{{ __('Customer reward') }}</p>
-                <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $suggestion->customerProfile?->user?->name }}</h1>
+                <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $suggestion->customerProfile?->display_name }}</h1>
                 <p class="mt-2 text-sm text-casa-muted">{{ $suggestion->rfmSegment?->name ?: __('Previous reward rule') }}</p>
             </div>
             <a href="{{ route('admin.promotions.index') }}" class="casa-button-secondary">{{ __('All customer rewards') }}</a>
@@ -21,7 +21,7 @@
                 ]" />
                 <div class="mt-6 rounded-2xl bg-casa-bg p-5">
                     <p class="casa-section-label">{{ __('Complimentary add-on') }}</p>
-                    <p class="mt-3 text-lg font-bold text-casa-text">{{ $suggestion->addonName() ?: $suggestion->suggested_offer }}</p>
+                    <p class="mt-3 text-lg font-bold text-casa-text">{{ $rewardName }}</p>
                     @if ($suggestion->notes)
                         <p class="mt-4 whitespace-pre-line text-sm leading-6 text-casa-muted">{{ $suggestion->notes }}</p>
                     @endif
@@ -34,11 +34,24 @@
                 <p class="casa-section-label">{{ __('Reward status') }}</p>
                 <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ ucfirst($state) }}</h2>
                 <div class="mt-4 space-y-2 text-sm text-casa-muted">
-                    <p>{{ __('Issued') }}: {{ $suggestion->created_at?->format('M d, Y g:i A') }}</p>
-                    <p>{{ __('Expires') }}: {{ $suggestion->expires_at?->format('M d, Y g:i A') ?: __('No expiration') }}</p>
-                    <p>{{ __('Reserved or used') }}: {{ $suggestion->applied_at?->format('M d, Y g:i A') ?: __('No') }}</p>
-                    <p>{{ __('Dismissed') }}: {{ $suggestion->dismissed_at?->format('M d, Y g:i A') ?: __('No') }}</p>
+                    <p>{{ __('Issued') }}: {{ $suggestion->created_at?->timezone('Asia/Manila')->format('M d, Y g:i A') }}</p>
+                    <p>{{ __('Expires') }}: {{ $suggestion->expires_at?->timezone('Asia/Manila')->format('M d, Y g:i A') ?: __('No expiration') }}</p>
+                    <p>{{ __('Reserved or used') }}: {{ $suggestion->applied_at?->timezone('Asia/Manila')->format('M d, Y g:i A') ?: __('No') }}</p>
+                    <p>{{ __('Dismissed') }}: {{ $suggestion->dismissed_at?->timezone('Asia/Manila')->format('M d, Y g:i A') ?: __('No') }}</p>
                 </div>
+                <x-input-error class="mt-4" :messages="$errors->get('promotion')" />
+                @if ($canDismiss)
+                    <div class="mt-5 border-t border-casa-border pt-4">
+                        <x-confirm-action
+                            :action="route('admin.promotions.dismiss', $suggestion)"
+                            method="PATCH"
+                            label="{{ __('Dismiss reward') }}"
+                            confirm-title="{{ __('Dismiss this reward?') }}"
+                            confirm-message="{{ __('The customer will no longer be able to use this reward. This cannot be undone.') }}"
+                            confirm-button="{{ __('Dismiss reward') }}"
+                        />
+                    </div>
+                @endif
             </x-app-card>
         </aside>
     </div>

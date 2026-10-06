@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <p class="casa-eyebrow">{{ __('Attendance station') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Automatic therapist attendance') }}</h1>
+            <p class="casa-eyebrow">{{ __('Daily work') }}</p>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Staff attendance') }}</h1>
             <p class="mt-2 text-sm text-casa-muted">{{ __('Display the live QR. A valid therapist scan records time in or time out immediately.') }}</p>
         </div>
     </x-slot>

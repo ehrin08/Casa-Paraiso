@@ -15,7 +15,7 @@ class ComplexCrudPageNavigationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_team_and_schedule_workspaces_link_to_full_page_crud_forms(): void
+    public function test_therapist_service_and_schedule_workspaces_link_to_full_page_crud_forms(): void
     {
         $superAdmin = User::factory()->create([
             'email' => config('auth.super_admin_email'),
@@ -30,9 +30,15 @@ class ComplexCrudPageNavigationTest extends TestCase
             ->assertOk()
             ->assertSee(route('admin.staff.create', absolute: false), false)
             ->assertSee(route('admin.staff.edit', $staffProfile, false), false)
+            ->assertDontSee(route('admin.services.create', absolute: false), false)
+            ->assertDontSee(route('admin.services.edit', $service, false), false)
+            ->assertDontSee('admin-staff-create', false);
+
+        $this->actingAs($superAdmin)
+            ->get(route('admin.services.index', absolute: false))
+            ->assertOk()
             ->assertSee(route('admin.services.create', absolute: false), false)
             ->assertSee(route('admin.services.edit', $service, false), false)
-            ->assertDontSee('admin-staff-create', false)
             ->assertDontSee('admin-service-create', false);
 
         $this->actingAs($superAdmin)

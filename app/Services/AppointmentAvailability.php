@@ -7,12 +7,14 @@ use App\Models\Service;
 use App\Models\StaffProfile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class AppointmentAvailability
 {
     public function __construct(
         private readonly AppointmentWorkflow $workflow,
         private readonly ScheduleWindowResolver $scheduleWindows,
+        private readonly AppointmentAddons $addons,
     ) {}
 
     /**
@@ -23,34 +25,63 @@ class AppointmentAvailability
      *     dates: array<string, array<int, array{starts_at: string, ends_at: string, time: string, label: string, staff_count: int}>>
      * }
      */
-    /** @param array<int, string> $addonCodes */
     public function month(Service $service, string $month, ?int $preferredStaffProfileId = null, array $addonCodes = []): array
     {
-        $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        return $this->monthAvailability($service, $month, $preferredStaffProfileId, $addonCodes, $this->customerBookingCutoff());
+    }
+
+    /** @param array<int, string> $addonCodes */
+    public function forOperations(Service $service, string $month, array $addonCodes = [], ?Appointment $appointment = null): array
+    {
+        $appointment?->loadMissing(['promotionSuggestion', 'addons']);
+        $selectedAddons = $this->addons->selected($addonCodes, true);
+        $this->addons->assertDoesNotDuplicateVoucher($selectedAddons, $appointment?->promotionSuggestion);
+        $allowedCodes = $this->addons->catalog()->pluck('code')->merge($appointment?->addons->pluck('addon_code') ?? collect());
+        if ($selectedAddons->contains(fn (array $addon) => ! $allowedCodes->contains($addon['code']))) {
+            throw ValidationException::withMessages(['addon_codes' => __('Select active add-ons.')]);
+        }
+        if ($appointment?->promotionSuggestion?->addon_code) {
+            $addonCodes[] = $appointment->promotionSuggestion->addon_code;
+        }
+
+        $timezone = (string) config('casa.business_hours.timezone', config('app.timezone'));
+
+        return $this->monthAvailability($service, $month, null, array_values(array_unique($addonCodes)), now($timezone)->addSecond(), $appointment);
+    }
+
+    private function monthAvailability(Service $service, string $month, ?int $preferredStaffProfileId, array $addonCodes, Carbon $bookingCutoff, ?Appointment $ignoreAppointment = null): array
+    {
+        $timezone = (string) config('casa.business_hours.timezone', config('app.timezone'));
+        $monthStart = Carbon::createFromFormat('!Y-m', $month, $timezone)->startOfMonth();
         $monthEnd = $monthStart->copy()->endOfMonth();
         $staffProfiles = $this->eligibleStaff($service, $preferredStaffProfileId);
+        $durationMinutes = $service->duration_minutes + $this->addons->durationMinutes($this->addons->selected($addonCodes, $ignoreAppointment !== null));
         $dates = [];
-
-        if ($staffProfiles->isEmpty()) {
-            return [
-                'month' => $monthStart->format('Y-m'),
-                'service_id' => $service->id,
-                'preferred_staff_profile_id' => $preferredStaffProfileId,
-                'dates' => [],
-            ];
-        }
+        $storeDates = [];
+        $today = now($timezone)->startOfDay();
 
         $confirmedByStaff = Appointment::query()
             ->whereIn('staff_profile_id', $staffProfiles->pluck('id'))
             ->where('status', Appointment::STATUS_CONFIRMED)
+            ->when($ignoreAppointment, fn ($query) => $query->whereKeyNot($ignoreAppointment->getKey()))
             ->where('scheduled_start_at', '<', $monthEnd->copy()->addDay()->startOfDay())
             ->where('scheduled_end_at', '>', $monthStart)
             ->get()
             ->groupBy('staff_profile_id');
-        $bookingCutoff = $this->customerBookingCutoff();
 
         for ($day = $monthStart->copy(); $day->lte($monthEnd); $day->addDay()) {
-            $daySlots = $this->slotsForDate($service, $staffProfiles, $confirmedByStaff, $day, $addonCodes, $bookingCutoff);
+            if ($day->lt($today)) {
+                continue;
+            }
+
+            $business = $this->scheduleWindows->businessWindow($day);
+            $storeSlots = $this->slotsForDate($staffProfiles, $confirmedByStaff, $day, $durationMinutes, $bookingCutoff);
+            $storeDates[$day->toDateString()] = [
+                'opens_at' => $business['start']->toDateTimeString(),
+                'closes_at' => $business['end']->toDateTimeString(),
+                'slots' => $storeSlots,
+            ];
+            $daySlots = array_values(array_filter($storeSlots, fn (array $slot) => $slot['staff_count'] > 0));
 
             if ($daySlots !== []) {
                 $dates[$day->toDateString()] = $daySlots;
@@ -62,6 +93,7 @@ class AppointmentAvailability
             'service_id' => $service->id,
             'preferred_staff_profile_id' => $preferredStaffProfileId,
             'dates' => $dates,
+            'store_dates' => $storeDates,
         ];
     }
 
@@ -96,19 +128,14 @@ class AppointmentAvailability
      * @return array<int, array{starts_at: string, ends_at: string, time: string, label: string, staff_count: int}>
      */
     private function slotsForDate(
-        Service $service,
         Collection $staffProfiles,
         Collection $confirmedByStaff,
         Carbon $day,
-        array $addonCodes,
+        int $durationMinutes,
         Carbon $bookingCutoff,
     ): array {
         $slots = [];
         $business = $this->scheduleWindows->businessWindow($day);
-
-        if ($business['end']->lte($bookingCutoff)) {
-            return $slots;
-        }
 
         // Resolve each therapist's windows once per date. Previously this happened
         // for every 30-minute slot, repeatedly querying dated roster coverage.
@@ -119,13 +146,10 @@ class AppointmentAvailability
         $interval = (int) config('casa.business_hours.slot_interval_minutes', 30);
 
         while ($slot->lt($business['end'])) {
-            $slotEnd = $this->workflow->scheduledEnd($slot, $service, $addonCodes);
+            $slotEnd = $slot->copy()->addMinutes($durationMinutes);
 
-            if ($slotEnd->gt($business['end'])) {
-                break;
-            }
-
-            if ($slot->gte($bookingCutoff)) {
+            $availableStaffCount = 0;
+            if ($slot->gte($bookingCutoff) && $slotEnd->lte($business['end'])) {
                 $availableStaffCount = $staffProfiles
                     ->filter(function (StaffProfile $staffProfile) use ($slot, $slotEnd, $confirmedByStaff, $windowsByStaff): bool {
                         if (! $windowsByStaff->get($staffProfile->id, collect())
@@ -139,16 +163,15 @@ class AppointmentAvailability
                     })
                     ->count();
 
-                if ($availableStaffCount > 0) {
-                    $slots[] = [
-                        'starts_at' => $slot->toDateTimeString(),
-                        'ends_at' => $slotEnd->toDateTimeString(),
-                        'time' => $slot->format('H:i'),
-                        'label' => $slot->format('g:i A'),
-                        'staff_count' => $availableStaffCount,
-                    ];
-                }
             }
+
+            $slots[] = [
+                'starts_at' => $slot->toDateTimeString(),
+                'ends_at' => $slotEnd->toDateTimeString(),
+                'time' => $slot->format('H:i'),
+                'label' => $slot->format('g:i A'),
+                'staff_count' => $availableStaffCount,
+            ];
 
             $slot->addMinutes($interval);
         }

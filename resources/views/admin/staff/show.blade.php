@@ -41,6 +41,7 @@
             ['label' => __('Access'), 'value' => $staffProfile->user->is_active ? __('Active') : __('Inactive'), 'meta' => __('Login status'), 'tone' => 'dark'],
         ]" />
 
+        <div id="therapist-roster" class="scroll-mt-4">
         <x-weekly-roster
             :feed-url="route('admin.staff-roster.show')"
             :copy-url="route('admin.staff-roster.copy')"
@@ -49,6 +50,7 @@
             :initial-week="now()->startOfWeek(\Illuminate\Support\Carbon::SUNDAY)->toDateString()"
             :staff-profile-id="$staffProfile->id"
         />
+        </div>
 
         <section class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <x-app-card>
@@ -107,7 +109,7 @@
             </aside>
         </section>
 
-        <section>
+        <section id="therapist-exceptions" class="scroll-mt-4">
             <x-app-card>
                 <div class="flex flex-col gap-3 border-b border-casa-border pb-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>

@@ -9,9 +9,11 @@ use App\Http\Requests\Admin\StaffRequest;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\User;
+use App\Services\ScheduleWindowResolver;
 use App\Services\StaffScheduleConflictGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -19,7 +21,7 @@ class StaffController extends Controller
 {
     use HandlesIndexSorting;
 
-    public function index(Request $request): View
+    public function index(Request $request, ScheduleWindowResolver $scheduleResolver): View
     {
         $search = trim((string) $request->query('q'));
         $status = (string) $request->query('status');
@@ -34,18 +36,30 @@ class StaffController extends Controller
         ];
         $sort = $this->indexSort($request, $sorts, 'status');
         $direction = $this->indexDirection($request, $sort === 'status' ? 'desc' : 'asc');
+        $today = Carbon::today('Asia/Manila');
+        $scheduleWeekStart = $today->copy()->startOfWeek(Carbon::SUNDAY);
+        $scheduleWeekEnd = $scheduleWeekStart->copy()->addDays(6);
 
         $staffProfiles = StaffProfile::query()
-            ->with(['user', 'services'])
-            ->withCount(['services', 'appointments'])
+            ->with([
+                'user',
+                'services' => fn ($query) => $query->orderBy('name'),
+                'weeklySchedules',
+                'scheduleExceptions' => fn ($query) => $query->whereBetween('exception_date', [
+                    $scheduleWeekStart->toDateString(),
+                    $scheduleWeekEnd->toDateString(),
+                ]),
+            ])
             ->join('users', 'users.id', '=', 'staff_profiles.user_id')
             ->select('staff_profiles.*')
+            ->withCount(['services', 'appointments'])
             ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
                 $query->where('users.name', 'like', "%{$search}%")
                     ->orWhere('users.email', 'like', "%{$search}%")
                     ->orWhere('users.phone', 'like', "%{$search}%")
                     ->orWhere('staff_profiles.position', 'like', "%{$search}%")
-                    ->orWhere('staff_profiles.specialization', 'like', "%{$search}%");
+                    ->orWhere('staff_profiles.specialization', 'like', "%{$search}%")
+                    ->orWhereHas('services', fn ($query) => $query->where('services.name', 'like', "%{$search}%"));
             }))
             ->when($status === 'active', fn ($query) => $query->where('users.is_active', true))
             ->when($status === 'inactive', fn ($query) => $query->where('users.is_active', false))
@@ -53,17 +67,33 @@ class StaffController extends Controller
             ->when($bookable === 'no', fn ($query) => $query->where('staff_profiles.is_bookable', false))
             ->orderBy($sorts[$sort], $direction)
             ->orderBy('users.name')
+            ->orderBy('staff_profiles.id')
             ->paginate((int) config('casa.pagination.per_page', 15))
-            ->withQueryString();
+            ->appends($request->only(['q', 'status', 'bookable', 'sort', 'direction']));
         $accountSummary = User::query()
             ->where('role', User::ROLE_STAFF)
             ->selectRaw('SUM(CASE WHEN is_active THEN 1 ELSE 0 END) AS active_count')
             ->selectRaw('SUM(CASE WHEN NOT is_active THEN 1 ELSE 0 END) AS inactive_count')
             ->first();
-        $serviceSummary = Service::query()
-            ->selectRaw('SUM(CASE WHEN is_active THEN 1 ELSE 0 END) AS active_count')
-            ->selectRaw('SUM(CASE WHEN NOT is_active THEN 1 ELSE 0 END) AS inactive_count')
-            ->first();
+        $selectedId = filter_var($request->query('selected'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $selectedStaffProfile = $staffProfiles->getCollection()->firstWhere('id', $selectedId ?: null)
+            ?? $staffProfiles->getCollection()->first();
+        $requestedTab = $request->query('tab');
+        $selectedTab = in_array($requestedTab, ['profile', 'services', 'schedule', 'availability'], true)
+            ? $requestedTab
+            : 'profile';
+        $scheduleSummaries = $staffProfiles->getCollection()
+            ->mapWithKeys(fn (StaffProfile $profile) => [
+                $profile->id => $this->scheduleSummary($profile, $scheduleWeekStart, $scheduleResolver),
+            ])->all();
+        $upcomingExceptions = $selectedStaffProfile
+            ? $selectedStaffProfile->scheduleExceptions()
+                ->with('creator')
+                ->where('exception_date', '>=', $today->toDateString())
+                ->orderBy('exception_date')
+                ->orderBy('start_time')
+                ->get()
+            : collect();
 
         return view('admin.staff.index', [
             'staffProfiles' => $staffProfiles,
@@ -75,16 +105,46 @@ class StaffController extends Controller
             'activeAccountCount' => (int) $accountSummary?->active_count,
             'inactiveAccountCount' => (int) $accountSummary?->inactive_count,
             'bookableCount' => StaffProfile::query()->where('is_bookable', true)->count(),
-            'serviceCatalog' => Service::query()
-                ->withCount(['staffProfiles', 'appointments'])
-                ->orderByDesc('is_active')
-                ->orderBy('name')
-                ->paginate((int) config('casa.pagination.per_page', 15), ['*'], 'services_page')
-                ->withQueryString()
-                ->fragment('service-catalog'),
-            'activeServiceCount' => (int) $serviceSummary?->active_count,
-            'inactiveServiceCount' => (int) $serviceSummary?->inactive_count,
+            'selectedStaffProfile' => $selectedStaffProfile,
+            'selectedTab' => $selectedTab,
+            'scheduleWeekStart' => $scheduleWeekStart,
+            'scheduleWeekEnd' => $scheduleWeekEnd,
+            'scheduleSummaries' => $scheduleSummaries,
+            'upcomingExceptions' => $upcomingExceptions,
         ]);
+    }
+
+    private function scheduleSummary(StaffProfile $profile, Carbon $weekStart, ScheduleWindowResolver $resolver): array
+    {
+        $days = [];
+        $scheduledDays = [];
+        $hourPatterns = [];
+
+        for ($offset = 0; $offset < 7; $offset++) {
+            $day = $weekStart->copy()->addDays($offset);
+            $windows = $resolver->effectiveWindows($profile, $day)->map(fn (array $window) => [
+                'start' => $window['start']->format('g:i A'),
+                'end' => $window['end']->format('H:i') === '00:00' ? '12:00 midnight' : $window['end']->format('g:i A'),
+            ])->all();
+            $days[] = ['date' => $day->toDateString(), 'day' => $day->format('D'), 'windows' => $windows];
+
+            if ($windows !== []) {
+                $scheduledDays[] = $day->format('D');
+                $hourPatterns[] = implode(', ', array_map(fn (array $window) => $window['start'].' – '.$window['end'], $windows));
+            }
+        }
+
+        $hourPatterns = array_unique($hourPatterns);
+
+        return [
+            'daysLabel' => $scheduledDays !== [] ? implode(', ', $scheduledDays) : 'No scheduled hours',
+            'hoursLabel' => match (count($hourPatterns)) {
+                0 => 'No scheduled hours',
+                1 => reset($hourPatterns),
+                default => 'Hours vary by day',
+            },
+            'days' => $days,
+        ];
     }
 
     public function create(): View

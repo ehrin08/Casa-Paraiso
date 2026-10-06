@@ -15,61 +15,69 @@
     $navGroups = match (true) {
         $user->isAdmin() => [
             [
-                'label' => 'Today',
+                'label' => 'Daily work',
                 'items' => [
-                    ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard'],
-                    ['label' => 'Schedule', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
+                    ['label' => 'Today', 'icon' => 'dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard'],
+                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'admin.customers.index', 'active' => 'admin.customers.*'],
                 ],
             ],
             [
-                'label' => 'Operations',
+                'label' => 'Manage',
                 'items' => [
-                    ['label' => 'Team & Services', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => ['admin.staff.*', 'admin.services.*'], 'preload' => true],
+                    ['label' => 'Therapists', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => 'admin.staff.*', 'preload' => true],
+                    ['label' => 'Services', 'icon' => 'services', 'route' => 'admin.services.index', 'active' => 'admin.services.*'],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'admin.transactions.index', 'active' => 'admin.transactions.*'],
                     ['label' => 'Commissions', 'icon' => 'payments', 'route' => 'admin.commissions.index', 'active' => 'admin.commissions.*'],
                     ['label' => 'Attendance', 'icon' => 'team', 'route' => 'admin.attendance.index', 'active' => 'admin.attendance.*'],
                 ],
             ],
             [
-                'label' => 'Insights',
+                'label' => 'Review',
                 'items' => [
-                    ['label' => 'Insights', 'icon' => 'insights', 'route' => 'admin.promotions.index', 'active' => ['admin.promotions.*', 'admin.feedback.*', 'admin.reports.*'], 'preload' => true],
+                    ['label' => 'Customer rewards', 'icon' => 'insights', 'route' => 'admin.promotions.index', 'active' => 'admin.promotions.*', 'preload' => true],
+                    ['label' => 'Feedback', 'icon' => 'feedback', 'route' => 'admin.feedback.index', 'active' => 'admin.feedback.*'],
+                    ['label' => 'Reports', 'icon' => 'insights', 'route' => 'admin.reports.index', 'active' => 'admin.reports.*'],
                 ],
             ],
         ],
         $user->isStaff() => [
             [
-                'label' => 'Today',
+                'label' => 'Daily work',
                 'items' => [
-                    ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'staff.dashboard', 'active' => 'staff.dashboard'],
-                    ['label' => 'Attendance', 'icon' => 'team', 'route' => 'staff.attendance.show', 'active' => 'staff.attendance.*'],
-                    ['label' => 'My Schedule', 'icon' => 'calendar', 'route' => 'staff.appointments.index', 'active' => 'staff.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
+                    ['label' => 'Today', 'icon' => 'dashboard', 'route' => 'staff.dashboard', 'active' => 'staff.dashboard'],
+                    ['label' => 'My appointments', 'icon' => 'calendar', 'route' => 'staff.appointments.index', 'active' => 'staff.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
+                    ['label' => 'My attendance', 'icon' => 'team', 'route' => 'staff.attendance.show', 'active' => 'staff.attendance.*'],
+                ],
+            ],
+            [
+                'label' => 'Review',
+                'items' => [
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'staff.customers.index', 'active' => 'staff.customers.*', 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'staff.transactions.index', 'active' => 'staff.transactions.*'],
-                    ['label' => 'My Commissions', 'icon' => 'payments', 'route' => 'staff.commissions.index', 'active' => 'staff.commissions.*'],
+                    ['label' => 'My commissions', 'icon' => 'payments', 'route' => 'staff.commissions.index', 'active' => 'staff.commissions.*'],
                     ['label' => 'Feedback', 'icon' => 'feedback', 'route' => 'staff.feedback.index', 'active' => 'staff.feedback.*'],
                 ],
             ],
         ],
         $user->isReceptionist() => [
             [
-                'label' => 'Front desk',
+                'label' => 'Daily work',
                 'items' => [
-                    ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'reception.dashboard', 'active' => 'reception.dashboard'],
-                    ['label' => 'Attendance', 'icon' => 'team', 'route' => 'reception.attendance.station', 'active' => 'reception.attendance.*'],
+                    ['label' => 'Today', 'icon' => 'dashboard', 'route' => 'reception.dashboard', 'active' => 'reception.dashboard'],
                     ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'reception.appointments.index', 'active' => 'reception.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'reception.customers.index', 'active' => 'reception.customers.*', 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'reception.transactions.index', 'active' => 'reception.transactions.*'],
+                    ['label' => 'Staff attendance', 'icon' => 'team', 'route' => 'reception.attendance.station', 'active' => 'reception.attendance.*'],
                 ],
             ],
         ],
         default => [
             [
-                'label' => 'My wellness',
+                'label' => 'My care',
                 'items' => [
-                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'customer.appointments.index', 'active' => ['customer.appointments.index', 'customer.appointments.show', 'customer.appointments.create']],
-                    ['label' => 'Feedback', 'icon' => 'feedback', 'route' => 'customer.feedback.index', 'active' => 'customer.feedback.*', 'preload' => true],
+                    ['label' => 'My appointments', 'icon' => 'calendar', 'route' => 'customer.appointments.index', 'active' => 'customer.appointments.*'],
+                    ['label' => 'My feedback', 'icon' => 'feedback', 'route' => 'customer.feedback.index', 'active' => 'customer.feedback.*', 'preload' => true],
                 ],
             ],
         ],
@@ -83,15 +91,15 @@
         ? [
             ...$notificationLink,
             ...($user->isSuperAdmin() ? [
-                ['label' => 'User access', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
-                ['label' => 'System errors', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $unresolvedSystemErrorCount ?? 0],
+                ['label' => 'User accounts', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
+                ['label' => 'System issues', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $unresolvedSystemErrorCount ?? 0],
             ] : []),
             ['label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*'],
-            ['label' => 'Profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
+            ['label' => 'My profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
         ]
         : [
             ...$notificationLink,
-            ['label' => 'Profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
+            ['label' => 'My profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
         ];
 
     $initials = collect(preg_split('/\s+/', trim($user->name)))
@@ -273,15 +281,15 @@
         <nav data-mobile-customer-navigation class="casa-mobile-dock lg:hidden" aria-label="Customer navigation">
             <a href="{{ route('customer.appointments.index') }}" @class(['casa-mobile-dock-link', 'casa-mobile-dock-link-active' => request()->routeIs('customer.appointments.*')]) @if(request()->routeIs('customer.appointments.*')) aria-current="page" @endif>
                 <x-nav-icon name="calendar" class="size-4" />
-                <span>Appointments</span>
+                <span>My appointments</span>
             </a>
             <a href="{{ route('customer.feedback.index') }}" @class(['casa-mobile-dock-link', 'casa-mobile-dock-link-active' => request()->routeIs('customer.feedback.*')]) @if(request()->routeIs('customer.feedback.*')) aria-current="page" @endif>
                 <x-nav-icon name="feedback" class="size-4" />
-                <span>Feedback</span>
+                <span>My feedback</span>
             </a>
             <a href="{{ route('profile.edit') }}" @class(['casa-mobile-dock-link', 'casa-mobile-dock-link-active' => request()->routeIs('profile.*')]) @if(request()->routeIs('profile.*')) aria-current="page" @endif>
                 <x-nav-icon name="profile" class="size-4" />
-                <span>Profile</span>
+                <span>My profile</span>
             </a>
         </nav>
     @endif

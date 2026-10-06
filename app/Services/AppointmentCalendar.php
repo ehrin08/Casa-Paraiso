@@ -200,7 +200,7 @@ class AppointmentCalendar
         $startsAt = $appointment->scheduled_start_at ?? $appointment->requested_start_at;
         $endsAt = $appointment->scheduled_end_at
             ?? $startsAt?->copy()->addMinutes($appointment->service?->duration_minutes ?? 60);
-        $customerName = $appointment->customerProfile?->user?->name;
+        $customerName = $appointment->customerProfile?->display_name;
         $serviceName = $appointment->service?->name ?? __('Spa service');
         $preferredName = $appointment->preferredStaffProfile?->user?->name;
         $staffName = $appointment->staffProfile?->user?->name;
@@ -220,6 +220,7 @@ class AppointmentCalendar
                 : $serviceName,
             'appointment_number' => $appointment->appointment_number,
             'service_name' => $serviceName,
+            'staff_name' => $staffName,
             'customer_name' => $audience === 'customer' ? null : $customerName,
             'preferred_staff_name' => $preferredName,
             'detail_url' => route($audience.'.appointments.show', $appointment),

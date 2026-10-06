@@ -22,7 +22,7 @@ class TransactionController extends Controller
         $search = trim((string) $request->query('q'));
         $transactions = Transaction::query()->with(['customerProfile.user', 'service', 'appointment', 'recorder'])
             ->when(in_array($status, Transaction::PAYMENT_STATUSES, true), fn ($query) => $query->where('payment_status', $status))
-            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query->where('transaction_number', 'like', "%{$search}%")->orWhereHas('customerProfile.user', fn ($user) => $user->where('name', 'like', "%{$search}%"))->orWhereHas('service', fn ($service) => $service->where('name', 'like', "%{$search}%"))))
+            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query->where('transaction_number', 'like', "%{$search}%")->orWhereHas('customerProfile', fn ($customer) => $customer->search($search))->orWhereHas('service', fn ($service) => $service->where('name', 'like', "%{$search}%"))))
             ->latest()->paginate((int) config('casa.pagination.per_page', 15))->withQueryString();
 
         return view('reception.transactions.index', [
@@ -66,7 +66,7 @@ class TransactionController extends Controller
     private function selectors(): array
     {
         return [
-            'customers' => CustomerProfile::query()->with('user')->get()->sortBy('user.name')->values(),
+            'customers' => CustomerProfile::query()->with('user')->get()->sortBy('display_name')->values(),
             'services' => Service::query()->orderBy('name')->get(),
             'appointments' => Appointment::query()->with(['customerProfile.user', 'service', 'addons'])->whereIn('status', [Appointment::STATUS_CONFIRMED, Appointment::STATUS_COMPLETED])->latest('scheduled_start_at')->get(),
         ];

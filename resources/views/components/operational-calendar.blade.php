@@ -6,6 +6,7 @@
     'services' => collect(),
     'staffProfiles' => collect(),
     'createUrl' => null,
+    'presentation' => 'day',
 ])
 
 @php
@@ -22,6 +23,7 @@
         weeklyCreatePattern: @js($weeklyCreatePattern),
         exceptionCreatePattern: @js($exceptionCreatePattern),
         role: @js($role),
+        presentation: @js($presentation),
         canEditAvailability: @js($canEditAvailability),
         initialMode: @js($initialMode),
         initialWeek: @js($initialWeek)
@@ -30,6 +32,9 @@
     class="space-y-5"
     data-operational-calendar
 >
+    @if ($presentation === 'week')
+        @include('components.calendar.week-schedule')
+    @else
     <section class="casa-card p-3">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div class="space-y-3">
@@ -117,9 +122,12 @@
         </div>
     </section>
 
-    <p class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-show="error" x-text="error" role="alert"></p>
+    @endif
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-show="error" x-cloak role="alert">
+        <p x-text="error"></p><button type="button" class="casa-button-secondary mt-2" x-on:click="load()">{{ __('Retry schedule') }}</button>
+    </div>
 
-    <section class="casa-card overflow-hidden" x-bind:aria-busy="loading">
+    <section class="casa-card overflow-hidden" x-bind:aria-busy="loading" @if ($presentation === 'week') x-show="mode === 'availability'" x-cloak @endif>
         <div class="flex flex-col gap-2 border-b border-casa-border bg-casa-paper px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <p class="casa-section-label" x-text="mode === 'availability' ? '{{ __('Therapist coverage') }}' : '{{ __('Appointment timeline') }}'"></p>
@@ -179,8 +187,9 @@
                         <template x-for="slot in timeSlots" x-bind:key="slot.time">
                             <div
                                 x-bind:class="slot.minutes % 60 === 0
-                                    ? 'h-8 border-b border-casa-border px-2 pt-1 text-end text-xs font-bold text-casa-muted'
-                                    : 'h-8 border-b border-casa-border/20 px-2'"
+                                    ? 'border-b border-casa-border px-2 pt-1 text-end text-xs font-bold text-casa-muted'
+                                    : 'border-b border-casa-border/20 px-2'"
+                                x-bind:style="`height:${slotHeight}px`"
                                 x-text="slot.minutes % 60 === 0 ? slot.label : ''"
                             ></div>
                         </template>
@@ -190,7 +199,7 @@
                         <div class="relative border-e border-casa-border bg-casa-paper" x-bind:style="`height:${timelineHeight}px`">
                             <div class="absolute inset-0 z-0">
                                 <template x-for="slot in timeSlots" x-bind:key="slot.time">
-                                    <div x-bind:class="slot.minutes % 60 === 0 ? 'h-8 border-b border-casa-border bg-casa-sand/20' : 'h-8 border-b border-casa-border/20'">
+                                    <div x-bind:style="`height:${slotHeight}px`" x-bind:class="slot.minutes % 60 === 0 ? 'border-b border-casa-border bg-casa-sand/20' : 'border-b border-casa-border/20'">
                                         <button
                                             x-show="slotCanCreate(resource.id, slot)"
                                             type="button"

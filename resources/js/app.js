@@ -1,6 +1,9 @@
 import './bootstrap';
 import { initializeBookingNotifications } from './booking-notifications';
 import { initializeSidebar } from './sidebar';
+import { manilaDateKey, mondayOf, manilaTime, positionWeekEvents, therapistColor } from './calendar-week';
+import { createOperationsBooking, createCustomerBooking } from './appointment-booking';
+import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -93,8 +96,10 @@ window.casaModal = ({ name, initialShow = false, focusable = false }) => ({
 
     focusables() {
         const selector = 'a, button, input:not([type=\'hidden\']), textarea, select, details, [tabindex]:not([tabindex=\'-1\'])';
+        const dialog = [...document.querySelectorAll('[role="dialog"][data-modal-name]')]
+            .find((element) => element.dataset.modalName === this.name);
 
-        return [...this.$el.querySelectorAll(selector)].filter((element) => !element.hasAttribute('disabled'));
+        return [...(dialog ?? this.$el).querySelectorAll(selector)].filter((element) => !element.hasAttribute('disabled'));
     },
 
     firstFocusable() {
@@ -157,6 +162,9 @@ window.operationalCalendar = (config) => ({
     weeklyCreatePattern: config.weeklyCreatePattern || '',
     exceptionCreatePattern: config.exceptionCreatePattern || '',
     role: config.role,
+    weeklyPresentation: config.presentation === 'week',
+    filtersOpen: false,
+    requestVersion: 0,
     canEditAvailability: Boolean(config.canEditAvailability),
     mode: config.initialMode || 'bookings',
     weekStart: config.initialWeek,
@@ -169,12 +177,12 @@ window.operationalCalendar = (config) => ({
     loading: false,
     error: '',
     availabilitySelection: null,
-    slotHeight: 32,
+    slotHeight: config.presentation === 'week' ? 44 : 32,
     openingMinutes: 13 * 60,
     closingMinutes: 24 * 60,
 
     init() {
-        const today = dateKey(new Date());
+        const today = this.weeklyPresentation ? manilaDateKey() : dateKey(new Date());
         const weekEnd = addCalendarDays(this.weekStart, 7);
 
         if (today >= this.weekStart && today < weekEnd) {
@@ -206,7 +214,7 @@ window.operationalCalendar = (config) => ({
                 date,
                 weekday: parsed.toLocaleDateString(undefined, { weekday: 'short' }),
                 label: parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-                isToday: date === dateKey(new Date()),
+                isToday: date === (this.weeklyPresentation ? manilaDateKey() : dateKey(new Date())),
             };
         });
     },
@@ -244,7 +252,7 @@ window.operationalCalendar = (config) => ({
 
     get selectedAgendaEvents() {
         return this.events
-            .filter((event) => dateFromIso(event.starts_at) === this.selectedDate
+            .filter((event) => (this.weeklyPresentation ? manilaDateKey(event.starts_at) : dateFromIso(event.starts_at)) === this.selectedDate
                 && (this.mode === 'availability'
                     ? event.kind !== 'availability'
                     : !['availability', 'weekly_availability', 'available_exception', 'unavailable_exception'].includes(event.kind)))
@@ -260,6 +268,9 @@ window.operationalCalendar = (config) => ({
     },
 
     eventTimeRange(event) {
+        if (this.weeklyPresentation) {
+            return `${manilaTime(event.starts_at)} – ${manilaTime(event.ends_at)}`;
+        }
         const options = { hour: 'numeric', minute: '2-digit' };
         return `${new Date(event.starts_at).toLocaleTimeString(undefined, options)} – ${new Date(event.ends_at).toLocaleTimeString(undefined, options)}`;
     },
@@ -270,6 +281,7 @@ window.operationalCalendar = (config) => ({
         }
 
         this.mode = mode;
+        this.$dispatch?.('appointment-calendar-mode-changed', { mode });
         this.load();
     },
 
@@ -286,6 +298,12 @@ window.operationalCalendar = (config) => ({
     },
 
     today() {
+        if (this.weeklyPresentation) {
+            this.weekStart = mondayOf(manilaDateKey());
+            this.selectedDate = manilaDateKey();
+            this.load();
+            return;
+        }
         const now = new Date();
         const sunday = new Date(now);
         sunday.setDate(now.getDate() - now.getDay());
@@ -316,6 +334,7 @@ window.operationalCalendar = (config) => ({
     },
 
     load() {
+        const version = ++this.requestVersion;
         this.loading = true;
         this.error = '';
 
@@ -329,15 +348,37 @@ window.operationalCalendar = (config) => ({
                 status: this.statusFilter || null,
             },
         }).then((response) => {
+            if (version !== this.requestVersion) return;
             this.resources = response.data.resources || [];
             this.events = response.data.events || [];
         }).catch(() => {
+            if (version !== this.requestVersion) return;
             this.error = 'The schedule could not be loaded. Try refreshing this week.';
             this.resources = [];
             this.events = [];
         }).finally(() => {
-            this.loading = false;
+            if (version === this.requestVersion) this.loading = false;
         });
+    },
+
+    weekEvents(day) {
+        return positionWeekEvents(this.events, day, this.openingMinutes, this.closingMinutes);
+    },
+
+    get hasWeekBookings() {
+        return this.dayOptions.some((day) => this.weekEvents(day.date).length);
+    },
+
+    weekEventClass(event) {
+        return `casa-week-event-tone-${therapistColor(event.resource_id)}`;
+    },
+
+    weekEventTime(event) {
+        return manilaTime(event.starts_at);
+    },
+
+    weekEventDescription(event) {
+        return `${this.eventTimeRange(event)}, ${event.customer_name || event.title}, ${event.service_name || event.subtitle}, ${event.staff_name || this.resourceName(event.resource_id)}, ${this.statusLabel(event.status)}`;
     },
 
     backgroundEvents(resourceId) {
@@ -637,387 +678,8 @@ window.customerAppointmentCalendar = (config) => ({
     },
 });
 
-window.adminAppointmentForm = (config) => ({
-    availableUrl: config.availableUrl,
-    appointmentId: config.appointmentId || '',
-    serviceId: config.initialServiceId || '',
-    scheduledStart: config.initialScheduledStart || '',
-    staffId: config.initialStaffId || '',
-    persistedServiceId: config.persistedServiceId || '',
-    persistedScheduledStart: config.persistedScheduledStart || '',
-    persistedStaffId: config.persistedStaffId || '',
-    staffNames: config.staffNames || {},
-    addonOptions: config.addonOptions || [],
-    addonCodes: config.initialAddonCodes || [],
-    availableStaffIds: null,
-    loadingTherapists: false,
-    therapistError: '',
-
-    init() {
-        if (this.serviceId && this.scheduledStart) {
-            this.refreshTherapists();
-        }
-    },
-
-    applyCalendarSelection(selection) {
-        if (!selection?.startsAt) {
-            return;
-        }
-
-        this.scheduledStart = selection.startsAt;
-        this.staffId = selection.staffId || '';
-        this.refreshTherapists();
-    },
-
-    get assignedStaffName() {
-        return this.staffNames[String(this.staffId)] || 'Choose therapist';
-    },
-
-    get scheduleSummary() {
-        if (!this.scheduledStart) {
-            return 'Choose a date and time';
-        }
-
-        const date = new Date(this.scheduledStart);
-        const label = Number.isNaN(date.getTime())
-            ? this.scheduledStart.replace('T', ' · ')
-            : date.toLocaleString(undefined, {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-            });
-
-        return `${label} · ${this.assignedStaffName}${this.addonDurationMinutes ? ` · +${this.addonDurationMinutes} min add-ons` : ''}`;
-    },
-
-    get selectedPaidAddons() {
-        return this.addonOptions.filter((addon) => this.addonCodes.includes(addon.code));
-    },
-
-    get paidAddonTotal() {
-        return this.selectedPaidAddons.reduce((total, addon) => total + Number(addon.price || 0), 0);
-    },
-
-    get addonDurationMinutes() {
-        return this.selectedPaidAddons.reduce((total, addon) => total + Number(addon.duration_minutes || 0), 0);
-    },
-
-    addonChanged() {
-        this.refreshTherapists();
-    },
-
-    refreshTherapists() {
-        this.therapistError = '';
-
-        if (!this.serviceId || !this.scheduledStart) {
-            this.availableStaffIds = null;
-            return Promise.resolve();
-        }
-
-        this.loadingTherapists = true;
-
-        return window.axios.get(this.availableUrl, {
-            params: {
-                service_id: this.serviceId,
-                starts_at: this.scheduledStart,
-                appointment_id: this.appointmentId || null,
-                addon_codes: this.addonCodes,
-            },
-        }).then((response) => {
-            this.availableStaffIds = (response.data.therapists || []).map((staff) => String(staff.id));
-
-            if (this.staffId
-                && !this.availableStaffIds.includes(String(this.staffId))
-                && !this.canPreservePersistedStaff(this.staffId)) {
-                this.staffId = '';
-            }
-        }).catch(() => {
-            this.availableStaffIds = null;
-            this.therapistError = 'Available therapists could not be checked. The schedule will still be validated when saved.';
-        }).finally(() => {
-            this.loadingTherapists = false;
-        });
-    },
-
-    staffIsAvailable(id) {
-        return this.availableStaffIds === null
-            || this.availableStaffIds.includes(String(id))
-            || this.canPreservePersistedStaff(id);
-    },
-
-    canPreservePersistedStaff(id) {
-        return Boolean(this.appointmentId)
-            && String(id) === String(this.persistedStaffId)
-            && String(this.serviceId) === String(this.persistedServiceId)
-            && String(this.scheduledStart) === String(this.persistedScheduledStart);
-    },
-});
-
-window.customerCalendarBooking = (config) => ({
-    availabilityUrl: config.availabilityUrl,
-    services: config.services || [],
-    staffOptions: config.staffOptions || [],
-    vouchers: config.vouchers || [],
-    addonOptions: config.addonOptions || [],
-    serviceId: config.initialServiceId || '',
-    staffId: config.initialStaffId || '',
-    voucherId: config.initialVoucherId || '',
-    addonCodes: config.initialAddonCodes || [],
-    month: config.initialMonth,
-    selectedDate: '',
-    selectedSlot: config.initialSlot || '',
-    preferredDate: '',
-    slotsByDate: {},
-    loading: false,
-    error: '',
-    weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    slotPreviewLimit: config.slotPreviewLimit || 2,
-
-    init() {
-        if (this.selectedSlot) {
-            this.selectedDate = this.selectedSlot.slice(0, 10);
-        }
-
-        if (this.serviceId) {
-            this.fetchAvailability();
-        }
-    },
-
-    get monthLabel() {
-        const [year, month] = this.month.split('-').map(Number);
-        return new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    },
-
-    get calendarDays() {
-        const [year, month] = this.month.split('-').map(Number);
-        const firstDay = new Date(year, month - 1, 1);
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const days = [];
-
-        for (let index = 0; index < firstDay.getDay(); index += 1) {
-            days.push({ key: `blank-${index}`, label: '', date: null, available: false, previewSlots: [], moreSlots: 0 });
-        }
-
-        for (let day = 1; day <= daysInMonth; day += 1) {
-            const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const slots = this.slotsByDate[date] || [];
-
-            days.push({
-                key: date,
-                label: day,
-                date,
-                available: slots.length > 0,
-                previewSlots: slots.slice(0, this.slotPreviewLimit),
-                moreSlots: Math.max(0, slots.length - this.slotPreviewLimit),
-            });
-        }
-
-        return days;
-    },
-
-    get selectedDateSlots() {
-        return this.selectedDate ? (this.slotsByDate[this.selectedDate] || []) : [];
-    },
-
-    get selectedService() {
-        return this.services.find((service) => String(service.id) === String(this.serviceId)) || null;
-    },
-
-    get eligibleStaff() {
-        return this.staffOptions.filter((staff) => staff.service_ids.map(String).includes(String(this.serviceId)));
-    },
-
-    get selectedStaff() {
-        return this.staffOptions.find((staff) => String(staff.id) === String(this.staffId)) || null;
-    },
-
-    get selectedVoucher() {
-        return this.vouchers.find((voucher) => String(voucher.id) === String(this.voucherId)) || null;
-    },
-
-    get selectedPaidAddons() {
-        return this.addonOptions.filter((addon) => this.addonCodes.includes(addon.code));
-    },
-
-    get paidAddonTotal() {
-        return this.selectedPaidAddons.reduce((total, addon) => total + Number(addon.price || 0), 0);
-    },
-
-    get addonDurationMinutes() {
-        return this.selectedPaidAddons.reduce((total, addon) => total + Number(addon.duration_minutes || 0), 0);
-    },
-
-    addonChanged() {
-        this.selectedDate = '';
-        this.selectedSlot = '';
-        this.fetchAvailability();
-    },
-
-    voucherChanged() {
-        if (this.selectedVoucher?.addon_code) {
-            this.addonCodes = this.addonCodes.filter((code) => code !== this.selectedVoucher.addon_code);
-        }
-
-        this.selectedDate = '';
-        this.selectedSlot = '';
-        this.fetchAvailability();
-    },
-
-    get selectedDateLabel() {
-        if (!this.selectedDate) {
-            return 'Choose a highlighted date.';
-        }
-
-        return new Date(`${this.selectedDate}T00:00:00`).toLocaleDateString(undefined, {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-        });
-    },
-
-    get selectedSlotLabel() {
-        if (!this.selectedSlot) {
-            return '';
-        }
-
-        return new Date(this.selectedSlot.replace(' ', 'T')).toLocaleString(undefined, {
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
-    },
-
-    serviceChanged() {
-        if (this.staffId && !this.eligibleStaff.some((staff) => String(staff.id) === String(this.staffId))) {
-            this.staffId = '';
-        }
-
-        this.selectedDate = '';
-        this.selectedSlot = '';
-        this.fetchAvailability();
-    },
-
-    selectService(id) {
-        this.serviceId = String(id);
-        this.serviceChanged();
-    },
-
-    staffChanged() {
-        this.selectedDate = '';
-        this.selectedSlot = '';
-        this.fetchAvailability();
-    },
-
-    previousMonth() {
-        const [year, month] = this.month.split('-').map(Number);
-        const date = new Date(year, month - 2, 1);
-        this.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        this.selectedDate = '';
-        this.selectedSlot = '';
-        this.fetchAvailability();
-    },
-
-    nextMonth() {
-        const [year, month] = this.month.split('-').map(Number);
-        const date = new Date(year, month, 1);
-        this.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        this.selectedDate = '';
-        this.selectedSlot = '';
-        this.fetchAvailability();
-    },
-
-    selectDate(date) {
-        this.selectedDate = date;
-        this.selectedSlot = '';
-    },
-
-    preselectDate(date) {
-        if (!date) {
-            return;
-        }
-
-        this.preferredDate = date;
-        this.month = date.slice(0, 7);
-        this.selectedDate = '';
-        this.selectedSlot = '';
-
-        if (this.serviceId) {
-            this.fetchAvailability();
-        }
-    },
-
-    moveAvailableDate(date, amount) {
-        const nextDate = addCalendarDays(date, amount);
-        const nextMonth = nextDate.slice(0, 7);
-        const focusDate = () => {
-            if (!(this.slotsByDate[nextDate] || []).length) {
-                return;
-            }
-
-            this.selectDate(nextDate);
-            window.requestAnimationFrame(() => document.querySelector(`[data-booking-calendar-day="${nextDate}"]`)?.focus());
-        };
-
-        if (nextMonth !== this.month) {
-            this.month = nextMonth;
-            this.selectedDate = '';
-            this.selectedSlot = '';
-            this.fetchAvailability().then(focusDate);
-
-            return;
-        }
-
-        focusDate();
-    },
-
-    chooseSlot(slot) {
-        this.selectedSlot = slot.starts_at;
-    },
-
-    moreSlotsLabel(day) {
-        return day.moreSlots ? `+${day.moreSlots} more` : '';
-    },
-
-    fetchAvailability() {
-        this.error = '';
-        this.slotsByDate = {};
-
-        if (!this.serviceId) {
-            return Promise.resolve();
-        }
-
-        this.loading = true;
-
-        return window.axios.get(this.availabilityUrl, {
-            params: {
-                service_id: this.serviceId,
-                preferred_staff_profile_id: this.staffId || null,
-                promotion_suggestion_id: this.voucherId || null,
-                addon_codes: this.addonCodes,
-                month: this.month,
-            },
-        }).then((response) => {
-            this.slotsByDate = response.data.dates || {};
-
-            if (this.preferredDate && (this.slotsByDate[this.preferredDate] || []).length) {
-                this.selectedDate = this.preferredDate;
-                this.preferredDate = '';
-            }
-
-            if (this.selectedDate && !this.slotsByDate[this.selectedDate]) {
-                this.selectedDate = '';
-                this.selectedSlot = '';
-            }
-        }).catch(() => {
-            this.error = 'Availability could not be loaded. Try another service or month.';
-        }).finally(() => {
-            this.loading = false;
-        });
-    },
-});
+window.adminAppointmentForm = createOperationsBooking;
+window.customerCalendarBooking = createCustomerBooking;
 
 window.attendanceScanner = ({ scanUrl }) => ({
     working: false, error: '', notice: '', scanner: null,
@@ -1315,6 +977,37 @@ const panelElements = () => {
 const panelCache = new Map();
 const panelCacheTtl = 60000;
 let panelTrigger = null;
+let panelRequest = 0;
+let panelAbort = null;
+const panelInertState = new Map();
+
+const setPanelPresentation = (booking, preview = false) => {
+    const { host } = panelElements();
+    host?.classList.toggle('is-booking', booking);
+    host?.classList.toggle('is-appointment-preview', preview);
+    host?.classList.toggle('is-centered', booking || preview);
+    if (!booking && !preview) {
+        panelInertState.forEach((wasInert, element) => { element.inert = wasInert; });
+        panelInertState.clear();
+        return;
+    }
+    let current = host;
+    while (current?.parentElement) {
+        [...current.parentElement.children].filter((element) => element !== current && !element.matches('script, style, link')).forEach((element) => {
+            if (!panelInertState.has(element)) panelInertState.set(element, element.inert);
+            element.inert = true;
+        });
+        current = current.parentElement;
+        if (current === document.body) break;
+    }
+};
+
+const clearPanelContent = (content) => {
+    if (!content) return;
+    closeModalWithin(content);
+    window.Alpine?.destroyTree(content);
+    content.innerHTML = '';
+};
 
 const panelFocusTarget = (trigger) => {
     if (trigger instanceof HTMLElement && trigger.isConnected) {
@@ -1339,6 +1032,7 @@ const closeModalWithin = (root) => {
 
 const panelPathPrefixes = [
     '/admin/appointments/',
+    '/reception/appointments/',
     '/admin/customers/',
     '/admin/staff/',
     '/admin/services/',
@@ -1383,29 +1077,31 @@ const setPanelLoading = (url) => {
     }
 
     host.classList.add('is-open', 'is-loading');
+    setPanelPresentation(isBookingPanelUrl(url), isAppointmentPreviewUrl(url));
     host.setAttribute('aria-hidden', 'false');
     syncBodyScrollLock();
 
     if (title) {
-        title.textContent = 'Loading';
+        title.textContent = isBookingPanelUrl(url) ? (url.pathname.endsWith('/edit') ? 'Edit appointment' : 'Create appointment') : (isAppointmentPreviewUrl(url) ? 'Appointment details' : 'Loading');
     }
 
     if (status) {
-        status.textContent = `Opening ${url.pathname}`;
+        status.textContent = isBookingPanelUrl(url) ? 'Loading booking form…' : (isAppointmentPreviewUrl(url) ? 'Loading appointment details…' : `Opening ${url.pathname}`);
     }
 
     if (content) {
-        closeModalWithin(content);
-        content.innerHTML = '';
+        clearPanelContent(content);
     }
 
-    window.setTimeout(() => dialog?.focus(), 20);
+    dialog?.focus();
 };
 
 const closePanel = ({ restoreFocus = true } = {}) => {
     const { host, content } = panelElements();
     const trigger = panelTrigger;
     panelTrigger = null;
+    panelRequest++;
+    panelAbort?.abort();
 
     if (!host) {
         return;
@@ -1413,11 +1109,11 @@ const closePanel = ({ restoreFocus = true } = {}) => {
 
     host.classList.remove('is-open', 'is-loading');
     host.setAttribute('aria-hidden', 'true');
-    closeModalWithin(content);
+    setPanelPresentation(false);
     syncBodyScrollLock();
 
     if (content) {
-        content.innerHTML = '';
+        clearPanelContent(content);
     }
 
     if (restoreFocus) {
@@ -1431,6 +1127,10 @@ const panelPageHtml = (doc) => {
 
     if (!main) {
         return null;
+    }
+
+    if (main.querySelector('[data-booking-form]')) {
+        return `<div class="casa-panel-page" data-booking-page><main>${main.innerHTML}</main></div>`;
     }
 
     return `
@@ -1448,8 +1148,9 @@ const renderPanelHtml = (pageHtml) => {
         return false;
     }
 
-    closeModalWithin(content);
+    clearPanelContent(content);
     content.innerHTML = pageHtml;
+    setPanelPresentation(Boolean(content.querySelector('[data-booking-page]')), Boolean(content.querySelector('[data-appointment-preview]')));
     host.classList.add('is-open');
     host.classList.remove('is-loading');
     host.setAttribute('aria-hidden', 'false');
@@ -1459,16 +1160,23 @@ const renderPanelHtml = (pageHtml) => {
     const { title } = panelElements();
 
     if (title) {
-        title.textContent = heading?.textContent?.trim() || 'Workspace panel';
+        title.textContent = content.querySelector('[data-booking-title]')?.dataset.bookingTitle || heading?.textContent?.trim() || 'Workspace panel';
     }
 
     window.Alpine?.initTree(content);
-    content.querySelector('input, select, textarea, button, a')?.focus({ preventScroll: true });
+    const { dialog } = panelElements();
+    window.requestAnimationFrame(() => {
+        if (!host.classList.contains('is-open')) return;
+        (visibleDialogControls(content)[0] || dialog)?.focus({ preventScroll: true });
+    });
     return true;
 };
 
 const openPanel = async (url, trigger = document.activeElement) => {
     let { host, content } = panelElements();
+    const request = ++panelRequest;
+    panelAbort?.abort();
+    panelAbort = new AbortController();
 
     if (!host || !content || !isPanelEligibleUrl(url)) {
         panelTrigger = null;
@@ -1480,7 +1188,7 @@ const openPanel = async (url, trigger = document.activeElement) => {
         panelTrigger = trigger instanceof HTMLElement ? trigger : null;
     }
 
-    const cached = panelCache.get(url.href);
+    const cached = isAppointmentPreviewUrl(url) ? null : panelCache.get(url.href);
     const cachedHtml = cached?.html;
     const cacheIsFresh = cached && Date.now() - cached.fetchedAt < panelCacheTtl;
 
@@ -1499,6 +1207,8 @@ const openPanel = async (url, trigger = document.activeElement) => {
 
     try {
         const response = await window.fetch(url.href, {
+            signal: panelAbort.signal,
+            cache: isAppointmentPreviewUrl(url) ? 'no-store' : 'default',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-Casa-Panel': '1',
@@ -1510,6 +1220,7 @@ const openPanel = async (url, trigger = document.activeElement) => {
         }
 
         const text = await response.text();
+        if (request !== panelRequest || !host.classList.contains('is-open')) return;
         const doc = new DOMParser().parseFromString(text, 'text/html');
         const pageHtml = panelPageHtml(doc);
 
@@ -1518,7 +1229,9 @@ const openPanel = async (url, trigger = document.activeElement) => {
             return;
         }
 
-        panelCache.set(url.href, { html: pageHtml, fetchedAt: Date.now() });
+        if (!isAppointmentPreviewUrl(url)) {
+            panelCache.set(url.href, { html: pageHtml, fetchedAt: Date.now() });
+        }
 
         ({ host, content } = panelElements());
 
@@ -1529,11 +1242,14 @@ const openPanel = async (url, trigger = document.activeElement) => {
 
         renderPanelHtml(pageHtml);
     } catch {
+        if (request !== panelRequest || panelAbort.signal.aborted) return;
         if (!cachedHtml) {
             window.location.href = url.href;
         }
     }
 };
+
+window.addEventListener('close-workspace-panel', () => closePanel());
 
 prepareFastNavigation();
 
@@ -1589,6 +1305,11 @@ document.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+    const { host, dialog } = panelElements();
+    if (event.key === 'Tab' && host?.classList.contains('is-open') && host.classList.contains('is-centered') && !modalStore().active) {
+        trapBookingFocus(event, dialog);
+        return;
+    }
     if (event.key !== 'Escape') {
         return;
     }
@@ -1599,8 +1320,6 @@ document.addEventListener('keydown', (event) => {
         modalStore().close();
         return;
     }
-
-    const { host } = panelElements();
 
     if (host?.classList.contains('is-open')) {
         closePanel();

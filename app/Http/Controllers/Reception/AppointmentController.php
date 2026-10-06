@@ -127,6 +127,9 @@ class AppointmentController extends Controller
         $service = Service::query()->findOrFail($data['service_id']);
         $start = Carbon::parse($data['starts_at']);
         $addonCodes = $data['addon_codes'] ?? [];
+        if ($appointment?->promotionSuggestion?->addon_code) {
+            $addonCodes = array_values(array_unique([...$addonCodes, $appointment->promotionSuggestion->addon_code]));
+        }
         $workflow->assertBookableStart($start, $service, 'starts_at', true, $addonCodes);
         $end = $workflow->scheduledEnd($start, $service, $addonCodes);
         $therapists = StaffProfile::query()->with(['user', 'services', 'weeklySchedules', 'scheduleExceptions'])
@@ -140,15 +143,23 @@ class AppointmentController extends Controller
 
     private function selectors(?Appointment $appointment = null): array
     {
+        $staffProfiles = StaffProfile::query()->with(['user', 'services'])->where('is_bookable', true)
+            ->whereHas('user', fn ($query) => $query->where('is_active', true))->get();
+        foreach ([$appointment?->staffProfile, $appointment?->preferredStaffProfile] as $retainedStaff) {
+            if ($retainedStaff && ! $staffProfiles->contains('id', $retainedStaff->id)) {
+                $retainedStaff->loadMissing(['user', 'services']);
+                $staffProfiles->push($retainedStaff);
+            }
+        }
         $services = Service::query()->where('is_active', true)->orderBy('name')->get();
         if ($appointment?->service && ! $services->contains('id', $appointment->service_id)) {
             $services->push($appointment->service);
         }
 
         return [
-            'customers' => CustomerProfile::query()->with('user')->get()->sortBy('user.name')->values(),
+            'customers' => CustomerProfile::query()->with('user')->whereKey((int) old('customer_profile_id', $appointment?->customer_profile_id))->get(),
             'services' => $services,
-            'staffProfiles' => StaffProfile::query()->with(['user', 'services'])->where('is_bookable', true)->whereHas('user', fn ($query) => $query->where('is_active', true))->get()->sortBy('user.name')->values(),
+            'staffProfiles' => $staffProfiles->sortBy('user.name')->values(),
             'addons' => $this->addonSelectors($appointment),
         ];
     }

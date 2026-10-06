@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Therapist module') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Transactions') }}</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Review transactions linked to your assigned appointments.') }}</p>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ __('Payments') }}</h1>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Review payments linked to your appointments.') }}</p>
         </div>
 
     </x-slot>
@@ -43,7 +43,7 @@
                     @foreach ($transactions as $transaction)
                         <tr class="casa-table-row">
                             <td class="px-4 py-4 font-semibold text-casa-text">{{ $transaction->transaction_number }}</td>
-                            <td class="px-4 py-4 text-casa-muted">{{ $transaction->customerProfile?->user?->name }}</td>
+                            <td class="px-4 py-4 text-casa-muted">{{ $transaction->customerProfile?->display_name }}</td>
                             <td class="px-4 py-4 text-casa-muted">{{ $transaction->service?->name }}</td>
                             <td class="px-4 py-4 font-semibold text-casa-text">PHP {{ number_format((float) $transaction->amount, 2) }}</td>
                             <td class="px-4 py-4"><x-status-badge>{{ ucfirst($transaction->payment_status) }}</x-status-badge></td>

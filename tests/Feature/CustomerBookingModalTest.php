@@ -33,14 +33,14 @@ class CustomerBookingModalTest extends TestCase
             ->get(route('customer.appointments.create', absolute: false))
             ->assertOk()
             ->assertSee('Book an appointment')
-            ->assertSee('min-w-[22.25rem]', false)
-            ->assertSee('grid-cols-[repeat(7,minmax(2.75rem,1fr))]', false)
-            ->assertSee('x-bind:aria-selected="selectedDate === day.date"', false)
-            ->assertSee('aria-label="Booking recap"', false)
+            ->assertSee('booking-month-grid', false)
+            ->assertSee('data-booking-step="2"', false)
+            ->assertSee('x-bind:aria-pressed="day.date === selectedDate"', false)
+            ->assertSee('Booking summary')
             ->assertSee('x-cloak', false)
-            ->assertSee('Add paid add-ons (optional)')
-            ->assertSee('Use a complimentary add-on voucher (optional)')
-            ->assertSee('Need a different time?')
+            ->assertSee('Paid add-ons (optional)')
+            ->assertSee('Complimentary add-on voucher (optional)')
+            ->assertSee('Start time')
             ->assertSee('>Open<', false);
     }
 
