@@ -28,6 +28,7 @@ class AppointmentController extends Controller
 {
     public function index(Request $request): View
     {
+        $calendarDate = $request->validate(['calendar_date' => ['nullable', 'date_format:Y-m-d']])['calendar_date'] ?? null;
         $summary = Appointment::query()
             ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS confirmed', [Appointment::STATUS_CONFIRMED])
             ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS completed', [Appointment::STATUS_COMPLETED])
@@ -36,7 +37,8 @@ class AppointmentController extends Controller
 
         return view('reception.appointments.index', [
             'mode' => in_array($request->query('mode'), ['bookings', 'availability'], true) ? $request->query('mode') : 'bookings',
-            'initialWeek' => now()->startOfWeek(Carbon::SUNDAY)->toDateString(),
+            'initialWeek' => ($calendarDate ? Carbon::parse($calendarDate, 'Asia/Manila') : now('Asia/Manila'))->startOfWeek(Carbon::SUNDAY)->toDateString(),
+            'initialDate' => $calendarDate,
             'summary' => ['confirmed' => (int) $summary?->confirmed, 'completed' => (int) $summary?->completed, 'cancelled' => (int) $summary?->cancelled],
             'services' => Service::query()->where('is_active', true)->orderBy('name')->get(),
             'staffProfiles' => StaffProfile::query()->with('user')->where('is_bookable', true)->whereHas('user', fn ($query) => $query->where('is_active', true))->get()->sortBy('user.name')->values(),

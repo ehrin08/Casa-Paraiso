@@ -16,11 +16,13 @@ class AppointmentController extends Controller
 {
     public function index(Request $request): View
     {
+        $calendarDate = $request->validate(['calendar_date' => ['nullable', 'date_format:Y-m-d']])['calendar_date'] ?? null;
         $staffProfile = $request->user()->staffProfile;
 
         return view('staff.appointments.index', [
             'staffProfile' => $staffProfile,
-            'initialWeek' => now()->startOfWeek(Carbon::SUNDAY)->toDateString(),
+            'initialWeek' => ($calendarDate ? Carbon::parse($calendarDate, 'Asia/Manila') : now('Asia/Manila'))->startOfWeek(Carbon::SUNDAY)->toDateString(),
+            'initialDate' => $calendarDate,
         ]);
     }
 

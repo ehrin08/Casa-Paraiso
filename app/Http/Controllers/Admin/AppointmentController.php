@@ -30,6 +30,7 @@ class AppointmentController extends Controller
 {
     public function index(Request $request): View
     {
+        $calendarDate = $request->validate(['calendar_date' => ['nullable', 'date_format:Y-m-d']])['calendar_date'] ?? null;
         $today = now('Asia/Manila')->startOfDay();
         $requestedMode = $request->old('return_to') === 'index'
             ? $request->old('mode', $request->query('mode'))
@@ -68,7 +69,8 @@ class AppointmentController extends Controller
 
         return view('admin.appointments.index', [
             'mode' => $mode,
-            'initialWeek' => $today->copy()->startOfWeek(Carbon::MONDAY)->toDateString(),
+            'initialWeek' => ($calendarDate ? Carbon::parse($calendarDate, 'Asia/Manila') : $today->copy())->startOfWeek(Carbon::MONDAY)->toDateString(),
+            'initialDate' => $calendarDate,
             'today' => $today,
             'transaction' => new Transaction(['payment_method' => ApplicationSetting::current()->default_payment_method]),
             'summary' => ['confirmed' => (int) $summary?->confirmed, 'completed' => (int) $summary?->completed, 'cancelled' => (int) $summary?->cancelled],

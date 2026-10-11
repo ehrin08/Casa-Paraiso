@@ -6,11 +6,157 @@ use App\Models\ApplicationSetting;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminSettingsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_admin_roles_see_the_reference_sections_and_one_save_action(): void
+    {
+        config(['auth.super_admin_email' => 'owner@casaparaiso.test']);
+
+        foreach ([User::factory()->admin()->create(), User::factory()->create([
+            'email' => 'owner@casaparaiso.test', 'role' => User::ROLE_SUPER_ADMIN,
+        ])] as $user) {
+            $response = $this->actingAs($user)->get(route('admin.settings.index'))
+                ->assertOk()
+                ->assertSeeInOrder(['Business identity', 'Payments', 'Environment checks', 'Company history', 'Public organization chart'])
+                ->assertSee('More public details')
+                ->assertSee('Operating rules and user access')
+                ->assertSee('No public organization chart yet.')
+                ->assertSee('Debug mode')
+                ->assertSee('HTTPS cookies')
+                ->assertSee('Session encryption')
+                ->assertSee('Trusted hosts')
+                ->assertDontSee('Healthy');
+
+            $xpath = $this->settingsXPath($response->getContent());
+            $this->assertSame(1, $xpath->query('//form[@data-settings-workspace]//button[@type="submit"]')->length);
+            $this->assertSame('Save changes', trim($xpath->query('//form[@data-settings-workspace]//button[@type="submit"]')->item(0)->textContent));
+            $this->assertSame(0, $xpath->query('//details[@id="settings-chart-editor" or @id="settings-public-details"][@open]')->length);
+        }
+    }
+
+    public function test_a_no_javascript_unrelated_save_preserves_the_collapsed_chart_and_photos(): void
+    {
+        Storage::fake('public');
+        $chart = [
+            'owner' => ['title' => 'Owner', 'name' => 'Ana', 'description' => 'Leads the spa.', 'photo' => 'org-chart/owner.webp'],
+            'admin' => ['title' => 'Administrator', 'name' => 'Bea', 'description' => 'Runs operations.', 'photo' => 'org-chart/admin.webp'],
+            'team' => [
+                ['title' => 'Therapists', 'name' => 'Care team', 'description' => 'Treatments.', 'photo' => 'org-chart/team-0.webp'],
+                ['title' => 'Reception', 'name' => 'Welcome team', 'description' => 'Arrivals.', 'photo' => 'org-chart/team-1.webp'],
+            ],
+        ];
+        foreach (['owner.webp', 'admin.webp', 'team-0.webp', 'team-1.webp'] as $file) {
+            Storage::disk('public')->put('org-chart/'.$file, 'retained-photo');
+        }
+        $settings = ApplicationSetting::factory()->create(['id' => 1, 'organization_chart' => $chart]);
+        $this->actingAs(User::factory()->admin()->create());
+        $response = $this->get(route('admin.settings.index'))->assertOk()->assertSee('data-settings-chart-preview', false);
+        $payload = $this->noJavascriptFormPayload($response->getContent());
+        $payload['contact_phone'] = '09171234567';
+
+        $this->patch(route('admin.settings.update'), $payload)->assertSessionHasNoErrors()->assertSessionHas('status', 'settings-updated');
+
+        $this->assertSame($chart, $settings->fresh()->organization_chart);
+        $this->assertSame('09171234567', $settings->fresh()->contact_phone);
+        foreach (['owner.webp', 'admin.webp', 'team-0.webp', 'team-1.webp'] as $file) {
+            Storage::disk('public')->assertExists('org-chart/'.$file);
+        }
+    }
+
+    public function test_chart_photo_upload_replacement_and_removal_keep_the_existing_workflow(): void
+    {
+        Storage::fake('public');
+        $this->actingAs(User::factory()->admin()->create());
+        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
+        $payload['organization_chart'] = [
+            'owner' => ['title' => 'Owner'], 'admin' => ['title' => 'Administrator'],
+            'team' => [['title' => 'Therapists']],
+        ];
+        $payload['organization_chart_photos'] = [
+            'owner' => UploadedFile::fake()->image('owner.png'),
+            'admin' => UploadedFile::fake()->image('admin.jpg'),
+            'team' => [UploadedFile::fake()->image('team.png')],
+        ];
+        $this->patch(route('admin.settings.update'), $payload)->assertSessionHasNoErrors();
+        foreach (['owner.webp', 'admin.webp', 'team-0.webp'] as $file) {
+            Storage::disk('public')->assertExists('org-chart/'.$file);
+        }
+
+        $ownerBefore = Storage::disk('public')->get('org-chart/owner.webp');
+        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
+        $payload['organization_chart_photos']['owner'] = UploadedFile::fake()->image('replacement.png', 300, 100);
+        $replacement = imagecreatetruecolor(300, 100);
+        imagefill($replacement, 0, 0, imagecolorallocate($replacement, 80, 110, 80));
+        imagepng($replacement, $payload['organization_chart_photos']['owner']->getRealPath());
+        imagedestroy($replacement);
+        $payload['organization_chart_remove_photos'] = ['admin' => '1', 'team' => ['1']];
+        $this->patch(route('admin.settings.update'), $payload)->assertSessionHasNoErrors();
+
+        $chart = ApplicationSetting::current()->organization_chart;
+        $this->assertSame('org-chart/owner.webp', $chart['owner']['photo']);
+        $this->assertNotSame($ownerBefore, Storage::disk('public')->get('org-chart/owner.webp'));
+        $this->assertNull($chart['admin']['photo']);
+        $this->assertNull($chart['team'][0]['photo']);
+        Storage::disk('public')->assertMissing(['org-chart/admin.webp', 'org-chart/team-0.webp']);
+    }
+
+    public function test_validation_opens_both_disclosures_and_retains_draft_chart_values(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
+        $payload['facebook_url'] = 'https://example.com/private';
+        $payload['organization_chart'] = [
+            'owner' => ['title' => 'Draft owner', 'name' => 'Draft name'],
+            'admin' => ['title' => 'Administrator'],
+            'team' => [['title' => 'Therapists', 'name' => str_repeat('x', 101)]],
+        ];
+        $payload['organization_chart_photos']['owner'] = UploadedFile::fake()->create('invalid.txt', 1, 'text/plain');
+        $this->from(route('admin.settings.index'))->patch(route('admin.settings.update'), $payload)
+            ->assertSessionHasErrors(['facebook_url', 'organization_chart.team.0.name', 'organization_chart_photos.owner']);
+        $response = $this->get(route('admin.settings.index'))->assertOk()->assertSee('Draft owner')->assertSee('Draft name');
+        $xpath = $this->settingsXPath($response->getContent());
+        $this->assertSame(2, $xpath->query('//details[@id="settings-chart-editor" or @id="settings-public-details"][@open]')->length);
+        $this->assertDatabaseCount('application_settings', 0);
+    }
+
+    private function settingsXPath(string $html): \DOMXPath
+    {
+        $document = new \DOMDocument;
+        $previous = libxml_use_internal_errors(true);
+        $document->loadHTML('<?xml encoding="UTF-8">'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        return new \DOMXPath($document);
+    }
+
+    /** Read the successful HTML controls as a browser with scripting disabled would. */
+    private function noJavascriptFormPayload(string $html): array
+    {
+        $xpath = $this->settingsXPath($html);
+        $pairs = [];
+        foreach ($xpath->query('//form[@data-settings-workspace]//*[self::input or self::textarea or self::select][@name][not(ancestor::template)][not(@disabled)]') as $control) {
+            $type = $control->getAttribute('type');
+            if ($type === 'file' || ($type === 'checkbox' && ! $control->hasAttribute('checked'))) {
+                continue;
+            }
+            $value = match ($control->nodeName) {
+                'textarea' => $control->textContent,
+                'select' => $xpath->query('.//option[@selected]', $control)->item(0)?->getAttribute('value') ?? '',
+                default => $control->getAttribute('value'),
+            };
+            $pairs[] = urlencode($control->getAttribute('name')).'='.urlencode($value);
+        }
+        parse_str(implode('&', $pairs), $payload);
+
+        return $payload;
+    }
 
     public function test_admin_can_view_and_update_application_settings(): void
     {
@@ -19,9 +165,10 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.settings.index'))
             ->assertOk()
-            ->assertSee('Business profile')
-            ->assertSee('Company history and organizational chart')
-            ->assertSee('Security readiness')
+            ->assertSee('Business identity')
+            ->assertSee('Company history')
+            ->assertSee('Public organization chart')
+            ->assertSee('Environment checks')
             ->assertSee('Default payment method');
 
         $this->actingAs($admin)

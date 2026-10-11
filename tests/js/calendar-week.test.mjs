@@ -48,7 +48,7 @@ test('half-hour visits and midnight endings retain actual durations and exclude 
     assert.equal(therapistColor('17'), therapistColor(17));
 });
 
-function harness() {
+function harness(config = {}) {
     const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
     const calendar = source.slice(source.indexOf('const dateFromIso'), source.indexOf('window.weeklyRoster'));
     const requests = [];
@@ -58,9 +58,25 @@ function harness() {
         mondayOf, manilaTime, positionWeekEvents, therapistColor,
     });
     vm.runInContext(calendar, context);
-    return { state: window.operationalCalendar({ presentation: 'week', initialWeek: '2026-09-28', feedUrl: '/feed', role: 'admin' }), requests };
+    return { state: window.operationalCalendar({ presentation: 'week', initialWeek: '2026-09-28', feedUrl: '/feed', role: 'admin', ...config }), requests };
 }
 const flush = () => new Promise(setImmediate);
+
+test('an explicit booking date survives initialization in the current week and future weeks', () => {
+    for (const config of [
+        { initialDate: '2026-10-01' },
+        { initialWeek: '2026-11-02', initialDate: '2026-11-04' },
+        { presentation: 'day', initialWeek: '2026-09-27', initialDate: '2026-10-01' },
+    ]) {
+        const { state, requests } = harness(config);
+        state.init();
+        assert.equal(state.selectedDate, config.initialDate);
+        assert.equal(requests[0].options.params.start, config.initialWeek || '2026-09-28');
+    }
+    const { state } = harness();
+    state.init();
+    assert.equal(state.selectedDate, '2026-10-04');
+});
 
 test('changing calendar mode publishes the current mode for queue action forms', () => {
     const { state, requests } = harness();

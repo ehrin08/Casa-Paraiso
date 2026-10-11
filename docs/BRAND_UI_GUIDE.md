@@ -122,7 +122,16 @@ Paid total includes only fully paid transactions; Unpaid total includes only unp
 
 The month picker defaults to All dates and filters linked scheduled visits when selected. Status and month changes submit the GET form automatically; Enter or the search button applies search, and no-JavaScript controls include Apply filters. Mobile filters use the shared disclosure, metric cards stack below 640px, and the table scrolls in the keyboard-focusable shared region. Pagination stays fixed at 15, without a page-size selector. CSV exports use the same filters and order as the table, while Revenue report remains a secondary link.
 
+## Admin Reports
+
+The admin and super-admin Reports dashboard follows the supplied Reports reference while retaining the shared sidebar and page heading. A cream date-range/category panel with Export CSV precedes three metrics with palm icon circles: Total revenue, Completed appointments, and Unique customers. Whole peso values omit decimals; fractional values retain two places. Previous-period comparisons include text and directional arrows, and show No prior activity when the baseline is zero.
+
+At desktop widths, revenue bars sit beside appointment-status and feedback-sentiment doughnuts. Service revenue rankings sit beside a four-column RFM customer-group table, followed by the five report record tabs. Charts use server-rendered CSS/SVG with visible totals and legends; they require neither JavaScript nor a chart CDN. Longer revenue ranges switch from weekly to monthly buckets and wrap into additional rows; horizontal scrolling is confined to record and RFM tables. Empty states retain true zero totals. The existing preset group names and appointment statuses replace unsupported sample labels.
+
+Styles are scoped in `resources/css/reports.css`. Panels stack on smaller screens; tabs, charts, and tables scroll internally with accessible names and keyboard focus. Meaningful text remains at least 14px and interactive targets at least 44px. Native date disclosures and GET forms work without JavaScript; Alpine only enhances select submission. All reports shows all panels; focused categories show the relevant metrics and charts. Search/status controls clearly apply to record rows and the exported CSV, while dashboard aggregates use the selected date range.
+
 ## Admin Commissions
+
 
 The admin and super-admin Commissions index uses three cream Pending, Paid, and Net total cards with pale green icon circles above a separate therapist/status/earned-date filter panel. All cards follow the current filters across all pages and include signed adjustments. Basis amount, stored rate, and Commission replace the reference's gross/deduction labels to reflect the actual commission policy. Whole peso amounts omit decimals; fractional amounts retain two decimal places.
 
@@ -153,6 +162,20 @@ Search, Service, and Sentiment are visible on desktop. The native More filters d
 The service table includes every represented service with Positive, Neutral, Negative, and Total counts, ordered by total descending and name. Its bounded scroll region accommodates larger histories. Experience topics use their configured labels and accessible meters showing positive findings divided by all stored findings for that topic. A review can contribute findings of both polarities, so the denominator is findings rather than reviews.
 
 The five-column review table shows customer names linked to feedback details, emails or guest phones, treatment/service, Manila submission date, textual sentiment pills, and escaped comment previews limited to 180 characters. Longer comments offer Read full review; ratings, classification evidence, and manual review remain in the existing detail screen. Pagination remains fixed at 15. Empty history, no matching reviews, and absent topic findings use distinct truthful messages.
+
+## Notifications
+
+Operational Notifications follows the supplied reference with All/Unread navigation, a customer/service/booking-number search field, a cream booking-alert list, and a booking-detail panel. The 62/38 split applies at 1280px and above; smaller screens stack details below the list and retain the shared keyboard-focusable table scrolling. Selected rows use pale green, unread dots include accessible status text, and the detail read-status pill includes a visible label.
+
+Current customer contacts, service and scheduled duration, therapist, Manila schedule, received timestamp, and a shaded customer-note block use restrained green icon circles. View booking and View in calendar occupy the footer, stacking on mobile. Missing or reassigned bookings show an unavailable message and disabled actions. Page-specific styles live in `resources/css/notifications.css`; shared navigation, the approved logo, Casa colors, 14px meaningful text, and 44px controls remain in use. Search and preview work with normal Laravel GET requests; previewing alone never marks an alert read.
+
+## Admin Settings
+
+Admin and super-admin Settings follows the supplied reference within the existing shared sidebar and page heading. Two equal columns apply at 1024px and above: Business identity beside a Payments/Environment checks stack, then Company history beside Public organization chart. Smaller screens stack the cards. Scoped styles live in `resources/css/settings.css`, using Casa Paper surfaces, light borders, restrained palm accents, Manrope typography, 14px meaningful text, and 44px controls.
+
+Business identity shows name, email, phone, and address; a native More public details disclosure contains landmarks and public links. Environment rows display the real debug, HTTPS-cookie, session-encryption, and trusted-host configuration values with textual status pills; they do not claim application, database, or email health. Operating rules and role-aware user access sit in a secondary disclosure below the main cards.
+
+The saved chart preview connects owner, administrator, and team tiers, retaining public role titles, names, summaries, and photos. An empty chart invites editing without inventing published roles. Edit chart expands the existing editor in place; closing it preserves inputs. Native disclosures reopen for their validation errors. One multipart Save changes submission retains the existing PATCH route and publishes all edited settings. The team editor preserves stable row identities during removal and has an eight-slot server-rendered no-JavaScript fallback, so unrelated saves preserve saved chart fields and photos. Plain-text history retains paragraph breaks and the existing 6000-character limit.
 
 ## Imagery
 

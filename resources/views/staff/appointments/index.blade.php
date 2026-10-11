@@ -12,6 +12,7 @@
     <x-operational-calendar
         :feed-url="route('staff.appointments.calendar')"
         :initial-week="$initialWeek"
+        :initial-date="$initialDate"
         role="staff"
     />
 </x-app-layout>

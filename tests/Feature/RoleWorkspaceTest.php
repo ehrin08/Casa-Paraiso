@@ -87,6 +87,9 @@ class RoleWorkspaceTest extends TestCase
             } elseif ($path === '/admin/feedback') {
                 $this->assertSame(3, substr_count($content, 'data-metric-card'));
                 $this->assertStringContainsString('Filtered sentiment totals', $content);
+            } elseif ($path === '/admin/reports') {
+                $this->assertSame(3, substr_count($content, 'data-metric-card'));
+                $this->assertStringContainsString('Selected-period metrics', $content);
             } else {
                 $this->assertStringContainsString('hidden text-sm font-semibold leading-5 text-casa-muted sm:block', $content);
             }
@@ -242,7 +245,7 @@ class RoleWorkspaceTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/reports')
             ->assertOk()
-            ->assertSee('href="'.route('admin.reports.export').'" class="casa-button-primary" data-turbo="false"', false);
+            ->assertSee('href="'.e(route('admin.reports.export', ['range' => 'this_month', 'type' => 'appointments', 'category' => 'all'])).'" class="casa-button-primary reports-export" data-turbo="false"', false);
     }
 
     public function test_authenticated_landing_page_links_directly_to_role_home(): void

@@ -4,17 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\HandlesIndexSorting;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ReportIndexRequest;
+use App\Models\Addon;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Feedback;
 use App\Models\PromotionSuggestion;
 use App\Models\Transaction;
+use App\Services\ReportDashboard;
+use App\Services\ReportDateRange;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
@@ -23,12 +27,15 @@ class ReportController extends Controller
 
     public const TYPES = ['appointments', 'transactions', 'customers', 'promotions', 'feedback'];
 
-    public function index(Request $request)
-    {
-        $this->validateFilters($request);
+    public function __construct(private readonly ReportDashboard $dashboard) {}
 
+    public function index(ReportIndexRequest $request): View
+    {
+        $range = ReportDateRange::fromFilters($request->validated());
         $type = $this->type($request);
-        $records = $this->query($type, $request)
+        $editingCustomDates = $range->key === 'custom' && ! $request->filled('date_from') && ! $request->filled('date_to');
+        $request->query->add([...$range->query(), 'type' => $type]);
+        $records = $this->query($type, $request, $range)
             ->paginate((int) config('casa.pagination.per_page', 15))
             ->withQueryString();
 
@@ -36,17 +43,21 @@ class ReportController extends Controller
             'type' => $type,
             'types' => self::TYPES,
             'records' => $records,
-            'summary' => $this->summary(),
+            'rewardNames' => $type === 'promotions' ? Addon::query()->whereIn('code', $records->pluck('addon_code')->filter())->pluck('name', 'code')->all() : [],
+            'dashboard' => $this->dashboard->forRange($range),
+            'range' => $range,
+            'editingCustomDates' => $editingCustomDates,
+            'category' => $request->query('category', 'all'),
+            'filterQuery' => [...$request->safe()->except(['page']), ...$range->query(), 'type' => $type, 'category' => $request->query('category', 'all')],
             'filters' => $request->only(['q', 'date_from', 'date_to', 'status', 'payment_status', 'sentiment_label', 'sort', 'direction']),
         ]);
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(ReportIndexRequest $request): StreamedResponse
     {
-        $this->validateFilters($request);
-
+        $range = ReportDateRange::fromFilters($request->validated());
         $type = $this->type($request);
-        $records = $this->query($type, $request)->lazy(500);
+        $records = $this->query($type, $request, $range)->lazy(500);
         $filename = 'casa-paraiso-'.$type.'-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($type, $records): void {
@@ -64,20 +75,34 @@ class ReportController extends Controller
 
     protected function type(Request $request): string
     {
+        if ($request->query('category', 'all') !== 'all') {
+            return (string) $request->query('category');
+        }
+
         $type = (string) $request->query('type', 'appointments');
 
         return in_array($type, self::TYPES, true) ? $type : 'appointments';
     }
 
-    protected function query(string $type, Request $request): Builder
+    protected function query(string $type, Request $request, ReportDateRange $range): Builder
     {
-        return match ($type) {
+        $query = match ($type) {
             'transactions' => $this->transactionQuery($request),
             'customers' => $this->customerQuery($request),
             'promotions' => $this->promotionQuery($request),
             'feedback' => $this->feedbackQuery($request),
             default => $this->appointmentQuery($request),
         };
+
+        $column = match ($type) {
+            'transactions' => 'transactions.paid_at',
+            'customers' => 'customer_profiles.created_at',
+            'promotions' => 'promotion_suggestions.created_at',
+            'feedback' => 'feedback.submitted_at',
+            default => DB::raw('COALESCE(appointments.scheduled_start_at, appointments.requested_start_at)'),
+        };
+
+        return $range->apply($query, $column);
     }
 
     private function appointmentQuery(Request $request): Builder
@@ -110,10 +135,9 @@ class ReportController extends Controller
                     ->orWhereHas('customerProfile', fn ($customer) => $customer->search($search))
                     ->orWhere('report_appointment_services.name', 'like', "%{$search}%");
             }))
-            ->when($request->filled('date_from'), fn ($query) => $query->whereDate(DB::raw('COALESCE(appointments.scheduled_start_at, appointments.requested_start_at)'), '>=', Carbon::parse($request->query('date_from'))))
-            ->when($request->filled('date_to'), fn ($query) => $query->whereDate(DB::raw('COALESCE(appointments.scheduled_start_at, appointments.requested_start_at)'), '<=', Carbon::parse($request->query('date_to'))))
             ->orderBy($sorts[$sort], $direction)
-            ->orderByDesc('report_start_at');
+            ->orderByDesc('report_start_at')
+            ->orderByDesc('appointments.id');
     }
 
     private function transactionQuery(Request $request): Builder
@@ -125,6 +149,7 @@ class ReportController extends Controller
             'amount' => 'transactions.amount',
             'status' => 'transactions.payment_status',
             'paid_at' => 'transactions.paid_at',
+            'method' => 'transactions.payment_method',
         ];
         $sort = $this->indexSort($request, $sorts, 'paid_at');
         $direction = $this->indexDirection($request, 'desc');
@@ -146,11 +171,10 @@ class ReportController extends Controller
                     ->orWhereHas('customerProfile', fn ($customer) => $customer->search($search))
                     ->orWhere('report_transaction_services.name', 'like', "%{$search}%");
             }))
-            ->when($request->filled('date_from'), fn ($query) => $query->whereDate('transactions.paid_at', '>=', Carbon::parse($request->query('date_from'))))
-            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('transactions.paid_at', '<=', Carbon::parse($request->query('date_to'))))
             ->orderBy($sorts[$sort], $direction)
             ->orderByDesc('transactions.paid_at')
-            ->orderByDesc('transactions.created_at');
+            ->orderByDesc('transactions.created_at')
+            ->orderByDesc('transactions.id');
     }
 
     private function customerQuery(Request $request): Builder
@@ -180,10 +204,9 @@ class ReportController extends Controller
                 in_array((string) $request->query('status'), ['active', 'inactive'], true),
                 fn ($query) => $query->where('users.is_active', $request->query('status') === 'active'),
             )
-            ->when($request->filled('date_from'), fn ($query) => $query->whereDate('customer_profiles.created_at', '>=', Carbon::parse($request->query('date_from'))))
-            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('customer_profiles.created_at', '<=', Carbon::parse($request->query('date_to'))))
             ->orderBy($sorts[$sort], $direction)
-            ->orderBy('customer_display_name');
+            ->orderBy('customer_display_name')
+            ->orderBy('customer_profiles.id');
     }
 
     private function promotionQuery(Request $request): Builder
@@ -212,10 +235,9 @@ class ReportController extends Controller
                     ->orWhere('report_rfm_segments.name', 'like', "%{$search}%")
                     ->orWhere('promotion_suggestions.suggested_offer', 'like', "%{$search}%");
             }))
-            ->when($request->filled('date_from'), fn ($query) => $query->whereDate('promotion_suggestions.created_at', '>=', Carbon::parse($request->query('date_from'))))
-            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('promotion_suggestions.created_at', '<=', Carbon::parse($request->query('date_to'))))
             ->orderBy($sorts[$sort], $direction)
-            ->orderByDesc('promotion_suggestions.created_at');
+            ->orderByDesc('promotion_suggestions.created_at')
+            ->orderByDesc('promotion_suggestions.id');
 
         return match ($status) {
             'available' => $query->where('promotion_suggestions.status', PromotionSuggestion::STATUS_SUGGESTED)
@@ -261,23 +283,9 @@ class ReportController extends Controller
                     ->orWhere('report_feedback_services.name', 'like', "%{$search}%")
                     ->orWhere('feedback.comment', 'like', "%{$search}%");
             }))
-            ->when($request->filled('date_from'), fn ($query) => $query->whereDate('feedback.submitted_at', '>=', Carbon::parse($request->query('date_from'))))
-            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('feedback.submitted_at', '<=', Carbon::parse($request->query('date_to'))))
             ->orderBy($sorts[$sort], $direction)
-            ->orderByDesc('feedback.submitted_at');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function summary(): array
-    {
-        return [
-            'appointments' => Appointment::query()->count(),
-            'revenue' => Transaction::query()->where('payment_status', Transaction::PAYMENT_PAID)->sum('amount'),
-            'customers' => CustomerProfile::query()->count(),
-            'feedback' => Feedback::query()->count(),
-        ];
+            ->orderByDesc('feedback.submitted_at')
+            ->orderByDesc('feedback.id');
     }
 
     /**
@@ -379,54 +387,30 @@ class ReportController extends Controller
             ->map(fn ($r) => ['name' => $r->name, 'count' => (int) $r->count]);
 
         return response()->json([
-            'period'               => $period,
-            'revenue'              => $revenueQuery,
-            'appointments_status'  => $appointmentsByStatus,
-            'sentiment'            => $sentiment,
-            'top_services'         => $topServices,
-            'rfm_segments'         => $rfmSegments,
+            'period' => $period,
+            'revenue' => $revenueQuery,
+            'appointments_status' => $appointmentsByStatus,
+            'sentiment' => $sentiment,
+            'top_services' => $topServices,
+            'rfm_segments' => $rfmSegments,
         ]);
     }
 
     /**
      * Return the Carbon start timestamp for the insights period, or null for all-time.
      *
-     * @return array{0: \Illuminate\Support\Carbon|null, 1: \Illuminate\Support\Carbon}
+     * @return array{0: Carbon|null, 1: Carbon}
      */
     private function insightsPeriodDates(string $period): array
     {
         $to = now();
         $from = match ($period) {
-            '7'  => $to->copy()->subDays(7)->startOfDay(),
+            '7' => $to->copy()->subDays(7)->startOfDay(),
             '90' => $to->copy()->subDays(90)->startOfDay(),
             'all' => null,
             default => $to->copy()->subDays(30)->startOfDay(),
         };
 
         return [$from, $to];
-    }
-
-    protected function validateFilters(Request $request): void
-    {
-        $request->validate([
-            'type' => ['sometimes', Rule::in(self::TYPES)],
-            'q' => ['nullable', 'string', 'max:255'],
-            'date_from' => ['nullable', 'date_format:Y-m-d'],
-            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from'],
-            'status' => ['nullable', Rule::in([
-                ...Appointment::STATUSES,
-                'available',
-                'reserved',
-                'used',
-                'dismissed',
-                'expired',
-                'active',
-                'inactive',
-            ])],
-            'payment_status' => ['nullable', Rule::in(Transaction::PAYMENT_STATUSES)],
-            'sentiment_label' => ['nullable', Rule::in(Feedback::SENTIMENT_LABELS)],
-            'sort' => ['nullable', 'string', 'max:50'],
-            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
-        ]);
     }
 }

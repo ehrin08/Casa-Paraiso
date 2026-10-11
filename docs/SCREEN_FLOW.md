@@ -52,6 +52,14 @@ Route prefixes:
 - Customer: My care (My appointments, My feedback); Account (My profile). The mobile bottom navigation uses those same three labels.
 - Each menu choice opens its own existing route and highlights only its related pages. The desktop sidebar, mobile drawer, and customer bottom navigation retain their current responsive behavior.
 
+## Notifications
+
+- `/notifications` is available to admin, super-admin, receptionist, and therapist accounts. All is the default; All/Unread navigation and GET `q` search retained customer names, services, and booking numbers. Counts follow search across all pages, and pagination remains fixed at 15.
+- The cream list and booking-detail panels use a 62/38 split at 1280px and above, stacking below that width. Booking-number links select a notification UUID on the current filtered page and anchor to its details without marking it read. The first result is selected by default; search, tab, and pagination links reset selection.
+- Rows retain alert snapshot summaries; the detail panel shows current customer contacts, service, actual scheduled duration, therapist, Manila schedule, received time, read status, and escaped customer notes. Missing or reassigned bookings show an unavailable state without exposing live contacts/notes or enabling booking/calendar actions.
+- View booking submits the existing PATCH action, verifies recipient ownership and current booking access, marks the alert read, and opens the role-scoped detail page. Mark all as read retains its existing recipient-only PATCH workflow.
+- View in calendar opens the existing role appointment index with `calendar_date=YYYY-MM-DD`, booking mode, and `#booking-calendar`. The supplied date selects its containing week and day; admin weeks begin Monday and reception/therapist weeks begin Sunday. Existing schedule-page acknowledgement behavior remains in use.
+
 ## Admin Attendance
 
 - `/admin/attendance` opens today's date in Asia/Manila. GET `date=YYYY-MM-DD` selects a day; `all_dates=1` opens history and takes precedence. Therapist and On duty/Completed filters combine with the date mode. Legacy inclusive `date_from`/`date_to` URLs remain supported without a new date mode.
@@ -421,20 +429,22 @@ Purpose:
 
 Screens:
 
-- Appointment report.
-- Transaction/revenue report.
-- Customer activity report.
-- Promotion suggestion report.
-- Feedback sentiment report.
+- A dashboard with Total revenue, Completed appointments, Unique customers, revenue bars, appointment-status and sentiment doughnuts, top-five services by revenue, and Customers by RFM group.
+- Appointments, Transactions, Customers, Rewards, and Feedback record tabs. Rewards retains the internal `promotions` type.
 
 Main data:
 
-- Filtered summaries and tabular records by date range, status, service, staff, customer, and sentiment.
+- `range` defaults to `this_month` in Asia/Manila; other choices are `last_month`, `last_30_days`, `all`, and `custom`. Explicit `date_from`/`date_to` override the preset and may have either bound. Dates are inclusive, using an exclusive next-day upper boundary in queries.
+- Revenue and service rankings use fully paid transactions by `paid_at`. Completed appointments, distinct guest/enrolled customers with completed visits, and appointment statuses use scheduled dates with requested-date fallback. Feedback uses submission dates. Customer/reward record dates retain profile creation/reward issuance semantics.
+- Calendar-month comparisons use the preceding calendar month; other bounded selections use the preceding equal-length period. Unbounded ranges omit comparisons; a zero prior value displays No prior activity.
+- RFM classifies the entire customer base created by the range-end cutoff, capped at now, including retained soft-deleted profiles. Lifetime paid transactions linked to completed visits use existing preset thresholds and precedence; both payment and scheduled/requested visit dates must fall on or before the cutoff. Customers without matching history are Unassigned. Percentages use all profiles; average revenue uses selected-period paid revenue divided by each group's customer count. Reports are read-only and never issue or change rewards.
+- Revenue buckets are daily below eight days, weekly through 90 days, and monthly thereafter, with zero buckets included. Charts and legends render on the server.
 
 Primary actions:
 
-- Filter report.
-- Export CSV.
+- Select a date range or category. `category=all` shows every panel; focused categories select their matching tab. Appointments shows completion/customer metrics and status, Transactions shows revenue and service rankings, Customers shows unique customers and RFM, Rewards shows RFM, and Feedback shows sentiment. Tab changes retain All reports or switch the focused category.
+- Search and status filters narrow only the selected record tab and CSV, preserving sorting and fixed 15-record pagination. Dashboard panels use the common date range. GET forms include no-JavaScript controls.
+- Export all matching records from the active tab through the existing streamed, formula-safe CSV route; downloads remain excluded from Turbo. Existing `/admin/reports/insights` JSON keys and legacy period behavior stay compatible.
 
 ### Settings
 

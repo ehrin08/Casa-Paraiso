@@ -68,7 +68,7 @@
                 <div class="mt-3">{{ $serviceQueue->links() }}</div>
             @endif
         </section>
-        <x-operational-calendar :feed-url="route('admin.appointments.calendar')" :initial-week="$initialWeek" :initial-mode="$mode" role="admin" presentation="week" :services="$services" :staff-profiles="$staffProfiles" :create-url="route('admin.appointments.create')" />
+        <x-operational-calendar :feed-url="route('admin.appointments.calendar')" :initial-week="$initialWeek" :initial-date="$initialDate" :initial-mode="$mode" role="admin" presentation="week" :services="$services" :staff-profiles="$staffProfiles" :create-url="route('admin.appointments.create')" />
     </div>
     @foreach ($completionAppointments as $appointment)
             @php $completionModal = 'admin-appointment-completion-'.$appointment->id; @endphp

@@ -185,7 +185,7 @@ window.operationalCalendar = (config) => ({
         const today = this.weeklyPresentation ? manilaDateKey() : dateKey(new Date());
         const weekEnd = addCalendarDays(this.weekStart, 7);
 
-        if (today >= this.weekStart && today < weekEnd) {
+        if (!config.initialDate && today >= this.weekStart && today < weekEnd) {
             this.selectedDate = today;
         }
 
@@ -715,11 +715,12 @@ window.attendanceStation = (config) => ({
 
 window.organizationChartEditor = () => ({
     team: [],
+    nextKey: 0,
 
     init() {
         try {
             const team = JSON.parse(this.$root.dataset.initialTeam || '[]');
-            this.team = Array.isArray(team) ? team : [];
+            this.team = Array.isArray(team) ? team.map(role => ({ ...role, key: this.nextKey++, removePhoto: Boolean(role.removePhoto) })) : [];
         } catch {
             this.team = [];
         }
@@ -734,7 +735,7 @@ window.organizationChartEditor = () => ({
             return;
         }
 
-        this.team.push({ title: '', name: '', description: '', photoUrl: '' });
+        this.team.push({ key: this.nextKey++, title: '', name: '', description: '', photo: '', photoUrl: '', removePhoto: false });
     },
 
     removeRole(index) {

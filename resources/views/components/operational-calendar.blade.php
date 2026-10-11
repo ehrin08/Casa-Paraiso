@@ -1,6 +1,7 @@
 @props([
     'feedUrl',
     'initialWeek',
+    'initialDate' => null,
     'role',
     'initialMode' => 'bookings',
     'services' => collect(),
@@ -26,11 +27,13 @@
         presentation: @js($presentation),
         canEditAvailability: @js($canEditAvailability),
         initialMode: @js($initialMode),
-        initialWeek: @js($initialWeek)
+        initialWeek: @js($initialWeek),
+        initialDate: @js($initialDate)
     })"
     x-init="init()"
     class="space-y-5"
     data-operational-calendar
+    id="booking-calendar"
 >
     @if ($presentation === 'week')
         @include('components.calendar.week-schedule')

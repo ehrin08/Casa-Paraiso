@@ -57,6 +57,7 @@ class CustomerBookingNotificationTest extends TestCase
             ->for($service)
             ->for($therapist, 'staffProfile')
             ->create([
+                'staff_profile_id' => $therapist->id,
                 'scheduled_start_at' => $start,
                 'scheduled_end_at' => $start->copy()->addHour(),
             ]);

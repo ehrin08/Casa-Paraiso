@@ -1,0 +1,81 @@
+/* Settings extends the shared Casa workspace without changing other pages. */
+.casa-page-heading .settings-heading h1 { font-size: clamp(1.75rem, 2.5vw, 2rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
+.settings-heading p { margin-top: 0.4rem; color: var(--color-casa-muted); font-size: 1rem; line-height: 1.5; }
+.settings-workspace { display: grid; gap: 1rem; min-width: 0; color: var(--color-casa-text); font-size: 0.875rem; }
+.settings-grid { display: grid; gap: 1rem; min-width: 0; align-items: start; }
+.settings-card { min-width: 0; border: 1px solid var(--color-casa-border); border-radius: 14px; padding: 1rem; background: var(--color-casa-paper); }
+.settings-card h2 { font-size: 1.25rem; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
+.settings-description, .settings-help { color: var(--color-casa-muted); line-height: 1.5; overflow-wrap: anywhere; }
+.settings-description { margin-top: 0.2rem; }
+.settings-help { margin-top: 0.4rem; }
+.settings-fields { display: grid; gap: 1rem; margin-top: 1rem; min-width: 0; }
+.settings-workspace .casa-label { display: block; font-size: 0.875rem; font-weight: 600; text-transform: none; letter-spacing: normal; }
+.settings-workspace .casa-input { width: 100%; min-width: 0; min-height: 44px; margin-top: 0.35rem; border-radius: 8px; font-size: 0.875rem; line-height: 1.5; }
+.settings-workspace textarea { resize: vertical; }
+.settings-workspace select { appearance: auto; }
+.settings-workspace input[type="file"] { overflow: hidden; padding-inline: 0.5rem; }
+.settings-workspace .casa-button-primary, .settings-workspace .casa-button-secondary { min-height: 44px; text-transform: none; letter-spacing: normal; box-shadow: none; }
+.settings-side-stack { display: grid; gap: 1rem; min-width: 0; }
+.settings-checks { margin-top: 0.5rem; }
+.settings-checks li { display: flex; align-items: center; gap: 0.75rem; padding-block: 0.75rem; }
+.settings-checks li + li { border-top: 1px solid var(--color-casa-border); }
+.settings-icon-circle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%; color: var(--color-casa-palm-dark); background: color-mix(in srgb, var(--color-casa-palm) 13%, var(--color-casa-paper)); }
+.settings-icon-circle svg { width: 22px; height: 22px; }
+.settings-check-copy { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.settings-check-copy h3 { font-weight: 700; }
+.settings-check-copy p { color: var(--color-casa-muted); line-height: 1.5; margin-top: 0.1rem; }
+.settings-status { max-width: 8rem; text-align: center; flex: 0 0 auto; border-radius: 8px; padding: 0.25rem 0.65rem; font-weight: 600; overflow-wrap: anywhere; }
+.settings-status--safe { color: #20482b; background: #e2f1dd; }
+.settings-status--review { color: #634619; background: #ffedca; }
+.settings-disclosure { margin-top: 0.75rem; border-top: 1px solid var(--color-casa-border); }
+.settings-disclosure > summary { min-height: 44px; padding-block: 0.6rem; cursor: pointer; font-weight: 600; color: var(--color-casa-palm-dark); }
+.settings-disclosure > summary::marker { font-size: 0.75rem; }
+.settings-disclosure > summary svg { display: inline-block; width: 18px; height: 18px; margin-inline: 0.25rem 0.5rem; vertical-align: -0.2rem; }
+.settings-disclosure > .settings-fields { margin-top: 0.5rem; }
+.settings-history { margin-top: 1rem !important; min-height: 12rem !important; }
+.settings-chart { display: grid; justify-items: center; margin-top: 1rem; }
+.settings-chart-tier { position: relative; display: grid; gap: 0.5rem; justify-items: center; width: 100%; max-width: 24rem; padding-top: 1rem; }
+.settings-chart-tier:first-child { padding-top: 0; }
+.settings-chart-tier + .settings-chart-tier::before { content: ""; position: absolute; inset-block-start: 0; inset-inline-start: 50%; height: 1rem; width: 1px; background: var(--color-casa-palm); }
+.settings-chart-node { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.65rem 0.85rem; border-radius: 8px; background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--color-casa-paper)); }
+.settings-chart-node > svg { width: 22px; height: 22px; flex: 0 0 auto; }
+.settings-chart-node img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+.settings-chart-node > div { min-width: 0; overflow-wrap: anywhere; }
+.settings-chart-role { font-weight: 700; }
+.settings-chart-node p { margin-top: 0.1rem; color: var(--color-casa-muted); line-height: 1.5; }
+.settings-chart-team .settings-chart-node { background: color-mix(in srgb, var(--color-casa-muted) 12%, var(--color-casa-paper)); }
+.settings-chart-team-label { font-weight: 700; text-align: center; }
+.settings-chart-empty { display: grid; justify-items: center; text-align: center; gap: 0.5rem; padding: 1.5rem 0.5rem; }
+.settings-chart-empty > p:first-of-type { font-weight: 600; }
+.settings-chart-editor-body { display: grid; gap: 1rem; padding-top: 0.5rem; }
+.settings-role-fields { min-width: 0; padding: 1rem; border: 1px solid var(--color-casa-border); border-radius: 10px; background: var(--color-casa-bg); }
+.settings-role-fields legend { max-width: 100%; padding-inline: 0.4rem; font-weight: 700; overflow-wrap: anywhere; }
+.settings-role-fields .settings-fields { margin-top: 0.25rem; }
+.settings-photo-input { display: flex; gap: 0.5rem; align-items: center; min-width: 0; }
+.settings-photo-input img { width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
+.settings-photo-input input { flex: 1; }
+.settings-remove-photo { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; cursor: pointer; }
+.settings-remove-photo input { flex: 0 0 auto; }
+.settings-team-heading { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 0.5rem; }
+.settings-team-heading h3, .settings-access h3 { font-weight: 700; }
+.settings-team-fields { display: grid; gap: 1rem; margin-top: 1rem; }
+.settings-remove-role { min-height: 44px; padding-inline: 0.5rem; color: #852e28; font-weight: 600; }
+.settings-remove-role:hover { text-decoration: underline; }
+.settings-team-editor noscript .settings-role-fields { margin-top: 1rem; }
+.settings-operating-details { margin-top: 0; }
+.settings-operating-details > summary { padding-block: 0; }
+.settings-operating-details[open] > summary { margin-bottom: 1rem; }
+.settings-access { display: grid; gap: 0.5rem; margin-top: 1rem; }
+.settings-access p { color: var(--color-casa-muted); line-height: 1.5; }
+.settings-access a { justify-self: start; }
+.settings-actions { display: flex; justify-content: end; }
+.settings-actions button { min-width: 10rem; }
+.settings-workspace summary:focus-visible, .settings-workspace button:focus-visible, .settings-workspace a:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: 8px; }
+@media (min-width: 1024px) {
+    .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 479px) {
+    .settings-checks li { display: grid; grid-template-columns: 44px minmax(0, 1fr); }
+    .settings-checks .settings-status { grid-column: 2; justify-self: start; }
+    .settings-actions button { width: 100%; }
+}
