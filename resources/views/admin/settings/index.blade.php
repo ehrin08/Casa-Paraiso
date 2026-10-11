@@ -42,11 +42,12 @@
         @method('PATCH')
         <x-input-error :messages="$errors->get('settings')" />
         <div class="settings-grid">
+            <div class="settings-card-stack">
             <section class="settings-card" aria-labelledby="business-identity-heading">
                 <h2 id="business-identity-heading">{{ __('Business identity') }}</h2>
                 <p class="settings-description">{{ __('Your spa’s basic information used across the system.') }}</p>
-                <div class="settings-fields">
-                    <div>
+                <div class="settings-fields settings-identity-fields">
+                    <div class="settings-field-wide">
                         <x-input-label for="business_name" :value="__('Business name')" />
                         <x-text-input id="business_name" name="business_name" type="text" :value="old('business_name', $settings->business_name)" maxlength="255" required />
                         <x-input-error :messages="$errors->get('business_name')" />
@@ -61,7 +62,7 @@
                         <x-text-input id="contact_phone" name="contact_phone" type="tel" :value="old('contact_phone', $settings->contact_phone)" maxlength="50" />
                         <x-input-error :messages="$errors->get('contact_phone')" />
                     </div>
-                    <div>
+                    <div class="settings-field-wide">
                         <x-input-label for="business_address" :value="__('Business address')" />
                         <textarea id="business_address" name="business_address" rows="3" maxlength="1000" class="casa-input">{{ old('business_address', $settings->business_address) }}</textarea>
                         <x-input-error :messages="$errors->get('business_address')" />
@@ -87,7 +88,17 @@
                 </details>
             </section>
 
-            <div class="settings-side-stack">
+            <section class="settings-card" aria-labelledby="company-history-heading">
+                <h2 id="company-history-heading">{{ __('Company history') }}</h2>
+                <p class="settings-description">{{ __('Share a brief history of your spa for the public landing page.') }}</p>
+                <label for="company_history" class="sr-only">{{ __('Company history') }}</label>
+                <textarea id="company_history" name="company_history" rows="5" maxlength="6000" class="casa-input settings-history" aria-describedby="company-history-help">{{ old('company_history', $settings->company_history) }}</textarea>
+                <p id="company-history-help" class="settings-help">{{ __('Plain text only. Paragraph breaks are preserved; blank history stays hidden.') }}</p>
+                <x-input-error :messages="$errors->get('company_history')" />
+            </section>
+            </div>
+
+            <div class="settings-card-stack">
                 <section class="settings-card" aria-labelledby="settings-payments-heading">
                     <h2 id="settings-payments-heading">{{ __('Payments') }}</h2>
                     <p class="settings-description">{{ __('Set your default payment method for new transactions.') }}</p>
@@ -122,29 +133,24 @@
                     <p class="settings-help">{{ __('Configuration checks only. Review the production checklist before every release.') }}</p>
                 </section>
             </div>
+        </div>
 
-            <section class="settings-card" aria-labelledby="company-history-heading">
-                <h2 id="company-history-heading">{{ __('Company history') }}</h2>
-                <p class="settings-description">{{ __('Share a brief history of your spa for the public landing page.') }}</p>
-                <label for="company_history" class="sr-only">{{ __('Company history') }}</label>
-                <textarea id="company_history" name="company_history" rows="7" maxlength="6000" class="casa-input settings-history" aria-describedby="company-history-help">{{ old('company_history', $settings->company_history) }}</textarea>
-                <p id="company-history-help" class="settings-help">{{ __('Plain text only. Paragraph breaks are preserved; blank history stays hidden.') }}</p>
-                <x-input-error :messages="$errors->get('company_history')" />
-            </section>
-
-            <section class="settings-card settings-chart-card" aria-labelledby="organization-chart-heading">
+        <section class="settings-card settings-chart-card" aria-labelledby="organization-chart-heading">
                 <h2 id="organization-chart-heading">{{ __('Public organization chart') }}</h2>
                 <p class="settings-description">{{ __('Your saved team structure, shown on the public landing page.') }}</p>
                 @if ($hasSavedChart)
-                    <ol class="settings-chart" aria-label="{{ __('Owner, Administrator and Team reporting structure') }}" data-settings-chart-preview>
+                    <ol class="settings-chart" aria-label="{{ __('Owner, Administrator and Team reporting structure') }}" tabindex="0" data-settings-chart-preview>
                         @foreach (['owner' => __('Owner'), 'admin' => __('Administrator')] as $tier => $label)
                             @if (isset($savedChart[$tier]))
-                                <li class="settings-chart-tier"><x-settings-chart-node :role="$savedChart[$tier]" :label="$label" /></li>
+                                <li class="settings-chart-tier">
+                                    <p class="settings-chart-tier-label">{{ $label }}</p>
+                                    <x-settings-chart-node :role="$savedChart[$tier]" :label="$label" />
+                                </li>
                             @endif
                         @endforeach
                         @if ($savedChart['team'] !== [])
                             <li class="settings-chart-tier settings-chart-team">
-                                <p class="settings-chart-team-label">{{ __('Team') }}</p>
+                                <p class="settings-chart-tier-label settings-chart-team-label">{{ __('Team') }}</p>
                                 @foreach ($savedChart['team'] as $role)
                                     <x-settings-chart-node :role="$role" :label="__('Team role')" />
                                 @endforeach
@@ -160,16 +166,30 @@
                 @endif
                 <details id="settings-chart-editor" class="settings-disclosure settings-chart-editor" @if($chartInvalid) open @endif>
                     <summary><x-nav-icon name="settings" />{{ __('Edit chart') }}</summary>
+                    <dialog open class="settings-chart-dialog" data-settings-chart-dialog aria-labelledby="settings-chart-dialog-heading" aria-describedby="settings-chart-dialog-help">
+                    <header class="settings-chart-dialog-header">
+                        <div>
+                            <h2 id="settings-chart-dialog-heading">{{ __('Edit organization chart') }}</h2>
+                            <p id="settings-chart-dialog-help" class="settings-help">{{ __('Edits are kept when you close this editor. Use Save changes on the Settings page to publish them.') }}</p>
+                        </div>
+                        <button type="button" class="casa-button-secondary" data-settings-chart-close hidden aria-label="{{ __('Close chart editor') }}">{{ __('Close') }}</button>
+                    </header>
                     <div class="settings-chart-editor-body">
                         <p class="settings-help">{{ __('Use public role labels and short responsibilities. Save changes to publish the chart; leave every field blank to hide it.') }}</p>
+                        <div class="settings-chart-leadership">
                         @foreach (['owner' => __('Owner / Leadership'), 'admin' => __('Administration')] as $tier => $label)
                             <x-settings-chart-fields :role="data_get($organizationChart, $tier, [])" :tier="$tier" :label="$label" />
                         @endforeach
+                        </div>
                         <x-settings-chart-team-editor :team="$organizationTeam" />
                     </div>
+                    <footer class="settings-chart-dialog-footer" hidden>
+                        <p class="settings-help">{{ __('Use the page’s Save changes button to publish your edits.') }}</p>
+                        <button type="button" class="casa-button-primary" data-settings-chart-close>{{ __('Done') }}</button>
+                    </footer>
+                    </dialog>
                 </details>
-            </section>
-        </div>
+        </section>
 
         <details class="settings-card settings-disclosure settings-operating-details">
             <summary>{{ __('Operating rules and user access') }}</summary>

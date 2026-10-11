@@ -7,14 +7,15 @@ use App\Http\Requests\AdminAppointmentCompletionRequest;
 use App\Http\Requests\AdminAppointmentOutcomeRequest;
 use App\Http\Requests\AdminAppointmentStoreRequest;
 use App\Http\Requests\AdminAppointmentUpdateRequest;
-use App\Models\ApplicationSetting;
 use App\Models\Addon;
+use App\Models\ApplicationSetting;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\Transaction;
 use App\Services\AppointmentCompletion;
+use App\Services\AppointmentCompletionConfirmation;
 use App\Services\AppointmentManagement;
 use App\Services\AppointmentWorkflow;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +27,7 @@ use Illuminate\View\View;
 
 class AppointmentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, AppointmentCompletionConfirmation $confirmation): View
     {
         $calendarDate = $request->validate(['calendar_date' => ['nullable', 'date_format:Y-m-d']])['calendar_date'] ?? null;
         $summary = Appointment::query()
@@ -35,7 +36,11 @@ class AppointmentController extends Controller
             ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS cancelled', [Appointment::STATUS_CANCELLED])
             ->first();
 
+        $completedTransaction = $confirmation->consume($request);
+
         return view('reception.appointments.index', [
+            'completedTransaction' => $completedTransaction,
+            'completedVoucherName' => $completedTransaction?->appointment?->promotionSuggestion?->addonName(),
             'mode' => in_array($request->query('mode'), ['bookings', 'availability'], true) ? $request->query('mode') : 'bookings',
             'initialWeek' => ($calendarDate ? Carbon::parse($calendarDate, 'Asia/Manila') : now('Asia/Manila'))->startOfWeek(Carbon::SUNDAY)->toDateString(),
             'initialDate' => $calendarDate,
@@ -52,6 +57,7 @@ class AppointmentController extends Controller
             'staff_profile_id' => ['nullable', 'integer', 'exists:staff_profiles,id'],
             'scheduled_start_at' => ['nullable', 'date'],
         ]);
+
         return view('reception.appointments.form', [
             'appointment' => new Appointment([
                 'scheduled_start_at' => filled($data['scheduled_start_at'] ?? null) ? Carbon::parse($data['scheduled_start_at']) : now()->addDay()->setTime(13, 0),
@@ -107,7 +113,9 @@ class AppointmentController extends Controller
     {
         $transaction = $completion->complete($appointment, $request->validated(), $request->user()->id);
 
-        return redirect()->route('reception.transactions.show', $transaction)->with('status', 'appointment-completed');
+        return redirect()->route('reception.appointments.index')
+            ->with('status', 'appointment-completed')
+            ->with(AppointmentCompletionConfirmation::FLASH_KEY, $transaction->id);
     }
 
     public function outcome(AdminAppointmentOutcomeRequest $request, Appointment $appointment, AppointmentWorkflow $workflow): RedirectResponse
@@ -174,6 +182,7 @@ class AppointmentController extends Controller
                 $addons->push(new Addon(['code' => $snapshot->addon_code, 'name' => $snapshot->addon_name, 'price' => $snapshot->price, 'duration_minutes' => $snapshot->duration_minutes, 'is_active' => false]));
             }
         }
+
         return $addons->sortBy('name')->values();
     }
 }

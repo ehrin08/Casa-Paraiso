@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Addon;
+use App\Models\ApplicationSetting;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,8 +23,8 @@ class LandingServiceCatalogTest extends TestCase
             ->assertSee('Book an appointment')
             ->assertSee('>Log in</a>', false)
             ->assertSee('href="'.route('login').'"', false)
-            ->assertSee('Instant confirmation')
-            ->assertSee('Select your ritual, therapist, and preferred schedule with real-time availability.')
+            ->assertSee('A successful booking reserves and confirms your appointment immediately.')
+            ->assertSee('Log in, choose a treatment, and pick an available time.')
             ->assertSee('data-landing-catalog-cta', false)
             ->assertDontSee('Request an appointment')
             ->assertDontSee('Request-first care');
@@ -48,7 +50,10 @@ class LandingServiceCatalogTest extends TestCase
             ->assertSee('>Log in</a>', false)
             ->assertSee('href="'.route('login').'"', false)
             ->assertDontSee('>Contact for availability</a>', false)
-            ->assertSee('Current availability')
+            ->assertSee('Reference packages from')
+            ->assertSee('Ask about availability')
+            ->assertDontSee('data-landing-catalog-cta', false)
+            ->assertDontSee('>Book appointment ', false)
             ->assertDontSee('Instant confirmation');
     }
 
@@ -107,5 +112,92 @@ class LandingServiceCatalogTest extends TestCase
             ->assertDontSee('GAIA TOUCH')
             ->assertDontSee('data-landing-catalog-fallback', false)
             ->assertSee('PHP 750.00');
+    }
+
+    public function test_all_active_treatments_and_safe_custom_copy_are_rendered_without_a_three_card_limit(): void
+    {
+        $services = collect(range(1, 5))->map(fn (int $number) => Service::factory()->create([
+            'name' => 'Custom Treatment '.$number,
+            'slug' => 'custom-treatment-'.$number,
+            'description' => $number === 5 ? '<script>unsafe()</script> '.str_repeat('Restorative care. ', 40) : 'Published treatment details.',
+            'duration_minutes' => 75,
+            'price' => 550 + $number,
+            'is_active' => true,
+        ]));
+
+        $response = $this->get('/')->assertOk();
+
+        foreach ($services as $service) {
+            $response->assertSee($service->name)
+                ->assertSee('aria-label="Book '.$service->name.'"', false);
+        }
+
+        $response->assertSee('1 Hour 15 Minutes')
+            ->assertSee('images/spa/casa-towel-detail-720.webp')
+            ->assertSee('&lt;script&gt;unsafe()&lt;/script&gt;', false)
+            ->assertDontSee('<script>unsafe()</script>', false);
+
+        $this->assertSame(5, substr_count($response->getContent(), 'data-landing-treatment'));
+    }
+
+    public function test_optional_additions_show_only_active_saved_entries_and_safe_custom_thumbnails(): void
+    {
+        Addon::query()->update(['is_active' => false]);
+        Addon::query()->updateOrCreate(['code' => 'hot-stone'], ['name' => 'Hot Stone', 'price' => 210, 'duration_minutes' => 0, 'is_active' => true]);
+        Addon::query()->create(['code' => 'custom-addition', 'name' => 'Custom Addition', 'price' => 125, 'duration_minutes' => 15, 'is_active' => true]);
+        Addon::query()->create(['code' => 'hidden-addition', 'name' => 'Hidden Addition', 'price' => 100, 'duration_minutes' => 0, 'is_active' => false]);
+
+        $response = $this->get('/')->assertOk()
+            ->assertSee('A little extra comfort.')
+            ->assertSee('Hot Stone')
+            ->assertSee('PHP 210.00')
+            ->assertSee('Custom Addition')
+            ->assertSee('+15 minutes')
+            ->assertSee('images/spa/casa-hot-stone-720.webp')
+            ->assertSee('images/spa/casa-towel-detail-720.webp')
+            ->assertDontSee('Hidden Addition');
+
+        $this->assertLessThan(strpos($response->getContent(), 'id="visit"'), strpos($response->getContent(), 'data-landing-section="addons"'));
+    }
+
+    public function test_public_chart_preserves_missing_tiers_and_every_published_team_entry(): void
+    {
+        $settings = ApplicationSetting::factory()->create(['id' => 1]);
+        $team = array_map(fn (int $number) => ['title' => 'Published role '.$number, 'name' => 'Team Member '.$number], range(1, 8));
+
+        foreach ([
+            ['owner' => ['title' => 'Owner', 'name' => 'Published Owner']],
+            ['admin' => ['title' => 'Administrator', 'name' => 'Published Administrator']],
+            ['team' => $team],
+        ] as $chart) {
+            $settings->update(['company_history' => null, 'organization_chart' => $chart]);
+            $response = $this->get('/')->assertOk()->assertSee('data-organization-chart', false);
+            $html = $response->getContent();
+            $this->assertSame(isset($chart['owner']) ? 1 : 0, substr_count($html, 'data-org-tier="owner"'));
+            $this->assertSame(isset($chart['admin']) ? 1 : 0, substr_count($html, 'data-org-tier="admin"'));
+            $this->assertSame(count($chart['team'] ?? []), substr_count($html, 'data-org-tier="team"'));
+            foreach ($chart['team'] ?? [] as $node) {
+                $response->assertSee($node['name']);
+            }
+        }
+    }
+
+    public function test_unpublished_profile_and_missing_contact_links_are_omitted(): void
+    {
+        Addon::query()->update(['is_active' => false]);
+        ApplicationSetting::factory()->create([
+            'id' => 1, 'company_history' => null, 'organization_chart' => null,
+            'business_address' => '', 'location_landmarks' => null,
+            'messenger_url' => null, 'facebook_url' => null, 'map_url' => null,
+        ]);
+
+        $this->get('/')->assertOk()
+            ->assertDontSee('href="#about"', false)
+            ->assertDontSee('data-organization-chart', false)
+            ->assertDontSee('data-landing-section="addons"', false)
+            ->assertDontSee('Message us')
+            ->assertDontSee('Visit Facebook')
+            ->assertDontSee('Get directions')
+            ->assertSee('We look forward to welcoming you.');
     }
 }

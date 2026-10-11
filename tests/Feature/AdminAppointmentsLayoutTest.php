@@ -167,13 +167,14 @@ class AdminAppointmentsLayoutTest extends TestCase
         $this->get($target)->assertOk()->assertSee('The service queue is clear');
     }
 
-    public function test_completion_without_queue_context_keeps_the_transaction_redirect(): void
+    public function test_completion_without_queue_context_returns_to_appointments(): void
     {
         $visit = $this->visit('2026-10-01 13:00:00');
         $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.appointments.complete', $visit), [
             'amount' => $visit->expectedAmount(), 'payment_status' => 'unpaid',
         ]);
-        $response->assertRedirect(route('admin.transactions.show', Transaction::query()->sole()));
+        $response->assertRedirect(route('admin.appointments.index'))
+            ->assertSessionHas('completed_transaction_id', Transaction::query()->sole()->id);
     }
 
     public function test_invalid_return_context_is_rejected_before_mutation(): void

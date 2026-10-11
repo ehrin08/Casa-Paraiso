@@ -1,0 +1,20 @@
+.casa-panel-host.is-customer-detail .casa-panel__content {
+    min-height: 0;
+    padding: 1.25rem;
+    overscroll-behavior: contain;
+}
+
+.casa-panel-host.is-customer-detail .casa-panel-page > main {
+    padding: 0;
+}
+
+@media (min-width: 1024px) {
+    .casa-panel-host.is-customer-detail .customer-detail-layout {
+        grid-template-columns: minmax(0, 1fr) 22rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .casa-panel-host.is-customer-detail .casa-panel__content { padding: .75rem; }
+    .casa-panel-host.is-customer-detail .casa-stat-strip dt { font-size: .75rem; }
+}

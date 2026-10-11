@@ -4,7 +4,7 @@
             <h1 class="font-display text-3xl font-black text-casa-text">{{ __('Appointments') }}</h1>
             <p class="mt-2 text-sm text-casa-muted">{{ $today->format('l, F j, Y') }} · Asia/Manila</p>
         </div>
-        <a href="{{ route('admin.appointments.create') }}" class="casa-button-primary" data-panel-link data-turbo="false">
+        <a id="appointments-add" href="{{ route('admin.appointments.create') }}" class="casa-button-primary" data-panel-link data-turbo="false">
             <x-nav-icon name="plus" class="size-5" />{{ __('Add appointment') }}
         </a>
     </x-slot>
@@ -76,4 +76,7 @@
                 <div class="p-5">@include('admin.appointments.partials.completion-form', ['appointment' => $appointment, 'modalName' => $completionModal, 'queueContext' => ['return_to' => 'index', 'queue_page' => $serviceQueue->currentPage(), 'mode' => $mode]])</div>
             </x-modal>
     @endforeach
+    @if ($completedTransaction)
+        <x-appointment-completed :transaction="$completedTransaction" :voucher-name="$completedVoucherName" role="admin" />
+    @endif
 </x-app-layout>

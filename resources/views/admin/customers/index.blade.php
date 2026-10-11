@@ -64,7 +64,7 @@
                                         <x-status-badge>{{ $customer->contact_preference ?: __('Not set') }}</x-status-badge>
                                     </td>
                                     <td class="px-4 py-4">
-                                        <a href="{{ route('admin.customers.show', $customer) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark">
+                                        <a href="{{ route('admin.customers.show', ['customer' => $customer, 'modal' => 1, 'return_filters' => request()->only(['q', 'status', 'sort', 'direction', 'page'])]) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark" data-panel-link data-turbo="false" data-customer-open="{{ $customer->id }}" aria-haspopup="dialog">
                                             {{ __('Open') }}
                                         </a>
                                     </td>
@@ -80,4 +80,16 @@
             </div>
         </x-app-card>
     </div>
+    @if ($modalCustomer)
+        <template data-customer-detail-recovery data-customer-id="{{ $modalCustomer->id }}">
+            <div class="casa-panel-page">
+                <main>
+                    @include('admin.customers.partials.modal-content', ['customer' => $modalCustomer, 'returnFilters' => request()->only(['q', 'status', 'sort', 'direction', 'page'])])
+                </main>
+            </div>
+        </template>
+        <noscript>
+            <p class="mt-4"><a href="{{ route('admin.customers.show', $modalCustomer) }}" class="casa-button-secondary">{{ __('View customer details') }}</a></p>
+        </noscript>
+    @endif
 </x-app-layout>

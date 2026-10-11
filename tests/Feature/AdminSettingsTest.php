@@ -23,7 +23,7 @@ class AdminSettingsTest extends TestCase
         ])] as $user) {
             $response = $this->actingAs($user)->get(route('admin.settings.index'))
                 ->assertOk()
-                ->assertSeeInOrder(['Business identity', 'Payments', 'Environment checks', 'Company history', 'Public organization chart'])
+                ->assertSeeInOrder(['Business identity', 'Company history', 'Payments', 'Environment checks', 'Public organization chart'])
                 ->assertSee('More public details')
                 ->assertSee('Operating rules and user access')
                 ->assertSee('No public organization chart yet.')
@@ -37,6 +37,12 @@ class AdminSettingsTest extends TestCase
             $this->assertSame(1, $xpath->query('//form[@data-settings-workspace]//button[@type="submit"]')->length);
             $this->assertSame('Save changes', trim($xpath->query('//form[@data-settings-workspace]//button[@type="submit"]')->item(0)->textContent));
             $this->assertSame(0, $xpath->query('//details[@id="settings-chart-editor" or @id="settings-public-details"][@open]')->length);
+            $this->assertSame(1, $xpath->query('//form[@data-settings-workspace]//dialog[@data-settings-chart-dialog][@open]')->length);
+            $this->assertSame(0, $xpath->query('//dialog//form')->length);
+            $this->assertSame(2, $xpath->query('//dialog//input[@name="organization_chart[owner][title]" or @name="organization_chart[admin][title]"]')->length);
+            $this->assertSame(8, $xpath->query('//dialog//noscript//input[contains(@name, "[title]")]')->length);
+            $this->assertSame(2, $xpath->query('//dialog//input[@type="file"][not(ancestor::template)][not(ancestor::noscript)]')->length);
+            $this->assertSame(0, $xpath->query('//dialog//button[@type="submit"]')->length);
         }
     }
 
@@ -122,7 +128,30 @@ class AdminSettingsTest extends TestCase
         $response = $this->get(route('admin.settings.index'))->assertOk()->assertSee('Draft owner')->assertSee('Draft name');
         $xpath = $this->settingsXPath($response->getContent());
         $this->assertSame(2, $xpath->query('//details[@id="settings-chart-editor" or @id="settings-public-details"][@open]')->length);
+        $this->assertSame('Draft owner', $xpath->query('//dialog//input[@name="organization_chart[owner][title]"]')->item(0)->getAttribute('value'));
+        $this->assertSame(1, $xpath->query('//dialog[@data-settings-chart-dialog][@open]')->length);
         $this->assertDatabaseCount('application_settings', 0);
+    }
+
+    public function test_chart_validation_retains_photo_removal_choices_inside_the_editor(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('org-chart/owner.webp', 'retained-photo');
+        $settings = ApplicationSetting::factory()->create(['id' => 1, 'organization_chart' => [
+            'owner' => ['title' => 'Owner', 'photo' => 'org-chart/owner.webp'],
+            'team' => [],
+        ]]);
+        $this->actingAs(User::factory()->admin()->create());
+        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->getContent());
+        $payload['organization_chart']['owner']['name'] = str_repeat('x', 101);
+        $payload['organization_chart_remove_photos']['owner'] = '1';
+        $this->from(route('admin.settings.index'))->patch(route('admin.settings.update'), $payload)
+            ->assertSessionHasErrors('organization_chart.owner.name');
+
+        $xpath = $this->settingsXPath($this->get(route('admin.settings.index'))->getContent());
+        $this->assertSame(1, $xpath->query('//details[@id="settings-chart-editor"][@open]//dialog//input[@name="organization_chart_remove_photos[owner]"][@checked]')->length);
+        $this->assertSame('org-chart/owner.webp', $settings->fresh()->organization_chart['owner']['photo']);
+        Storage::disk('public')->assertExists('org-chart/owner.webp');
     }
 
     private function settingsXPath(string $html): \DOMXPath

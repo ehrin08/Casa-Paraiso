@@ -7,7 +7,7 @@ import vm from 'node:vm';
 const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
 const factorySource = source.slice(source.indexOf('window.casaModal ='), source.indexOf("window.addEventListener('open-modal'"));
 
-function fixture() {
+function fixture(options = {}) {
     const document = { activeElement: null };
     const control = (id, disabled = false) => ({
         id,
@@ -19,7 +19,10 @@ function fixture() {
     const unrelated = { dataset: { modalName: 'other' }, querySelectorAll: () => [control('wrong-dialog')] };
     document.querySelectorAll = () => [unrelated, dialog];
     const watchers = [];
-    const state = { active: 'completion' };
+    const state = {
+        active: 'completion',
+        open(name, trigger) { this.active = name; this.trigger = trigger; },
+    };
     const context = vm.createContext({
         window: { setTimeout: (callback) => callback() },
         document,
@@ -28,7 +31,7 @@ function fixture() {
         modalStore: () => state,
     });
     vm.runInContext(factorySource, context);
-    const modal = context.window.casaModal({ name: 'completion', focusable: true });
+    const modal = context.window.casaModal({ name: 'completion', focusable: true, ...options });
     modal.$el = { querySelectorAll: () => [] }; // Alpine's original wrapper is empty after teleport.
     modal.$watch = (_name, callback) => watchers.push(callback);
     return { modal, document, controls, watchers, state };
@@ -65,5 +68,16 @@ test('Tab from outside the dialog enters its first enabled control', () => {
     const { modal, document } = fixture();
     document.activeElement = { id: 'background-trigger' };
     modal.handleTab({ shiftKey: false, preventDefault() {} });
+    assert.equal(document.activeElement.id, 'amount');
+});
+
+test('automatically opened confirmation stores its explicit return focus control', () => {
+    const { modal, document, state } = fixture({ initialShow: true, returnFocus: '#appointments-add' });
+    const returnControl = { id: 'appointments-add' };
+    document.querySelector = (selector) => selector === '#appointments-add' ? returnControl : null;
+    state.active = null;
+    modal.init();
+    assert.equal(state.active, 'completion');
+    assert.equal(state.trigger, returnControl);
     assert.equal(document.activeElement.id, 'amount');
 });

@@ -16,6 +16,7 @@ use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\Transaction;
 use App\Services\AppointmentCompletion;
+use App\Services\AppointmentCompletionConfirmation;
 use App\Services\AppointmentManagement;
 use App\Services\AppointmentWorkflow;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +29,7 @@ use Illuminate\View\View;
 
 class AppointmentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, AppointmentCompletionConfirmation $confirmation): View
     {
         $calendarDate = $request->validate(['calendar_date' => ['nullable', 'date_format:Y-m-d']])['calendar_date'] ?? null;
         $today = now('Asia/Manila')->startOfDay();
@@ -67,7 +68,11 @@ class AppointmentController extends Controller
             }
         }
 
+        $completedTransaction = $confirmation->consume($request);
+
         return view('admin.appointments.index', [
+            'completedTransaction' => $completedTransaction,
+            'completedVoucherName' => $completedTransaction?->appointment?->promotionSuggestion?->addonName(),
             'mode' => $mode,
             'initialWeek' => ($calendarDate ? Carbon::parse($calendarDate, 'Asia/Manila') : $today->copy())->startOfWeek(Carbon::MONDAY)->toDateString(),
             'initialDate' => $calendarDate,
@@ -218,12 +223,14 @@ class AppointmentController extends Controller
         $transaction = $completion->complete($appointment, $data, $request->user()->id);
 
         if (($data['return_to'] ?? null) === 'index') {
-            return $this->redirectToQueue($data, 'appointment-completed');
+            return $this->redirectToQueue($data, 'appointment-completed')
+                ->with(AppointmentCompletionConfirmation::FLASH_KEY, $transaction->id);
         }
 
         return redirect()
-            ->route('admin.transactions.show', $transaction)
-            ->with('status', 'appointment-completed');
+            ->route('admin.appointments.index')
+            ->with('status', 'appointment-completed')
+            ->with(AppointmentCompletionConfirmation::FLASH_KEY, $transaction->id);
     }
 
     public function outcome(

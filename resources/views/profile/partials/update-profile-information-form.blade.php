@@ -1,18 +1,18 @@
-<section>
+<section class="profile-panel profile-form-panel" aria-labelledby="profile-information-title">
     <header>
-        <h2 class="font-display text-lg font-black text-casa-text">Profile information</h2>
+        <h2 id="profile-information-title" class="font-display text-lg font-black text-casa-text">Profile information</h2>
         <p class="mt-1 text-sm leading-6 text-casa-muted">Your verified sign-in email identifies your account and cannot be changed here.</p>
     </header>
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="profile-form">
         @csrf @method('patch')
         <div>
-            <x-input-label for="name" value="Name" />
+            <x-input-label for="name" value="Full name" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
         <div>
             <x-input-label for="email" value="Sign-in email" />
-            <x-text-input id="email" type="email" class="mt-1 block w-full opacity-70" :value="$user->email" disabled />
+            <x-text-input id="email" type="email" class="mt-1 block w-full" :value="$user->email" disabled />
         </div>
         <div>
             <x-input-label for="phone" value="Phone (optional)" />
@@ -36,6 +36,6 @@
                 <x-input-error class="mt-2" :messages="$errors->get('contact_preference')" />
             </div>
         @endif
-        <x-primary-button>Save profile</x-primary-button>
+        <div class="profile-form-actions"><x-primary-button>Save profile</x-primary-button></div>
     </form>
 </section>

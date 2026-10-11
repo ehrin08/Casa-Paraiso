@@ -196,7 +196,7 @@ class PasswordSetupTest extends TestCase
         $this->actingAs($user)
             ->get('/profile')
             ->assertOk()
-            ->assertSee('Update Password')
+            ->assertSee('Update password')
             ->assertSee('Current Password');
 
         $this->actingAs($user)->put('/password', [

@@ -1,0 +1,161 @@
+.casa-page-heading h1.profile-page-title {
+    font-size: 30px;
+    line-height: 1.2;
+}
+
+.profile-workspace {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.profile-workspace .profile-panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--color-casa-border);
+    border-radius: 8px;
+    background: var(--color-casa-paper);
+}
+
+.profile-workspace .profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 24px;
+}
+
+.profile-workspace .profile-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--color-casa-palm);
+    color: var(--color-casa-paper);
+    font-size: 36px;
+    line-height: 1;
+    font-weight: 500;
+}
+
+.profile-workspace .profile-identity-copy {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.profile-workspace .profile-identity h2 {
+    font-size: 24px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: var(--color-casa-ink);
+}
+
+.profile-workspace .profile-role {
+    margin-top: 4px;
+    font-size: 16px;
+    color: var(--color-casa-muted);
+}
+
+.profile-workspace .profile-help {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-casa-muted);
+}
+
+.profile-workspace .profile-form-grid {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.profile-workspace .profile-form-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-workspace .profile-form-panel h2 {
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: 800;
+}
+
+.profile-workspace .profile-form,
+.profile-workspace .profile-password-setup {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.profile-workspace .profile-form > div {
+    min-width: 0;
+}
+
+.profile-workspace .profile-form-actions {
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.profile-workspace .profile-setup-action {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+body[data-workspace-role] .profile-workspace .casa-input {
+    min-height: 44px;
+    border-radius: 6px;
+    background-color: #fff;
+}
+
+body[data-workspace-role] .profile-workspace .casa-input:disabled {
+    opacity: 1;
+    color: var(--color-casa-muted);
+    background-color: var(--color-casa-bg);
+    cursor: not-allowed;
+}
+
+body[data-workspace-role] .profile-workspace .casa-button-primary,
+body[data-workspace-role] .profile-workspace .casa-button-secondary {
+    min-height: 44px;
+    min-width: min(100%, 15rem);
+    max-width: 100%;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 10px 20px;
+    text-align: center;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.profile-workspace .profile-deletion {
+    overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+    .profile-workspace .profile-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 639px) {
+    .profile-workspace .profile-identity {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .profile-workspace .profile-avatar {
+        flex-basis: auto;
+        width: 72px;
+        height: 72px;
+        font-size: 28px;
+    }
+
+    .profile-workspace .profile-form-actions .casa-button-primary {
+        width: 100%;
+    }
+}

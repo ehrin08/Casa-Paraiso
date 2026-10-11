@@ -33,9 +33,30 @@ class AppointmentController extends Controller
             ->first();
         $summary = ['upcoming' => (int) $summaryRow?->upcoming, 'cancelled' => (int) $summaryRow?->cancelled, 'completed' => (int) $summaryRow?->completed];
 
+        $nextVisit = Appointment::query()
+            ->with(['service', 'staffProfile.user'])
+            ->where('customer_profile_id', $customerProfileId)
+            ->where('status', Appointment::STATUS_CONFIRMED)
+            ->where('scheduled_start_at', '>=', now())
+            ->orderBy('scheduled_start_at')
+            ->orderBy('id')
+            ->first();
+
+        $feedbackVisit = Appointment::query()
+            ->with('service')
+            ->where('customer_profile_id', $customerProfileId)
+            ->where('status', Appointment::STATUS_COMPLETED)
+            ->whereDoesntHave('feedback')
+            ->orderByDesc('completed_at')
+            ->orderByRaw('COALESCE(scheduled_start_at, requested_start_at) DESC')
+            ->orderByDesc('id')
+            ->first();
+
         return view('customer.appointments.index', [
             'summary' => $summary,
             'initialMonth' => now()->format('Y-m'),
+            'nextVisit' => $nextVisit,
+            'feedbackVisit' => $feedbackVisit,
         ]);
     }
 

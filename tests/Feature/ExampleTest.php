@@ -45,33 +45,29 @@ class ExampleTest extends TestCase
             ->assertSee('data-page-loading', false)
             ->assertSee('data-turbo-track="reload"', false)
             ->assertDontSee('data-prefetch', false)
-            ->assertSee('Treatments made for your return to yourself.')
+            ->assertSee('Find your moment of rest.')
             ->assertSee('1:00 PM to 12:00 MN')
             ->assertSee('Reserve your spot. You deserve this.');
     }
 
-    public function test_landing_page_uses_fixed_navigation_and_screen_fit_sections(): void
+    public function test_landing_page_uses_fixed_navigation_and_continuous_sections(): void
     {
         $response = $this->get('/')->assertOk();
         $html = $response->getContent();
-        $css = file_get_contents(resource_path('css/app.css'));
-
         $this->assertIsString($html);
-        $this->assertIsString($css);
         $this->assertStringContainsString('data-landing-header="fixed"', $html);
         $this->assertStringContainsString('data-landing-mobile-menu', $html);
         $this->assertStringContainsString('aria-controls="landing-mobile-navigation"', $html);
         $this->assertStringContainsString('id="landing-mobile-navigation"', $html);
         $this->assertStringContainsString('class="casa-landing-main"', $html);
-        $this->assertSame(4, substr_count($html, 'data-landing-screen-section'));
+        $this->assertStringContainsString('data-landing-section="hero"', $html);
+        $this->assertStringContainsString('data-landing-section="treatments"', $html);
+        $this->assertStringContainsString('data-landing-section="how-it-works"', $html);
+        $this->assertStringContainsString('data-landing-section="visit"', $html);
         $this->assertStringContainsString('id="treatments"', $html);
         $this->assertStringContainsString('id="how-it-works"', $html);
         $this->assertStringContainsString('id="visit"', $html);
-        $this->assertStringContainsString('.casa-landing-header', $css);
-        $this->assertStringContainsString('body.casa-landing-body', $css);
-        $this->assertStringContainsString('@media (min-width: 1024px)', $css);
-        $this->assertStringContainsString('min-block-size: calc(100dvh - var(--casa-landing-header-height));', $css);
-        $this->assertStringContainsString('scroll-margin-block-start: var(--casa-landing-header-height);', $css);
+        $this->assertStringNotContainsString('data-landing-screen-section', $html);
     }
 
     public function test_guest_entry_points_use_login_without_signup_promotion(): void

@@ -1,7 +1,12 @@
 @props([
     'name',
     'show' => false,
-    'maxWidth' => '2xl'
+    'maxWidth' => '2xl',
+    'centered' => false,
+    'panelClass' => '',
+    'labelledBy' => null,
+    'returnFocus' => null,
+    'transient' => false,
 ])
 
 @php
@@ -23,9 +28,11 @@ $maxWidth = [
         name: @js($name),
         initialShow: @js($show),
         focusable: @js($attributes->has('focusable')),
+        returnFocus: @js($returnFocus),
     })"
     x-init="init()"
     data-modal-name="{{ $name }}"
+    @if ($transient) data-transient-modal data-turbo-temporary @endif
 >
 <template x-teleport="body">
     <div
@@ -35,10 +42,11 @@ $maxWidth = [
         x-cloak
         x-bind:aria-hidden="(! show).toString()"
         data-modal-name="{{ $name }}"
-        class="fixed inset-0 z-[100] isolate overflow-y-auto px-4 py-6 sm:px-0"
+        @if ($transient) data-transient-modal data-turbo-temporary @endif
+        class="fixed inset-0 z-[100] isolate overflow-y-auto px-4 py-6 sm:px-0 {{ $centered ? 'flex items-center justify-center' : '' }}"
         role="dialog"
         aria-modal="true"
-        aria-label="{{ str_replace('-', ' ', ucfirst($name)) }}"
+        @if ($labelledBy) aria-labelledby="{{ $labelledBy }}" @else aria-label="{{ str_replace('-', ' ', ucfirst($name)) }}" @endif
     >
         <div
             x-show="show"
@@ -56,7 +64,7 @@ $maxWidth = [
 
         <div
             x-show="show"
-            class="casa-card relative z-10 mb-6 max-h-[calc(100vh-3rem)] overflow-y-auto transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto"
+            class="casa-card relative z-10 mb-6 max-h-[calc(100vh-3rem)] overflow-y-auto transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto {{ $panelClass }}"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"

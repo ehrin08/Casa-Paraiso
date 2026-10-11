@@ -3,12 +3,11 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 import { isAppointmentPreviewUrl, isBookingPanelUrl, visibleDialogControls } from '../../resources/js/booking-dialog.js';
+import { isCustomerModalUrl } from '../../resources/js/customer-dialog.js';
 
 // Run the actual workspace loader with a small DOM fixture and controlled requests.
 const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
 const loaderSource = source.slice(source.indexOf('const panelElements ='), source.indexOf("window.addEventListener('close-workspace-panel'"));
-const url = new URL('http://localhost/admin/appointments/12?preview=1');
-const response = (label) => ({ ok: true, text: async () => `<div data-appointment-preview>${label}</div>` });
 
 function fixture(fetch) {
     const document = { activeElement: null };
@@ -33,12 +32,14 @@ function fixture(fetch) {
         innerHTML: '',
         querySelector(selector) {
             if (selector === '[data-appointment-preview]' && this.innerHTML.includes('data-appointment-preview')) return {};
+            if (selector === '[data-customer-detail]' && this.innerHTML.includes('data-customer-detail')) return {};
             if (selector === 'h1, h2') return { textContent: 'Appointment details' };
             return null;
         },
         querySelectorAll(selector) { return selector === '[data-modal-name]' ? [] : [closeControl]; },
     };
     const dialog = new Element();
+    dialog.querySelectorAll = content.querySelectorAll.bind(content);
     const host = {
         attributes: {},
         classList: {
@@ -66,19 +67,27 @@ function fixture(fetch) {
     }
     const context = vm.createContext({
         window, document, Element, HTMLElement: Element, AbortController, DOMParser,
-        isAppointmentPreviewUrl, isBookingPanelUrl, visibleDialogControls,
+        isAppointmentPreviewUrl, isBookingPanelUrl, isCustomerModalUrl, visibleDialogControls,
         shouldSkipNavigationUrl: () => false, syncBodyScrollLock() {}, modalStore: () => ({ active: null }),
     });
     vm.runInContext(loaderSource + '\nglobalThis.panelApi = { openPanel, closePanel };', context);
     return { ...context.panelApi, window, document, trigger, closeControl, background, alreadyInert, classes, content, host };
 }
 
-test('every preview open fetches fresh HTML without browser caching and restores focus/inert state', async () => {
+for (const [kind, path, marker] of [
+    ['appointment', '/admin/appointments/12?preview=1', 'data-appointment-preview'],
+    ['customer', '/admin/customers/12?modal=1', 'data-customer-detail'],
+]) {
+const url = new URL('http://localhost' + path);
+const response = (label) => ({ ok: true, text: async () => `<div ${marker}>${label}</div>` });
+
+test(kind + ': every open fetches fresh HTML without browser caching and restores focus/inert state', async () => {
     const requests = [];
     const f = fixture(async (_url, options) => { requests.push(options); return response(`Load ${requests.length}`); });
     await f.openPanel(url, f.trigger);
     assert.equal(f.classes.has('is-centered'), true);
-    assert.equal(f.classes.has('is-appointment-preview'), true);
+    assert.equal(f.classes.has('is-appointment-preview'), kind === 'appointment');
+    assert.equal(f.classes.has('is-customer-detail'), kind === 'customer');
     assert.equal(f.classes.has('is-booking'), false);
     assert.equal(f.background.inert, true);
     assert.equal(f.document.activeElement, f.closeControl);
@@ -94,7 +103,7 @@ test('every preview open fetches fresh HTML without browser caching and restores
     assert.match(f.content.innerHTML, /Load 2/);
 });
 
-test('dismissal aborts loading and late HTML cannot reopen the preview or navigate away', async () => {
+test(kind + ': dismissal aborts loading and late HTML cannot reopen the dialog or navigate away', async () => {
     let resolve;
     let signal;
     const f = fixture((_url, options) => { signal = options.signal; return new Promise((done) => { resolve = done; }); });
@@ -108,11 +117,11 @@ test('dismissal aborts loading and late HTML cannot reopen the preview or naviga
     assert.equal(f.window.location.href, 'http://localhost/admin/appointments');
 });
 
-test('a newer preview wins when an earlier request finishes late', async () => {
+test(kind + ': a newer detail request wins when an earlier request finishes late', async () => {
     const requests = [];
     const f = fixture((_url, options) => new Promise((resolve) => requests.push({ resolve, signal: options.signal })));
     const first = f.openPanel(url, f.trigger);
-    const second = f.openPanel(new URL('http://localhost/admin/appointments/13?preview=1'), f.trigger);
+    const second = f.openPanel(new URL(url.href.replace('/12', '/13')), f.trigger);
     assert.equal(requests[0].signal.aborted, true);
     requests[1].resolve(response('Second visit'));
     await second;
@@ -122,8 +131,9 @@ test('a newer preview wins when an earlier request finishes late', async () => {
     assert.doesNotMatch(f.content.innerHTML, /First visit/);
 });
 
-test('failed preview loading falls back to the ordinary detail URL', async () => {
+test(kind + ': failed loading falls back to the ordinary detail URL', async () => {
     const f = fixture(async () => ({ ok: false, status: 503 }));
     await f.openPanel(url, f.trigger);
     assert.equal(f.window.location.href, url.href);
 });
+}

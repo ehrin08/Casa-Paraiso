@@ -4,6 +4,9 @@ import { initializeSidebar } from './sidebar';
 import { manilaDateKey, mondayOf, manilaTime, positionWeekEvents, therapistColor } from './calendar-week';
 import { createOperationsBooking, createCustomerBooking } from './appointment-booking';
 import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
+import { isCustomerModalUrl, restoreCustomerDetail, clearCustomerDetailRecovery } from './customer-dialog';
+import { initializeSettingsChartDialog } from './settings-dialog';
+import { createCustomerAppointmentCalendar } from './customer-appointment-calendar';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -65,7 +68,7 @@ Alpine.store(modalStoreName, {
 
 const modalStore = () => Alpine.store(modalStoreName);
 
-window.casaModal = ({ name, initialShow = false, focusable = false }) => ({
+window.casaModal = ({ name, initialShow = false, focusable = false, returnFocus = null }) => ({
     name,
     initialShow,
     focusable,
@@ -76,7 +79,7 @@ window.casaModal = ({ name, initialShow = false, focusable = false }) => ({
 
     init() {
         if (this.initialShow) {
-            modalStore().open(this.name);
+            modalStore().open(this.name, returnFocus ? document.querySelector(returnFocus) : null);
         }
 
         this.$watch('show', (show) => {
@@ -567,116 +570,7 @@ window.weeklyRoster = (config) => ({
     publish() { if (!this.scheduleWeekId || !window.confirm('Publish this team roster? Customers will be able to book the published hours.')) return; this.loading = true; this.error = ''; const url = this.publishUrlPattern.replace('__WEEK__', this.scheduleWeekId); window.axios.post(url).then((response) => this.apply(response.data)).catch((error) => { this.error = error.response?.data?.message || 'The roster could not be published.'; }).finally(() => { this.loading = false; }); },
 });
 
-window.customerAppointmentCalendar = (config) => ({
-    feedUrl: config.feedUrl,
-    month: config.initialMonth,
-    selectedDate: '',
-    statusFilter: '',
-    events: [],
-    loading: false,
-    error: '',
-    weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-
-    init() {
-        const today = dateKey(new Date());
-        this.selectedDate = today.slice(0, 7) === this.month ? today : `${this.month}-01`;
-        this.load();
-    },
-
-    get monthLabel() {
-        const [year, month] = this.month.split('-').map(Number);
-        return new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    },
-
-    get calendarDays() {
-        const [year, month] = this.month.split('-').map(Number);
-        const first = new Date(year, month - 1, 1);
-        const gridStart = new Date(first);
-        gridStart.setDate(first.getDate() - first.getDay());
-
-        return Array.from({ length: 42 }, (_, index) => {
-            const date = new Date(gridStart);
-            date.setDate(gridStart.getDate() + index);
-            const key = dateKey(date);
-            const events = this.events.filter((event) => dateFromIso(event.starts_at) === key);
-
-            return {
-                date: key,
-                label: date.getDate(),
-                inMonth: date.getMonth() === month - 1,
-                events,
-                statuses: [...new Set(events.map((event) => event.status))].slice(0, 3),
-            };
-        });
-    },
-
-    get selectedEvents() {
-        return this.events
-            .filter((event) => dateFromIso(event.starts_at) === this.selectedDate)
-            .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-    },
-
-    get selectedDateLabel() {
-        return localDate(this.selectedDate).toLocaleDateString(undefined, {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-        });
-    },
-
-    previousMonth() {
-        const [year, month] = this.month.split('-').map(Number);
-        const date = new Date(year, month - 2, 1);
-        this.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        this.selectedDate = `${this.month}-01`;
-        this.load();
-    },
-
-    nextMonth() {
-        const [year, month] = this.month.split('-').map(Number);
-        const date = new Date(year, month, 1);
-        this.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        this.selectedDate = `${this.month}-01`;
-        this.load();
-    },
-
-    selectDate(date) {
-        this.selectedDate = date;
-    },
-
-    moveDate(date, amount) {
-        const nextDate = addCalendarDays(date, amount);
-        const nextMonth = nextDate.slice(0, 7);
-
-        this.selectedDate = nextDate;
-
-        if (nextMonth !== this.month) {
-            this.month = nextMonth;
-            this.load();
-        }
-
-        window.requestAnimationFrame(() => document.querySelector(`[data-customer-calendar-day="${nextDate}"]`)?.focus());
-    },
-
-    load() {
-        this.loading = true;
-        this.error = '';
-
-        return window.axios.get(this.feedUrl, { params: { month: this.month, status: this.statusFilter || null } })
-            .then((response) => {
-                this.events = response.data.events || [];
-            }).catch(() => {
-                this.error = 'Your appointment calendar could not be loaded. Try again.';
-                this.events = [];
-            }).finally(() => {
-                this.loading = false;
-            });
-    },
-
-    eventTime(event) {
-        return new Date(event.starts_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-    },
-});
+window.customerAppointmentCalendar = createCustomerAppointmentCalendar;
 
 window.adminAppointmentForm = createOperationsBooking;
 window.customerCalendarBooking = createCustomerBooking;
@@ -795,6 +689,8 @@ if (typeof IntersectionObserver !== 'undefined') {
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', initializeBookingNotifications);
+document.addEventListener('DOMContentLoaded', () => initializeSettingsChartDialog());
+document.addEventListener('turbo:load', () => initializeSettingsChartDialog());
 
 let loadingRevealTimer = null;
 let loadingFallbackTimer = null;
@@ -982,12 +878,13 @@ let panelRequest = 0;
 let panelAbort = null;
 const panelInertState = new Map();
 
-const setPanelPresentation = (booking, preview = false) => {
+const setPanelPresentation = (booking, preview = false, customer = false) => {
     const { host } = panelElements();
     host?.classList.toggle('is-booking', booking);
     host?.classList.toggle('is-appointment-preview', preview);
-    host?.classList.toggle('is-centered', booking || preview);
-    if (!booking && !preview) {
+    host?.classList.toggle('is-customer-detail', customer);
+    host?.classList.toggle('is-centered', booking || preview || customer);
+    if (!booking && !preview && !customer) {
         panelInertState.forEach((wasInert, element) => { element.inert = wasInert; });
         panelInertState.clear();
         return;
@@ -1078,16 +975,16 @@ const setPanelLoading = (url) => {
     }
 
     host.classList.add('is-open', 'is-loading');
-    setPanelPresentation(isBookingPanelUrl(url), isAppointmentPreviewUrl(url));
+    setPanelPresentation(isBookingPanelUrl(url), isAppointmentPreviewUrl(url), isCustomerModalUrl(url));
     host.setAttribute('aria-hidden', 'false');
     syncBodyScrollLock();
 
     if (title) {
-        title.textContent = isBookingPanelUrl(url) ? (url.pathname.endsWith('/edit') ? 'Edit appointment' : 'Create appointment') : (isAppointmentPreviewUrl(url) ? 'Appointment details' : 'Loading');
+        title.textContent = isBookingPanelUrl(url) ? (url.pathname.endsWith('/edit') ? 'Edit appointment' : 'Create appointment') : (isAppointmentPreviewUrl(url) ? 'Appointment details' : (isCustomerModalUrl(url) ? 'Customer details' : 'Loading'));
     }
 
     if (status) {
-        status.textContent = isBookingPanelUrl(url) ? 'Loading booking form…' : (isAppointmentPreviewUrl(url) ? 'Loading appointment details…' : `Opening ${url.pathname}`);
+        status.textContent = isBookingPanelUrl(url) ? 'Loading booking form…' : (isAppointmentPreviewUrl(url) ? 'Loading appointment details…' : (isCustomerModalUrl(url) ? 'Loading customer details…' : `Opening ${url.pathname}`));
     }
 
     if (content) {
@@ -1151,7 +1048,7 @@ const renderPanelHtml = (pageHtml) => {
 
     clearPanelContent(content);
     content.innerHTML = pageHtml;
-    setPanelPresentation(Boolean(content.querySelector('[data-booking-page]')), Boolean(content.querySelector('[data-appointment-preview]')));
+    setPanelPresentation(Boolean(content.querySelector('[data-booking-page]')), Boolean(content.querySelector('[data-appointment-preview]')), Boolean(content.querySelector('[data-customer-detail]')));
     host.classList.add('is-open');
     host.classList.remove('is-loading');
     host.setAttribute('aria-hidden', 'false');
@@ -1168,7 +1065,8 @@ const renderPanelHtml = (pageHtml) => {
     const { dialog } = panelElements();
     window.requestAnimationFrame(() => {
         if (!host.classList.contains('is-open')) return;
-        (visibleDialogControls(content)[0] || dialog)?.focus({ preventScroll: true });
+        const focusRoot = content.querySelector('[data-customer-detail]') ? dialog : content;
+        (content.querySelector('[data-customer-note-invalid]') || visibleDialogControls(focusRoot)[0] || dialog)?.focus({ preventScroll: true });
     });
     return true;
 };
@@ -1189,7 +1087,8 @@ const openPanel = async (url, trigger = document.activeElement) => {
         panelTrigger = trigger instanceof HTMLElement ? trigger : null;
     }
 
-    const cached = isAppointmentPreviewUrl(url) ? null : panelCache.get(url.href);
+    const freshDetails = isAppointmentPreviewUrl(url) || isCustomerModalUrl(url);
+    const cached = freshDetails ? null : panelCache.get(url.href);
     const cachedHtml = cached?.html;
     const cacheIsFresh = cached && Date.now() - cached.fetchedAt < panelCacheTtl;
 
@@ -1209,7 +1108,7 @@ const openPanel = async (url, trigger = document.activeElement) => {
     try {
         const response = await window.fetch(url.href, {
             signal: panelAbort.signal,
-            cache: isAppointmentPreviewUrl(url) ? 'no-store' : 'default',
+            cache: freshDetails ? 'no-store' : 'default',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-Casa-Panel': '1',
@@ -1230,7 +1129,7 @@ const openPanel = async (url, trigger = document.activeElement) => {
             return;
         }
 
-        if (!isAppointmentPreviewUrl(url)) {
+        if (!freshDetails) {
             panelCache.set(url.href, { html: pageHtml, fetchedAt: Date.now() });
         }
 
@@ -1252,6 +1151,10 @@ const openPanel = async (url, trigger = document.activeElement) => {
 
 window.addEventListener('close-workspace-panel', () => closePanel());
 
+const restoreCustomerModal = () => restoreCustomerDetail(document, renderPanelHtml, (trigger) => { panelTrigger = trigger; });
+document.addEventListener('DOMContentLoaded', restoreCustomerModal);
+if (document.readyState !== 'loading') restoreCustomerModal();
+
 prepareFastNavigation();
 
 document.addEventListener('turbo:before-render', (event) => {
@@ -1264,6 +1167,7 @@ document.addEventListener('turbo:visit', () => {
 });
 
 document.addEventListener('turbo:load', () => {
+    restoreCustomerModal();
     initializeBookingNotifications();
     prepareFastNavigation();
     hidePageLoading();
@@ -1275,8 +1179,21 @@ document.addEventListener('turbo:load', () => {
 
 document.addEventListener('turbo:before-cache', () => {
     closePanel({ restoreFocus: false });
+    clearCustomerDetailRecovery(document);
+    clearCompletionConfirmation();
     hidePageLoading();
 });
+
+// Completion confirmations belong only to the successful redirect, never a restored page.
+const clearCompletionConfirmation = () => {
+    const confirmations = [...document.querySelectorAll('[data-transient-modal]')];
+    if (confirmations.some((element) => element.dataset.modalName === modalStore().active)) {
+        modalStore().close();
+    }
+    confirmations.forEach((element) => element.remove());
+};
+
+window.addEventListener('pagehide', clearCompletionConfirmation);
 
 document.addEventListener('turbo:fetch-request-error', hidePageLoading);
 

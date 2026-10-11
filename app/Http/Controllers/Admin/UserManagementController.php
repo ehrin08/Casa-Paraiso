@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\StaffScheduleConflictException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UserIndexRequest;
 use App\Models\CustomerProfile;
 use App\Models\StaffProfile;
 use App\Models\User;
@@ -16,14 +17,27 @@ use Illuminate\View\View;
 
 class UserManagementController extends Controller
 {
-    public function index(): View
+    public function index(UserIndexRequest $request): View
     {
+        $filters = collect($request->validated())->only(['q', 'role', 'status'])
+            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->filter(fn ($value) => filled($value))->all();
+        $users = User::query()
+            ->with('staffProfile')
+            ->when($filters['q'] ?? null, fn ($query, $search) => $query->where(fn ($query) => $query
+                ->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%')))
+            ->when($filters['role'] ?? null, fn ($query, $role) => $query->where('role', $role))
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('is_active', $status === 'active'))
+            ->orderByRaw("CASE role WHEN 'super_admin' THEN 1 WHEN 'admin' THEN 2 WHEN 'receptionist' THEN 3 WHEN 'staff' THEN 4 WHEN 'customer' THEN 5 ELSE 6 END")
+            ->orderBy('name')
+            ->orderBy('id')
+            ->paginate((int) config('casa.pagination.per_page', 15))
+            ->appends($filters);
+
         return view('admin.users.index', [
-            'users' => User::query()
-                ->with(['staffProfile', 'customerProfile'])
-                ->orderByRaw("CASE role WHEN 'super_admin' THEN 1 WHEN 'admin' THEN 2 WHEN 'receptionist' THEN 3 WHEN 'staff' THEN 4 WHEN 'customer' THEN 5 ELSE 6 END")
-                ->orderBy('name')
-                ->paginate((int) config('casa.pagination.per_page', 15)),
+            'users' => $users,
+            'filters' => $filters,
+            'selectedUser' => $users->first(fn (User $user) => $user->id === $request->integer('selected') && ! $user->isSuperAdmin()),
             'assignableRoles' => [User::ROLE_ADMIN, User::ROLE_RECEPTIONIST, User::ROLE_STAFF, User::ROLE_CUSTOMER],
         ]);
     }

@@ -19,8 +19,8 @@ class AppointmentCalendarController extends Controller
             'status' => ['nullable', Rule::in(Appointment::STATUSES)],
         ]);
         $month = Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth();
-        $start = $month->copy()->startOfWeek(Carbon::SUNDAY);
-        $end = $month->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY)->addDay()->startOfDay();
+        $start = $month->copy()->startOfWeek(Carbon::MONDAY);
+        $end = $month->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY)->addDay()->startOfDay();
         $customerProfileId = $request->user()->customerProfile?->id;
 
         abort_unless($customerProfileId, 403);

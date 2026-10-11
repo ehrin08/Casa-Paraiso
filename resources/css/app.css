@@ -1,8 +1,12 @@
 @import "tailwindcss";
+@import "./landing.css";
 @import "./admin-dashboard.css";
 @import "./appointments.css";
+@import "./customer-appointments.css";
+@import "./appointment-completion.css";
 @import "./appointment-form.css";
 @import "./appointment-detail.css";
+@import "./customer-detail.css";
 @import "./therapists.css";
 @import "./services.css";
 @import "./payments.css";
@@ -13,6 +17,8 @@
 @import "./reports.css";
 @import "./notifications.css";
 @import "./settings.css";
+@import "./profile.css";
+@import "./users.css";
 
 @plugin "@tailwindcss/forms";
 
@@ -171,10 +177,6 @@ html[data-sidebar-collapsed="true"] {
         text-rendering: optimizeLegibility;
     }
 
-    body.casa-landing-body {
-        min-width: 0;
-    }
-
     button,
     input,
     select,
@@ -205,25 +207,6 @@ html[data-sidebar-collapsed="true"] {
         background:
             radial-gradient(circle at 92% 4%, rgba(179, 135, 69, 0.09), transparent 24rem),
             linear-gradient(180deg, var(--color-casa-paper) 0, var(--color-casa-bg) 42rem);
-    }
-
-    .casa-landing {
-        --casa-landing-header-height: 4.0625rem;
-    }
-
-    .casa-landing-header {
-        block-size: var(--casa-landing-header-height);
-    }
-
-    .casa-landing-main {
-        padding-block-start: var(--casa-landing-header-height);
-    }
-
-    .casa-landing-screen-section {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        scroll-margin-block-start: var(--casa-landing-header-height);
     }
 
     .casa-card,
@@ -1055,19 +1038,6 @@ body[data-workspace-role] .casa-list-toolbar > :last-child {
     .casa-app-page .space-y-5 > :not([hidden]) ~ :not([hidden]) {
         margin-top: 0.875rem;
     }
-
-@media (min-width: 640px) {
-    .casa-landing {
-        --casa-landing-header-height: 4.5625rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .casa-landing-screen-section {
-        min-block-size: calc(100vh - var(--casa-landing-header-height));
-        min-block-size: calc(100dvh - var(--casa-landing-header-height));
-    }
-}
 
 .casa-app-page [data-page-content] .grid,
 .casa-app-page [data-page-content] .grid > *,

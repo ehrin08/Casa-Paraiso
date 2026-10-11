@@ -1,0 +1,79 @@
+/* My appointments extends the shared customer workspace. */
+.casa-app-page .customer-appointments-heading h1 { margin-top: 8px; font-family: var(--font-editorial); font-size: clamp(2rem, 3.4vw, 2.75rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.025em; }
+.customer-appointments-eyebrow { color: var(--color-casa-palm-dark); font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.16em; }
+.customer-appointments-subtitle { margin-top: 8px; color: var(--color-casa-muted); font-size: 16px; line-height: 1.5; }
+.customer-appointments-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+body[data-workspace-role] .customer-appointments-actions .casa-button-primary, body[data-workspace-role] .customer-appointments-actions .casa-button-secondary,
+body[data-workspace-role] .customer-appointments .casa-button-primary, body[data-workspace-role] .customer-appointments .casa-button-secondary { min-height: 44px; border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none; box-shadow: none; }
+.customer-appointments-actions .casa-button-secondary { color: var(--color-casa-text); }
+.customer-appointments .customer-appointments-card-action.casa-button-secondary { border-color: var(--color-casa-palm); color: var(--color-casa-palm-dark); }
+.customer-appointments-actions svg, .customer-appointments svg { width: 20px; height: 20px; flex-shrink: 0; }
+.customer-appointments { container-type: inline-size; font-size: 14px; }
+.customer-appointments .casa-appointment-stats { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+.customer-appointments .casa-appointment-stat { min-height: 88px; gap: 20px; padding: 16px; border-radius: 8px; }
+.customer-appointments .casa-appointment-stat-icon { width: 48px; height: 48px; background: #e6ebdf; color: var(--color-casa-palm-dark); }
+.customer-appointments .casa-appointment-stat-icon svg { width: 26px; height: 26px; }
+.customer-appointments .casa-appointment-stat-icon.is-cancelled { background: #fbe0dc; color: #9b2924; }
+.customer-appointments .casa-appointment-stat dt { font-size: 14px; }
+.customer-appointments .casa-appointment-stat dd { margin-top: 2px; font-size: 26px; font-weight: 600; }
+.customer-appointments-panels { display: grid; gap: 16px; align-items: start; }
+.customer-appointments-card { min-width: 0; padding: 16px; border: 1px solid var(--color-casa-border); border-radius: 8px; background: var(--color-casa-paper); }
+.customer-appointments .customer-appointments-card h2 { font-family: var(--font-editorial); font-size: 22px; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
+.customer-appointments-card h3 { margin-top: 12px; font-family: var(--font-editorial); font-size: 26px; font-weight: 600; line-height: 1.15; overflow-wrap: anywhere; }
+.customer-appointments-aside { display: grid; gap: 16px; min-width: 0; }
+.customer-appointments-card-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.customer-appointments-badge { padding: 3px 8px; border-radius: 999px; background: #dcefe0; color: #245238; font-size: 14px; line-height: 1.4; }
+.customer-appointments-visit-schedule { display: grid; gap: 12px; margin-top: 16px; }
+.customer-appointments-visit-schedule li, .customer-appointments-feedback-date { display: flex; align-items: flex-start; gap: 12px; line-height: 1.5; }
+.customer-appointments-visit-facts { display: grid; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-casa-border); }
+.customer-appointments-visit-facts div { display: grid; grid-template-columns: 5rem minmax(0, 1fr); gap: 12px; line-height: 1.5; }
+.customer-appointments-visit-facts dt, .customer-appointments-muted { color: var(--color-casa-muted); }
+.customer-appointments-visit-facts dd { overflow-wrap: anywhere; }
+.customer-appointments-card-action { display: flex; width: 100%; margin-top: 20px; }
+.customer-appointments-muted { margin-top: 8px; line-height: 1.5; }
+.customer-appointments-feedback h3 { font-size: 22px; }
+.customer-appointments-feedback-date { margin-top: 12px; }
+.customer-appointments-empty { margin-top: 16px; color: var(--color-casa-muted); line-height: 1.6; }
+.customer-appointments-empty a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-casa-palm-dark); text-decoration: underline; }
+.customer-appointments-calendar-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.customer-appointments-month-navigation { display: flex; align-items: center; gap: 12px; }
+.customer-appointments .customer-appointments-month-navigation h2 { min-width: 8.5rem; text-align: center; font-size: 26px; }
+.customer-appointments-icon-button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--color-casa-border); border-radius: 6px; background: var(--color-casa-paper); }
+.customer-appointments-icon-button:hover { background: var(--color-casa-sand); }
+.customer-appointments-status-filter { min-width: 9rem; flex: 1; max-width: 12rem; }
+.customer-appointments .customer-appointments-status-filter .casa-input { min-height: 44px; border-radius: 6px; font-size: 14px; font-weight: 400; }
+.customer-appointments-calendar-message { margin-bottom: 12px; color: var(--color-casa-muted); line-height: 1.5; }
+.customer-appointments-calendar-error { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; border: 1px solid #e4bcb5; border-radius: 6px; padding: 12px; background: #fff0ed; color: #9b2924; }
+.customer-appointments-calendar-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--color-casa-border); border-radius: 8px; }
+.customer-appointments-month-grid { min-width: 35rem; }
+.customer-appointments-weekdays, .customer-appointments-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.customer-appointments-weekdays { background: #faf7f1; color: var(--color-casa-muted); }
+.customer-appointments-weekdays span { padding: 12px 4px; text-align: center; }
+.customer-appointments-weekdays span + span, .customer-appointments-day + .customer-appointments-day { border-left: 1px solid var(--color-casa-border); }
+.customer-appointments-day { min-width: 0; min-height: 96px; border-top: 1px solid var(--color-casa-border); padding: 4px; }
+.customer-appointments-day.is-adjacent { background: #faf7f1; color: var(--color-casa-muted); }
+.customer-appointments-day.is-selected { box-shadow: inset 0 0 0 1px var(--color-casa-palm); }
+.customer-appointments-date { display: flex; align-items: center; justify-content: flex-start; min-width: 44px; min-height: 44px; padding: 0 4px; line-height: 1; }
+.customer-appointments-date span { display: grid; place-items: center; min-width: 28px; min-height: 28px; }
+.customer-appointments-date .is-today { border-radius: 999px; background: var(--color-casa-palm); color: white; }
+.customer-appointments-day-events { display: grid; gap: 4px; }
+.customer-appointments-event { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 4px; min-height: 44px; padding: 4px 2px; border-radius: 8px; background: #dcefe0; color: #245238; font-size: 14px; line-height: 1.3; text-align: center; }
+.customer-appointments-event span { white-space: nowrap; }
+.customer-appointments-event[data-status="completed"] { background: #e4f1e8; color: #305b45; }
+.customer-appointments-event[data-status="cancelled"] { background: #fbe0dc; color: #9b2924; }
+.customer-appointments-event[data-status="no_show"] { background: #f5e9ce; color: #715317; }
+.customer-appointments-event:hover { filter: brightness(0.97); text-decoration: underline; }
+.customer-appointments-more { display: flex; align-items: center; justify-content: center; min-height: 44px; color: var(--color-casa-palm-dark); text-decoration: underline; }
+.customer-appointments-legend { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 16px; color: var(--color-casa-muted); }
+.customer-appointments-legend > span { display: inline-flex; align-items: center; gap: 8px; }
+.customer-appointments-legend i { width: 12px; height: 12px; border-radius: 50%; background: #478b67; }
+.customer-appointments-legend i[data-status="completed"] { background: #9dccaa; }
+.customer-appointments-legend i[data-status="cancelled"] { background: #eaa19b; }
+.customer-appointments-legend i[data-status="no_show"] { background: #c2a66a; }
+.customer-appointments :focus-visible, .customer-appointments-actions :focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; }
+@media (min-width: 640px) {
+    .customer-appointments .casa-appointment-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container (min-width: 52rem) {
+    .customer-appointments-panels { grid-template-columns: minmax(0, 1fr) 16rem; }
+}

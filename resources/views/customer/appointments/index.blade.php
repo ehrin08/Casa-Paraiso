@@ -1,59 +1,135 @@
-<x-app-layout>
+<x-app-layout page-title="My appointments">
     <x-slot name="header">
-        <div>
-            <p class="casa-eyebrow">{{ __('Customer lounge') }}</p>
-            <h1 class="mt-3 font-editorial text-4xl font-semibold text-casa-text">{{ __('My appointments') }}</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-casa-muted">{{ __('Follow confirmed, completed, and cancelled visits in one calm monthly view.') }}</p>
+        <div class="customer-appointments-heading">
+            <p class="customer-appointments-eyebrow">{{ __('Your wellness space') }}</p>
+            <h1>{{ __('A little time for yourself.') }}</h1>
+            <p class="customer-appointments-subtitle">{{ __('View your visits and plan your next moment of rest.') }}</p>
         </div>
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('customer.appointments.history') }}" class="casa-button-secondary">{{ __('View history') }}</a>
+        <div class="customer-appointments-actions">
             <a href="{{ route('customer.appointments.create') }}" class="casa-button-primary" data-panel-link data-turbo="false">
-                <x-nav-icon name="calendar" class="size-4" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
                 {{ __('Book appointment') }}
             </a>
+            <a href="{{ route('customer.appointments.history') }}" class="casa-button-secondary">{{ __('View history') }}</a>
         </div>
     </x-slot>
 
-    <div x-data="customerAppointmentCalendar({ feedUrl: @js(route('customer.appointments.calendar')), initialMonth: @js($initialMonth) })" x-init="init()" class="space-y-4" data-customer-appointment-calendar>
-        <x-stat-strip :items="[
-            ['label' => __('Upcoming'), 'value' => $summary['upcoming'], 'meta' => __('Confirmed visits ahead'), 'tone' => 'green'],
-            ['label' => __('Cancelled'), 'value' => $summary['cancelled'], 'meta' => __('Visits no longer scheduled'), 'tone' => 'gold'],
-            ['label' => __('Completed'), 'value' => $summary['completed'], 'meta' => __('Finished visits'), 'tone' => 'dark'],
+    <div class="customer-appointments" data-customer-appointments>
+        <x-stat-strip presentation="cards" :items="[
+            ['label' => __('Upcoming'), 'value' => $summary['upcoming'], 'tone' => 'green', 'icon' => 'calendar'],
+            ['label' => __('Cancelled'), 'value' => $summary['cancelled'], 'tone' => 'red', 'icon' => 'cancel'],
+            ['label' => __('Completed'), 'value' => $summary['completed'], 'tone' => 'green', 'icon' => 'check'],
         ]" />
 
-        <section class="casa-editorial-card p-4 sm:p-5" x-bind:aria-busy="loading">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-                    <button type="button" class="casa-icon-button" x-on:click="previousMonth()" aria-label="{{ __('Previous month') }}"><svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                    <h2 class="min-w-0 flex-1 text-center font-editorial text-2xl font-semibold leading-tight text-casa-text sm:min-w-44" x-text="monthLabel"></h2>
-                    <button type="button" class="casa-icon-button" x-on:click="nextMonth()" aria-label="{{ __('Next month') }}"><svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="customer-appointments-panels">
+            <section class="customer-appointments-card customer-appointments-calendar"
+                x-data="customerAppointmentCalendar({ feedUrl: @js(route('customer.appointments.calendar')), historyUrl: @js(route('customer.appointments.history')), initialMonth: @js($initialMonth) })"
+                x-bind:aria-busy="loading ? 'true' : 'false'" aria-label="{{ __('Your appointment calendar') }}" data-customer-appointment-calendar>
+                <div class="customer-appointments-calendar-toolbar" x-cloak>
+                    <div class="customer-appointments-month-navigation">
+                        <button type="button" class="customer-appointments-icon-button" x-on:click="previousMonth()" aria-label="{{ __('Previous month') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <h2 x-text="monthLabel" aria-live="polite"></h2>
+                        <button type="button" class="customer-appointments-icon-button" x-on:click="nextMonth()" aria-label="{{ __('Next month') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    </div>
+                    <label class="customer-appointments-status-filter">
+                        <span class="sr-only">{{ __('Filter appointment status') }}</span>
+                        <select class="casa-input" x-model="statusFilter" x-on:change="load()">
+                            <option value="">{{ __('All statuses') }}</option>
+                            @foreach (\App\Models\Appointment::STATUSES as $status)
+                                <option value="{{ $status }}">{{ $status === 'no_show' ? __('No-show') : ucfirst($status) }}</option>
+                            @endforeach
+                        </select>
+                    </label>
                 </div>
-                <label class="block sm:min-w-44"><span class="sr-only">{{ __('Filter appointment status') }}</span><select class="casa-input" x-model="statusFilter" x-on:change="load()"><option value="">{{ __('All appointment statuses') }}</option>@foreach (\App\Models\Appointment::STATUSES as $status)<option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</option>@endforeach</select></label>
-            </div>
 
-            <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-show="error" x-text="error" role="alert"></p>
+                <div class="customer-appointments-calendar-error" x-show="error" x-cloak role="alert">
+                    <p x-text="error"></p>
+                    <button type="button" class="casa-button-secondary" x-on:click="load()">{{ __('Retry') }}</button>
+                </div>
+                <p class="customer-appointments-calendar-message" role="status" aria-live="polite" x-cloak x-show="loading || (!error && !hasMonthEvents)" x-text="loading ? 'Loading your appointments…' : (statusFilter ? 'No matching appointments this month.' : 'No appointments this month.')"></p>
 
-            <div class="mt-5 overflow-x-auto rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-casa-palm" tabindex="0" role="region" aria-label="{{ __('Scrollable appointment month') }}" data-calendar-scroll>
-                <div class="min-w-[22rem]">
-                    <div class="grid grid-cols-7 gap-1 text-center text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted sm:gap-2"><template x-for="dayName in weekDays" x-bind:key="dayName"><span x-text="dayName"></span></template></div>
-                    <div class="mt-2 grid grid-cols-7 gap-1 sm:gap-2" role="grid" aria-label="{{ __('Appointment month') }}">
-                        <template x-for="day in calendarDays" x-bind:key="day.date">
-                            <button type="button" class="min-h-16 rounded-xl border p-2 text-left transition sm:min-h-24 sm:p-2.5" x-on:click="selectDate(day.date)" x-on:keydown.right.prevent="moveDate(day.date, 1)" x-on:keydown.left.prevent="moveDate(day.date, -1)" x-on:keydown.down.prevent="moveDate(day.date, 7)" x-on:keydown.up.prevent="moveDate(day.date, -7)" x-bind:aria-label="`${day.date}, ${day.events.length} appointments`" x-bind:tabindex="selectedDate === day.date ? 0 : -1" x-bind:data-customer-calendar-day="day.date" x-bind:class="selectedDate === day.date ? 'border-casa-palm bg-casa-palm text-white shadow-md' : day.inMonth ? 'border-casa-border bg-casa-paper text-casa-text hover:border-casa-brass' : 'border-casa-border/50 bg-casa-sand/30 text-casa-muted/45'" role="gridcell">
-                                <span class="text-sm font-extrabold" x-text="day.label"></span>
-                                <span class="mt-2 flex flex-wrap gap-1" x-show="day.statuses.length">
-                                    <template x-for="status in day.statuses" x-bind:key="status">
-                                        <span class="inline-flex items-center justify-center size-2.5 rounded-full ring-1 ring-white/70" x-bind:class="{'bg-casa-palm': status === 'confirmed', 'bg-casa-cacao': status === 'completed', 'bg-red-500': status === 'cancelled' || status === 'no_show'}">
-                                            <span class="sr-only" x-text="status.replaceAll('_', ' ')"></span>
-                                        </span>
-                                    </template>
-                                </span>
-                                <span class="mt-2 hidden text-sm font-extrabold uppercase tracking-[0.04em] sm:block" x-show="day.events.length" x-text="`${day.events.length} visit${day.events.length === 1 ? '' : 's'}`"></span>
-                            </button>
+                <div class="customer-appointments-calendar-scroll" tabindex="0" role="region" aria-label="{{ __('Scrollable appointment month') }}" data-calendar-scroll x-cloak>
+                    <div class="customer-appointments-month-grid" role="grid" aria-label="{{ __('Appointment month') }}">
+                        <div class="customer-appointments-weekdays" role="row">
+                            <template x-for="dayName in weekDays" x-bind:key="dayName"><span role="columnheader" x-text="dayName"></span></template>
+                        </div>
+                        <template x-for="row in calendarRows" x-bind:key="row[0].date">
+                            <div class="customer-appointments-week" role="row">
+                                <template x-for="(day, dayIndex) in row" x-bind:key="day.date">
+                                    <div class="customer-appointments-day" x-bind:class="{ 'is-adjacent': !day.inMonth, 'is-selected': selectedDate === day.date }" role="gridcell" x-bind:aria-selected="selectedDate === day.date">
+                                        <button type="button" class="customer-appointments-date" x-on:click="selectDate(day.date)"
+                                            x-on:keydown.right.prevent="moveDate(day.date, 1)" x-on:keydown.left.prevent="moveDate(day.date, -1)"
+                                            x-on:keydown.down.prevent="moveDate(day.date, 7)" x-on:keydown.up.prevent="moveDate(day.date, -7)"
+                                            x-on:keydown.home.prevent="moveDate(day.date, -dayIndex)" x-on:keydown.end.prevent="moveDate(day.date, 6 - dayIndex)"
+                                            x-bind:aria-label="dayDescription(day)" x-bind:aria-current="day.isToday ? 'date' : null"
+                                            x-bind:tabindex="selectedDate === day.date ? 0 : -1" x-bind:data-customer-calendar-day="day.date">
+                                            <span x-bind:class="{ 'is-today': day.isToday }" x-text="day.label"></span>
+                                        </button>
+                                        <div class="customer-appointments-day-events">
+                                            <template x-for="event in day.events" x-bind:key="event.id">
+                                                <a class="customer-appointments-event" x-bind:data-status="event.status" x-bind:href="event.detail_url" x-bind:aria-label="eventDescription(event)" x-bind:title="eventDescription(event)">
+                                                    <span x-text="statusLabel(event.status)"></span><span x-text="eventTime(event)"></span>
+                                                </a>
+                                            </template>
+                                            <a class="customer-appointments-more" x-show="day.remaining" x-bind:href="historyUrl(day.date)" x-bind:aria-label="'View all ' + day.total + ' appointments on ' + day.date" x-text="'+' + day.remaining + ' more'"></a>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </template>
                     </div>
                 </div>
-            </div>
-        </section>
-    </div>
 
+                <div class="customer-appointments-legend" aria-label="{{ __('Appointment statuses') }}" x-cloak>
+                    @foreach (\App\Models\Appointment::STATUSES as $status)
+                        <span><i data-status="{{ $status }}" aria-hidden="true"></i>{{ $status === 'no_show' ? __('No-show') : ucfirst($status) }}</span>
+                    @endforeach
+                </div>
+                <noscript><p class="customer-appointments-empty">{{ __('Open your appointment history to view your visits without JavaScript.') }} <a href="{{ route('customer.appointments.history') }}">{{ __('View history') }}</a></p></noscript>
+            </section>
+
+            <aside class="customer-appointments-aside" aria-label="{{ __('Your visits') }}">
+                <section class="customer-appointments-card customer-appointments-visit" data-next-visit>
+                    <div class="customer-appointments-card-heading">
+                        <h2>{{ __('Your next visit') }}</h2>
+                        @if ($nextVisit)<span class="customer-appointments-badge">{{ __('Confirmed') }}</span>@endif
+                    </div>
+                    @if ($nextVisit)
+                        @php
+                            $timezone = config('casa.business_hours.timezone', 'Asia/Manila');
+                            $nextStart = $nextVisit->scheduled_start_at->copy()->timezone($timezone);
+                            $nextEnd = $nextVisit->scheduled_end_at?->copy()->timezone($timezone);
+                        @endphp
+                        <h3>{{ $nextVisit->service?->name ?? __('Spa service') }}</h3>
+                        <ul class="customer-appointments-visit-schedule">
+                            <li><x-nav-icon name="calendar" /><span>{{ $nextStart->format('l, F j') }}</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg><span>{{ $nextStart->format('g:i A') }}@if ($nextEnd) – {{ $nextEnd->format('g:i A') }}@if (! $nextStart->isSameDay($nextEnd)) {{ __('(next day)') }}@endif @endif</span></li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>{{ $timezone }}</span></li>
+                        </ul>
+                        <dl class="customer-appointments-visit-facts">
+                            <div><dt>{{ __('Therapist') }}</dt><dd>{{ $nextVisit->staffProfile?->user?->name ?: __('Unassigned') }}</dd></div>
+                            <div><dt>{{ __('Duration') }}</dt><dd>{{ $nextEnd ? (int) $nextStart->diffInMinutes($nextEnd).' '.__('minutes') : __('Not recorded') }}</dd></div>
+                        </dl>
+                        <a href="{{ route('customer.appointments.show', $nextVisit) }}" class="casa-button-primary customer-appointments-card-action">{{ __('View details') }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    @else
+                        <p class="customer-appointments-empty">{{ __('You have no upcoming visits. Make time for a little rest when you’re ready.') }}</p>
+                        <a href="{{ route('customer.appointments.create') }}" class="casa-button-primary customer-appointments-card-action" data-panel-link data-turbo="false">{{ __('Book appointment') }}</a>
+                    @endif
+                </section>
+
+                <section class="customer-appointments-card customer-appointments-feedback" data-feedback-visit>
+                    <h2>{{ __('How was your last visit?') }}</h2>
+                    @if ($feedbackVisit)
+                        <p class="customer-appointments-muted">{{ __('Share feedback on your completed treatment.') }}</p>
+                        <h3>{{ $feedbackVisit->service?->name ?? __('Spa service') }}</h3>
+                        <p class="customer-appointments-feedback-date"><x-nav-icon name="calendar" /><span>{{ ($feedbackVisit->scheduled_start_at ?? $feedbackVisit->requested_start_at)?->copy()->timezone(config('casa.business_hours.timezone', 'Asia/Manila'))->format('F j, Y') }}</span></p>
+                        <a href="{{ route('customer.feedback.create', ['appointment_id' => $feedbackVisit->id]) }}" class="casa-button-secondary customer-appointments-card-action">{{ __('Share feedback') }}</a>
+                    @else
+                        <p class="customer-appointments-empty">{{ __('There are no completed visits awaiting feedback. After your next treatment, you can share your experience here.') }}</p>
+                        <a href="{{ route('customer.feedback.index') }}" class="casa-button-secondary customer-appointments-card-action">{{ __('My feedback') }}</a>
+                    @endif
+                </section>
+            </aside>
+        </div>
+    </div>
 </x-app-layout>

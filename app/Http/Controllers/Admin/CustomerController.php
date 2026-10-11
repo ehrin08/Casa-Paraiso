@@ -44,6 +44,12 @@ class CustomerController extends Controller
             ->paginate((int) config('casa.pagination.per_page', 15))
             ->withQueryString();
 
+        $modalCustomerId = $request->session()->pull('customer_modal_id');
+        $modalCustomer = $modalCustomerId ? CustomerProfile::find($modalCustomerId) : null;
+        if ($modalCustomer) {
+            $this->loadDetails($modalCustomer);
+        }
+
         return view('admin.customers.index', [
             'customers' => $customers,
             'search' => $search,
@@ -51,10 +57,22 @@ class CustomerController extends Controller
             'sort' => $sort,
             'direction' => $direction,
             'totalCustomers' => CustomerProfile::query()->count(),
+            'modalCustomer' => $modalCustomer,
         ]);
     }
 
-    public function show(CustomerProfile $customer): View
+    public function show(Request $request, CustomerProfile $customer): View
+    {
+        $this->loadDetails($customer);
+        $isModal = $request->header('X-Casa-Panel') === '1' && $request->query('modal') === '1';
+
+        return view($isModal ? 'admin.customers.modal' : 'admin.customers.show', [
+            'customer' => $customer,
+            'returnFilters' => $request->query('return_filters', []),
+        ]);
+    }
+
+    private function loadDetails(CustomerProfile $customer): void
     {
         $customer->load([
             'user',
@@ -75,15 +93,17 @@ class CustomerController extends Controller
                 ->latest()
                 ->limit(8),
         ])->loadCount(['appointments', 'transactions', 'feedback', 'promotionSuggestions']);
-
-        return view('admin.customers.show', [
-            'customer' => $customer,
-        ]);
     }
 
     public function update(CustomerNoteRequest $request, CustomerProfile $customer): RedirectResponse
     {
-        $customer->update($request->validated());
+        $customer->update($request->safe()->only(['notes']));
+
+        if ($request->validated('return_to') === 'index') {
+            return redirect()->route('admin.customers.index', $request->returnQuery())
+                ->with('customer_modal_id', $customer->id)
+                ->with('status', 'customer-updated');
+        }
 
         return redirect()
             ->route('admin.customers.show', $customer)
