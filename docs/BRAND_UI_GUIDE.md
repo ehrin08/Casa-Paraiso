@@ -144,6 +144,16 @@ Search, lifecycle status (including Dismissed), and labelled native From/To issu
 
 The settings summary shows the complimentary add-on reward type, saved validity or No expiration, active fixed-group chips, and a read-only Enabled/Disabled indicator derived from group activation. Automatic reward settings and Edit open the full-page five-group form at `admin.promotions.settings.edit`; Save returns to history and validation retains inputs. Configuration changes affect future rewards only. View opens the existing reward detail, where an available reward can be dismissed through its confirmed PATCH workflow. Existing issuance and RFM thresholds remain unchanged.
 
+## Admin Feedback
+
+Admin and super-admin Feedback follows the supplied reference with three cream Positive, Neutral, and Negative cards using pale green face-icon circles, followed by a separate filter panel, equal-width service/topic panels at 1280px and above, and Customer reviews. Panels stack below that width and metric cards stack below 640px. Styles are scoped in `resources/css/feedback.css`; Casa typography, the shared sidebar and header, 14px meaningful text, 44px controls, and keyboard-focusable table scrolling remain in use.
+
+Search, Service, and Sentiment are visible on desktop. The native More filters disclosure contains optional Submitted from/to dates and Experience topic, and opens when those filters are active or invalid. Dropdown changes submit automatically; Enter and the search button submit search. Mobile uses the shared filter disclosure, with Apply filters and visible filter fields available without JavaScript. All history is the default and Clear filters removes every filter. All filters affect the review table, sentiment cards, service summary, and topic findings across every page; submission dates follow inclusive Manila days.
+
+The service table includes every represented service with Positive, Neutral, Negative, and Total counts, ordered by total descending and name. Its bounded scroll region accommodates larger histories. Experience topics use their configured labels and accessible meters showing positive findings divided by all stored findings for that topic. A review can contribute findings of both polarities, so the denominator is findings rather than reviews.
+
+The five-column review table shows customer names linked to feedback details, emails or guest phones, treatment/service, Manila submission date, textual sentiment pills, and escaped comment previews limited to 180 characters. Longer comments offer Read full review; ratings, classification evidence, and manual review remain in the existing detail screen. Pagination remains fixed at 15. Empty history, no matching reviews, and absent topic findings use distinct truthful messages.
+
 ## Imagery
 
 Use warm editorial treatment details, anonymous hands, natural linens, dark wood, woven cane, ceramic vessels, restrained foliage, and believable window light. Avoid identifiable faces, clinical equipment, excessive candles, glossy stock-photo styling, added heavy orange casts, text, and third-party logos. The approved Casa Paraiso business photos retain their original colors and embedded spa branding.

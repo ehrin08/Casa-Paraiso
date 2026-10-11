@@ -9,6 +9,7 @@
 @import "./commissions.css";
 @import "./attendance.css";
 @import "./rewards.css";
+@import "./feedback.css";
 
 @plugin "@tailwindcss/forms";
 

@@ -392,6 +392,10 @@ Purpose:
 
 - Review customer ratings, comments, and sentiment summaries.
 
+The admin and super-admin index shows all history by default. Three sentiment cards precede search/service/sentiment filters, with optional Manila submission dates and topic inside More filters. All active filters scope the review list and every aggregate across all pages. A full service sentiment table sits beside positive-share topic finding meters at desktop widths; smaller screens stack them. Topic percentages use stored findings, including both polarities from one review, rather than counting all reviews as topic mentions.
+
+The five-column Customer reviews table includes customer detail links, email or guest phone, treatment/service, Manila date, sentiment, and escaped 180-character comment previews. Long comments link to the existing feedback detail, which retains ratings, classification evidence, and manual review. Native GET submissions, mobile filter disclosure, no-JavaScript Apply filters, keyboard-focusable table scrolling, and fixed 15-record pagination remain available.
+
 Screens:
 
 - Feedback list.

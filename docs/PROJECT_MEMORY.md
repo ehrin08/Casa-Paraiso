@@ -1,6 +1,6 @@
 # Casa Paraiso Project Memory
 
-> Last reviewed: 2026-10-06
+> Last reviewed: 2026-10-07
 > Role: orientation and routing; verify current source before changing behavior.
 
 ## Current Shape
@@ -38,6 +38,8 @@ Earlier native-client, versioned API, device-token, database, tunnel, and hosted
 - Role navigation is defined in `resources/views/layouts/navigation.blade.php`: admins have direct Therapists, Services, Customer rewards, Feedback, and Reports links; all roles use task-based group labels and plain-English destinations. The mobile drawer shares those links, and the customer dock uses My appointments, My feedback, and My profile.
 
 ## Durable Rules
+
+- Admin and super-admin Feedback uses three sentiment cards, a separate search/service/sentiment toolbar with native More filters for submission dates and topic, a complete service sentiment table beside topic finding bars, and a five-column customer review list. All history is the default; every filter affects the list and all aggregates across every page. `FeedbackIndexRequest` validates filters; optional submission dates use inclusive Manila days and allow either bound independently. Search reuses customer identity/contact helpers and retains service/comment matching. Topic percentages count stored positive findings divided by all findings for that topic, including multiple polarities from one review. The fixed 15-record paginator and existing detail/manual-review routes remain in use; ratings and evidence stay in details. Styles are scoped in `resources/css/feedback.css`. Verify with `AdminFeedbackLayoutTest`, `RoleWorkspaceTest`, `GuestCustomerBookingTest`, `InsightRemediationTest`, and `PhaseFiveToTenWorkflowTest`, plus desktop/mobile filters, no-JavaScript submission, and table scrolling.
 
 - Admin and super-admin Customer rewards uses four filtered lifecycle cards and a six-column issued-reward history beside a read-only automatic-settings summary, with a 68/32 split at 1280px and above. `q`, `lifecycle`, and optional `date_from`/`date_to` filter history and counts across all pages; dates use inclusive Manila issued-day boundaries and default to all history. Pagination stays fixed at 15. `admin.promotions.settings.edit` opens the full-page five-group form at `/admin/promotions/settings`; the existing PATCH saves future configuration and returns to history while preserving unrelated application settings and issued rewards. Available rewards are dismissed with confirmation from their existing detail page. Historical add-on names are batch-loaded, including inactive add-ons. Styles live in `resources/css/rewards.css`; shared navigation and issuance rules are unchanged. Verify with `AdminRewardsLayoutTest`, `CustomerRewardsTest`, `InsightRemediationTest`, `GuestCustomerBookingTest`, `RoleWorkspaceTest`, and `PhaseFiveToTenWorkflowTest`.
 

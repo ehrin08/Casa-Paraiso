@@ -84,6 +84,9 @@ class RoleWorkspaceTest extends TestCase
             } elseif ($path === '/admin/promotions') {
                 $this->assertSame(4, substr_count($content, 'data-metric-card'));
                 $this->assertStringContainsString('Filtered reward totals', $content);
+            } elseif ($path === '/admin/feedback') {
+                $this->assertSame(3, substr_count($content, 'data-metric-card'));
+                $this->assertStringContainsString('Filtered sentiment totals', $content);
             } else {
                 $this->assertStringContainsString('hidden text-sm font-semibold leading-5 text-casa-muted sm:block', $content);
             }
