@@ -1,6 +1,6 @@
 # Casa Paraiso Project Memory
 
-> Last reviewed: 2026-10-11
+> Last reviewed: 2026-10-12
 > Role: orientation and routing; verify current source before changing behavior.
 
 ## Current Shape
@@ -92,6 +92,7 @@ Earlier native-client, versioned API, device-token, database, tunnel, and hosted
 - Local demo data uses `http://localhost:18001`, service `app`, and additive `php artisan db:seed` only on a verified disposable local database; never use `migrate:fresh` or `db:wipe` for demo setup.
 - The app source is bind-mounted from Windows for local Docker. `storage/logs` is a Docker-managed `storage-logs` volume initialized for `www-data`; the `single` and `daily` Monolog channels leave file modes to that volume instead of requesting `chmod`.
 - Apache runs directly in the app container. Booking-count polling pauses on hidden pages and navigation, aborts stale requests, and refreshes on return. No WebSocket server, broadcast credentials, or broadcast authorization route is required.
+- `scripts/casa-preview.ps1 start|status|stop` manages an optional local Cloudflare Quick Tunnel using the installed Windows client and the existing Docker wrapper. Temporary public HTTPS links use the current app/database, built assets, and ordinary login/role permissions; the computer, Docker, and tunnel must stay running. While active, it journals and changes only `APP_DEBUG`, `APP_URL`, `TRUSTED_HOSTS`, and `SESSION_SECURE_COOKIE`, preserving proxies and unrelated edits. Stop/failure restores settings and clears configuration; stale process identity is checked before termination. Ignored `.casa-preview/` stores logs and recovery state, never a complete environment backup. See `DOCKER_WORKFLOW.md` for manual-conflict recovery and email/password login limitations. Verify with `tests/scripts/casa-preview.tests.ps1`, authentication/security tests, the full Laravel suite, asset build, Docker startup, and public HTTPS/session/asset checks. Retired provider tunnels and archived data remain untouched.
 - The next deployment target is Hostinger Web/Cloud hosting with managed MariaDB; `HOSTINGER_DEPLOYMENT.md` documents database preparation. Local MariaDB 10.11 is provisional until the actual hosting version is verified. Hosting cutover has not been performed.
 - The existing Render/Oracle workflow is retained as historical deployment evidence in `Dockerfile.render`, `docker/app/render-entrypoint.sh`, `render.yaml`, and `RENDER_ORACLE_DEPLOYMENT.md`. This local migration does not change those provider services or the archived `casa-paraiso-supabase-api-poc` service.
 
