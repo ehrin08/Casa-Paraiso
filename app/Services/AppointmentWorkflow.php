@@ -92,6 +92,7 @@ class AppointmentWorkflow
         ?CarbonInterface $end = null,
         ?Appointment $ignoreAppointment = null,
         array $addonCodes = [],
+        ?ScheduleWindowResolver $windows = null,
     ): bool {
         $end ??= $this->scheduledEnd($start, $service, $addonCodes);
 
@@ -99,11 +100,11 @@ class AppointmentWorkflow
             return false;
         }
 
-        if (! $this->scheduleWindows->covers($staffProfile, $start, $end)) {
+        if (! ($windows ?? $this->scheduleWindows)->covers($staffProfile, $start, $end)) {
             return false;
         }
 
-        return ! $this->hasConfirmedOverlap($staffProfile, $start, $end, $ignoreAppointment);
+        return ! $this->hasConfirmedOverlap($staffProfile, $start, $end, $ignoreAppointment, $windows !== null);
     }
 
     public function hasConfirmedOverlap(
@@ -111,14 +112,16 @@ class AppointmentWorkflow
         CarbonInterface $start,
         CarbonInterface $end,
         ?Appointment $ignoreAppointment = null,
+        bool $lock = false,
     ): bool {
-        return Appointment::query()
+        $query = Appointment::query()
             ->where('staff_profile_id', $staffProfile->id)
             ->where('status', Appointment::STATUS_CONFIRMED)
             ->when($ignoreAppointment, fn ($query) => $query->whereKeyNot($ignoreAppointment->getKey()))
             ->where('scheduled_start_at', '<', $end)
-            ->where('scheduled_end_at', '>', $start)
-            ->exists();
+            ->where('scheduled_end_at', '>', $start);
+
+        return $lock ? $query->lockForUpdate()->first(['id']) !== null : $query->exists();
     }
 
     /**
@@ -159,11 +162,13 @@ class AppointmentWorkflow
                     ->pluck('id');
 
                 $staffProfiles = StaffProfile::query()
-                    ->with(['user', 'services', 'weeklySchedules', 'scheduleExceptions'])
+                    ->with(['user' => fn ($query) => $query->sharedLock(), 'services' => fn ($query) => $query->sharedLock(),
+                        'weeklySchedules' => fn ($query) => $query->sharedLock(), 'scheduleExceptions' => fn ($query) => $query->sharedLock()])
                     ->whereKey($candidateIds)
                     ->orderBy('id')
                     ->lockForUpdate()
                     ->get();
+                $windows = $this->scheduleWindows->freshForTransaction();
 
                 $futureBookingCounts = Appointment::query()
                     ->selectRaw('staff_profile_id, COUNT(*) as aggregate')
@@ -174,7 +179,7 @@ class AppointmentWorkflow
                     ->pluck('aggregate', 'staff_profile_id');
 
                 $available = $staffProfiles
-                    ->filter(fn (StaffProfile $staff) => $this->isStaffAvailable($staff, $service, $start, null, null, $scheduleAddonCodes))
+                    ->filter(fn (StaffProfile $staff) => $this->isStaffAvailable($staff, $service, $start, null, null, $scheduleAddonCodes, $windows))
                     ->sortBy(fn (StaffProfile $staff) => sprintf(
                         '%012d-%012d',
                         (int) ($futureBookingCounts[$staff->id] ?? 0),
@@ -302,7 +307,8 @@ class AppointmentWorkflow
 
         return DB::transaction(function () use ($appointment, $staffProfile, $service, $start, $changedBy, $reason, $dirtyAttributes, $addonCodes): Appointment {
             $lockedStaff = StaffProfile::query()
-                ->with(['user', 'services', 'weeklySchedules', 'scheduleExceptions'])
+                ->with(['user' => fn ($query) => $query->sharedLock(), 'services' => fn ($query) => $query->sharedLock(),
+                    'weeklySchedules' => fn ($query) => $query->sharedLock(), 'scheduleExceptions' => fn ($query) => $query->sharedLock()])
                 ->lockForUpdate()
                 ->findOrFail($staffProfile->id);
 
@@ -321,7 +327,7 @@ class AppointmentWorkflow
             $this->assertBookableStart($start, $service, 'scheduled_start_at', true, $scheduleAddonCodes);
             $end = $this->scheduledEnd($start, $service, $scheduleAddonCodes);
 
-            if (! $this->isStaffAvailable($lockedStaff, $service, $start, $end, $target->exists ? $target : null)) {
+            if (! $this->isStaffAvailable($lockedStaff, $service, $start, $end, $target->exists ? $target : null, [], $this->scheduleWindows->freshForTransaction())) {
                 throw ValidationException::withMessages([
                     'scheduled_start_at' => __('Selected therapist is not available for this schedule.'),
                 ]);

@@ -5,7 +5,7 @@
         ->filter()->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('');
     $tabUrl = fn ($tab) => route('admin.staff.index', array_merge($selectionQuery, ['selected' => $staffProfile->id, 'tab' => $tab])).'#therapist-detail';
     $editUrl = route('admin.staff.edit', $staffProfile);
-    $scheduleUrl = route('admin.staff.show', $staffProfile).'#therapist-roster';
+    $scheduleUrl = route('admin.staff-roster.index', ['staff_profile_id' => $staffProfile->id]);
     $availabilityUrl = route('admin.staff.show', $staffProfile).'#therapist-exceptions';
     $formatTime = fn ($time) => \Illuminate\Support\Carbon::parse($time)->format('g:i A');
 @endphp

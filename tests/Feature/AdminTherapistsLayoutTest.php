@@ -82,7 +82,7 @@ class AdminTherapistsLayoutTest extends TestCase
             if ($tab === 'services') {
                 $response->assertSee('Active massage')->assertSee('Retired massage')->assertSee('Inactive')->assertSee('Edit services');
             } elseif ($tab === 'schedule') {
-                $response->assertSee('href="'.route('admin.staff.show', $profile).'#therapist-roster"', false);
+                $response->assertSee('href="'.route('admin.staff-roster.index', ['staff_profile_id' => $profile->id]).'"', false);
             } elseif ($tab === 'availability') {
                 $response->assertSee('href="'.route('admin.staff.schedule-exceptions.create', $profile).'"', false);
             }

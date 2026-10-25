@@ -40,6 +40,8 @@ class StaffWeeklyScheduleController extends Controller
     {
         try {
             DB::transaction(function () use ($request, $staff, $guard): void {
+                StaffProfile::query()->lockForUpdate()->findOrFail($staff->id);
+                $request->assertNoOverlap($staff);
                 $staff->weeklySchedules()->create([
                     ...$request->validated(),
                     'ends_next_day' => $request->boolean('ends_next_day'),
@@ -72,6 +74,8 @@ class StaffWeeklyScheduleController extends Controller
 
         try {
             DB::transaction(function () use ($request, $staff, $weeklySchedule, $guard): void {
+                StaffProfile::query()->lockForUpdate()->findOrFail($staff->id);
+                $request->assertNoOverlap($staff, $weeklySchedule);
                 $weeklySchedule->update([
                     ...$request->validated(),
                     'ends_next_day' => $request->boolean('ends_next_day'),
@@ -94,6 +98,7 @@ class StaffWeeklyScheduleController extends Controller
 
         try {
             DB::transaction(function () use ($staff, $weeklySchedule, $guard): void {
+                StaffProfile::query()->lockForUpdate()->findOrFail($staff->id);
                 $weeklySchedule->delete();
                 $guard->assertFutureAppointmentsRemainCovered($staff);
             });

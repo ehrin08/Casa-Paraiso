@@ -6,6 +6,7 @@ import { createOperationsBooking, createCustomerBooking } from './appointment-bo
 import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
 import { isCustomerModalUrl, restoreCustomerDetail, clearCustomerDetailRecovery } from './customer-dialog';
 import { initializeSettingsChartDialog } from './settings-dialog';
+import { initializeScheduleDialog } from './schedule-dialog';
 import { createCustomerAppointmentCalendar } from './customer-appointment-calendar';
 
 import { session as turboSession } from '@hotwired/turbo';
@@ -550,26 +551,6 @@ window.operationalCalendar = (config) => ({
     },
 });
 
-window.weeklyRoster = (config) => ({
-    feedUrl: config.feedUrl, copyUrl: config.copyUrl, shiftUrlPattern: config.shiftUrlPattern, publishUrlPattern: config.publishUrlPattern,
-    week: config.initialWeek, staffProfileId: config.staffProfileId || null, resources: [], shifts: [], loading: false, error: '', modalError: '', selection: null, startTime: '13:00', endTime: '14:00', scheduleWeekId: null, publishedAt: null, hasDraft: false,
-    get days() { return Array.from({ length: 7 }, (_, index) => { const date = addCalendarDays(this.week, index); return { date, label: localDate(date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) }; }); },
-    get weekLabel() { const end = addCalendarDays(this.week, 6); return `${localDate(this.week).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${localDate(end).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`; },
-    get times() { return Array.from({ length: 22 }, (_, index) => { const minutes = 780 + (index * 30); return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`; }); },
-    get endTimes() { return [...this.times.slice(1), '00:00']; },
-    timeLabel(time) { if (time === '00:00') return '12:00 midnight'; return new Date(`2000-01-01T${time}:00`).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); },
-    shiftLabel(shift) { return `${this.timeLabel(shift.start_time)} – ${shift.ends_next_day ? '12:00 midnight' : this.timeLabel(shift.end_time)}`; },
-    shiftsFor(staffId, date) { return this.shifts.filter((shift) => String(shift.staff_profile_id) === String(staffId) && shift.schedule_date === date); },
-    apply(data) { this.resources = (data.resources || []).filter((staff) => !this.staffProfileId || String(staff.id) === String(this.staffProfileId)); this.shifts = data.draft_shifts || []; this.scheduleWeekId = data.schedule_week_id; this.publishedAt = data.published_at; this.hasDraft = Boolean(data.has_draft); },
-    load() { this.loading = true; this.error = ''; return window.axios.get(this.feedUrl, { params: { week: this.week } }).then((response) => this.apply(response.data)).catch((error) => { this.error = error.response?.data?.message || 'The weekly roster could not be loaded.'; }).finally(() => { this.loading = false; }); },
-    moveWeek(days) { this.week = addCalendarDays(this.week, days); this.load(); },
-    copyPrevious() { this.loading = true; this.error = ''; return window.axios.post(this.copyUrl, { week: this.week }).then((response) => this.apply(response.data)).catch((error) => { this.error = error.response?.data?.message || 'The previous roster could not be copied.'; }).finally(() => { this.loading = false; }); },
-    openShift(staff, day) { this.selection = { staff, day }; this.startTime = '13:00'; this.endTime = '14:00'; this.modalError = ''; modalStore().open('weekly-roster-shift'); },
-    saveShift() { if (!this.selection || !this.scheduleWeekId) return; this.modalError = ''; const url = this.shiftUrlPattern.replace('__WEEK__', this.scheduleWeekId); const endsNextDay = this.endTime === '00:00'; window.axios.post(url, { staff_profile_id: this.selection.staff.id, schedule_date: this.selection.day.date, start_time: this.startTime, end_time: this.endTime, ends_next_day: endsNextDay }).then((response) => { this.apply(response.data); modalStore().close('weekly-roster-shift'); }).catch((error) => { this.modalError = error.response?.data?.message || Object.values(error.response?.data?.errors || {}).flat()[0] || 'The shift could not be saved.'; }); },
-    removeShift(shift) { if (!window.confirm(`Remove ${this.shiftLabel(shift)} from this draft?`)) return; const url = this.shiftUrlPattern.replace('__WEEK__', this.scheduleWeekId) + `/${shift.id}`; window.axios.delete(url).then((response) => this.apply(response.data)).catch((error) => { this.error = error.response?.data?.message || 'The draft shift could not be removed.'; }); },
-    publish() { if (!this.scheduleWeekId || !window.confirm('Publish this team roster? Customers will be able to book the published hours.')) return; this.loading = true; this.error = ''; const url = this.publishUrlPattern.replace('__WEEK__', this.scheduleWeekId); window.axios.post(url).then((response) => this.apply(response.data)).catch((error) => { this.error = error.response?.data?.message || 'The roster could not be published.'; }).finally(() => { this.loading = false; }); },
-});
-
 window.customerAppointmentCalendar = createCustomerAppointmentCalendar;
 
 window.adminAppointmentForm = createOperationsBooking;
@@ -691,6 +672,8 @@ Alpine.start();
 document.addEventListener('DOMContentLoaded', initializeBookingNotifications);
 document.addEventListener('DOMContentLoaded', () => initializeSettingsChartDialog());
 document.addEventListener('turbo:load', () => initializeSettingsChartDialog());
+document.addEventListener('DOMContentLoaded', () => initializeScheduleDialog());
+document.addEventListener('turbo:load', () => initializeScheduleDialog());
 
 let loadingRevealTimer = null;
 let loadingFallbackTimer = null;

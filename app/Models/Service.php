@@ -16,6 +16,7 @@ class Service extends Model
         'name',
         'slug',
         'description',
+        'photo_path',
         'duration_minutes',
         'price',
         'is_active',

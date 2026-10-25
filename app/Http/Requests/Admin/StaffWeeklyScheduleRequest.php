@@ -6,6 +6,7 @@ use App\Models\StaffProfile;
 use App\Models\StaffWeeklySchedule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 
 class StaffWeeklyScheduleRequest extends FormRequest
@@ -66,23 +67,32 @@ class StaffWeeklyScheduleRequest extends FormRequest
                     return;
                 }
 
-                $hasOverlap = StaffWeeklySchedule::query()
-                    ->where('staff_profile_id', $staff->id)
-                    ->where('day_of_week', (int) $this->input('day_of_week'))
-                    ->when($weeklySchedule instanceof StaffWeeklySchedule, fn ($query) => $query->whereKeyNot($weeklySchedule->getKey()))
-                    ->get()
-                    ->contains(function (StaffWeeklySchedule $existing) use ($startMinutes, $endMinutes): bool {
-                        $existingStart = $this->minutes((string) $existing->start_time);
-                        $existingEnd = $existing->ends_next_day ? 1440 : $this->minutes((string) $existing->end_time);
-
-                        return $startMinutes < $existingEnd && $endMinutes > $existingStart;
-                    });
+                $hasOverlap = $this->hasOverlap($staff, $weeklySchedule instanceof StaffWeeklySchedule ? $weeklySchedule : null, $startMinutes, $endMinutes);
 
                 if ($hasOverlap) {
                     $validator->errors()->add('start_time', 'This weekly shift overlaps an existing shift for the selected day.');
                 }
             },
         ];
+    }
+
+    /** Repeat overlap validation after the controller acquires the therapist lock. */
+    public function assertNoOverlap(StaffProfile $staff, ?StaffWeeklySchedule $schedule = null): void
+    {
+        if ($this->hasOverlap($staff, $schedule, $this->minutes((string) $this->input('start_time')),
+            $this->boolean('ends_next_day') ? 1440 : $this->minutes((string) $this->input('end_time')), true)) {
+            throw ValidationException::withMessages(['start_time' => __('This weekly shift overlaps an existing shift for the selected day.')]);
+        }
+    }
+
+    private function hasOverlap(StaffProfile $staff, ?StaffWeeklySchedule $schedule, int $start, int $end, bool $lock = false): bool
+    {
+        return StaffWeeklySchedule::query()->where('staff_profile_id', $staff->id)
+            ->where('day_of_week', (int) $this->input('day_of_week'))
+            ->when($schedule, fn ($query) => $query->whereKeyNot($schedule->id))
+            ->when($lock, fn ($query) => $query->lockForUpdate())->get()
+            ->contains(fn (StaffWeeklySchedule $existing) => $start < ($existing->ends_next_day ? 1440 : $this->minutes((string) $existing->end_time))
+                && $end > $this->minutes((string) $existing->start_time));
     }
 
     private function minutes(string $time): int

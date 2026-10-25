@@ -17,7 +17,7 @@ class LandingServiceCatalogTest extends TestCase
     {
         Service::factory()->create(['is_active' => true]);
 
-        $this->get('/')
+        $response = $this->get('/')
             ->assertOk()
             ->assertSee('<title>Casa Paraiso Body and Wellness Spa</title>', false)
             ->assertSee('Book an appointment')
@@ -28,13 +28,21 @@ class LandingServiceCatalogTest extends TestCase
             ->assertSee('data-landing-catalog-cta', false)
             ->assertDontSee('Request an appointment')
             ->assertDontSee('Request-first care');
+
+        $xpath = $this->landingXPath($response->getContent());
+
+        $this->assertSame(3, $xpath->query('//a[@href="'.route('login').'"]')->length);
+        $this->assertSame(1, $xpath->query('//p[@class="landing-login-note"]')->length);
+        $this->assertSame(1, $xpath->query('//a[@data-landing-catalog-cta]')->length);
+        $this->assertSame(route('login'), $xpath->query('//a[@data-landing-catalog-cta]')->item(0)->getAttribute('href'));
+        $this->assertSame(0, $xpath->query('//section[@id="visit"]//a[@href="'.route('login').'"] | //footer//a[@href="'.route('login').'"]')->length);
     }
 
     public function test_landing_page_shows_configured_packages_as_a_contact_only_fallback_when_no_services_are_active(): void
     {
         Service::factory()->create(['is_active' => false]);
 
-        $this->get('/')
+        $response = $this->get('/')
             ->assertOk()
             ->assertSee('data-landing-catalog-fallback', false)
             ->assertSee('GAIA TOUCH')
@@ -55,18 +63,39 @@ class LandingServiceCatalogTest extends TestCase
             ->assertDontSee('data-landing-catalog-cta', false)
             ->assertDontSee('>Book appointment ', false)
             ->assertDontSee('Instant confirmation');
+
+        $xpath = $this->landingXPath($response->getContent());
+        $catalogLinks = $xpath->query('//section[@id="treatments"]//a');
+
+        $this->assertSame(1, $catalogLinks->length);
+        $this->assertSame('#visit', $catalogLinks->item(0)->getAttribute('href'));
+        $this->assertSame('Ask about availability', trim($catalogLinks->item(0)->textContent));
     }
 
     public function test_authenticated_visitors_see_their_workspace_action_without_guest_ctas(): void
     {
-        $customer = User::factory()->customer()->create();
+        Service::factory()->create(['is_active' => true]);
 
-        $this->actingAs($customer)
-            ->get('/')
-            ->assertOk()
-            ->assertSee('Open workspace')
-            ->assertDontSee('>Log in</a>', false)
-            ->assertDontSee('>Book an appointment</a>', false);
+        foreach ([User::ROLE_CUSTOMER, User::ROLE_STAFF, User::ROLE_RECEPTIONIST, User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN] as $role) {
+            $user = User::factory()->create(['role' => $role]);
+
+            $response = $this->actingAs($user)
+                ->get('/')
+                ->assertOk()
+                ->assertSee('Open workspace')
+                ->assertDontSee('>Log in</a>', false)
+                ->assertDontSee('>Book an appointment</a>', false)
+                ->assertDontSee('Log in to book your visit.');
+
+            $xpath = $this->landingXPath($response->getContent());
+            $workspaceLinks = $xpath->query('//a[normalize-space()="Open workspace"]');
+
+            $this->assertSame(3, $workspaceLinks->length);
+
+            foreach ($workspaceLinks as $link) {
+                $this->assertSame(route($user->homeRouteName()), $link->getAttribute('href'));
+            }
+        }
     }
 
     public function test_landing_page_uses_current_active_service_prices_after_an_admin_update(): void
@@ -128,8 +157,7 @@ class LandingServiceCatalogTest extends TestCase
         $response = $this->get('/')->assertOk();
 
         foreach ($services as $service) {
-            $response->assertSee($service->name)
-                ->assertSee('aria-label="Book '.$service->name.'"', false);
+            $response->assertSee($service->name);
         }
 
         $response->assertSee('1 Hour 15 Minutes')
@@ -138,6 +166,11 @@ class LandingServiceCatalogTest extends TestCase
             ->assertDontSee('<script>unsafe()</script>', false);
 
         $this->assertSame(5, substr_count($response->getContent(), 'data-landing-treatment'));
+
+        $xpath = $this->landingXPath($response->getContent());
+
+        $this->assertSame(0, $xpath->query('//article[@data-landing-treatment]//a')->length);
+        $this->assertSame(1, $xpath->query('//section[@id="treatments"]//a')->length);
     }
 
     public function test_optional_additions_show_only_active_saved_entries_and_safe_custom_thumbnails(): void
@@ -198,6 +231,18 @@ class LandingServiceCatalogTest extends TestCase
             ->assertDontSee('Message us')
             ->assertDontSee('Visit Facebook')
             ->assertDontSee('Get directions')
+            ->assertDontSee('class="landing-contact-actions"', false)
             ->assertSee('We look forward to welcoming you.');
+    }
+
+    private function landingXPath(string $html): \DOMXPath
+    {
+        $document = new \DOMDocument;
+        $previous = libxml_use_internal_errors(true);
+        $document->loadHTML('<?xml encoding="UTF-8">'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        return new \DOMXPath($document);
     }
 }

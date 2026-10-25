@@ -1,3 +1,4 @@
+@inject('servicePhotos', 'App\Services\ServicePhotoService')
 @php
     $initialRequestedAt = old('requested_start_at', $initialRequestedAt ?? null);
     $initialMonth = $initialRequestedAt ? substr($initialRequestedAt, 0, 7) : now('Asia/Manila')->addDay()->format('Y-m');
@@ -23,7 +24,16 @@
         <section data-booking-step="1" x-show="step === 1">
             <div class="booking-step-heading"><h2 data-step-heading tabindex="-1">{{ __('Treatment details') }}</h2><p>{{ __('Choose your treatment and any extra care for your visit.') }}</p></div>
             <fieldset><legend class="casa-label">{{ __('Choose a treatment') }}</legend><div class="booking-service-grid">
-                @foreach ($services as $service)<button type="button" class="booking-service" x-on:click="selectService({{ $service->id }})" x-bind:class="{ 'is-selected': serviceId === '{{ $service->id }}' }" x-bind:aria-pressed="serviceId === '{{ $service->id }}'"><strong>{{ $service->name }}</strong><span>{{ $service->duration_minutes }} {{ __('minutes') }} · PHP {{ number_format((float) $service->price, 2) }}</span><span>{{ $service->description }}</span></button>@endforeach
+                @foreach ($services as $service)
+                    <button type="button" class="booking-service booking-service--photo" x-on:click="selectService({{ $service->id }})" x-bind:class="{ 'is-selected': serviceId === '{{ $service->id }}' }" x-bind:aria-pressed="serviceId === '{{ $service->id }}'">
+                        <img src="{{ $servicePhotos->url($service->photo_path, $service->slug) }}" alt="" width="720" height="480" loading="lazy" decoding="async" class="booking-service-photo">
+                        <span class="booking-service-details">
+                            <strong>{{ $service->name }}</strong>
+                            <span>{{ $service->duration_minutes }} {{ __('minutes') }} · PHP {{ number_format((float) $service->price, 2) }}</span>
+                            <span>{{ $service->description }}</span>
+                        </span>
+                    </button>
+                @endforeach
             </div><x-input-error class="mt-2" :messages="$errors->get('service_id')" /></fieldset>
             <noscript><select name="service_id" class="casa-input mt-4" aria-label="{{ __('Treatment') }}" required><option value="">{{ __('Select treatment') }}</option>@foreach ($services as $service)<option value="{{ $service->id }}" @selected((int) old('service_id', $preselectedServiceId ?? null) === $service->id)>{{ $service->name }}</option>@endforeach</select></noscript>
             <div class="booking-preference mt-5"><x-input-label for="preferred_staff_profile_id" :value="__('Preferred therapist (optional)')" />

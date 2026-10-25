@@ -7,12 +7,15 @@
                 {{ __('Manage your team of therapists, their services, schedules, and availability.') }}
             </p>
         </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ route('admin.staff-roster.index') }}" class="casa-button-secondary">{{ __('Manage schedule') }}</a>
         @if (auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.staff.create') }}" class="casa-button-primary">
                 <x-nav-icon name="plus" />
                 {{ __('Add therapist') }}
             </a>
         @endif
+        </div>
     </x-slot>
 
     @php

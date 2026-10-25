@@ -41,16 +41,12 @@
             ['label' => __('Access'), 'value' => $staffProfile->user->is_active ? __('Active') : __('Inactive'), 'meta' => __('Login status'), 'tone' => 'dark'],
         ]" />
 
-        <div id="therapist-roster" class="scroll-mt-4">
-        <x-weekly-roster
-            :feed-url="route('admin.staff-roster.show')"
-            :copy-url="route('admin.staff-roster.copy')"
-            :shift-url-pattern="url('/admin/staff-schedule-roster/__WEEK__/shifts')"
-            :publish-url-pattern="url('/admin/staff-schedule-roster/__WEEK__/publish')"
-            :initial-week="now()->startOfWeek(\Illuminate\Support\Carbon::SUNDAY)->toDateString()"
-            :staff-profile-id="$staffProfile->id"
-        />
-        </div>
+        <section id="therapist-roster" class="casa-card p-5 scroll-mt-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div><p class="casa-section-label">{{ __('Schedule') }}</p><h2 class="mt-2 font-bold">{{ __('Working hours and booking conflicts') }}</h2><p class="mt-2 text-sm text-casa-muted">{{ __('Manage this therapist in the shared weekly team schedule.') }}</p></div>
+                <a href="{{ route('admin.staff-roster.index', ['staff_profile_id' => $staffProfile->id]) }}" class="casa-button-primary">{{ __('Manage schedule') }}</a>
+            </div>
+        </section>
 
         <section class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <x-app-card>

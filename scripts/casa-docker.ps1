@@ -3,6 +3,8 @@ param(
     [Parameter(Position = 0)]
     [ValidateSet('setup', 'start', 'stop', 'status', 'compose')]
     [string] $Action = 'status',
+    [ValidatePattern('^[a-z0-9][a-z0-9_-]*$')]
+    [string] $ProjectName = 'casa-paraiso-web',
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]] $ComposeArguments
 )
@@ -26,37 +28,37 @@ switch ($Action) {
         }
 
         Assert-CasaMariaDbEnvironment
-        Invoke-CasaCompose -EnsureEngine -Arguments @('up', '--build', '-d') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('up', '--build', '-d') | Write-Output
 
-        Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'composer', 'install', '--no-interaction', '--prefer-dist') | Write-Output
-        Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'npm', 'ci') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('exec', '-T', 'app', 'composer', 'install', '--no-interaction', '--prefer-dist') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('exec', '-T', 'app', 'npm', 'ci') | Write-Output
 
         if ((Select-String -Path $environmentPath -Pattern '^APP_KEY=$' -Quiet)) {
-            Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'key:generate', '--force') | Write-Output
+            Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'key:generate', '--force') | Write-Output
         }
 
-        Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'migrate', '--force') | Write-Output
-        Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'storage:link', '--force') | Write-Output
-        Invoke-CasaCompose -EnsureEngine -Arguments @('exec', '-T', 'app', 'npm', 'run', 'build') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'migrate', '--force') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('exec', '-T', 'app', 'php', 'artisan', 'storage:link', '--force') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('exec', '-T', 'app', 'npm', 'run', 'build') | Write-Output
     }
     'start' {
         Assert-CasaMariaDbEnvironment
-        Invoke-CasaCompose -EnsureEngine -Arguments @('up', '-d') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments @('up', '-d') | Write-Output
     }
     'stop' {
-        Invoke-CasaCompose -Arguments @('stop') | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -Arguments @('stop') | Write-Output
     }
     'status' {
         Assert-CasaDockerEngine
         Write-Output 'Docker engine: Docker Desktop (desktop-linux)'
-        Write-Output "Compose project: $(Get-CasaComposeProjectName)"
-        Invoke-CasaCompose -Arguments @('ps', '--all') | Write-Output
+        Write-Output "Compose project: $(Get-CasaComposeProjectName -ProjectName $ProjectName)"
+        Invoke-CasaCompose -ProjectName $ProjectName -Arguments @('ps', '--all') | Write-Output
     }
     'compose' {
         if (-not $ComposeArguments) {
             throw 'Usage: .\scripts\casa-docker.ps1 compose <docker compose arguments>'
         }
 
-        Invoke-CasaCompose -EnsureEngine -Arguments $ComposeArguments | Write-Output
+        Invoke-CasaCompose -ProjectName $ProjectName -EnsureEngine -Arguments $ComposeArguments | Write-Output
     }
 }

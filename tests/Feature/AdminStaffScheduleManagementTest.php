@@ -219,7 +219,7 @@ class AdminStaffScheduleManagementTest extends TestCase
             ->get(route('admin.staff.show', $staffProfile, false))
             ->assertOk()
             ->assertSee('Schedule Staff')
-            ->assertSee('Weekly staff schedule')
+            ->assertSee('Working hours and booking conflicts')
             ->assertDontSee('Recurring availability')
             ->assertSee('Workshop day')
             ->assertSee('Full day');

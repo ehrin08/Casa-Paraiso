@@ -64,10 +64,13 @@
 .booking-addon, .booking-service { display: flex; gap: .75rem; border: 1px solid var(--color-casa-border); background: var(--color-casa-paper); border-radius: 10px; padding: 1rem; font-size: .875rem; }
 .booking-addon { cursor: pointer; align-items: start; }
 .booking-addon input { margin-top: .25rem; flex-shrink: 0; }
-.booking-addon strong, .booking-addon span span, .booking-service strong, .booking-service > span, .booking-voucher-options span span { display: block; }
+.booking-addon strong, .booking-addon span span, .booking-service strong, .booking-service > span, .booking-service-details > span, .booking-voucher-options span span { display: block; }
 .booking-addon strong, .booking-service strong { font-weight: 700; }
-.booking-addon span span, .booking-service > span { margin-top: .375rem; color: var(--color-casa-muted); }
+.booking-addon span span, .booking-service > span:not(.booking-service-details), .booking-service-details > span { margin-top: .375rem; color: var(--color-casa-muted); }
 .booking-service { flex-direction: column; gap: 0; text-align: left; }
+.booking-service--photo { padding: 0; overflow: hidden; }
+.booking-service-photo { display: block; width: 100%; aspect-ratio: 3 / 2; height: auto; object-fit: cover; }
+.booking-service-details { padding: 1rem; overflow-wrap: anywhere; }
 .booking-service.is-selected { border-color: var(--color-casa-palm); background: color-mix(in srgb, var(--color-casa-palm) 8%, var(--color-casa-paper)); box-shadow: inset 0 0 0 1px var(--color-casa-palm); }
 .booking-voucher-options { display: grid; gap: .75rem; font-size: .875rem; }
 .booking-voucher-options label { display: flex; gap: .75rem; align-items: start; cursor: pointer; }

@@ -1,5 +1,6 @@
+@inject('servicePhotos', 'App\Services\ServicePhotoService')
 @php $cancelUrl = $cancelUrl ?? route('admin.services.index'); @endphp
-<form method="POST" action="{{ $action }}" class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+<form method="POST" action="{{ $action }}" enctype="multipart/form-data" data-turbo="false" class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
     @csrf
     @if ($method !== 'POST')
         @method($method)
@@ -51,6 +52,26 @@
     </x-app-card>
 
     <aside class="space-y-4">
+        <x-app-card>
+            <h2 class="font-display text-xl font-black text-casa-text">{{ __('Service photo') }}</h2>
+            <img src="{{ $servicePhotos->url($service->photo_path, $service->slug ?? '') }}" alt="{{ __('Current service photo') }}" width="720" height="480" class="mt-4 aspect-[3/2] w-full rounded-lg object-cover" decoding="async">
+            <p class="mt-3 text-sm leading-6 text-casa-muted">{{ __('Shown on the homepage and when customers choose a treatment.') }}</p>
+            <div class="mt-4">
+                <x-input-label for="photo" :value="__('Upload a photo (optional)')" />
+                <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" class="casa-input mt-2" aria-describedby="photo-help">
+                <p id="photo-help" class="mt-2 text-sm leading-6 text-casa-muted">{{ __('JPEG, PNG, or WebP. Up to 2 MB and 4000 × 4000 pixels. A landscape photo works best. Without an upload, the sample image is used.') }}</p>
+                <x-input-error class="mt-2" :messages="$errors->get('photo')" />
+            </div>
+            @if ($service->photo_path)
+                <label class="mt-4 flex items-start gap-3 text-sm leading-6">
+                    <input type="hidden" name="remove_photo" value="0">
+                    <input type="checkbox" name="remove_photo" value="1" @checked(old('remove_photo', false)) class="mt-1 rounded border-casa-border text-casa-primary focus:ring-casa-gold">
+                    <span>{{ __('Remove uploaded photo and use the sample. Uploading a new photo replaces the current one.') }}</span>
+                </label>
+                <x-input-error class="mt-2" :messages="$errors->get('remove_photo')" />
+            @endif
+        </x-app-card>
+
         <x-app-card data-modal-actions>
             <p class="casa-section-label">{{ __('Generated fields') }}</p>
             <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Slug is automatic') }}</h2>

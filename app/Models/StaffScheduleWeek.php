@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class StaffScheduleWeek extends Model
 {
-    protected $fillable = ['week_start_date', 'published_at', 'published_by'];
+    protected $attributes = ['revision' => 0];
+
+    protected $fillable = ['week_start_date', 'published_at', 'published_by', 'draft_initialized_at', 'revision'];
 
     protected function casts(): array
     {
-        return ['week_start_date' => 'date', 'published_at' => 'datetime'];
+        return ['week_start_date' => 'date', 'published_at' => 'datetime', 'draft_initialized_at' => 'datetime', 'revision' => 'integer'];
     }
 
     public function shifts()

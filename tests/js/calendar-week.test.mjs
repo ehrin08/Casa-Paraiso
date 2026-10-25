@@ -50,7 +50,7 @@ test('half-hour visits and midnight endings retain actual durations and exclude 
 
 function harness(config = {}) {
     const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
-    const calendar = source.slice(source.indexOf('const dateFromIso'), source.indexOf('window.weeklyRoster'));
+    const calendar = source.slice(source.indexOf('const dateFromIso'), source.indexOf('window.customerAppointmentCalendar'));
     const requests = [];
     const window = { axios: { get: (url, options) => new Promise((resolve, reject) => requests.push({ url, options, resolve, reject })) } };
     const context = vm.createContext({

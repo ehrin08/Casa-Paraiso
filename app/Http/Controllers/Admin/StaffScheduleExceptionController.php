@@ -41,6 +41,7 @@ class StaffScheduleExceptionController extends Controller
     {
         try {
             DB::transaction(function () use ($request, $staff, $guard): void {
+                StaffProfile::query()->lockForUpdate()->findOrFail($staff->id);
                 $staff->scheduleExceptions()->create([
                     ...$this->exceptionData($request),
                     'created_by' => $request->user()->id,
@@ -72,6 +73,7 @@ class StaffScheduleExceptionController extends Controller
 
         try {
             DB::transaction(function () use ($request, $staff, $scheduleException, $guard): void {
+                StaffProfile::query()->lockForUpdate()->findOrFail($staff->id);
                 $scheduleException->update($this->exceptionData($request));
                 $guard->assertFutureAppointmentsRemainCovered($staff);
             });
@@ -90,6 +92,7 @@ class StaffScheduleExceptionController extends Controller
 
         try {
             DB::transaction(function () use ($staff, $scheduleException, $guard): void {
+                StaffProfile::query()->lockForUpdate()->findOrFail($staff->id);
                 $scheduleException->delete();
                 $guard->assertFutureAppointmentsRemainCovered($staff);
             });

@@ -9,7 +9,8 @@ function Get-CasaProjectPath {
 }
 
 function Get-CasaComposeProjectName {
-    return $script:ComposeProjectName
+    param([string] $ProjectName = $script:ComposeProjectName)
+    return $ProjectName
 }
 
 function Assert-CasaDockerEngine {
@@ -44,12 +45,25 @@ function Start-CasaDockerEngine {
 function Invoke-CasaCompose {
     param(
         [Parameter(Mandatory)] [string[]] $Arguments,
-        [switch] $EnsureEngine
+        [switch] $EnsureEngine,
+        [ValidatePattern('^[a-z0-9][a-z0-9_-]*$')] [string] $ProjectName = $script:ComposeProjectName
     )
 
     Assert-CasaDockerEngine
     $projectPath = Get-CasaProjectPath
-    $command = @('--context', $script:DockerContext, 'compose', '--project-name', $script:ComposeProjectName) + $Arguments
+    if ($ProjectName -eq $script:ComposeProjectName -and ($Arguments | Where-Object { $_ -match '(?:^|[\\/])compose\.testing\.yaml$' })) {
+        throw 'compose.testing.yaml requires an explicit non-default -ProjectName to preserve the main project.'
+    }
+    $composeCommands = @('up', 'down', 'exec', 'run', 'ps', 'config', 'build', 'restart', 'stop', 'start', 'logs', 'top', 'version', 'images', 'create', 'rm', 'pull', 'push', 'kill', 'events', 'watch', 'port', 'ls', 'cp', 'pause', 'unpause', 'attach', 'wait')
+    $globalArguments = @()
+    foreach ($argument in $Arguments) {
+        if ($composeCommands -contains $argument) { break }
+        $globalArguments += $argument
+    }
+    if ($globalArguments | Where-Object { $_ -eq '-p' -or $_ -match '^-p.+' -or $_ -eq '--project-name' -or $_ -like '--project-name=*' }) {
+        throw 'Use the wrapper -ProjectName parameter for an isolated project; raw Compose project flags cannot override its default.'
+    }
+    $command = @('--context', $script:DockerContext, 'compose', '--project-name', $ProjectName) + $Arguments
     $previousErrorAction = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     Push-Location $projectPath

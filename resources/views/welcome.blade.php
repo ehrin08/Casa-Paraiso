@@ -16,13 +16,23 @@
         FIRST VIEWPORT: Compact navigation, a two-column booking headline and arched lobby image, then a three-part hours and price strip.
         FORM: The user's supplied homepage reference, adapted to the official logo and current public data.
         FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+        @inject('servicePhotos', 'App\Services\ServicePhotoService')
         @php
             $businessHours = config('casa.business_hours', []);
             $homeUrl = auth()->check() ? route(auth()->user()->homeRouteName()) : null;
             $accountUrl = $homeUrl ?? route('login');
+            $bookingLabel = $homeUrl ? __('Open workspace') : __('Book an appointment');
             $startingRate = $services->min('price');
             $organizationChart = $applicationSettings->publicOrganizationChart();
             $showCompanyProfile = $applicationSettings->hasPublicCompanyProfile();
+            $navigationItems = [
+                '#treatments' => __('Treatments'),
+                '#how-it-works' => __('How it works'),
+                '#visit' => __('Visit & contact'),
+            ];
+            if ($showCompanyProfile) {
+                $navigationItems = ['#about' => __('About')] + $navigationItems;
+            }
             $hasHistory = filled($applicationSettings->company_history);
             $leaders = collect([
                 'owner' => $organizationChart['owner'] ?? null,
@@ -31,12 +41,6 @@
             $hasTeam = $organizationChart['team'] !== [];
             $hasChart = $leaders->isNotEmpty() || $hasTeam;
             $neutralImage = 'images/spa/casa-towel-detail-720.webp';
-            $serviceImages = [
-                'gaia-touch' => 'images/spa/casa-massage-720.webp',
-                'tethys-flow' => 'images/spa/casa-hot-compress-720.webp',
-                'hestia-warmth' => 'images/spa/casa-hot-stone-720.webp',
-                'aurora-breeze' => 'images/spa/casa-treatment-room-800.webp',
-            ];
             $addonImages = [
                 'back-massage-30' => 'images/spa/casa-massage-720.webp',
                 'hot-compress' => 'images/spa/casa-hot-compress-720.webp',
@@ -56,10 +60,9 @@
                         <img src="{{ asset('images/casa_paraiso_logo.jpg') }}" alt="Casa Paraiso Body and Wellness Spa" width="500" height="500">
                     </a>
                     <nav class="landing-desktop-nav" aria-label="Public navigation">
-                        @if ($showCompanyProfile)<a href="#about">About</a>@endif
-                        <a href="#treatments">Treatments</a>
-                        <a href="#how-it-works">How it works</a>
-                        <a href="#visit">Visit &amp; contact</a>
+                        @foreach ($navigationItems as $anchor => $label)
+                            <a href="{{ $anchor }}">{{ $label }}</a>
+                        @endforeach
                     </nav>
                     <div class="landing-header-actions">
                         <a href="{{ $accountUrl }}" class="landing-button landing-button--outline">{{ auth()->check() ? __('Open workspace') : __('Log in') }}</a>
@@ -69,10 +72,9 @@
                     </div>
                 </div>
                 <nav id="landing-mobile-navigation" class="landing-mobile-nav" aria-label="Mobile public navigation" x-cloak x-show="open" style="display: none;">
-                    @if ($showCompanyProfile)<a href="#about" x-on:click="open = false">About</a>@endif
-                    <a href="#treatments" x-on:click="open = false">Treatments</a>
-                    <a href="#how-it-works" x-on:click="open = false">How it works</a>
-                    <a href="#visit" x-on:click="open = false">Visit &amp; contact</a>
+                    @foreach ($navigationItems as $anchor => $label)
+                        <a href="{{ $anchor }}" x-on:click="open = false">{{ $label }}</a>
+                    @endforeach
                     <button type="button" x-on:click="open = false" aria-label="Close public navigation"><x-landing-icon name="close" /> Close menu</button>
                 </nav>
             </header>
@@ -85,11 +87,11 @@
                         <h1 id="landing-title">{{ config('casa.marketing_line') }}</h1>
                         <p class="landing-hero-description">A calm space to slow down, unwind, and feel cared for.</p>
                         <div class="landing-hero-actions">
-                            <a href="{{ $accountUrl }}" class="landing-button landing-button--primary">{{ auth()->check() ? __('Open workspace') : __('Book an appointment') }}</a>
+                            <a href="{{ $accountUrl }}" class="landing-button landing-button--primary">{{ $bookingLabel }}</a>
                             <a href="#treatments" class="landing-text-link">Explore treatments <x-landing-icon name="arrow" /></a>
                         </div>
                         @guest
-                            <a href="{{ route('login') }}" class="landing-login-note">Log in to book your visit.</a>
+                            <p class="landing-login-note">Log in to book your visit.</p>
                         @endguest
                     </div>
                     <div class="landing-hero-image">
@@ -157,7 +159,7 @@
                     <div class="landing-container">
                         <p class="landing-kicker">Treatments</p>
                         <h2 id="landing-treatments-title">Find your moment of rest.</h2>
-                        <div class="landing-treatment-grid" @if ($servicesAreBookable) data-landing-catalog-cta @endif>
+                        <div class="landing-treatment-grid">
                             @foreach ($services as $service)
                                 @php
                                     $durationParts = [];
@@ -169,10 +171,9 @@
                                     if ($minutes > 0) {
                                         $durationParts[] = $minutes.' '.($minutes === 1 ? __('Minute') : __('Minutes'));
                                     }
-                                    $serviceImage = $serviceImages[$service->slug] ?? $neutralImage;
                                 @endphp
                                 <article class="landing-treatment-card" data-landing-treatment>
-                                    <img src="{{ asset($serviceImage) }}" alt="" width="720" height="480" loading="lazy">
+                                    <img src="{{ $servicePhotos->url($service->photo_path ?? null, $service->slug) }}" alt="" width="720" height="480" loading="lazy" decoding="async">
                                     <div class="landing-treatment-content">
                                         <h3>{{ $service->name }}</h3>
                                         <p class="landing-treatment-description">{{ $service->description }}</p>
@@ -180,11 +181,6 @@
                                             <p><x-landing-icon name="clock" /> {{ implode(' ', $durationParts) }}</p>
                                             <p class="landing-price">PHP {{ number_format((float) $service->price, 2) }}</p>
                                         </div>
-                                        @if ($servicesAreBookable)
-                                            <a href="{{ $accountUrl }}" class="landing-text-link" aria-label="{{ auth()->check() ? __('Open workspace for :service', ['service' => $service->name]) : __('Book :service', ['service' => $service->name]) }}">{{ auth()->check() ? __('Open workspace') : __('Book appointment') }} <x-landing-icon name="arrow" /></a>
-                                        @else
-                                            <a href="#visit" class="landing-text-link" aria-label="{{ __('Ask about :service', ['service' => $service->name]) }}">Ask about availability <x-landing-icon name="arrow" /></a>
-                                        @endif
                                     </div>
                                 </article>
                             @endforeach
@@ -192,6 +188,13 @@
                         @if (! $servicesAreBookable)
                             <p class="landing-catalog-note" data-landing-catalog-fallback>These signature packages are shown for reference. Contact us for current availability and help choosing your next treatment.</p>
                         @endif
+                        <div class="landing-catalog-action">
+                            @if ($servicesAreBookable)
+                                <a href="{{ $accountUrl }}" class="landing-button landing-button--outline" data-landing-catalog-cta>{{ $bookingLabel }}</a>
+                            @else
+                                <a href="#visit" class="landing-button landing-button--outline">Ask about availability</a>
+                            @endif
+                        </div>
                     </div>
                 </section>
 
@@ -215,7 +218,7 @@
                         <div class="landing-container">
                             <div class="landing-addons-heading">
                                 <div><p class="landing-kicker">Optional additions</p><h2 id="landing-addons-title">A little extra comfort.</h2></div>
-                                <p>Optional additions · Coordinate with our spa team</p>
+                                <p>Coordinate with our spa team.</p>
                             </div>
                             <div class="landing-addon-grid">
                                 @foreach ($addons as $addon)
@@ -242,12 +245,13 @@
                                 <p><x-landing-icon name="pin" /><span>{{ $applicationSettings->location_landmarks }}</span></p>
                             @endif
                         </div>
-                        <a href="{{ $accountUrl }}" class="landing-button landing-button--warm">{{ auth()->check() ? __('Open workspace') : __('Book an appointment') }}</a>
-                        <div class="landing-contact-actions">
-                            @if (filled($applicationSettings->messenger_url))<a href="{{ $applicationSettings->messenger_url }}" target="_blank" rel="noopener noreferrer"><x-landing-icon name="message" /> Message us</a>@endif
-                            @if (filled($applicationSettings->facebook_url))<a href="{{ $applicationSettings->facebook_url }}" target="_blank" rel="noopener noreferrer"><x-landing-icon name="facebook" /> Visit Facebook</a>@endif
-                            @if (filled($applicationSettings->map_url))<a href="{{ $applicationSettings->map_url }}" target="_blank" rel="noopener noreferrer"><x-landing-icon name="pin" /> Get directions</a>@endif
-                        </div>
+                        @if (filled($applicationSettings->messenger_url) || filled($applicationSettings->facebook_url) || filled($applicationSettings->map_url))
+                            <div class="landing-contact-actions">
+                                @if (filled($applicationSettings->messenger_url))<a href="{{ $applicationSettings->messenger_url }}" target="_blank" rel="noopener noreferrer"><x-landing-icon name="message" /> Message us</a>@endif
+                                @if (filled($applicationSettings->facebook_url))<a href="{{ $applicationSettings->facebook_url }}" target="_blank" rel="noopener noreferrer"><x-landing-icon name="facebook" /> Visit Facebook</a>@endif
+                                @if (filled($applicationSettings->map_url))<a href="{{ $applicationSettings->map_url }}" target="_blank" rel="noopener noreferrer"><x-landing-icon name="pin" /> Get directions</a>@endif
+                            </div>
+                        @endif
                     </div>
                     <img class="landing-visit-image" src="{{ asset('images/spa/casa-lobby-1600.webp') }}" srcset="{{ asset('images/spa/casa-lobby-960.webp') }} 960w, {{ asset('images/spa/casa-lobby-1600.webp') }} 1600w" sizes="(max-width: 767px) 100vw, 50vw" width="1600" height="1200" alt="The welcoming reception and seating area at Casa Paraiso" loading="lazy">
                 </section>
@@ -257,10 +261,10 @@
                 <div class="landing-container landing-footer-inner">
                     <a href="{{ url('/') }}" class="landing-logo" aria-label="Casa Paraiso home"><img src="{{ asset('images/casa_paraiso_logo.jpg') }}" alt="Casa Paraiso Body and Wellness Spa" width="500" height="500" loading="lazy"></a>
                     <nav class="landing-footer-nav" aria-label="Footer navigation">
-                        @if ($showCompanyProfile)<a href="#about">About</a>@endif
-                        <a href="#treatments">Treatments</a><a href="#how-it-works">How it works</a><a href="#visit">Visit &amp; contact</a>
+                        @foreach ($navigationItems as $anchor => $label)
+                            <a href="{{ $anchor }}">{{ $label }}</a>
+                        @endforeach
                     </nav>
-                    <a href="{{ $accountUrl }}" class="landing-button landing-button--outline">{{ auth()->check() ? __('Open workspace') : __('Log in') }}</a>
                     <p class="landing-copyright">&copy; {{ date('Y') }} {{ $applicationSettings->business_name }}. {{ __('All rights reserved.') }}</p>
                 </div>
             </footer>

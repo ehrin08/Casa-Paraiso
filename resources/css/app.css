@@ -19,6 +19,7 @@
 @import "./settings.css";
 @import "./profile.css";
 @import "./users.css";
+@import "./staff-schedules.css";
 
 @plugin "@tailwindcss/forms";
 

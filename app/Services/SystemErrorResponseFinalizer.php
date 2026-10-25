@@ -28,6 +28,9 @@ class SystemErrorResponseFinalizer
 
         $this->recorder->record($request, $response, $exception);
 
+        if ($request->attributes->get('casa_rendered_error_response') === $response) {
+            return $response;
+        }
         if (! $this->shouldRenderPage($request, $response, $exception)) {
             return $response;
         }
@@ -47,6 +50,7 @@ class SystemErrorResponseFinalizer
             $response->headers->set('Turbo-Visit-Control', 'reload');
 
             AddSecurityHeaders::apply($request, $response);
+            $request->attributes->set('casa_rendered_error_response', $response);
         } catch (Throwable) {
             // Keep Laravel's original response if the error presentation itself cannot render.
         }

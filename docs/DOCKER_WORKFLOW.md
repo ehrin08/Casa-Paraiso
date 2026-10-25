@@ -42,6 +42,18 @@ For commands with Compose options, use an explicit argument array: PowerShell ca
 .\scripts\casa-docker.ps1 -Action compose -ComposeArguments @('up', '-d', 'mariadb')
 ```
 
+## Isolated Verification
+
+After the normal setup has built the app image and installed dependencies, `compose.testing.yaml` provides a private MariaDB `testing` database plus separate framework/cache/log volumes and a distinct browser session cookie. Supply an explicit non-default `-ProjectName`; the normal project remains `casa-paraiso-web`. The test app binds to loopback port 18002 (`TEST_APP_PORT` may override it). Never reuse an account-bearing database volume.
+
+```powershell
+.\scripts\casa-docker.ps1 -ProjectName casa-paraiso-schedule-test -Action compose -ComposeArguments @('-f', 'compose.testing.yaml', 'up', '-d')
+.\scripts\casa-docker.ps1 -ProjectName casa-paraiso-schedule-test -Action compose -ComposeArguments @('-f', 'compose.testing.yaml', 'exec', '-T', 'app', 'php', 'artisan', 'test')
+.\scripts\casa-docker.ps1 -ProjectName casa-paraiso-schedule-test -Action compose -ComposeArguments @('-f', 'compose.testing.yaml', 'down', '--volumes')
+```
+
+Only remove volumes belonging to that disposable test project. Roster concurrency tests require committed fixtures across independent processes and use guarded testing-database truncation; they do not roll deployed migrations backward. Verify wrapper project selection with `powershell -NoProfile -ExecutionPolicy Bypass -File tests/scripts/casa-docker.tests.ps1`.
+
 ## Online Preview with Cloudflare
 
 Install `cloudflared` on Windows, keep Docker Desktop running, and use:

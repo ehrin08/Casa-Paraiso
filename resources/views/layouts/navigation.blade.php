@@ -25,7 +25,7 @@
             [
                 'label' => 'Manage',
                 'items' => [
-                    ['label' => 'Therapists', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => 'admin.staff.*', 'preload' => true],
+                    ['label' => 'Therapists', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => ['admin.staff.*', 'admin.staff-roster.*'], 'preload' => true],
                     ['label' => 'Services', 'icon' => 'services', 'route' => 'admin.services.index', 'active' => 'admin.services.*'],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'admin.transactions.index', 'active' => 'admin.transactions.*'],
                     ['label' => 'Commissions', 'icon' => 'payments', 'route' => 'admin.commissions.index', 'active' => 'admin.commissions.*'],

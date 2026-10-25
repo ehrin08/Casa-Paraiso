@@ -98,9 +98,19 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::get('/appointments/calendar', AdminAppointmentCalendarController::class)->name('appointments.calendar');
         Route::get('/appointments/records', [AdminAppointmentController::class, 'records'])->name('appointments.records');
         Route::get('/staff-schedule-roster', [AdminWeeklyRosterController::class, 'show'])->name('staff-roster.show');
+        Route::get('/staff-schedules', [AdminWeeklyRosterController::class, 'index'])->name('staff-roster.index');
+        Route::post('/staff-schedule-roster/draft', [AdminWeeklyRosterController::class, 'startDraft'])->name('staff-roster.draft.store');
+        Route::get('/staff-schedule-roster/copy', [AdminWeeklyRosterController::class, 'copyReview'])->name('staff-roster.copy.review');
+        Route::get('/staff-schedule-roster/{scheduleWeek}/shifts/create', [AdminWeeklyRosterController::class, 'createShift'])->name('staff-roster.shifts.create');
+        Route::get('/staff-schedule-roster/{scheduleWeek}/shifts/{shift}/edit', [AdminWeeklyRosterController::class, 'editShift'])->name('staff-roster.shifts.edit');
+        Route::put('/staff-schedule-roster/{scheduleWeek}/shifts/{shift}', [AdminWeeklyRosterController::class, 'updateShift'])->whereNumber('shift')->name('staff-roster.shifts.update');
+        Route::get('/staff-schedule-roster/{scheduleWeek}/bulk', [AdminWeeklyRosterController::class, 'bulkEdit'])->name('staff-roster.bulk.edit');
+        Route::post('/staff-schedule-roster/{scheduleWeek}/bulk/review', [AdminWeeklyRosterController::class, 'bulkReview'])->name('staff-roster.bulk.review');
+        Route::post('/staff-schedule-roster/{scheduleWeek}/bulk', [AdminWeeklyRosterController::class, 'bulkReplace'])->name('staff-roster.bulk.store');
+        Route::get('/staff-schedule-roster/{scheduleWeek}/review', [AdminWeeklyRosterController::class, 'publishReview'])->name('staff-roster.publish.review');
         Route::post('/staff-schedule-roster/copy', [AdminWeeklyRosterController::class, 'copy'])->name('staff-roster.copy');
         Route::post('/staff-schedule-roster/{scheduleWeek}/shifts', [AdminWeeklyRosterController::class, 'storeShift'])->name('staff-roster.shifts.store');
-        Route::delete('/staff-schedule-roster/{scheduleWeek}/shifts/{shift}', [AdminWeeklyRosterController::class, 'destroyShift'])->name('staff-roster.shifts.destroy');
+        Route::delete('/staff-schedule-roster/{scheduleWeek}/shifts/{shift}', [AdminWeeklyRosterController::class, 'destroyShift'])->whereNumber('shift')->name('staff-roster.shifts.destroy');
         Route::post('/staff-schedule-roster/{scheduleWeek}/publish', [AdminWeeklyRosterController::class, 'publish'])->name('staff-roster.publish');
         Route::post('/appointments/calendar', [AdminAppointmentController::class, 'storeFromCalendar'])->name('appointments.calendar.store');
         Route::get('/appointments/available-therapists', [AdminAppointmentController::class, 'availableTherapists'])->name('appointments.available-therapists');
@@ -108,8 +118,8 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::post('/appointments/{appointment}/complete', [AdminAppointmentController::class, 'complete'])->name('appointments.complete');
         Route::patch('/appointments/{appointment}/outcome', [AdminAppointmentController::class, 'outcome'])->name('appointments.outcome');
         Route::resource('appointments', AdminAppointmentController::class)->except('destroy');
-    Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
-    Route::resource('customers', AdminCustomerController::class)->only(['index', 'show', 'update']);
+        Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
+        Route::resource('customers', AdminCustomerController::class)->only(['index', 'show', 'update']);
         Route::get('/staff/{staff}/weekly-schedules/create', [AdminStaffWeeklyScheduleController::class, 'create'])->name('staff.weekly-schedules.create');
         Route::post('/staff/{staff}/weekly-schedules', [AdminStaffWeeklyScheduleController::class, 'store'])->name('staff.weekly-schedules.store');
         Route::get('/staff/{staff}/weekly-schedules/{weeklySchedule}/edit', [AdminStaffWeeklyScheduleController::class, 'edit'])->name('staff.weekly-schedules.edit');
@@ -182,8 +192,8 @@ Route::middleware(['auth', 'active', 'verified', 'role:receptionist', MeasureApp
         Route::post('/appointments/{appointment}/complete', [ReceptionAppointmentController::class, 'complete'])->name('appointments.complete');
         Route::patch('/appointments/{appointment}/outcome', [ReceptionAppointmentController::class, 'outcome'])->name('appointments.outcome');
         Route::resource('appointments', ReceptionAppointmentController::class)->except('destroy');
-    Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
-    Route::resource('customers', ReceptionCustomerController::class)->only(['index', 'show', 'update']);
+        Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
+        Route::resource('customers', ReceptionCustomerController::class)->only(['index', 'show', 'update']);
         Route::resource('transactions', ReceptionTransactionController::class)->except('destroy');
     });
 

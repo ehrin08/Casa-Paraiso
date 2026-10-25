@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\HandlesIndexSorting;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ServiceRequest;
 use App\Models\Service;
+use App\Services\ServicePhotoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 class ServiceController extends Controller
 {
     use HandlesIndexSorting;
+
+    public function __construct(private readonly ServicePhotoService $photos) {}
 
     public function index(Request $request): View
     {
@@ -68,11 +71,11 @@ class ServiceController extends Controller
 
     public function store(ServiceRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['photo', 'remove_photo']);
         $data['slug'] = $this->uniqueSlug($data['name']);
         $data['is_active'] = $request->boolean('is_active');
 
-        $service = Service::query()->create($data);
+        $service = $this->photos->save(new Service, $data, $request->file('photo'));
 
         return redirect()
             ->route('admin.services.show', $service)
@@ -97,14 +100,14 @@ class ServiceController extends Controller
 
     public function update(ServiceRequest $request, Service $service): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['photo', 'remove_photo']);
         $data['is_active'] = $request->boolean('is_active');
 
         if ($service->name !== $data['name']) {
             $data['slug'] = $this->uniqueSlug($data['name'], $service);
         }
 
-        $service->update($data);
+        $service = $this->photos->save($service, $data, $request->file('photo'), $request->boolean('remove_photo'));
 
         return redirect()
             ->route('admin.services.show', $service)

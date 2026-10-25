@@ -20,6 +20,8 @@ class ServiceRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
+            'remove_photo' => ['sometimes', 'boolean'],
             'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'is_active' => ['sometimes', 'boolean'],

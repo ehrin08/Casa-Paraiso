@@ -150,6 +150,7 @@ Key columns:
 - `name`
 - `slug` unique
 - `description` nullable
+- `photo_path` nullable, relative to the public disk under `service-photos/`; an uploaded service cover photo overrides the built-in sample.
 - `duration_minutes` unsigned integer
 - `price` decimal(10,2)
 - `is_active` boolean default true
@@ -256,12 +257,13 @@ Relationships:
 
 ### `staff_schedule_weeks` and `staff_schedule_shifts`
 
-Published weekly rosters provide the primary dated therapist schedule. `staff_schedule_weeks` has one Sunday `week_start_date`, optional `published_at`/`published_by`, and draft and published shift rows live in `staff_schedule_shifts`.
+Published weekly rosters provide the primary dated therapist schedule. `staff_schedule_weeks` has one Sunday `week_start_date`, optional `published_at`/`published_by`, `draft_initialized_at`, and an integer `revision` defaulting to zero. Draft and published shift rows live in `staff_schedule_shifts`. Additive migrations `2026_10_14_074842` and `2026_10_14_074932` add state and backfill existing populated drafts without changing their hours.
 
 Rules:
 
 - Draft shifts never affect booking availability.
-- Publishing replaces only that week's published shifts after confirmed-appointment coverage is checked.
+- GET requests never create weeks or drafts. A draft starts from the complete effective team hours. An initialized empty draft means no base roster hours and may publish if reservations remain covered by effective windows. Every draft mutation/publish requires the current revision; overlap validation and draft writes share the week lock. Publication locks therapists before week/schedule/appointment rows, matching final booking checks.
+- Publishing replaces that week's published shifts atomically after checking every affected confirmed appointment, including removed therapists and in-progress visits, through the next explicitly published week. With no later publication, check every later inherited booking. Available/unavailable date exceptions remain part of coverage.
 - A week without a published roster inherits the nearest earlier published roster by weekday; the legacy recurring weekly schedules remain the fallback until the first roster is published.
 - Shifts use 30-minute boundaries from 1:00 PM through midnight and may be split, but cannot overlap for a therapist/date/version.
 - Existing date-specific exceptions are applied after roster availability.

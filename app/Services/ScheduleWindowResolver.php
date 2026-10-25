@@ -18,6 +18,24 @@ class ScheduleWindowResolver
     /** @var array<int, Collection<string, Collection<int, StaffScheduleShift>>> */
     private array $publishedRosterShifts = [];
 
+    private bool $lockingReads = false;
+
+    public function clearCache(): void
+    {
+        $this->publishedWeeks = [];
+        $this->publishedRosterShifts = [];
+    }
+
+    /** Use a fresh, current database view after the caller acquires therapist locks. */
+    public function freshForTransaction(): self
+    {
+        $resolver = clone $this;
+        $resolver->clearCache();
+        $resolver->lockingReads = true;
+
+        return $resolver;
+    }
+
     /**
      * @return array{start: Carbon, end: Carbon}
      */
@@ -40,7 +58,7 @@ class ScheduleWindowResolver
      *
      * @return Collection<int, array{start: Carbon, end: Carbon}>
      */
-    public function effectiveWindows(StaffProfile $staffProfile, CarbonInterface $day): Collection
+    public function effectiveWindows(StaffProfile $staffProfile, CarbonInterface $day, ?Collection $rosterShifts = null): Collection
     {
         $date = Carbon::parse($day)->startOfDay();
         $business = $this->businessWindow($date);
@@ -50,7 +68,7 @@ class ScheduleWindowResolver
             : $staffProfile->scheduleExceptions()->whereDate('exception_date', $date->toDateString())->get();
 
         $windows = collect();
-        $rosterShifts = $this->rosterShiftsForDate($staffProfile, $date);
+        $rosterShifts ??= $this->rosterShiftsForDate($staffProfile, $date);
 
         if ($rosterShifts !== null) {
             foreach ($rosterShifts as $schedule) {
@@ -116,13 +134,13 @@ class ScheduleWindowResolver
         return $this->merge($windows)->values();
     }
 
-    public function covers(StaffProfile $staffProfile, CarbonInterface $start, CarbonInterface $end): bool
+    public function covers(StaffProfile $staffProfile, CarbonInterface $start, CarbonInterface $end, ?Collection $rosterShifts = null): bool
     {
         if ($end->lte($start) || ! $this->withinBusinessHours($start, $end)) {
             return false;
         }
 
-        return $this->effectiveWindows($staffProfile, $start)
+        return $this->effectiveWindows($staffProfile, $start, $rosterShifts)
             ->contains(fn (array $window) => $window['start']->lte($start) && $window['end']->gte($end));
     }
 
@@ -231,6 +249,7 @@ class ScheduleWindowResolver
                 ->whereNotNull('published_at')
                 ->whereDate('week_start_date', '<=', $weekStart)
                 ->orderByDesc('week_start_date')
+                ->when($this->lockingReads, fn ($query) => $query->sharedLock())
                 ->first();
         }
 
@@ -247,6 +266,7 @@ class ScheduleWindowResolver
                 ->where('staff_schedule_week_id', $week->id)
                 ->where('version', StaffScheduleShift::VERSION_PUBLISHED)
                 ->orderBy('start_time')
+                ->when($this->lockingReads, fn ($query) => $query->sharedLock())
                 ->get()
                 ->groupBy(fn (StaffScheduleShift $shift) => $shift->staff_profile_id.':'.$shift->schedule_date?->toDateString());
         }

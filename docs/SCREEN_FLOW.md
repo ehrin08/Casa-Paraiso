@@ -278,7 +278,7 @@ Primary actions:
 
 ### Weekly Therapist Roster
 
-Admin Availability includes a dated Sunday-to-Saturday team roster. The Admin copies the prior published week into a draft, adjusts therapist shift ranges, then publishes the whole roster. Drafts are private to Admin; published hours drive customer booking, receptionist availability, and therapist calendar coverage. A publish that would exclude a confirmed appointment is rejected and identifies the affected booking.
+Therapists → Manage schedule opens `/admin/staff-schedules`, a Sunday–Saturday team workspace with name search, optional therapist filter, 15 therapists per page, a desktop grid, and mobile day cards. Profile schedule links open that page filtered to the therapist. Start editing clones the complete effective team into a draft; clicking a shift edits it, and Remove is a separate confirmed form. Apply hours reviews replacement/clearing of selected therapist/day cells. Copy published week identifies the last earlier published source (or recurring fallback) and reviews draft replacement before saving. Live hours, draft changes, inherited source week, date exceptions, and effective hours are visible. Saving a draft shows affected bookings; Review and publish checks the entire team and repeating period, blocking any uncovered future/in-progress confirmed visit. Full-page forms preserve inputs/filters after errors, with optional read-only native-dialog loading. Past weeks and elapsed days are read-only; published schedules continue repeating until another explicit publication.
 
 ### Staff
 
