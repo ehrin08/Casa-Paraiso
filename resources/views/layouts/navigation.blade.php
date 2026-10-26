@@ -85,6 +85,15 @@
         ] : []),
     ];
 
+    // Each destination keeps a consistent soft tone on its icon chip.
+    $navTones = [
+        'Today' => 'palm', 'Appointments' => 'blue', 'My appointments' => 'blue', 'Customers' => 'rose',
+        'Therapists' => 'violet', 'Services' => 'brass', 'Payments' => 'cacao', 'Attendance' => 'palm',
+        'My attendance' => 'palm', 'Staff attendance' => 'violet', 'Insights' => 'blue', 'Feedback' => 'rose',
+        'My feedback' => 'rose', 'My profile' => 'palm', 'Settings' => 'brass', 'User accounts' => 'violet',
+        'System issues' => 'rose',
+    ];
+
     $initials = collect(preg_split('/\s+/', trim($user->name)))
         ->filter()
         ->take(2)
@@ -138,7 +147,7 @@
                                 @foreach ($accountLinks as $item)
                                     @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
                                     <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-menu-link', 'casa-menu-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
-                                        <x-nav-icon :name="$item['icon']" />
+                                        <span class="casa-nav-icon casa-tone-{{ $navTones[$item['label']] ?? 'palm' }}"><x-nav-icon :name="$item['icon']" /></span>
                                         <span>{{ $item['label'] }}</span>
                                         @if (($item['badge'] ?? 0) > 0)
                                             <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
@@ -148,7 +157,7 @@
                                 <form method="POST" action="{{ route('logout') }}" data-turbo="false">
                                     @csrf
                                     <button type="submit" class="casa-menu-link w-full">
-                                        <x-nav-icon name="logout" />
+                                        <span class="casa-nav-icon casa-tone-cacao"><x-nav-icon name="logout" /></span>
                                         <span>{{ __('Log out') }}</span>
                                     </button>
                                 </form>
@@ -177,7 +186,7 @@
                         @foreach ($group['items'] as $item)
                             @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
                             <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif @click="$store.drawer.close()">
-                                <x-nav-icon :name="$item['icon']" />
+                                <span class="casa-nav-icon casa-tone-{{ $navTones[$item['label']] ?? 'palm' }}"><x-nav-icon :name="$item['icon']" /></span>
                                 <span>{{ $item['label'] }}</span>
                                 @if ($item['booking_schedule'] ?? false)
                                     <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => $unreadBookings === 0]) aria-label="{{ $unreadBookings }} unread booking notifications"><span data-booking-notification-badge-value>{{ min($unreadBookings, 99) }}{{ $unreadBookings > 99 ? '+' : '' }}</span></span>
