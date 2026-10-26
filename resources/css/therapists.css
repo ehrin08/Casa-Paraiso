@@ -195,18 +195,18 @@
 }
 
 .therapists-workspace .therapists-pill--active {
-    background: #e5f2e3;
-    color: #25472a;
+    background: var(--color-casa-success-bg);
+    color: var(--color-casa-success);
 }
 
 .therapists-workspace .therapists-pill--inactive {
-    background: #efeeeb;
-    color: #52534f;
+    background: var(--color-casa-sand);
+    color: var(--color-casa-muted);
 }
 
 .therapists-workspace .therapists-pill--unavailable {
-    background: #ffe3df;
-    color: #8d2723;
+    background: var(--color-casa-danger-bg);
+    color: var(--color-casa-danger-text);
 }
 
 .therapists-workspace .therapists-chevron {
