@@ -50,7 +50,7 @@ Keep Laravel's `public/index.php` unchanged. Do not upload the complete project 
 
 ## Private production settings
 
-Edit `.env` privately. Use the final HTTPS `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_TIMEZONE=Asia/Manila`, `FORCE_HTTPS=true` and secure HTTP-only cookies. Set anchored `TRUSTED_HOSTS` patterns, such as `^spa\.your-domain\.com$`; include `www` only if used. Otherwise, redirect `www` to the bare domain at the host; an untrusted `www` host returns 400. Leave `TRUSTED_PROXIES` empty for direct TLS. If a reverse proxy is present, configure only its verified IPs/CIDRs and check HTTPS/client IP detection; do not trust `*` to work around an unknown configuration.
+Edit `.env` privately. Use the final HTTPS `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_TIMEZONE=Asia/Manila`, `FORCE_HTTPS=true` and secure HTTP-only cookies. Set anchored `TRUSTED_HOSTS` patterns, such as `^spa\.your-domain\.com$`; include `www` only if used. Otherwise, `public/.htaccess` already redirects any `www.` host to the bare HTTPS domain before Laravel runs; without that rule, an untrusted `www` host returns 400. Leave `TRUSTED_PROXIES` empty for direct TLS. If a reverse proxy is present, configure only its verified IPs/CIDRs and check HTTPS/client IP detection; do not trust `*` to work around an unknown configuration.
 
 Retain the existing `APP_KEY` when transferring encrypted records; do not run `key:generate` for this migration. Set `SUPER_ADMIN_EMAIL` to the existing designated super administrator and preserve that account's identity and role. Keep database sessions/cache and `QUEUE_CONNECTION=sync`.
 
