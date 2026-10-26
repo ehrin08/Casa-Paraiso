@@ -1,8 +1,9 @@
 @php
     $user = Auth::user();
-    $dashboardRoute = $user->homeRouteName();
     $isCustomer = $user->isCustomer();
     $receivesBookingNotifications = $user->isAdmin() || $user->isReceptionist() || $user->isStaff();
+    $unreadBookings = (int) ($unreadNotificationCount ?? 0);
+    $systemIssues = (int) ($unresolvedSystemErrorCount ?? 0);
 
     $roleLabel = match (true) {
         $user->isSuperAdmin() => 'Super admin workspace',
@@ -12,13 +13,14 @@
         default => 'Customer lounge',
     };
 
+    // Related pages share one drawer link and switch through section tabs on the page itself.
     $navGroups = match (true) {
         $user->isAdmin() => [
             [
                 'label' => 'Daily work',
                 'items' => [
                     ['label' => 'Today', 'icon' => 'dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard'],
-                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
+                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'admin.appointments.index', 'active' => 'admin.appointments.*', 'preload' => true, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'admin.customers.index', 'active' => 'admin.customers.*'],
                 ],
             ],
@@ -27,17 +29,9 @@
                 'items' => [
                     ['label' => 'Therapists', 'icon' => 'team', 'route' => 'admin.staff.index', 'active' => ['admin.staff.*', 'admin.staff-roster.*'], 'preload' => true],
                     ['label' => 'Services', 'icon' => 'services', 'route' => 'admin.services.index', 'active' => 'admin.services.*'],
-                    ['label' => 'Payments', 'icon' => 'payments', 'route' => 'admin.transactions.index', 'active' => 'admin.transactions.*'],
-                    ['label' => 'Commissions', 'icon' => 'payments', 'route' => 'admin.commissions.index', 'active' => 'admin.commissions.*'],
+                    ['label' => 'Payments', 'icon' => 'payments', 'route' => 'admin.transactions.index', 'active' => ['admin.transactions.*', 'admin.commissions.*']],
                     ['label' => 'Attendance', 'icon' => 'team', 'route' => 'admin.attendance.index', 'active' => 'admin.attendance.*'],
-                ],
-            ],
-            [
-                'label' => 'Review',
-                'items' => [
-                    ['label' => 'Customer rewards', 'icon' => 'insights', 'route' => 'admin.promotions.index', 'active' => 'admin.promotions.*', 'preload' => true],
-                    ['label' => 'Feedback', 'icon' => 'feedback', 'route' => 'admin.feedback.index', 'active' => 'admin.feedback.*'],
-                    ['label' => 'Reports', 'icon' => 'insights', 'route' => 'admin.reports.index', 'active' => 'admin.reports.*'],
+                    ['label' => 'Insights', 'icon' => 'insights', 'route' => 'admin.reports.index', 'active' => ['admin.reports.*', 'admin.feedback.*', 'admin.promotions.*'], 'preload' => true],
                 ],
             ],
         ],
@@ -46,7 +40,7 @@
                 'label' => 'Daily work',
                 'items' => [
                     ['label' => 'Today', 'icon' => 'dashboard', 'route' => 'staff.dashboard', 'active' => 'staff.dashboard'],
-                    ['label' => 'My appointments', 'icon' => 'calendar', 'route' => 'staff.appointments.index', 'active' => 'staff.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
+                    ['label' => 'My appointments', 'icon' => 'calendar', 'route' => 'staff.appointments.index', 'active' => 'staff.appointments.*', 'preload' => true, 'booking_schedule' => true],
                     ['label' => 'My attendance', 'icon' => 'team', 'route' => 'staff.attendance.show', 'active' => 'staff.attendance.*'],
                 ],
             ],
@@ -54,8 +48,7 @@
                 'label' => 'Review',
                 'items' => [
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'staff.customers.index', 'active' => 'staff.customers.*', 'preload' => true],
-                    ['label' => 'Payments', 'icon' => 'payments', 'route' => 'staff.transactions.index', 'active' => 'staff.transactions.*'],
-                    ['label' => 'My commissions', 'icon' => 'payments', 'route' => 'staff.commissions.index', 'active' => 'staff.commissions.*'],
+                    ['label' => 'Payments', 'icon' => 'payments', 'route' => 'staff.transactions.index', 'active' => ['staff.transactions.*', 'staff.commissions.*']],
                     ['label' => 'Feedback', 'icon' => 'feedback', 'route' => 'staff.feedback.index', 'active' => 'staff.feedback.*'],
                 ],
             ],
@@ -65,7 +58,7 @@
                 'label' => 'Daily work',
                 'items' => [
                     ['label' => 'Today', 'icon' => 'dashboard', 'route' => 'reception.dashboard', 'active' => 'reception.dashboard'],
-                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'reception.appointments.index', 'active' => 'reception.appointments.*', 'preload' => true, 'badge' => $unreadNotificationCount ?? 0, 'booking_schedule' => true],
+                    ['label' => 'Appointments', 'icon' => 'calendar', 'route' => 'reception.appointments.index', 'active' => 'reception.appointments.*', 'preload' => true, 'booking_schedule' => true],
                     ['label' => 'Customers', 'icon' => 'customers', 'route' => 'reception.customers.index', 'active' => 'reception.customers.*', 'preload' => true],
                     ['label' => 'Payments', 'icon' => 'payments', 'route' => 'reception.transactions.index', 'active' => 'reception.transactions.*'],
                     ['label' => 'Staff attendance', 'icon' => 'team', 'route' => 'reception.attendance.station', 'active' => 'reception.attendance.*'],
@@ -83,24 +76,14 @@
         ],
     };
 
-    $notificationLink = $receivesBookingNotifications
-        ? [['label' => 'Notifications', 'icon' => 'notifications', 'route' => 'notifications.index', 'active' => 'notifications.*']]
-        : [];
-
-    $accountLinks = $user->isAdmin()
-        ? [
-            ...$notificationLink,
-            ...($user->isSuperAdmin() ? [
-                ['label' => 'User accounts', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
-                ['label' => 'System issues', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $unresolvedSystemErrorCount ?? 0],
-            ] : []),
-            ['label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*'],
-            ['label' => 'My profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
-        ]
-        : [
-            ...$notificationLink,
-            ['label' => 'My profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
-        ];
+    $accountLinks = [
+        ['label' => 'My profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
+        ...($user->isAdmin() ? [['label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*']] : []),
+        ...($user->isSuperAdmin() ? [
+            ['label' => 'User accounts', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
+            ['label' => 'System issues', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $systemIssues],
+        ] : []),
+    ];
 
     $initials = collect(preg_split('/\s+/', trim($user->name)))
         ->filter()
@@ -109,171 +92,106 @@
         ->implode('');
 @endphp
 
-<nav x-data="{ open: false }" x-on:keydown.escape.window="open = false; $store.sidebar.hideTooltip()" data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
-    <div class="casa-glass-bar sticky top-0 z-40 border-b px-4 py-2 lg:hidden">
-        <div class="flex items-center justify-between gap-4">
-            <a href="{{ route($dashboardRoute) }}" class="min-w-0 rounded-xl bg-white px-2 py-1">
+<nav x-data data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
+    <div class="casa-topbar casa-glass-bar sticky top-0 z-40 border-b">
+        <div class="mx-auto flex h-16 max-w-[90rem] items-center gap-2 px-3 sm:gap-3 sm:px-5 lg:px-6">
+            <button type="button" class="casa-icon-button" data-drawer-toggle aria-controls="workspace-navigation" x-bind:aria-expanded="$store.drawer.isOpen" aria-label="Open navigation" @click="$store.drawer.open($el)">
+                <x-nav-icon name="menu" />
+            </button>
+
+            <a href="{{ url('/') }}" class="casa-topbar-logo min-w-0 rounded-2xl bg-white px-2 py-1" aria-label="Casa Paraiso website" data-site-home-link>
                 <x-application-logo class="origin-left scale-[0.72]" />
             </a>
 
-            <div class="flex items-center gap-2">
-                <span class="hidden text-right sm:block">
-                    <span class="block text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ $roleLabel }}</span>
-                    <span class="block max-w-36 truncate text-sm font-semibold text-casa-muted">{{ $user->name }}</span>
-                </span>
-                <button type="button" class="casa-icon-button" aria-label="Open account navigation" aria-controls="mobile-workspace-navigation" x-bind:aria-expanded="open" @click="open = true">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
+            <div class="ms-auto flex items-center gap-2">
+                <a href="{{ url('/') }}" class="casa-topbar-link" data-view-site-link>
+                    <x-nav-icon name="home" />
+                    <span class="hidden sm:inline">{{ __('View site') }}</span>
+                    <span class="sr-only sm:hidden">{{ __('View site') }}</span>
+                </a>
+
+                @if ($receivesBookingNotifications)
+                    <a href="{{ route('notifications.index') }}" @class(['casa-icon-button relative', 'casa-icon-button-active' => request()->routeIs('notifications.*')]) data-notification-bell @if(request()->routeIs('notifications.*')) aria-current="page" @endif>
+                        <x-nav-icon name="notifications" />
+                        <span class="sr-only">{{ __('Notifications') }}</span>
+                        <span data-booking-notification-badge @class(['casa-topbar-badge', 'hidden' => $unreadBookings === 0]) aria-label="{{ $unreadBookings }} unread booking notifications"><span data-booking-notification-badge-value>{{ min($unreadBookings, 99) }}{{ $unreadBookings > 99 ? '+' : '' }}</span></span>
+                    </a>
+                @endif
+
+                <x-dropdown align="right" width="w-72" content-classes="p-2 bg-casa-paper">
+                    <x-slot name="trigger">
+                        <button type="button" class="casa-avatar-button" data-account-menu-trigger aria-haspopup="menu" aria-label="{{ __('Account menu for :name', ['name' => $user->name]) }}">
+                            <span>{{ $initials }}</span>
+                            @if ($systemIssues > 0)
+                                <span class="casa-avatar-dot" aria-hidden="true"></span>
+                            @endif
+                        </button>
+                    </x-slot>
+                    <x-slot name="content">
+                        <div data-account-menu>
+                            <div class="px-3 pb-3 pt-2">
+                                <p class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ $roleLabel }}</p>
+                                <p class="mt-1 truncate text-sm font-semibold text-casa-text">{{ $user->name }}</p>
+                                <p class="truncate text-sm text-casa-muted">{{ $user->email }}</p>
+                            </div>
+                            <div class="border-t border-casa-border/70 pt-2">
+                                @foreach ($accountLinks as $item)
+                                    @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
+                                    <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-menu-link', 'casa-menu-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
+                                        <x-nav-icon :name="$item['icon']" />
+                                        <span>{{ $item['label'] }}</span>
+                                        @if (($item['badge'] ?? 0) > 0)
+                                            <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
+                                        @endif
+                                    </a>
+                                @endforeach
+                                <form method="POST" action="{{ route('logout') }}" data-turbo="false">
+                                    @csrf
+                                    <button type="submit" class="casa-menu-link w-full">
+                                        <x-nav-icon name="logout" />
+                                        <span>{{ __('Log out') }}</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </x-slot>
+                </x-dropdown>
             </div>
         </div>
     </div>
 
-    <aside id="desktop-workspace-navigation" data-desktop-sidebar aria-label="Desktop workspace navigation" class="casa-sidebar-panel fixed inset-y-0 start-0 z-30 hidden flex-col overflow-y-auto border-e p-3 lg:flex"
-        @mouseover="$store.sidebar.showTooltip($event)" @focusin="$store.sidebar.showTooltip($event)"
-        @mouseout="$store.sidebar.deferHideTooltip()" @focusout="$store.sidebar.deferHideTooltip()">
-        <div class="casa-sidebar-heading flex items-center justify-between gap-2">
-            <a href="{{ route($dashboardRoute) }}" class="casa-sidebar-logo min-w-0 rounded-2xl bg-white px-2.5 py-2">
-                <x-application-logo />
-            </a>
-            <button type="button" x-cloak class="casa-icon-button" aria-controls="desktop-workspace-navigation"
-                :aria-expanded="!$store.sidebar.collapsed" :aria-label="$store.sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-                :title="$store.sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'" @click="$store.sidebar.toggle()">
-                <svg class="size-5" :class="{ 'rotate-180': $store.sidebar.collapsed }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M9 4H4v16h5M15 8l-4 4 4 4M11 12h9" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="casa-sidebar-account mt-3 rounded-2xl border border-casa-border/70 bg-casa-sand/45 p-3">
-            <div class="flex items-center gap-3">
-                <span class="grid size-9 shrink-0 place-items-center rounded-full border border-casa-palm/20 bg-casa-palm-tint text-sm font-extrabold tracking-[0.04em] text-casa-palm-dark">{{ $initials }}</span>
-                <span class="casa-sidebar-expanded-only min-w-0">
-                    <span class="block text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ $roleLabel }}</span>
-                    <span class="mt-1 block truncate text-sm font-semibold text-casa-text">{{ $user->name }}</span>
-                    <span class="mt-0.5 block truncate text-sm text-casa-muted">{{ $user->email }}</span>
-                </span>
+    <div x-cloak x-show="$store.drawer.isOpen" class="casa-drawer-host" data-drawer-host>
+        <div class="casa-drawer-backdrop" @click="$store.drawer.close()" aria-hidden="true"></div>
+        <aside id="workspace-navigation" data-workspace-drawer class="casa-drawer" aria-label="Workspace navigation"
+            @keydown.escape.window="$store.drawer.close()" @keydown.tab="$store.drawer.trapFocus($event, $el)">
+            <div class="flex items-center justify-between gap-3 px-1">
+                <p class="text-sm font-extrabold uppercase tracking-[0.08em] text-casa-brass-light">{{ $roleLabel }}</p>
+                <button type="button" class="casa-drawer-close" aria-label="Close navigation" @click="$store.drawer.close()">
+                    <x-nav-icon name="close" />
+                </button>
             </div>
-        </div>
 
-        <div class="mt-4 space-y-4">
-            @foreach ($navGroups as $group)
-                <section aria-label="{{ $group['label'] }} navigation">
-                    <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ $group['label'] }}</p>
-                    <div class="mt-2 space-y-1">
+            <div class="mt-4 space-y-3">
+                @foreach ($navGroups as $group)
+                    <section aria-label="{{ $group['label'] }} navigation" @class(['casa-drawer-group', 'casa-drawer-group-divided' => ! $loop->first])>
                         @foreach ($group['items'] as $item)
                             @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                            <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif>
-                                <x-nav-icon :name="$item['icon']" />
-                                <span class="casa-sidebar-link-label">{{ $item['label'] }}</span>
-                                @if ($item['booking_schedule'] ?? false)
-                                    <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => ($item['badge'] ?? 0) === 0]) aria-label="{{ $item['badge'] }} unread booking notifications"><span data-booking-notification-badge-value>{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span></span>
-                                @elseif (($item['badge'] ?? 0) > 0)
-                                    <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
-                                @endif
-                            </a>
-                        @endforeach
-                    </div>
-                </section>
-            @endforeach
-
-            <section aria-label="Account navigation">
-                <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">Account</p>
-                <div class="mt-2 space-y-1">
-                    @foreach ($accountLinks as $item)
-                        @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                        <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif>
-                            <x-nav-icon :name="$item['icon']" />
-                            <span class="casa-sidebar-link-label">{{ $item['label'] }}</span>
-                            @if (($item['badge'] ?? 0) > 0)
-                                <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
-                            @endif
-                        </a>
-                    @endforeach
-                </div>
-            </section>
-        </div>
-
-        <div class="mt-auto pt-4">
-            <p class="casa-sidebar-expanded-only mb-2 px-2 text-sm leading-5 text-casa-muted">Open every day<br><span class="font-bold text-casa-text">1:00 PM to 12:00 MN</span></p>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" data-sidebar-label="Log out" class="casa-sidebar-logout casa-button-secondary w-full">
-                    <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v16h5M15 8l4 4-4 4M9 12h10" /></svg>
-                    <span class="casa-sidebar-link-label">Log out</span>
-                </button>
-            </form>
-        </div>
-    </aside>
-
-    <div x-cloak x-show="$store.sidebar.tooltip" class="casa-sidebar-tooltip" aria-hidden="true"
-        :style="{ top: ($store.sidebar.tooltip?.top ?? 0) + 'px', left: ($store.sidebar.tooltip?.left ?? 0) + 'px' }"
-        @mouseenter="$store.sidebar.keepTooltip()" @mouseleave="$store.sidebar.deferHideTooltip()"
-        x-text="$store.sidebar.tooltip?.label"></div>
-
-    <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 lg:hidden" style="display: none;">
-        <div class="absolute inset-0 bg-casa-charcoal/45 backdrop-blur-md" @click="open = false"></div>
-        <aside id="mobile-workspace-navigation" x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="casa-sidebar-panel absolute inset-y-0 start-0 flex w-[min(19rem,88vw)] flex-col overflow-y-auto bg-casa-paper p-3 shadow-casa-lift" aria-label="Mobile workspace navigation">
-            <div class="flex items-center justify-between gap-4">
-                <a href="{{ route($dashboardRoute) }}" class="rounded-2xl bg-white px-2 py-1.5" @click="open = false">
-                    <x-application-logo class="origin-left scale-[0.72]" />
-                </a>
-                <button type="button" class="casa-icon-button" aria-label="Close navigation" @click="open = false">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="mt-4 rounded-2xl border border-casa-border/70 bg-casa-sand/45 p-3">
-                <p class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ $roleLabel }}</p>
-                <p class="mt-1 truncate text-sm font-semibold text-casa-text">{{ $user->name }}</p>
-                <p class="mt-0.5 truncate text-sm text-casa-muted">{{ $user->email }}</p>
-            </div>
-
-            <div class="mt-4 space-y-4">
-                @foreach ($navGroups as $group)
-                    <section aria-label="{{ $group['label'] }} navigation">
-                        <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ $group['label'] }}</p>
-                        <div class="mt-2 space-y-1">
-                            @foreach ($group['items'] as $item)
-                                @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                                <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif @click="open = false">
-                                    <x-nav-icon :name="$item['icon']" />
-                                    <span>{{ $item['label'] }}</span>
-                                    @if ($item['booking_schedule'] ?? false)
-                                        <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => ($item['badge'] ?? 0) === 0]) aria-label="{{ $item['badge'] }} unread booking notifications"><span data-booking-notification-badge-value>{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span></span>
-                                    @elseif (($item['badge'] ?? 0) > 0)
-                                        <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
-                                    @endif
-                                </a>
-                            @endforeach
-                        </div>
-                    </section>
-                @endforeach
-
-                <section aria-label="Account navigation">
-                    <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">Account</p>
-                    <div class="mt-2 space-y-1">
-                        @foreach ($accountLinks as $item)
-                            @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
-                            <a href="{{ route($item['route']) }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @click="open = false">
+                            <a href="{{ route($item['route']) }}" data-sidebar-label="{{ $item['label'] }}" @class(['casa-nav-link w-full', 'casa-nav-link-active' => $isActive]) @if($isActive) aria-current="page" @endif @if($item['preload'] ?? false) data-turbo-preload @endif @if($item['booking_schedule'] ?? false) data-booking-schedule-link @endif @click="$store.drawer.close()">
                                 <x-nav-icon :name="$item['icon']" />
                                 <span>{{ $item['label'] }}</span>
-                                @if (($item['badge'] ?? 0) > 0)
-                                    <span class="ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink" aria-label="{{ $item['badge'] }} unresolved server errors">{{ min((int) $item['badge'], 99) }}{{ $item['badge'] > 99 ? '+' : '' }}</span>
+                                @if ($item['booking_schedule'] ?? false)
+                                    <span data-booking-notification-badge @class(['ms-auto rounded-full bg-casa-brass px-2 py-0.5 text-xs font-black text-casa-ink', 'hidden' => $unreadBookings === 0]) aria-label="{{ $unreadBookings }} unread booking notifications"><span data-booking-notification-badge-value>{{ min($unreadBookings, 99) }}{{ $unreadBookings > 99 ? '+' : '' }}</span></span>
                                 @endif
                             </a>
                         @endforeach
-                    </div>
-                </section>
+                    </section>
+                @endforeach
             </div>
 
-            <form method="POST" action="{{ route('logout') }}" class="mt-auto pt-6" data-turbo="false">
-                @csrf
-                <button type="submit" class="casa-button-secondary w-full">Log out</button>
-            </form>
+            <a href="{{ url('/') }}" class="casa-drawer-site-link mt-auto">
+                <x-nav-icon name="home" />
+                <span>{{ __('View the Casa Paraiso website') }}</span>
+            </a>
         </aside>
     </div>
 

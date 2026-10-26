@@ -13,8 +13,9 @@ $width = match ($width) {
 };
 @endphp
 
-<div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
-    <div @click="open = ! open">
+<div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false"
+    @keydown.escape="if (open) { open = false; $refs.trigger.querySelector('button, a')?.focus() }">
+    <div x-ref="trigger" @click="open = ! open" x-effect="$el.querySelector('button')?.setAttribute('aria-expanded', open)">
         {{ $trigger }}
     </div>
 
