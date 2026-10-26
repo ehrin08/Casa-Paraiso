@@ -36,7 +36,7 @@ body[data-workspace-role] .attendance-workspace .attendance-table td { padding: 
 .attendance-status { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.5rem; border-radius: 7px; font-size: 0.875rem; white-space: nowrap; background: var(--color-casa-bg); color: var(--color-casa-text); }
 .attendance-status > span { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; }
 .attendance-status--duty { background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
-.attendance-status--completed, .attendance-status--unrecorded { background: #eeede9; color: #45473f; }
+.attendance-status--completed, .attendance-status--unrecorded { background: var(--color-casa-sand); color: var(--color-casa-muted); }
 .attendance-correct { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.4rem 0.65rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); font-weight: 600; white-space: nowrap; box-shadow: var(--shadow-casa-soft); }
 .attendance-correct:hover { border-color: var(--color-casa-palm); color: var(--color-casa-palm-dark); }
 .attendance-pagination { margin-top: 1rem; }
@@ -71,7 +71,7 @@ body[data-workspace-role] .attendance-workspace .attendance-table td { padding: 
 .attendance-activity li { padding-top: 0.75rem; border-top: 1px solid var(--color-casa-border); color: var(--color-casa-muted); overflow-wrap: anywhere; }
 .attendance-event-title { margin-bottom: 0.25rem; color: var(--color-casa-text); font-weight: 600; }
 .attendance-event-reason { margin-top: 0.25rem; white-space: pre-line; }
-.attendance-errors { padding: 0.75rem; border-radius: var(--radius-casa-panel); background: #fdf0ed; color: #8b3125; font-size: 0.875rem; }
+.attendance-errors { padding: 0.75rem; border-radius: var(--radius-casa-panel); background: color-mix(in srgb, var(--color-casa-danger-bg) 50%, var(--color-casa-paper)); color: var(--color-casa-danger-text); font-size: 0.875rem; }
 .attendance-workspace a:focus-visible, .attendance-workspace button:focus-visible, .attendance-workspace summary:focus-visible, .attendance-station:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: var(--radius-casa-control); }
 .attendance-workspace ::selection { background: var(--color-casa-palm); color: white; }
 .attendance-workspace input, .attendance-workspace textarea { caret-color: var(--color-casa-palm-dark); }
