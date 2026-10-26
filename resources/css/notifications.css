@@ -18,7 +18,7 @@ body[data-workspace-role] .notifications-workspace .notifications-toolbar { disp
 body[data-workspace-role] .notifications-workspace .casa-table-wrap { border: 0; border-radius: 0; }
 .notifications-table table { width: 100%; min-width: 660px; font-size: 0.875rem; }
 body[data-workspace-role] .notifications-workspace .notifications-table td { padding: 0.875rem 0.5rem; vertical-align: top; border-bottom: 1px solid var(--color-casa-border); line-height: 1.4; }
-.notifications-row.is-selected { background: #edf5e9; }
+.notifications-row.is-selected { background: var(--color-casa-palm-tint); }
 .notifications-row:hover { background: color-mix(in srgb, var(--color-casa-palm) 11%, var(--color-casa-paper)); }
 .notifications-booking { position: relative; width: 30%; }
 .notifications-booking > div { padding-left: 1.25rem; }
