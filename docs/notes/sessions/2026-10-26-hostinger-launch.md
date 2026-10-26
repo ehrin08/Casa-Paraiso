@@ -35,12 +35,12 @@ Continue the Hostinger deployment: verify Gmail SMTP, check for data drift, swit
 
 - The cache and session row differences come from private checks and cron, not business activity, so no re-transfer was needed.
 - Hostinger is now the live database. Local business writes must not resume.
-- The `www` 400 is a follow-up, not a cutover blocker.
+- The `www` 400 was not a cutover blocker. It was fixed afterwards with a generic `.htaccess` redirect rather than by trusting `www`, so trusted hosts stay apex-only.
 
 ## Follow-ups
 
 - [ ] Live signed-in checks: password and Google sign-in, both Google flows, role restrictions, and the booking, reports, settings and attendance workspaces. No sign-in reached the site during this session.
 - [ ] Send a real test email (only on the user's instruction) and confirm delivery.
-- [ ] Redirect `www.casaparaiso.site` to the bare domain.
+- [x] Redirect `www.casaparaiso.site` to the bare domain. A `public/.htaccess` rule now sends `www.` hosts to the bare HTTPS domain (301, path and query kept). It is deployed and verified on the live site and in local Apache, and the full suite (483 tests), asset build and Docker startup passed.
 - [ ] Recheck the domain registration email warning in hPanel.
 - [ ] The user revokes the temporary deployment SSH key in hPanel once the host work is finished.
