@@ -45,9 +45,13 @@ Page stylesheets contain no raw hex values. Tints, lines and chart shades are `c
 - [x] 1. Tokens, plus exact palette and status hex values mapped to tokens. Page-only one-off shades remain until each page's detailed pass.
 - [x] 2. Shared shell (layouts, navigation) and shared components
 - [x] 3. Public homepage (verified at 1440px and 375px), guest layout and auth pages
-- [~] 4–6. Shape pass applied to every page stylesheet: cards 20px, panels 16px, controls 12px, buttons pills. Calendar events, chart bars, tabs, dots and badges keep their own corners. Each workspace still needs a signed-in visual review and any detailed page polish.
+- [x] 4–6. Shape pass applied to every page stylesheet: cards 20px, panels 16px, controls 12px, buttons pills. Calendar events, chart bars, tabs, dots and badges keep their own corners.
+  - The admin and customer workspaces were reviewed through rolled-back snapshots.
+  - The booking wizard and appointment dialogs were polished.
+  - Page-only hex shades and raw Tailwind reds now use tokens.
+  - The therapist and reception workspaces, live calendar feeds and the in-dialog booking panel still need a real signed-in review.
 - [x] 7. Brand guide shape rules and project memory updated
 
 ## Verification per phase
 
-Run the relevant tests, then the full Laravel suite, the asset build and the Docker startup through `scripts/casa-docker.ps1`. Check the pages in the browser at 1440px and 375px: keyboard focus, 44px targets, AA contrast and reduced motion. Screenshots go to `output/redesign/` and are not committed.
+Run the relevant tests, then the full Laravel suite, the JavaScript tests (`node --test 'tests/js/*.test.mjs'` in the app container), the asset build and the Docker startup through `scripts/casa-docker.ps1`. Check the pages in the browser at 1440px and 375px: keyboard focus, 44px targets, AA contrast and reduced motion. Screenshots go to `output/redesign/` and are not committed.
