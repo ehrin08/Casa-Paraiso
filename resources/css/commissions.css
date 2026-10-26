@@ -45,7 +45,7 @@ body[data-workspace-role] .commissions-workspace .casa-table-wrap td { padding: 
 .commissions-amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .commissions-net { font-weight: 700; }
 .commissions-status { display: inline-flex; align-items: center; justify-content: center; min-width: 4.5rem; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; }
-.commissions-status--pending { background: #ffecd0; color: var(--color-casa-cacao); }
+.commissions-status--pending { background: var(--color-casa-warning-bg); color: var(--color-casa-cacao); }
 .commissions-status--paid { background: color-mix(in srgb, var(--color-casa-palm) 14%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
 .commissions-view { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--radius-casa-panel); }
 .commissions-view:hover { background: var(--color-casa-sand); color: var(--color-casa-palm-dark); }

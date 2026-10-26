@@ -54,7 +54,7 @@ body[data-workspace-role] .payments-workspace .payments-table th { padding: 0 0.
 .payments-method { display: inline-flex; align-items: center; gap: 0.65rem; white-space: nowrap; }
 .payments-status { display: inline-flex; justify-content: center; align-items: center; min-width: 5rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; color: var(--color-casa-muted); background: var(--color-casa-sand); }
 .payments-status--paid { color: var(--color-casa-palm-dark); background: color-mix(in srgb, var(--color-casa-palm) 14%, var(--color-casa-paper)); }
-.payments-status--unpaid, .payments-status--partial { color: var(--color-casa-cacao); background: #ffecd0; }
+.payments-status--unpaid, .payments-status--partial { color: var(--color-casa-cacao); background: var(--color-casa-warning-bg); }
 .payments-status--refunded { color: var(--color-casa-cacao); }
 .payments-row-actions { display: flex; gap: 0.5rem; }
 .payments-row-actions a { display: inline-flex; justify-content: center; align-items: center; width: 44px; height: 44px; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); }
