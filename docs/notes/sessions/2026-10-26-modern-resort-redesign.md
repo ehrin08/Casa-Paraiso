@@ -47,6 +47,17 @@ Plan and start a visual redesign on the local `redesign` branch only, keeping th
 - **Code:** `resources/js/sidebar.js` is replaced by `resources/js/workspace-drawer.js`. The collapse rail, tooltips and pre-render preference script are removed. `x-dropdown` now closes on Escape, returns focus and exposes `aria-expanded`.
 - **Tests:** `RoleWorkspaceTest` is updated for the new structure and covers the merged-page tabs and active links, the home links, bell visibility per role, and the account menu contents. The new `tests/js/workspace-drawer.test.mjs` covers the drawer store.
 
+### More color (soft tints)
+
+- **Request:** the user said the workspace read as one color, and chose soft tints for metric cards, drawer icons, a page header band, and charts and statuses.
+- **Built:**
+  - Shared `.casa-tone-*` classes and a positional cycle for the metric grids, with semantic overrides for cancelled and sentiment.
+  - Pastel drawer and menu icon chips, with a brass ring on the active chip.
+  - Palm/amber header bands for staff and rose/amber for customers.
+  - Blue, rose and amber for chart and status colors, plus an `info` status-badge tone.
+- **Review:** checked through rolled-back snapshots at desktop and 375px with no overflow. Two adjustments came out of it: the revenue bars became palm-to-light-palm (the brass mix looked olive), and the drawer chips went from translucent to solid pastel, because translucent read grey on deep palm.
+- **Tests:** 99 targeted feature tests and 84 JS tests passed.
+
 ## Decisions
 
 - Work stays on `redesign`. `main` is untouched, and no Hostinger package is built from this branch.

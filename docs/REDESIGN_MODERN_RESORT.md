@@ -39,6 +39,24 @@ Page stylesheets contain no raw hex values. Tints, lines and chart shades are `c
 - **Badges, chips and pagination controls** are pills.
 - **Density:** the workspaces keep their compact table density and 12–16px gaps. Only shape, surface and elevation change there.
 
+## Color accents
+
+Soft tints add color without leaving the brand family. Text stays dark ink on each pastel, and color is never the only signal: every status keeps its label.
+
+- **Tone classes** (`app.css`): `.casa-tone-palm`, `-brass`, `-cacao`, `-blue`, `-rose` and `-violet`. Each sets `--tone` (ink) and `--tone-bg` (pastel) from the Casa tokens.
+- **Metric cards:** cards in the metric grids cycle palm, brass, blue, rose, violet, cacao by position, with a soft diagonal wash, a tinted top edge and a matching icon circle. A card that names its own tone (`x-metric-card`'s `tone` prop) keeps it. Cancelled stats are always rose, and feedback sentiment stays positive palm, neutral amber, negative rose.
+- **Drawer and account menu:** each destination has a pastel icon chip, for example Today palm, Appointments blue, Customers rose, Therapists violet, Services amber and Payments cacao. The active chip gets a brass ring.
+- **Page header band:** staff pages fade palm-tint, then cream, then amber with a faint brass glow; customer pages fade rose-tint, then cream, then amber.
+- **Charts and statuses:**
+  - **Appointment statuses:** confirmed blue, completed palm, cancelled rose, no-show amber.
+  - **Sentiment:** positive palm, neutral amber, negative rose.
+  - **Service revenue tracks:** palm, amber, blue and rose.
+  - **RFM bars:** blue.
+  - **Payment pills:** paid green, unpaid amber, refunded blue.
+  - **Attendance:** on duty green, completed blue.
+  - **Customer calendar:** completed visits are blue.
+  - `x-status-badge` also has an `info` tone.
+
 ## Phase checklist
 
 - [x] 0. Branch guard and this spec
