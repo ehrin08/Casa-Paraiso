@@ -37,6 +37,6 @@ Make the `redesign` branch the live site while keeping the stable `main` version
 
 ## Follow-ups
 
-- [ ] Point the hPanel cron at `casa-paraiso-redesign-20261026/artisan schedule:run`. The cron is not editable over SSH. Until then the old release's scheduler keeps running the same tasks against the same database.
+- [x] Point the hPanel cron at `casa-paraiso-redesign-20261026/artisan schedule:run`. The cron can't be edited over SSH, so the user asked for the change through Claude in Chrome. The every-minute job was added, and its output showed the normal "No scheduled commands are ready to run". The old `casa-paraiso/artisan` job was then deleted, leaving only the redesign job.
 - [ ] Rollback if needed: `ln -s "$PWD/casa-paraiso/public" public_html.new && mv -T public_html.new public_html`, run from the domain directory, then revert the cron.
 - [ ] Signed-in workspace check of the redesign on the live site.
