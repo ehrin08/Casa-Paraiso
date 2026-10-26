@@ -32,105 +32,235 @@
     display: none !important;
 }
 
-:root {
-    --casa-sidebar-width: 16rem;
+/* Workspace top bar and overlay drawer (redesign branch). */
+.casa-topbar {
+    box-shadow: 0 1px 0 rgba(55, 44, 32, 0.04), 0 10px 28px -18px rgba(38, 48, 40, 0.35);
 }
 
-html[data-sidebar-collapsed="true"] {
-    --casa-sidebar-width: 5rem;
-}
-
-.casa-sidebar-tooltip {
-    position: fixed;
-    z-index: 45;
-    max-width: 16rem;
-    transform: translateY(-50%);
+.casa-topbar-link {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     border: 1px solid var(--color-casa-border);
-    border-radius: 10px;
+    border-radius: var(--radius-casa-pill);
     background: var(--color-casa-paper);
-    padding: 0.5rem 0.75rem;
-    color: var(--color-casa-ink);
+    padding: 0.45rem 0.9rem;
+    color: var(--color-casa-palm-dark);
     font-size: 0.875rem;
     font-weight: 700;
-    box-shadow: var(--shadow-casa-card);
+    transition: background-color 180ms ease, border-color 180ms ease;
 }
 
-@media (min-width: 1024px) {
-    [data-desktop-sidebar] {
-        width: var(--casa-sidebar-width);
-        scrollbar-width: thin;
-        scrollbar-color: var(--color-casa-muted) transparent;
-    }
-
-    .casa-workspace-content {
-        padding-inline-start: var(--casa-sidebar-width);
-    }
-
-    .casa-sidebar-animating [data-desktop-sidebar] {
-        transition: width 180ms ease;
-    }
-
-    .casa-sidebar-animating .casa-workspace-content {
-        transition: padding-inline-start 180ms ease;
-    }
-
-    .casa-sidebar-logo img {
-        width: 100%;
-        min-width: 120px;
-    }
-
-    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-sidebar-expanded-only,
-    [data-sidebar-collapsed="true"] .casa-sidebar-logo {
-        display: none;
-    }
-
-    [data-sidebar-collapsed="true"] .casa-sidebar-heading,
-    [data-sidebar-collapsed="true"] .casa-sidebar-account > div {
-        justify-content: center;
-    }
-
-    [data-sidebar-collapsed="true"] .casa-sidebar-account {
-        padding: 0.5rem 0;
-        border-color: transparent;
-        background: transparent;
-    }
-
-    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-nav-link,
-    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-sidebar-logout {
-        min-height: 3.25rem;
-        justify-content: center;
-        gap: 0;
-        padding-inline: 0;
-    }
-
-    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-nav-link:hover {
-        transform: none;
-    }
-
-    [data-sidebar-collapsed="true"] .casa-sidebar-link-label {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-        white-space: nowrap;
-    }
-
-    [data-sidebar-collapsed="true"] [data-desktop-sidebar] .casa-nav-link > .ms-auto {
-        position: absolute;
-        top: -0.25rem;
-        inset-inline-end: -0.125rem;
-        margin: 0;
-        padding: 0 0.25rem;
-    }
+.casa-topbar-link:hover {
+    border-color: color-mix(in srgb, var(--color-casa-palm) 38%, var(--color-casa-border));
+    background: var(--color-casa-sand);
 }
 
-@media (max-width: 1023px) {
-    .casa-sidebar-tooltip {
-        display: none !important;
-    }
+.casa-topbar-badge {
+    position: absolute;
+    top: -0.3rem;
+    inset-inline-end: -0.3rem;
+    min-width: 1.35rem;
+    border: 2px solid var(--color-casa-paper);
+    border-radius: var(--radius-casa-pill);
+    background: var(--color-casa-brass);
+    padding: 0 0.3rem;
+    color: var(--color-casa-ink);
+    font-size: 0.75rem;
+    font-weight: 900;
+    line-height: 1.15rem;
+    text-align: center;
+}
+
+.casa-section-tabs {
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    gap: 0.25rem;
+    overflow-x: auto;
+    border: 1px solid color-mix(in srgb, var(--color-casa-border) 78%, white);
+    border-radius: var(--radius-casa-pill);
+    background: var(--color-casa-paper);
+    padding: 0.25rem;
+    box-shadow: var(--shadow-casa-soft);
+    scrollbar-width: none;
+}
+
+.casa-section-tab {
+    display: inline-flex;
+    min-height: 2.75rem;
+    flex: 0 0 auto;
+    align-items: center;
+    border-radius: var(--radius-casa-pill);
+    padding: 0.5rem 1.1rem;
+    color: var(--color-casa-muted);
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.casa-section-tab:hover {
+    background: var(--color-casa-sand);
+    color: var(--color-casa-text);
+}
+
+.casa-section-tab.is-active {
+    background: linear-gradient(150deg, var(--color-casa-palm), var(--color-casa-palm-dark));
+    color: white;
+    box-shadow: 0 8px 18px -10px rgba(51, 71, 54, 0.7);
+}
+
+.casa-icon-button-active {
+    border-color: var(--color-casa-palm);
+    background: var(--color-casa-palm-tint);
+}
+
+.casa-avatar-button {
+    position: relative;
+    display: inline-grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 2px solid var(--color-casa-paper);
+    border-radius: 50%;
+    background: linear-gradient(150deg, var(--color-casa-palm), var(--color-casa-palm-dark));
+    color: var(--color-casa-paper);
+    font-size: 0.875rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-casa-palm) 30%, transparent), var(--shadow-casa-soft);
+}
+
+.casa-avatar-dot {
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 2px solid var(--color-casa-paper);
+    border-radius: 50%;
+    background: var(--color-casa-brass);
+}
+
+.casa-menu-link {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.7rem;
+    border-radius: var(--radius-casa-control);
+    padding: 0.5rem 0.75rem;
+    color: var(--color-casa-text);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-align: left;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.casa-menu-link:hover,
+.casa-menu-link-active {
+    background: var(--color-casa-palm-tint);
+    color: var(--color-casa-palm-dark);
+}
+
+.casa-drawer-host {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+}
+
+.casa-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-casa-charcoal) 45%, transparent);
+    backdrop-filter: blur(6px);
+    animation: casa-drawer-fade 180ms ease;
+}
+
+.casa-drawer {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    display: flex;
+    width: min(18rem, 86vw);
+    flex-direction: column;
+    overflow-y: auto;
+    border-start-end-radius: var(--radius-casa-card);
+    border-end-end-radius: var(--radius-casa-card);
+    background:
+        radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--color-casa-brass) 22%, transparent), transparent 16rem),
+        linear-gradient(165deg, var(--color-casa-palm-dark) 0%, var(--color-casa-charcoal) 100%);
+    padding: 1rem 0.85rem;
+    color: var(--color-casa-paper);
+    box-shadow: inset -1px 0 0 rgba(255, 252, 247, 0.08), var(--shadow-casa-lift);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 252, 247, 0.3) transparent;
+    animation: casa-drawer-slide 180ms ease;
+}
+
+.casa-drawer-close {
+    display: inline-grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 1px solid rgba(255, 252, 247, 0.16);
+    border-radius: 50%;
+    background: rgba(255, 252, 247, 0.06);
+    color: var(--color-casa-paper);
+}
+
+.casa-drawer-close:hover {
+    background: rgba(255, 252, 247, 0.12);
+}
+
+.casa-drawer-group {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.casa-drawer-group-divided {
+    border-top: 1px solid rgba(255, 252, 247, 0.12);
+    padding-top: 0.75rem;
+}
+
+.casa-drawer-site-link {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: auto;
+    border: 1px solid rgba(255, 252, 247, 0.16);
+    border-radius: var(--radius-casa-pill);
+    padding: 0.55rem 0.9rem;
+    color: rgba(255, 252, 247, 0.88);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.casa-drawer-site-link:hover {
+    background: rgba(255, 252, 247, 0.08);
+}
+
+.casa-drawer :focus-visible {
+    outline-color: var(--color-casa-brass-light);
+}
+
+html.casa-drawer-open,
+html.casa-drawer-open body {
+    overflow: hidden;
+}
+
+@keyframes casa-drawer-slide {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes casa-drawer-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @theme {
@@ -257,14 +387,6 @@ html[data-sidebar-collapsed="true"] {
     .casa-wood-panel {
         color: var(--color-casa-paper);
         background: linear-gradient(160deg, var(--color-casa-palm-dark), var(--color-casa-charcoal));
-    }
-
-    /* Light resort sidebar used by every authenticated workspace. */
-    .casa-sidebar-panel {
-        border-color: color-mix(in srgb, var(--color-casa-border) 78%, white);
-        background: var(--color-casa-glass);
-        color: var(--color-casa-text);
-        backdrop-filter: blur(18px);
     }
 
     .casa-glass-bar {
@@ -400,22 +522,23 @@ html[data-sidebar-collapsed="true"] {
         border: 1px solid transparent;
         border-radius: var(--radius-casa-pill);
         padding: 0.64rem 0.85rem;
-        color: var(--color-casa-muted);
+        color: rgba(255, 252, 247, 0.8);
         font-size: 0.82rem;
         font-weight: 700;
         transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
     }
 
     .casa-nav-link:hover {
-        color: var(--color-casa-palm-dark);
-        background: color-mix(in srgb, var(--color-casa-sand) 70%, transparent);
+        color: white;
+        background: rgba(255, 252, 247, 0.08);
     }
 
     .casa-nav-link-active,
     .casa-nav-link-active:hover {
-        color: var(--color-casa-palm-dark);
-        border-color: color-mix(in srgb, var(--color-casa-palm) 18%, transparent);
-        background: var(--color-casa-palm-tint);
+        color: white;
+        border-color: color-mix(in srgb, var(--color-casa-brass-light) 40%, transparent);
+        background: color-mix(in srgb, var(--color-casa-brass) 24%, transparent);
+        box-shadow: inset 3px 0 0 var(--color-casa-brass-light);
     }
 
     .casa-nav-control {
