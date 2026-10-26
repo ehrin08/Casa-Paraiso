@@ -29,7 +29,7 @@ The signature visual is the **tropical canopy**: an arched image frame paired wi
 | Casa Muted | `#67675F` | Secondary text |
 | Casa Border | `#DCD2C2` | Borders and separators |
 
-Casa Brass is decorative and should not carry small text. Use Brass Light for meaningful text on dark surfaces. Success, warning, error, and information states must include text or icons rather than relying on color alone.
+On the `redesign` branch, soft tone accents (palm, brass, cacao, and the blue, rose and violet tokens) color metric cards, drawer icon chips, page header bands and charts, as described in [REDESIGN_MODERN_RESORT.md](REDESIGN_MODERN_RESORT.md#color-accents). Text on those pastels stays a dark ink. Casa Brass is decorative and should not carry small text. Use Brass Light for meaningful text on dark surfaces. Success, warning, error, and information states must include text or icons rather than relying on color alone.
 
 ## Typography
 
