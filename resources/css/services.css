@@ -245,13 +245,13 @@ body[data-workspace-role] .services-table .services-price {
 }
 
 .services-status--active {
-    color: #24532d;
-    background: #e4f0e2;
+    color: var(--color-casa-success);
+    background: var(--color-casa-success-bg);
 }
 
 .services-status--inactive {
-    color: #a61b1b;
-    background: #fce5e2;
+    color: var(--color-casa-danger-text);
+    background: var(--color-casa-danger-bg);
 }
 
 .services-status-dot {
@@ -292,8 +292,8 @@ body[data-workspace-role] .services-table .services-price {
 }
 
 .services-action--deactivate {
-    color: #b91c1c;
-    border-color: #dc2626;
+    color: var(--color-casa-danger);
+    border-color: var(--color-casa-danger);
 }
 
 .services-action--activate {
@@ -307,7 +307,7 @@ body[data-workspace-role] .services-table .services-price {
 }
 
 .services-action--deactivate:hover {
-    background: #fce5e2;
+    background: var(--color-casa-danger-bg);
 }
 
 @media (max-width: 1279px) {
