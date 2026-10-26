@@ -15,7 +15,7 @@
                     <p class="casa-section-label">{{ __('Live venue code') }}</p>
                     <h2 class="mt-2 font-display text-2xl font-black text-casa-text">{{ __('Refreshes every minute') }}</h2>
                     <p class="mt-3 text-sm text-casa-muted">{{ __('Time remaining:') }} <strong x-text="countdown"></strong></p>
-                    <p x-show="error" x-text="error" class="mt-4 text-sm font-semibold text-red-700"></p>
+                    <p x-show="error" x-text="error" class="mt-4 text-sm font-semibold text-casa-danger-text"></p>
                 </div>
             </div>
         </x-app-card>

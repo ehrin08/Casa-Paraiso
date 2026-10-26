@@ -81,7 +81,7 @@
                 </div>
             </x-app-card>
 
-            <aside class="casa-dark-panel rounded-[24px] p-6 shadow-casa-card">
+            <aside class="casa-dark-panel rounded-[20px] p-6 shadow-casa-card">
                 <p class="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-casa-brass-light">{{ __('Service rhythm') }}</p>
                 <h2 class="mt-4 text-2xl font-extrabold text-white">{{ __('Confirm. Care. Record.') }}</h2>
                 <p class="mt-4 text-sm leading-7 text-white/65">{{ __('Keep each visit moving through the same clear operational rhythm.') }}</p>

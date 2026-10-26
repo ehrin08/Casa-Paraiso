@@ -126,7 +126,7 @@
     </section>
 
     @endif
-    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-show="error" x-cloak role="alert">
+    <div class="rounded-xl border border-casa-danger/20 bg-casa-danger-bg px-4 py-3 text-sm text-casa-danger-text" x-show="error" x-cloak role="alert">
         <p x-text="error"></p><button type="button" class="casa-button-secondary mt-2" x-on:click="load()">{{ __('Retry schedule') }}</button>
     </div>
 
@@ -138,7 +138,7 @@
             </div>
             <div class="flex flex-wrap items-center gap-2 text-sm font-bold text-casa-muted">
                 <span class="casa-filter-chip"><span class="me-1 size-2 rounded-full bg-casa-palm"></span>{{ __('Confirmed') }}</span>
-                <span class="casa-filter-chip"><span class="me-1 size-2 rounded-full bg-red-500"></span>{{ __('Cancelled / no-show') }}</span>
+                <span class="casa-filter-chip"><span class="me-1 size-2 rounded-full bg-casa-danger"></span>{{ __('Cancelled / no-show') }}</span>
                 <span class="casa-filter-chip"><span class="me-1 size-2 rounded-full bg-casa-cacao"></span>{{ __('Unavailable') }}</span>
                 <x-status-badge x-show="loading">{{ __('Loading') }}</x-status-badge>
             </div>

@@ -61,7 +61,7 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail-notes section { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); padding: 0.875rem; background: color-mix(in srgb, var(--color-casa-sand) 20%, var(--color-casa-paper)); box-shadow: var(--shadow-casa-soft); }
 .appointment-detail-notes h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-weight: 600; }
 .appointment-detail-notes p { margin-top: 0.75rem; white-space: pre-line; color: var(--color-casa-muted); line-height: 1.6; }
-.appointment-detail-staff-label { padding: 0.15rem 0.5rem; border-radius: 5px; background: var(--color-casa-sand); color: var(--color-casa-cacao); font-weight: 400; }
+.appointment-detail-staff-label { padding: 0.15rem 0.6rem; border-radius: var(--radius-casa-pill); background: var(--color-casa-sand); color: var(--color-casa-cacao); font-weight: 400; }
 .appointment-detail-activity { margin-top: 0.5rem; }
 .appointment-detail-activity li { position: relative; display: flex; gap: 1rem; padding-bottom: 1.125rem; }
 .appointment-detail-activity li:last-child { padding-bottom: 0; }

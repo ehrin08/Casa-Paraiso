@@ -6,11 +6,11 @@
     @endif
 
     @if (session('eligibility_conflicts'))
-        <div class="rounded-2xl border border-red-200 bg-red-50 p-5 lg:col-span-2" role="alert">
-            <p class="text-sm font-extrabold text-red-800">{{ __('Resolve these confirmed appointments before changing therapist eligibility') }}</p>
+        <div class="rounded-2xl border border-casa-danger/20 bg-casa-danger-bg p-5 lg:col-span-2" role="alert">
+            <p class="text-sm font-extrabold text-casa-danger-text">{{ __('Resolve these confirmed appointments before changing therapist eligibility') }}</p>
             <div class="mt-3 flex flex-wrap gap-2">
                 @foreach (session('eligibility_conflicts') as $conflict)
-                    <a href="{{ $conflict['url'] }}" class="rounded-full border border-red-200 bg-white px-3 py-2 text-xs font-extrabold text-red-800 hover:border-red-400">
+                    <a href="{{ $conflict['url'] }}" class="rounded-full border border-casa-danger/20 bg-white px-3 py-2 text-xs font-extrabold text-casa-danger-text hover:border-casa-danger/40">
                         {{ $conflict['number'] }} · {{ \Illuminate\Support\Carbon::parse($conflict['starts_at'])->format('M d, g:i A') }}
                     </a>
                 @endforeach
