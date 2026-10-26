@@ -19,6 +19,7 @@ Earlier native-client, versioned API, device-token, database, tunnel, and hosted
 | Data design and invariants | `DATABASE_DESIGN.md` |
 | Role workflows and UI | `SCREEN_FLOW.md`, `BRAND_UI_GUIDE.md` |
 | Security release gate | `SECURITY_HARDENING.md` |
+| Docs index, Obsidian vault (`C:\Obsidian`, `Casa Paraiso` junction to `docs/`), and per-task session history | `HOME.md`, `notes/SESSIONS.md` |
 
 ## Entry Points
 

@@ -8,9 +8,17 @@ Earlier client, API, database, and hosted-pilot integrations are retired. The ar
 
 ## Required Reading
 
-For every task, read this file, then `docs/PROJECT_MEMORY.md` once; reuse their contents while unchanged. Read only task-relevant sections of authoritative documents and representative tests. Documentation-only work does not require application-test inspection. Update project memory with durable changes to routes, models, migrations, services, Docker workflow, or verification steps.
+For every task, read this file, then `docs/PROJECT_MEMORY.md` once; reuse their contents while unchanged. Then read `docs/HOME.md`, the three newest entries in `docs/notes/SESSIONS.md`, and any linked notes relevant to the task. Read only task-relevant sections of authoritative documents and representative tests. Documentation-only work does not require application-test inspection. Update project memory with durable changes to routes, models, migrations, services, Docker workflow, or verification steps.
 
 Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_DESIGN.md`, `docs/SCREEN_FLOW.md`, `docs/DOCKER_WORKFLOW.md`, `docs/IMPLEMENTATION_ROADMAP.md`, `docs/BRAND_UI_GUIDE.md`, and `docs/SECURITY_HARDENING.md`.
+
+## Obsidian Knowledge Base
+
+- The Obsidian vault is `C:\Obsidian`; its `Casa Paraiso` folder is a junction to `docs/`, so `docs/` stays the source of truth.
+- `docs/HOME.md` indexes the documentation. Link every new document from it.
+- At the end of every task, including documentation-only work, write `docs/notes/sessions/YYYY-MM-DD-<short-slug>.md` with front matter (`type: session-log`, `date`) and sections for Task, What Changed, Verification, Decisions, and Follow-ups. Add its link to the top of `docs/notes/SESSIONS.md`.
+- Use relative Markdown links, not `[[wikilinks]]`, so notes render on GitHub.
+- Never record secrets, credentials, or `.env` values in notes.
 
 ## Efficient Agent Workflow
 
@@ -48,6 +56,7 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 
 ## Verification and Delivery
 
+- Every delivery includes its session note and `docs/notes/SESSIONS.md` entry; these are documentation and do not trigger application checks.
 - Documentation-only changes: check accuracy, referenced paths, instruction consistency, and whitespace errors with `git diff --check`. Skip application tests, asset builds, and Docker startup.
 - Application changes: verify relevant tests first, then the full Laravel suite (`php artisan test`), asset build (`npm run build`), and Docker startup path through the existing Docker wrapper.
 - Reuse successful checks within the same task while their relevant code and environment remain unchanged. Rerun checks when subsequent changes or failures invalidate their evidence. Investigate a failed targeted test and rerun it after correction before proceeding to the full verification gate; report unresolved failures.
