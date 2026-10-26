@@ -69,13 +69,13 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail-activity-marker { z-index: 1; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; flex-shrink: 0; border-radius: 50%; background: var(--color-casa-sand); color: var(--color-casa-muted); }
 .appointment-detail-activity-marker svg { width: 0.875rem; height: 0.875rem; }
 .appointment-detail-activity-marker.is-success { background: var(--color-casa-palm-dark); color: white; }
-.appointment-detail-activity-marker.is-danger { background: #fef2f2; color: #b91c1c; }
+.appointment-detail-activity-marker.is-danger { background: color-mix(in srgb, var(--color-casa-danger-bg) 50%, var(--color-casa-paper)); color: var(--color-casa-danger); }
 .appointment-detail-activity p { font-weight: 600; }
 .appointment-detail-visit-state { display: flex; align-items: center; gap: 1rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); padding: 1rem; background: var(--color-casa-sand); box-shadow: var(--shadow-casa-soft); }
 .appointment-detail-visit-state--success { background: color-mix(in srgb, var(--color-casa-palm) 7%, var(--color-casa-paper)); border-color: color-mix(in srgb, var(--color-casa-palm) 30%, var(--color-casa-paper)); }
-.appointment-detail-visit-state--danger { background: #fef2f2; border-color: #fecaca; }
+.appointment-detail-visit-state--danger { background: color-mix(in srgb, var(--color-casa-danger-bg) 50%, var(--color-casa-paper)); border-color: color-mix(in srgb, var(--color-casa-danger) 30%, white); }
 .appointment-detail-state-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; flex-shrink: 0; border: 2px solid currentColor; border-radius: 50%; color: var(--color-casa-palm-dark); font-size: 1.5rem; }
-.appointment-detail-visit-state--danger .appointment-detail-state-icon { color: #b91c1c; }
+.appointment-detail-visit-state--danger .appointment-detail-state-icon { color: var(--color-casa-danger); }
 .appointment-detail-visit-state p { margin-top: 0.35rem; color: var(--color-casa-muted); line-height: 1.5; }
 .appointment-detail-visit-facts { display: grid; gap: 1rem; margin-top: 1rem; padding-block: 1rem; border-top: 1px solid var(--color-casa-border); }
 .appointment-detail-visit-facts > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1rem; }
@@ -84,8 +84,8 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail .casa-button-primary:disabled, .appointment-detail .casa-button-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
 .appointment-detail-action-help { margin-block: 0.5rem; color: var(--color-casa-muted); line-height: 1.5; }
 .appointment-detail-cancel { margin-top: 0.75rem; border-top: 1px solid var(--color-casa-border); padding-top: 0.75rem; }
-.appointment-detail-cancel-button { display: flex; justify-content: center; align-items: center; min-height: 2.75rem; color: #b91c1c; font-weight: 700; border-radius: var(--radius-casa-control); }
-.appointment-detail-cancel-button:hover { background: #fef2f2; }
+.appointment-detail-cancel-button { display: flex; justify-content: center; align-items: center; min-height: 2.75rem; color: var(--color-casa-danger); font-weight: 700; border-radius: var(--radius-casa-control); }
+.appointment-detail-cancel-button:hover { background: color-mix(in srgb, var(--color-casa-danger-bg) 50%, var(--color-casa-paper)); }
 .appointment-detail-payment { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); padding: 0 0.875rem; margin-bottom: 0.875rem; }
 .appointment-detail-payment > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; padding-block: 0.75rem; }
 .appointment-detail-payment > div + div { border-top: 1px solid var(--color-casa-border); }
