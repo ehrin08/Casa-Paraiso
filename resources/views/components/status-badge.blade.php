@@ -2,9 +2,9 @@
 
 @php
     $classes = match ($tone) {
-        'success' => 'border-casa-green/30 bg-casa-green/15 text-casa-green',
-        'warning' => 'border-casa-brass/40 bg-casa-brass/15 text-casa-cacao',
-        'danger' => 'border-red-200 bg-red-50 text-red-700',
+        'success' => 'border-casa-success/15 bg-casa-success-bg text-casa-success',
+        'warning' => 'border-casa-warning/15 bg-casa-warning-bg text-casa-warning',
+        'danger' => 'border-casa-danger/15 bg-casa-danger-bg text-casa-danger-text',
         'dark' => 'border-casa-charcoal/20 bg-casa-charcoal/10 text-casa-charcoal',
         default => 'border-casa-border bg-casa-sand/55 text-casa-muted',
     };

@@ -110,7 +110,7 @@
 @endphp
 
 <nav x-data="{ open: false }" x-on:keydown.escape.window="open = false; $store.sidebar.hideTooltip()" data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
-    <div class="sticky top-0 z-40 border-b border-casa-border/80 bg-casa-paper/94 px-4 py-2 backdrop-blur-xl lg:hidden">
+    <div class="casa-glass-bar sticky top-0 z-40 border-b px-4 py-2 lg:hidden">
         <div class="flex items-center justify-between gap-4">
             <a href="{{ route($dashboardRoute) }}" class="min-w-0 rounded-xl bg-white px-2 py-1">
                 <x-application-logo class="origin-left scale-[0.72]" />
@@ -130,14 +130,14 @@
         </div>
     </div>
 
-    <aside id="desktop-workspace-navigation" data-desktop-sidebar aria-label="Desktop workspace navigation" class="casa-wood-panel fixed inset-y-0 start-0 z-30 hidden flex-col overflow-y-auto border-e border-white/10 p-3 lg:flex"
+    <aside id="desktop-workspace-navigation" data-desktop-sidebar aria-label="Desktop workspace navigation" class="casa-sidebar-panel fixed inset-y-0 start-0 z-30 hidden flex-col overflow-y-auto border-e p-3 lg:flex"
         @mouseover="$store.sidebar.showTooltip($event)" @focusin="$store.sidebar.showTooltip($event)"
         @mouseout="$store.sidebar.deferHideTooltip()" @focusout="$store.sidebar.deferHideTooltip()">
         <div class="casa-sidebar-heading flex items-center justify-between gap-2">
-            <a href="{{ route($dashboardRoute) }}" class="casa-sidebar-logo min-w-0 rounded-xl bg-casa-paper px-2.5 py-2 shadow-casa-card">
+            <a href="{{ route($dashboardRoute) }}" class="casa-sidebar-logo min-w-0 rounded-2xl bg-white px-2.5 py-2">
                 <x-application-logo />
             </a>
-            <button type="button" x-cloak class="casa-icon-button border-white/15 bg-white/10 text-white" aria-controls="desktop-workspace-navigation"
+            <button type="button" x-cloak class="casa-icon-button" aria-controls="desktop-workspace-navigation"
                 :aria-expanded="!$store.sidebar.collapsed" :aria-label="$store.sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
                 :title="$store.sidebar.collapsed ? 'Expand sidebar' : 'Collapse sidebar'" @click="$store.sidebar.toggle()">
                 <svg class="size-5" :class="{ 'rotate-180': $store.sidebar.collapsed }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -146,13 +146,13 @@
             </button>
         </div>
 
-        <div class="casa-sidebar-account mt-3 rounded-xl border border-white/10 bg-white/[0.065] p-3">
+        <div class="casa-sidebar-account mt-3 rounded-2xl border border-casa-border/70 bg-casa-sand/45 p-3">
             <div class="flex items-center gap-3">
-                <span class="grid size-9 shrink-0 place-items-center rounded-full border border-casa-brass/35 bg-casa-brass/15 text-sm font-extrabold tracking-[0.04em] text-casa-sand">{{ $initials }}</span>
+                <span class="grid size-9 shrink-0 place-items-center rounded-full border border-casa-palm/20 bg-casa-palm-tint text-sm font-extrabold tracking-[0.04em] text-casa-palm-dark">{{ $initials }}</span>
                 <span class="casa-sidebar-expanded-only min-w-0">
-                    <span class="block text-sm font-extrabold uppercase tracking-[0.05em] text-casa-brass-light">{{ $roleLabel }}</span>
-                    <span class="mt-1 block truncate text-sm font-semibold text-white">{{ $user->name }}</span>
-                    <span class="mt-0.5 block truncate text-sm text-white/65">{{ $user->email }}</span>
+                    <span class="block text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ $roleLabel }}</span>
+                    <span class="mt-1 block truncate text-sm font-semibold text-casa-text">{{ $user->name }}</span>
+                    <span class="mt-0.5 block truncate text-sm text-casa-muted">{{ $user->email }}</span>
                 </span>
             </div>
         </div>
@@ -160,7 +160,7 @@
         <div class="mt-4 space-y-4">
             @foreach ($navGroups as $group)
                 <section aria-label="{{ $group['label'] }} navigation">
-                    <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">{{ $group['label'] }}</p>
+                    <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ $group['label'] }}</p>
                     <div class="mt-2 space-y-1">
                         @foreach ($group['items'] as $item)
                             @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
@@ -179,7 +179,7 @@
             @endforeach
 
             <section aria-label="Account navigation">
-                <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">Account</p>
+                <p class="casa-sidebar-expanded-only px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">Account</p>
                 <div class="mt-2 space-y-1">
                     @foreach ($accountLinks as $item)
                         @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
@@ -196,10 +196,10 @@
         </div>
 
         <div class="mt-auto pt-4">
-            <p class="casa-sidebar-expanded-only mb-2 px-2 text-sm leading-5 text-white/65">Open every day<br><span class="font-bold text-white/80">1:00 PM to 12:00 MN</span></p>
+            <p class="casa-sidebar-expanded-only mb-2 px-2 text-sm leading-5 text-casa-muted">Open every day<br><span class="font-bold text-casa-text">1:00 PM to 12:00 MN</span></p>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" data-sidebar-label="Log out" class="casa-sidebar-logout casa-button-secondary w-full border-white/15 bg-white/8 text-white hover:bg-white/14 hover:text-white">
+                <button type="submit" data-sidebar-label="Log out" class="casa-sidebar-logout casa-button-secondary w-full">
                     <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v16h5M15 8l4 4-4 4M9 12h10" /></svg>
                     <span class="casa-sidebar-link-label">Log out</span>
                 </button>
@@ -213,29 +213,29 @@
         x-text="$store.sidebar.tooltip?.label"></div>
 
     <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 lg:hidden" style="display: none;">
-        <div class="absolute inset-0 bg-casa-charcoal/72 backdrop-blur-sm" @click="open = false"></div>
-        <aside id="mobile-workspace-navigation" x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="casa-wood-panel absolute inset-y-0 start-0 flex w-[min(19rem,88vw)] flex-col overflow-y-auto p-3 shadow-casa-lift" aria-label="Mobile workspace navigation">
+        <div class="absolute inset-0 bg-casa-charcoal/45 backdrop-blur-md" @click="open = false"></div>
+        <aside id="mobile-workspace-navigation" x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="casa-sidebar-panel absolute inset-y-0 start-0 flex w-[min(19rem,88vw)] flex-col overflow-y-auto bg-casa-paper p-3 shadow-casa-lift" aria-label="Mobile workspace navigation">
             <div class="flex items-center justify-between gap-4">
-                <a href="{{ route($dashboardRoute) }}" class="rounded-xl bg-casa-paper px-2 py-1.5" @click="open = false">
+                <a href="{{ route($dashboardRoute) }}" class="rounded-2xl bg-white px-2 py-1.5" @click="open = false">
                     <x-application-logo class="origin-left scale-[0.72]" />
                 </a>
-                <button type="button" class="casa-icon-button border-white/15 bg-white/10 text-white" aria-label="Close navigation" @click="open = false">
+                <button type="button" class="casa-icon-button" aria-label="Close navigation" @click="open = false">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </button>
             </div>
 
-            <div class="mt-4 rounded-xl border border-white/10 bg-white/[0.065] p-3">
-                <p class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-brass-light">{{ $roleLabel }}</p>
-                <p class="mt-1 truncate text-sm font-semibold text-white">{{ $user->name }}</p>
-                <p class="mt-0.5 truncate text-sm text-white/65">{{ $user->email }}</p>
+            <div class="mt-4 rounded-2xl border border-casa-border/70 bg-casa-sand/45 p-3">
+                <p class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ $roleLabel }}</p>
+                <p class="mt-1 truncate text-sm font-semibold text-casa-text">{{ $user->name }}</p>
+                <p class="mt-0.5 truncate text-sm text-casa-muted">{{ $user->email }}</p>
             </div>
 
             <div class="mt-4 space-y-4">
                 @foreach ($navGroups as $group)
                     <section aria-label="{{ $group['label'] }} navigation">
-                        <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">{{ $group['label'] }}</p>
+                        <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">{{ $group['label'] }}</p>
                         <div class="mt-2 space-y-1">
                             @foreach ($group['items'] as $item)
                                 @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
@@ -254,7 +254,7 @@
                 @endforeach
 
                 <section aria-label="Account navigation">
-                    <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-white/60">Account</p>
+                    <p class="px-3 text-sm font-extrabold uppercase tracking-[0.05em] text-casa-muted">Account</p>
                     <div class="mt-2 space-y-1">
                         @foreach ($accountLinks as $item)
                             @php $isActive = request()->routeIs(...(array) $item['active']); @endphp
@@ -272,7 +272,7 @@
 
             <form method="POST" action="{{ route('logout') }}" class="mt-auto pt-6" data-turbo="false">
                 @csrf
-                <button type="submit" class="casa-button-secondary w-full border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white">Log out</button>
+                <button type="submit" class="casa-button-secondary w-full">Log out</button>
             </form>
         </aside>
     </div>

@@ -36,7 +36,7 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail-customer-identity { flex: 1; min-width: 0; }
 .appointment-detail-customer h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; }
 .appointment-detail-customer p { margin-top: 0.25rem; color: var(--color-casa-muted); }
-.appointment-detail-booking-strip { display: grid; gap: 0.875rem; border: 1px solid var(--color-casa-border); border-radius: 10px; padding: 0.75rem; background: color-mix(in srgb, var(--color-casa-sand) 25%, var(--color-casa-paper)); }
+.appointment-detail-booking-strip { display: grid; gap: 0.875rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); padding: 0.75rem; background: color-mix(in srgb, var(--color-casa-sand) 25%, var(--color-casa-paper)); }
 .appointment-detail-booking-strip > div { display: flex; align-items: center; gap: 0.625rem; min-width: 0; }
 .appointment-detail-service-icon { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; flex-shrink: 0; border-radius: 50%; background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
 .appointment-detail-service-icon svg { width: 1.75rem; height: 1.75rem; }
@@ -46,7 +46,7 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail-booking-facts dd { font-weight: 600; }
 .appointment-detail-notice { margin-bottom: 0.75rem; color: var(--color-casa-cacao); }
 .appointment-detail-treatment { border-top: 1px solid var(--color-casa-border); padding-top: 0.875rem; }
-.appointment-detail .appointment-detail-treatment-table { border: 0; border-radius: 6px; }
+.appointment-detail .appointment-detail-treatment-table { border: 0; border-radius: var(--radius-casa-control); }
 .appointment-detail-treatment-table table { width: 100%; min-width: 30rem; }
 .appointment-detail-treatment-table th { text-align: left; font-weight: 500; }
 .appointment-detail-treatment-table tbody th { color: var(--color-casa-text); }
@@ -55,10 +55,10 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail-treatment-table tbody td:nth-child(2) { color: var(--color-casa-muted); }
 .appointment-detail-treatment-table tr + tr, .appointment-detail-treatment-table tfoot { border-top: 1px solid var(--color-casa-border); }
 .appointment-detail-treatment-table tfoot :is(th, td) { font-weight: 800; }
-.appointment-detail-voucher { display: flex; gap: 0.75rem; margin-top: 0.875rem; padding: 0.75rem; border-radius: 8px; background: color-mix(in srgb, var(--color-casa-brass) 10%, var(--color-casa-paper)); }
+.appointment-detail-voucher { display: flex; gap: 0.75rem; margin-top: 0.875rem; padding: 0.75rem; border-radius: var(--radius-casa-panel); background: color-mix(in srgb, var(--color-casa-brass) 10%, var(--color-casa-paper)); }
 .appointment-detail-voucher p { margin-top: 0.25rem; color: var(--color-casa-muted); }
 .appointment-detail-notes { display: grid; gap: 0.75rem; }
-.appointment-detail-notes section { border: 1px solid var(--color-casa-border); border-radius: 8px; padding: 0.875rem; background: color-mix(in srgb, var(--color-casa-sand) 20%, var(--color-casa-paper)); }
+.appointment-detail-notes section { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); padding: 0.875rem; background: color-mix(in srgb, var(--color-casa-sand) 20%, var(--color-casa-paper)); box-shadow: var(--shadow-casa-soft); }
 .appointment-detail-notes h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-weight: 600; }
 .appointment-detail-notes p { margin-top: 0.75rem; white-space: pre-line; color: var(--color-casa-muted); line-height: 1.6; }
 .appointment-detail-staff-label { padding: 0.15rem 0.5rem; border-radius: 5px; background: var(--color-casa-sand); color: var(--color-casa-cacao); font-weight: 400; }
@@ -71,7 +71,7 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail-activity-marker.is-success { background: var(--color-casa-palm-dark); color: white; }
 .appointment-detail-activity-marker.is-danger { background: #fef2f2; color: #b91c1c; }
 .appointment-detail-activity p { font-weight: 600; }
-.appointment-detail-visit-state { display: flex; align-items: center; gap: 1rem; border: 1px solid var(--color-casa-border); border-radius: 8px; padding: 1rem; background: var(--color-casa-sand); }
+.appointment-detail-visit-state { display: flex; align-items: center; gap: 1rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); padding: 1rem; background: var(--color-casa-sand); box-shadow: var(--shadow-casa-soft); }
 .appointment-detail-visit-state--success { background: color-mix(in srgb, var(--color-casa-palm) 7%, var(--color-casa-paper)); border-color: color-mix(in srgb, var(--color-casa-palm) 30%, var(--color-casa-paper)); }
 .appointment-detail-visit-state--danger { background: #fef2f2; border-color: #fecaca; }
 .appointment-detail-state-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; flex-shrink: 0; border: 2px solid currentColor; border-radius: 50%; color: var(--color-casa-palm-dark); font-size: 1.5rem; }
@@ -84,9 +84,9 @@ body[data-workspace-role] .casa-page-heading .appointment-detail-title h1 { font
 .appointment-detail .casa-button-primary:disabled, .appointment-detail .casa-button-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
 .appointment-detail-action-help { margin-block: 0.5rem; color: var(--color-casa-muted); line-height: 1.5; }
 .appointment-detail-cancel { margin-top: 0.75rem; border-top: 1px solid var(--color-casa-border); padding-top: 0.75rem; }
-.appointment-detail-cancel-button { display: flex; justify-content: center; align-items: center; min-height: 2.75rem; color: #b91c1c; font-weight: 700; border-radius: 8px; }
+.appointment-detail-cancel-button { display: flex; justify-content: center; align-items: center; min-height: 2.75rem; color: #b91c1c; font-weight: 700; border-radius: var(--radius-casa-control); }
 .appointment-detail-cancel-button:hover { background: #fef2f2; }
-.appointment-detail-payment { border: 1px solid var(--color-casa-border); border-radius: 8px; padding: 0 0.875rem; margin-bottom: 0.875rem; }
+.appointment-detail-payment { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); padding: 0 0.875rem; margin-bottom: 0.875rem; }
 .appointment-detail-payment > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; padding-block: 0.75rem; }
 .appointment-detail-payment > div + div { border-top: 1px solid var(--color-casa-border); }
 .appointment-detail-payment dt { color: var(--color-casa-muted); }

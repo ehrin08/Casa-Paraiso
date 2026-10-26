@@ -9,6 +9,8 @@ Casa Paraiso is a Laravel 12 server-rendered web application using MariaDB 10.11
 
 Earlier native-client, versioned API, device-token, database, tunnel, and hosted-pilot integrations are retired. The previous repository and database infrastructure remain archival rollback sources only.
 
+The local `redesign` branch carries the presentation-only Modern Resort redesign ([REDESIGN_MODERN_RESORT.md](REDESIGN_MODERN_RESORT.md)). `main` stays the stable live version. Do not merge, push, or package Hostinger releases from `redesign` without the user's explicit decision. Its shape and elevation tokens (`--radius-casa-*`, `--shadow-casa-soft`, `--color-casa-glass`, status colors) live in the `@theme` block of `resources/css/app.css`. Page CSS consumes them, and the light `casa-sidebar-panel` and `casa-glass-bar` classes replace the dark sidebar.
+
 ## Authority Map
 
 | Question | Source |

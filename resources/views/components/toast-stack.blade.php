@@ -45,7 +45,7 @@
                 x-show="show"
                 x-transition
                 role="status"
-                class="pointer-events-auto rounded-2xl border border-casa-green/30 bg-white px-5 py-4 text-sm font-semibold text-casa-green shadow-casa-lift"
+                class="pointer-events-auto rounded-[20px] border border-casa-success/15 bg-casa-success-bg px-5 py-4 text-sm font-semibold text-casa-success shadow-casa-card"
             >
                 {{ $message }}
             </div>
@@ -58,7 +58,7 @@
                 x-show="show"
                 x-transition
                 role="alert"
-                class="pointer-events-auto rounded-2xl border border-red-200 bg-white px-5 py-4 text-sm font-semibold text-red-700 shadow-casa-lift"
+                class="pointer-events-auto rounded-[20px] border border-casa-danger/15 bg-casa-danger-bg px-5 py-4 text-sm font-semibold text-casa-danger-text shadow-casa-card"
             >
                 {{ $errorMessage }}
             </div>

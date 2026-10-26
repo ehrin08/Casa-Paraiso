@@ -54,7 +54,7 @@
             ])>
                 <!-- Page Heading -->
                 @isset($header)
-                    <header data-page-header class="border-b border-casa-border/80 bg-casa-paper/90 backdrop-blur-xl">
+                    <header data-page-header class="casa-glass-bar border-b">
                         <div class="mx-auto max-w-[90rem] px-4 py-4 sm:px-5 lg:px-6">
                             <x-page-heading :variant="$isCustomer ? 'editorial' : 'operational'">
                                 {{ $header }}

@@ -10,7 +10,7 @@
     gap: 24px;
     min-height: 112px;
     border: 1px solid var(--color-casa-border);
-    border-radius: 14px;
+    border-radius: var(--radius-casa-card);
     padding: 18px 20px;
 }
 .casa-appointment-stat-icon {
@@ -28,15 +28,15 @@
 .casa-appointment-stat dd { font-size: 36px; line-height: 1.15; color: var(--color-casa-text); }
 .casa-appointments-all-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px; font-weight: 600; }
 .casa-appointments-all-link:hover { color: var(--color-casa-palm); }
-.casa-appointment-status { display: inline-block; border-radius: 8px; padding: 4px 12px; background: #e3f2e0; color: #25472a; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.casa-appointment-status { display: inline-block; border-radius: var(--radius-casa-panel); padding: 4px 12px; background: #e3f2e0; color: #25472a; font-size: 14px; font-weight: 600; white-space: nowrap; }
 .casa-appointments button:disabled { opacity: .5; cursor: not-allowed; }
 .casa-week-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
 .casa-week-therapist { min-width: 180px; }
-.casa-week-mode { min-height: 44px; padding: 8px 12px; border-radius: 8px; color: var(--color-casa-muted); font-size: 14px; font-weight: 700; }
+.casa-week-mode { min-height: 44px; padding: 8px 12px; border-radius: var(--radius-casa-panel); color: var(--color-casa-muted); font-size: 14px; font-weight: 700; }
 .casa-week-mode[aria-pressed="true"] { background: var(--color-casa-palm); color: white; }
 .casa-week-day-tab { min-height: 52px; border: 1px solid var(--color-casa-border); border-radius: 8px; background: var(--color-casa-paper); padding: 4px; font-size: 14px; }
 .casa-week-day-tab[aria-selected="true"] { background: var(--color-casa-palm); color: white; }
-.casa-week-viewport { overflow: auto; max-height: 530px; border: 1px solid var(--color-casa-border); border-radius: 10px; }
+.casa-week-viewport { overflow: auto; max-height: 530px; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); }
 .casa-week-grid { min-width: 1060px; font-size: 14px; font-variant-numeric: tabular-nums; }
 .casa-week-grid-header, .casa-week-grid-body { display: grid; grid-template-columns: 80px repeat(7, minmax(140px, 1fr)); }
 .casa-week-grid-header { position: sticky; top: 0; z-index: 30; background: var(--color-casa-paper); border-bottom: 1px solid var(--color-casa-border); }

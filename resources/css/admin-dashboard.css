@@ -23,7 +23,7 @@
 .casa-dashboard-icon svg { width: 1.65rem; height: 1.65rem; }
 .casa-dashboard-value { margin-top: 0.25rem; font-size: clamp(1.4rem, 2vw, 1.875rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .casa-dashboard-value--wide { font-size: clamp(1rem, 1.2vw, 1.25rem); letter-spacing: -0.02em; }
-.casa-dashboard-attention { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1.25rem; border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); font-size: 0.875rem; }
+.casa-dashboard-attention { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.75rem 1.25rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); background: var(--color-casa-paper); font-size: 0.875rem; box-shadow: var(--shadow-casa-soft); }
 .casa-dashboard-attention-link { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 44px; color: var(--color-casa-palm-dark); }
 .casa-dashboard-columns { display: grid; gap: 1rem; min-width: 0; }
 .casa-dashboard-aside { display: grid; gap: 1rem; align-content: start; min-width: 0; }
@@ -42,7 +42,7 @@ body[data-workspace-role] .casa-admin-dashboard .casa-dashboard-table { position
 .casa-dashboard-feedback { padding-top: 0.25rem; }
 .casa-dashboard-quote { margin: 0.75rem 0 0.5rem; font-size: 1rem; line-height: 1.6; overflow-wrap: anywhere; }
 .casa-dashboard-action { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.875rem; min-height: 56px; padding: 0.5rem 0; border-top: 1px solid var(--color-casa-border); font-size: 0.875rem; }
-.casa-dashboard-action .casa-dashboard-icon { width: 2.5rem; height: 2.5rem; border-radius: 10px; }
+.casa-dashboard-action .casa-dashboard-icon { width: 2.5rem; height: 2.5rem; border-radius: var(--radius-casa-control); }
 .casa-dashboard-empty { padding: 1.75rem 0; color: var(--color-casa-muted); font-size: 0.875rem; line-height: 1.6; }
 .casa-dashboard-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin-top: 0.75rem; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 .casa-dashboard-chart-track { height: 100px; position: relative; border-bottom: 1px solid var(--color-casa-muted); }

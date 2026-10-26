@@ -59,7 +59,7 @@
 .therapists-workspace .therapists-detail {
     min-width: 0;
     border: 1px solid var(--color-casa-border);
-    border-radius: 16px;
+    border-radius: var(--radius-casa-card);
     background: var(--color-casa-paper);
     box-shadow: 0 3px 12px rgba(55, 44, 32, 0.025);
 }
@@ -75,7 +75,7 @@
     max-width: 100%;
     overflow-x: auto;
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--radius-casa-panel);
     box-shadow: none;
     scrollbar-width: thin;
     scrollbar-color: var(--color-casa-taupe) transparent;
@@ -215,7 +215,7 @@
     min-height: 44px;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: var(--radius-casa-panel);
     color: var(--color-casa-text);
 }
 
@@ -275,7 +275,7 @@
     min-height: 44px;
     place-items: center;
     border: 1px solid var(--color-casa-border);
-    border-radius: 10px;
+    border-radius: var(--radius-casa-control);
     color: var(--color-casa-text);
     list-style: none;
     cursor: pointer;
@@ -299,7 +299,7 @@
     min-width: 180px;
     max-width: min(240px, 70vw);
     border: 1px solid var(--color-casa-border);
-    border-radius: 10px;
+    border-radius: var(--radius-casa-control);
     background: var(--color-casa-paper);
     padding: 4px;
     box-shadow: var(--shadow-casa-card);
@@ -309,7 +309,7 @@
     display: flex;
     min-height: 44px;
     align-items: center;
-    border-radius: 6px;
+    border-radius: var(--radius-casa-control);
     padding: 8px 12px;
     color: var(--color-casa-text);
     font-size: 14px;
@@ -467,7 +467,7 @@
     justify-content: center;
     gap: 8px;
     border: 1px solid var(--color-casa-border);
-    border-radius: 8px;
+    border-radius: var(--radius-casa-panel);
     padding: 8px 12px;
     color: var(--color-casa-text);
     font-size: 14px;
@@ -555,7 +555,7 @@
 
 .therapists-workspace .therapists-exception {
     border: 1px solid var(--color-casa-border);
-    border-radius: 8px;
+    border-radius: var(--radius-casa-panel);
     padding: 12px;
     font-size: 14px;
     line-height: 1.5;

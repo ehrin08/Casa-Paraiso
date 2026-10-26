@@ -19,7 +19,7 @@ class ModalInfrastructureTest extends TestCase
         $this->assertStringContainsString('z-[100] isolate', $html);
         $this->assertStringContainsString('fixed inset-0 z-0 transform transition-all', $html);
         $this->assertStringContainsString('casa-card relative z-10', $html);
-        $this->assertStringContainsString('backdrop-blur-sm', $html);
+        $this->assertStringContainsString('backdrop-blur-md', $html);
     }
 
     public function test_modal_asset_registers_central_state_and_scroll_locking(): void
