@@ -7,7 +7,7 @@
         </div>
 
         <div class="flex flex-wrap gap-3">
-            <a href="{{ route('admin.transactions.edit', $transaction) }}" class="casa-button-primary">{{ __('Edit') }}</a>
+            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.transactions.edit', $transaction) }}" class="casa-button-primary">{{ __('Edit') }}</a>
             <a href="{{ route('admin.transactions.index') }}" class="casa-button-secondary">{{ __('All transactions') }}</a>
         </div>
     </x-slot>

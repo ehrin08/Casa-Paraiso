@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use App\Http\Middleware\MonitorErrorResponses;
+use App\Http\Middleware\RestorePanelForm;
 use App\Services\SystemErrorResponseFinalizer;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(MonitorErrorResponses::class);
         $middleware->append(AddSecurityHeaders::class);
+        $middleware->web(append: [RestorePanelForm::class]);
 
         $middleware->trustHosts(
             at: fn (): array => config('casa.security.trusted_hosts', []),

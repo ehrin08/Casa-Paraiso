@@ -1,4 +1,5 @@
-<div data-panel-host data-turbo="false" class="casa-panel-host" aria-hidden="true">
+@php($panelRestore = request()->attributes->get(\App\Http\Middleware\RestorePanelForm::ATTRIBUTE))
+<div data-panel-host data-turbo="false" class="casa-panel-host" aria-hidden="true" @if ($panelRestore) data-panel-restore="{{ $panelRestore }}" @endif>
     <div data-panel-backdrop class="casa-panel-backdrop"></div>
 
     <section

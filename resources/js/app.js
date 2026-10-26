@@ -5,6 +5,7 @@ import { manilaDateKey, mondayOf, manilaTime, positionWeekEvents, therapistColor
 import { createOperationsBooking, createCustomerBooking } from './appointment-booking';
 import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
 import { isCustomerModalUrl, restoreCustomerDetail, clearCustomerDetailRecovery } from './customer-dialog';
+import { isFormPanelUrl, attachPanelReturn, takePanelRestore } from './panel-form';
 import { initializeSettingsChartDialog } from './settings-dialog';
 import { initializeScheduleDialog } from './schedule-dialog';
 import { createCustomerAppointmentCalendar } from './customer-appointment-calendar';
@@ -861,13 +862,14 @@ let panelRequest = 0;
 let panelAbort = null;
 const panelInertState = new Map();
 
-const setPanelPresentation = (booking, preview = false, customer = false) => {
+const setPanelPresentation = ({ booking = false, preview = false, customer = false, form = false } = {}) => {
     const { host } = panelElements();
     host?.classList.toggle('is-booking', booking);
     host?.classList.toggle('is-appointment-preview', preview);
     host?.classList.toggle('is-customer-detail', customer);
-    host?.classList.toggle('is-centered', booking || preview || customer);
-    if (!booking && !preview && !customer) {
+    host?.classList.toggle('is-form', form);
+    host?.classList.toggle('is-centered', booking || preview || customer || form);
+    if (!booking && !preview && !customer && !form) {
         panelInertState.forEach((wasInert, element) => { element.inert = wasInert; });
         panelInertState.clear();
         return;
@@ -912,8 +914,10 @@ const closeModalWithin = (root) => {
 };
 
 const panelPathPrefixes = [
+    '/admin/addons/',
     '/admin/appointments/',
     '/reception/appointments/',
+    '/reception/transactions/',
     '/admin/customers/',
     '/admin/staff/',
     '/admin/services/',
@@ -958,16 +962,16 @@ const setPanelLoading = (url) => {
     }
 
     host.classList.add('is-open', 'is-loading');
-    setPanelPresentation(isBookingPanelUrl(url), isAppointmentPreviewUrl(url), isCustomerModalUrl(url));
+    setPanelPresentation({ booking: isBookingPanelUrl(url), preview: isAppointmentPreviewUrl(url), customer: isCustomerModalUrl(url), form: isFormPanelUrl(url) });
     host.setAttribute('aria-hidden', 'false');
     syncBodyScrollLock();
 
     if (title) {
-        title.textContent = isBookingPanelUrl(url) ? (url.pathname.endsWith('/edit') ? 'Edit appointment' : 'Create appointment') : (isAppointmentPreviewUrl(url) ? 'Appointment details' : (isCustomerModalUrl(url) ? 'Customer details' : 'Loading'));
+        title.textContent = isBookingPanelUrl(url) ? (url.pathname.endsWith('/edit') ? 'Edit appointment' : 'Create appointment') : (isAppointmentPreviewUrl(url) ? 'Appointment details' : (isCustomerModalUrl(url) ? 'Customer details' : (isFormPanelUrl(url) ? 'Loading form' : 'Loading')));
     }
 
     if (status) {
-        status.textContent = isBookingPanelUrl(url) ? 'Loading booking form…' : (isAppointmentPreviewUrl(url) ? 'Loading appointment details…' : (isCustomerModalUrl(url) ? 'Loading customer details…' : `Opening ${url.pathname}`));
+        status.textContent = isBookingPanelUrl(url) ? 'Loading booking form…' : (isAppointmentPreviewUrl(url) ? 'Loading appointment details…' : (isCustomerModalUrl(url) ? 'Loading customer details…' : (isFormPanelUrl(url) ? 'Loading form…' : `Opening ${url.pathname}`)));
     }
 
     if (content) {
@@ -990,7 +994,7 @@ const closePanel = ({ restoreFocus = true } = {}) => {
 
     host.classList.remove('is-open', 'is-loading');
     host.setAttribute('aria-hidden', 'true');
-    setPanelPresentation(false);
+    setPanelPresentation();
     syncBodyScrollLock();
 
     if (content) {
@@ -1002,7 +1006,7 @@ const closePanel = ({ restoreFocus = true } = {}) => {
     }
 };
 
-const panelPageHtml = (doc) => {
+const panelPageHtml = (doc, url = null) => {
     const header = doc.querySelector('[data-page-header]');
     const main = doc.querySelector('[data-page-content]');
 
@@ -1015,14 +1019,14 @@ const panelPageHtml = (doc) => {
     }
 
     return `
-        <div class="casa-panel-page">
+        <div class="casa-panel-page"${url && isFormPanelUrl(url) ? ' data-panel-form' : ''}>
             ${header ? `<header>${header.innerHTML}</header>` : ''}
             <main>${main.innerHTML}</main>
         </div>
     `;
 };
 
-const renderPanelHtml = (pageHtml) => {
+const renderPanelHtml = (pageHtml, url = null) => {
     const { host, content } = panelElements();
 
     if (!host || !content) {
@@ -1031,7 +1035,14 @@ const renderPanelHtml = (pageHtml) => {
 
     clearPanelContent(content);
     content.innerHTML = pageHtml;
-    setPanelPresentation(Boolean(content.querySelector('[data-booking-page]')), Boolean(content.querySelector('[data-appointment-preview]')), Boolean(content.querySelector('[data-customer-detail]')));
+    const formPage = content.querySelector('[data-panel-form]');
+    if (formPage && url) attachPanelReturn(formPage, url);
+    setPanelPresentation({
+        booking: Boolean(content.querySelector('[data-booking-page]')),
+        preview: Boolean(content.querySelector('[data-appointment-preview]')),
+        customer: Boolean(content.querySelector('[data-customer-detail]')),
+        form: Boolean(formPage),
+    });
     host.classList.add('is-open');
     host.classList.remove('is-loading');
     host.setAttribute('aria-hidden', 'false');
@@ -1054,7 +1065,7 @@ const renderPanelHtml = (pageHtml) => {
     return true;
 };
 
-const openPanel = async (url, trigger = document.activeElement) => {
+const openPanel = async (url, trigger = document.activeElement, { restore = false } = {}) => {
     let { host, content } = panelElements();
     const request = ++panelRequest;
     panelAbort?.abort();
@@ -1070,13 +1081,14 @@ const openPanel = async (url, trigger = document.activeElement) => {
         panelTrigger = trigger instanceof HTMLElement ? trigger : null;
     }
 
-    const freshDetails = isAppointmentPreviewUrl(url) || isCustomerModalUrl(url);
+    // Forms and details always load fresh so entered values, errors and tokens never come from the cache.
+    const freshDetails = restore || isAppointmentPreviewUrl(url) || isCustomerModalUrl(url) || isFormPanelUrl(url);
     const cached = freshDetails ? null : panelCache.get(url.href);
     const cachedHtml = cached?.html;
     const cacheIsFresh = cached && Date.now() - cached.fetchedAt < panelCacheTtl;
 
     if (cachedHtml) {
-        if (!renderPanelHtml(cachedHtml)) {
+        if (!renderPanelHtml(cachedHtml, url)) {
             window.location.href = url.href;
             return;
         }
@@ -1105,7 +1117,7 @@ const openPanel = async (url, trigger = document.activeElement) => {
         const text = await response.text();
         if (request !== panelRequest || !host.classList.contains('is-open')) return;
         const doc = new DOMParser().parseFromString(text, 'text/html');
-        const pageHtml = panelPageHtml(doc);
+        const pageHtml = panelPageHtml(doc, url);
 
         if (!pageHtml) {
             window.location.href = url.href;
@@ -1123,7 +1135,7 @@ const openPanel = async (url, trigger = document.activeElement) => {
             return;
         }
 
-        renderPanelHtml(pageHtml);
+        renderPanelHtml(pageHtml, url);
     } catch {
         if (request !== panelRequest || panelAbort.signal.aborted) return;
         if (!cachedHtml) {
@@ -1138,6 +1150,14 @@ const restoreCustomerModal = () => restoreCustomerDetail(document, renderPanelHt
 document.addEventListener('DOMContentLoaded', restoreCustomerModal);
 if (document.readyState !== 'loading') restoreCustomerModal();
 
+// A failed form-panel submit returns to the list page; reopen that panel so its errors and entered values show.
+const restorePanelForm = () => {
+    const url = takePanelRestore(document, panelPathPrefixes);
+    if (url) void openPanel(url, null, { restore: true });
+};
+document.addEventListener('DOMContentLoaded', restorePanelForm);
+if (document.readyState !== 'loading') restorePanelForm();
+
 prepareFastNavigation();
 
 document.addEventListener('turbo:before-render', (event) => {
@@ -1151,6 +1171,7 @@ document.addEventListener('turbo:visit', () => {
 
 document.addEventListener('turbo:load', () => {
     restoreCustomerModal();
+    restorePanelForm();
     initializeBookingNotifications();
     prepareFastNavigation();
     hidePageLoading();
@@ -1181,7 +1202,8 @@ window.addEventListener('pagehide', clearCompletionConfirmation);
 document.addEventListener('turbo:fetch-request-error', hidePageLoading);
 
 document.addEventListener('click', (event) => {
-    const closeTrigger = event.target instanceof Element ? event.target.closest('[data-panel-close], [data-panel-backdrop]') : null;
+    // Form Cancel links are real links on full pages; inside the panel they only dismiss it.
+    const closeTrigger = event.target instanceof Element ? event.target.closest('[data-panel-close], [data-panel-backdrop], [data-panel-host] [data-panel-dismiss]') : null;
 
     if (closeTrigger) {
         event.preventDefault();

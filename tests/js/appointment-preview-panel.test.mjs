@@ -4,6 +4,7 @@ import test from 'node:test';
 import vm from 'node:vm';
 import { isAppointmentPreviewUrl, isBookingPanelUrl, visibleDialogControls } from '../../resources/js/booking-dialog.js';
 import { isCustomerModalUrl } from '../../resources/js/customer-dialog.js';
+import { isFormPanelUrl, attachPanelReturn } from '../../resources/js/panel-form.js';
 
 // Run the actual workspace loader with a small DOM fixture and controlled requests.
 const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
@@ -33,6 +34,7 @@ function fixture(fetch) {
         querySelector(selector) {
             if (selector === '[data-appointment-preview]' && this.innerHTML.includes('data-appointment-preview')) return {};
             if (selector === '[data-customer-detail]' && this.innerHTML.includes('data-customer-detail')) return {};
+            if (selector === '[data-panel-form]' && this.innerHTML.includes('data-panel-form')) return { querySelectorAll: () => [] };
             if (selector === 'h1, h2') return { textContent: 'Appointment details' };
             return null;
         },
@@ -67,7 +69,7 @@ function fixture(fetch) {
     }
     const context = vm.createContext({
         window, document, Element, HTMLElement: Element, AbortController, DOMParser,
-        isAppointmentPreviewUrl, isBookingPanelUrl, isCustomerModalUrl, visibleDialogControls,
+        isAppointmentPreviewUrl, isBookingPanelUrl, isCustomerModalUrl, isFormPanelUrl, attachPanelReturn, visibleDialogControls,
         shouldSkipNavigationUrl: () => false, syncBodyScrollLock() {}, modalStore: () => ({ active: null }),
     });
     vm.runInContext(loaderSource + '\nglobalThis.panelApi = { openPanel, closePanel };', context);
@@ -77,6 +79,7 @@ function fixture(fetch) {
 for (const [kind, path, marker] of [
     ['appointment', '/admin/appointments/12?preview=1', 'data-appointment-preview'],
     ['customer', '/admin/customers/12?modal=1', 'data-customer-detail'],
+    ['form', '/admin/services/12/edit', 'data-service-form'],
 ]) {
 const url = new URL('http://localhost' + path);
 const response = (label) => ({ ok: true, text: async () => `<div ${marker}>${label}</div>` });
@@ -88,6 +91,7 @@ test(kind + ': every open fetches fresh HTML without browser caching and restore
     assert.equal(f.classes.has('is-centered'), true);
     assert.equal(f.classes.has('is-appointment-preview'), kind === 'appointment');
     assert.equal(f.classes.has('is-customer-detail'), kind === 'customer');
+    assert.equal(f.classes.has('is-form'), kind === 'form');
     assert.equal(f.classes.has('is-booking'), false);
     assert.equal(f.background.inert, true);
     assert.equal(f.document.activeElement, f.closeControl);

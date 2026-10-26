@@ -76,6 +76,8 @@
                             confirm-message="{{ __('The reserved therapist and time will become available to other customers immediately.') }}"
                             confirm-button="{{ __('Cancel booking') }}"
                             button-class="casa-danger-button w-full"
+                            tone="danger"
+                            dismiss-label="{{ __('Keep booking') }}"
                         />
                     </div>
                 </x-app-card>

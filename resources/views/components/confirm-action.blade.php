@@ -7,6 +7,8 @@
     'confirmButton' => null,
     'buttonClass' => 'font-bold text-casa-muted hover:text-casa-primary',
     'modalWidth' => 'md',
+    'tone' => 'default',
+    'dismissLabel' => null,
 ])
 
 @php
@@ -15,29 +17,30 @@
 @endphp
 
 <div @class(['block w-full' => str_contains($buttonClass, 'w-full'), 'inline' => ! str_contains($buttonClass, 'w-full')])>
-    <button type="button" class="{{ $buttonClass }}" x-data="" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')">
+    <button type="button" class="{{ $buttonClass }}" aria-haspopup="dialog" x-data="" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')">
         {{ $trigger ?? $label }}
     </button>
 
-    <x-modal :name="$modalName" :maxWidth="$modalWidth" focusable>
-        <form method="POST" action="{{ $action }}" class="p-6">
+    <x-modal :name="$modalName" :maxWidth="$modalWidth" :labelled-by="$modalName.'-title'" centered focusable>
+        <form method="POST" action="{{ $action }}" data-turbo="false">
             @csrf
             @if ($spoofMethod !== 'POST')
                 @method($spoofMethod)
             @endif
-            {{ $slot }}
 
-            <h2 class="font-display text-xl font-black text-casa-text">{{ $confirmTitle }}</h2>
-            <p class="mt-3 text-sm leading-6 text-casa-muted">{{ $confirmMessage }}</p>
+            <x-modal-shell :title="$confirmTitle" :title-id="$modalName.'-title'">
+                <p class="text-sm leading-6 text-casa-muted">{{ $confirmMessage }}</p>
+                {{ $slot }}
 
-            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button type="button" class="casa-button-secondary" x-on:click="$dispatch('close-modal', '{{ $modalName }}')">
-                    {{ __('Cancel') }}
-                </button>
-                <button type="submit" class="casa-button-primary">
-                    {{ $confirmButton ?? $label }}
-                </button>
-            </div>
+                <x-slot name="footer">
+                    <button type="button" class="casa-button-secondary" x-on:click="$dispatch('close-modal', '{{ $modalName }}')">
+                        {{ $dismissLabel ?? __('Cancel') }}
+                    </button>
+                    <button type="submit" class="{{ $tone === 'danger' ? 'casa-danger-button' : 'casa-button-primary' }}">
+                        {{ $confirmButton ?? $label }}
+                    </button>
+                </x-slot>
+            </x-modal-shell>
         </form>
     </x-modal>
 </div>

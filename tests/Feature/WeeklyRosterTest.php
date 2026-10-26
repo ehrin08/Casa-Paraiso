@@ -344,6 +344,21 @@ class WeeklyRosterTest extends TestCase
         $this->assertTrue($rows->contains(fn ($row) => $row->schedule_date->toDateString() === '2026-10-21' && $row->end_time === '16:00:00'));
     }
 
+    public function test_draft_shift_removal_asks_for_confirmation_in_a_modal(): void
+    {
+        $staff = $this->therapist();
+        $this->recurring($staff);
+        $week = $this->draft();
+        $shift = $week->shifts()->sole();
+
+        $this->get(route('admin.staff-roster.index', ['week' => $this->week, 'view' => 'draft']))->assertOk()
+            ->assertSee('Remove this shift?')
+            ->assertSee('Keep shift')
+            ->assertSee('casa-danger-button', false)
+            ->assertSee(route('admin.staff-roster.shifts.destroy', [$week, $shift]), false)
+            ->assertDontSee('<details class="schedules-remove">', false);
+    }
+
     private function therapist(array $attributes = []): StaffProfile
     {
         return StaffProfile::factory()->create($attributes);

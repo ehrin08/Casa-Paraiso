@@ -132,6 +132,13 @@
 .casa-panel-host.is-booking .casa-panel-page, .casa-panel-host.is-booking .casa-panel-page > main { display: flex; flex: 1; min-height: 0; width: 100%; padding: 0; }
 .casa-panel-host.is-booking .booking-wizard { border: 0; border-radius: 0; }
 
+/* Create and edit forms: a content-height centered dialog; the bar carries the page title. */
+.casa-panel-host.is-form .casa-panel { width: min(48rem, 100%); max-width: 48rem; height: auto; min-height: min(20rem, 90dvh); }
+.casa-panel-host.is-form .casa-panel__content { padding: 1.25rem 1.5rem 1.5rem; }
+.casa-panel-host.is-form .casa-panel-page > header { display: none; }
+.casa-panel-host.is-form .casa-panel-page > main { padding: 0; }
+.casa-panel-host.is-form .casa-panel-page .casa-card { box-shadow: none; }
+
 @media (max-width: 767px) {
     .booking-calendar-layout, .booking-review-layout { grid-template-columns: minmax(0, 1fr); }
     .booking-calendar-day { min-height: 3rem; }
@@ -145,6 +152,8 @@
     .casa-panel-host.is-centered { padding: .75rem; }
     .casa-panel-host.is-centered .casa-panel { height: 90dvh; max-height: 90dvh; }
     .casa-panel-host.is-centered .casa-panel__bar { padding: .75rem 1rem; }
+    .casa-panel-host.is-form .casa-panel { height: auto; }
+    .casa-panel-host.is-form .casa-panel__content { padding: .75rem 1rem 1rem; }
     .booking-calendar { padding: .75rem; }
     .booking-month-grid, .booking-weekdays { gap: .25rem; }
     .booking-date-open { font-size: .625rem; }

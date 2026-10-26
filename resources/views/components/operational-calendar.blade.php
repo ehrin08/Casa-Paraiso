@@ -263,12 +263,12 @@
                     · <span x-text="availabilitySelection?.label"></span>
                 </p>
                 <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                    <a x-bind:href="availabilityUrl('weekly')" class="rounded-2xl border border-casa-border bg-casa-sand/50 p-5 transition hover:border-casa-palm hover:bg-casa-paper">
+                    <a data-panel-link data-turbo="false" aria-haspopup="dialog" x-on:click="$dispatch('close-modal', 'calendar-availability-create')" x-bind:href="availabilityUrl('weekly')" class="rounded-2xl border border-casa-border bg-casa-sand/50 p-5 transition hover:border-casa-palm hover:bg-casa-paper">
                         <span class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-palm">{{ __('Repeat weekly') }}</span>
                         <strong class="mt-2 block text-base text-casa-text">{{ __('Recurring shift') }}</strong>
                         <span class="mt-2 block text-sm leading-6 text-casa-muted">{{ __('Create normal working availability for this weekday.') }}</span>
                     </a>
-                    <a x-bind:href="availabilityUrl('exception')" class="rounded-2xl border border-casa-border bg-casa-sand/50 p-5 transition hover:border-casa-cacao hover:bg-casa-paper">
+                    <a data-panel-link data-turbo="false" aria-haspopup="dialog" x-on:click="$dispatch('close-modal', 'calendar-availability-create')" x-bind:href="availabilityUrl('exception')" class="rounded-2xl border border-casa-border bg-casa-sand/50 p-5 transition hover:border-casa-cacao hover:bg-casa-paper">
                         <span class="text-sm font-extrabold uppercase tracking-[0.05em] text-casa-cacao">{{ __('This date only') }}</span>
                         <strong class="mt-2 block text-base text-casa-text">{{ __('Schedule exception') }}</strong>
                         <span class="mt-2 block text-sm leading-6 text-casa-muted">{{ __('Add availability or block time for this one date.') }}</span>

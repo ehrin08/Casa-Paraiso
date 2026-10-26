@@ -28,42 +28,33 @@
 
         <aside class="space-y-4">
             @if ($appointment->status === \App\Models\Appointment::STATUS_CONFIRMED && $appointment->scheduled_start_at?->lte(now()))
+                @php($completionModal = 'reception-appointment-completion-'.$appointment->id)
                 <x-app-card>
                     <p class="casa-section-label">{{ __('Finish service') }}</p>
-                    <form method="POST" action="{{ route('reception.appointments.complete', $appointment) }}" class="mt-4 space-y-3">
-                        @csrf
-                        <input type="number" step="0.01" min="0" name="amount" value="{{ old('amount', $appointment->expectedAmount()) }}" class="casa-input" required>
-                        <select name="payment_status" class="casa-input" required>
-                            @foreach ([\App\Models\Transaction::PAYMENT_UNPAID, \App\Models\Transaction::PAYMENT_PARTIAL, \App\Models\Transaction::PAYMENT_PAID] as $status)
-                                <option value="{{ $status }}">{{ ucfirst($status) }}</option>
-                            @endforeach
-                        </select>
-                        <select name="payment_method" class="casa-input">
-                            <option value="">{{ __('Select method') }}</option>
-                            @foreach (\App\Models\Transaction::PAYMENT_METHODS as $method)
-                                <option value="{{ $method }}" @selected(old('payment_method', $transaction->payment_method) === $method)>{{ $method }}</option>
-                            @endforeach
-                        </select>
-                        <input type="datetime-local" name="paid_at" value="{{ now()->format('Y-m-d\TH:i') }}" class="casa-input">
-                        <textarea name="notes" class="casa-input" rows="3" placeholder="{{ __('Payment notes') }}"></textarea>
-                        <button class="casa-button-primary w-full">{{ __('Complete and record payment') }}</button>
-                    </form>
+                    <p class="mt-2 text-sm leading-6 text-casa-muted">{{ __('Record the completed visit and its payment together.') }}</p>
+                    <button type="button" class="casa-button-primary mt-4 w-full" aria-haspopup="dialog" x-data="" x-on:click="$dispatch('open-modal', '{{ $completionModal }}')">{{ __('Finish service') }}</button>
                 </x-app-card>
+                <x-modal :name="$completionModal" :show="old('_modal') === $completionModal" maxWidth="5xl" focusable><div class="p-5">@include('admin.appointments.partials.completion-form', ['appointment' => $appointment, 'modalName' => $completionModal, 'completeAction' => route('reception.appointments.complete', $appointment)])</div></x-modal>
             @endif
 
             @if ($appointment->status === \App\Models\Appointment::STATUS_CONFIRMED)
                 <x-app-card>
                     <p class="casa-section-label">{{ __('Outcome') }}</p>
-                    <form method="POST" action="{{ route('reception.appointments.outcome', $appointment) }}" class="mt-4 space-y-3">
-                        @csrf
-                        @method('PATCH')
-                        <select name="status" class="casa-input">
-                            <option value="cancelled">{{ __('Cancelled') }}</option>
-                            <option value="no_show">{{ __('No-show') }}</option>
-                        </select>
-                        <input name="reason" class="casa-input" placeholder="{{ __('Reason (optional)') }}">
-                        <button class="casa-button-secondary w-full">{{ __('Record outcome') }}</button>
-                    </form>
+                    <x-input-error class="mt-2" :messages="old('_modal') ? [] : $errors->get('status')" />
+                    <div class="mt-4 space-y-3">
+                        @foreach ([
+                            ['status' => 'no_show', 'label' => __('Mark as no-show'), 'title' => __('Mark this visit as no-show?'), 'message' => __('The visit will leave the active queue and no transaction will be created.'), 'button' => __('Mark no-show'), 'dismiss' => null, 'class' => 'casa-button-secondary w-full'],
+                            ['status' => 'cancelled', 'label' => __('Cancel appointment'), 'title' => __('Cancel this appointment?'), 'message' => __('The therapist reservation will be released. This appointment will remain in your records.'), 'button' => __('Cancel appointment'), 'dismiss' => __('Keep appointment'), 'class' => 'casa-button-secondary w-full'],
+                        ] as $outcome)
+                            <x-confirm-action :action="route('reception.appointments.outcome', $appointment)" method="PATCH" :label="$outcome['label']" :confirm-title="$outcome['title']" :confirm-message="$outcome['message']" :confirm-button="$outcome['button']" :dismiss-label="$outcome['dismiss']" :button-class="$outcome['class']" tone="danger">
+                                <input type="hidden" name="status" value="{{ $outcome['status'] }}">
+                                <div>
+                                    <x-input-label :for="'outcome_reason_'.$outcome['status']" :value="__('Reason (optional)')" />
+                                    <x-text-input :id="'outcome_reason_'.$outcome['status']" name="reason" class="mt-2 block w-full" maxlength="500" />
+                                </div>
+                            </x-confirm-action>
+                        @endforeach
+                    </div>
                 </x-app-card>
             @endif
         </aside>

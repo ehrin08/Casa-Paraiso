@@ -71,7 +71,7 @@
         <x-app-card>
             <div class="flex flex-col gap-3">
                 <button type="submit" class="casa-button-primary w-full">{{ $submitLabel }}</button>
-                <a href="{{ route('admin.staff.show', $staffProfile) }}" class="casa-button-secondary w-full">{{ __('Cancel') }}</a>
+                <a href="{{ route('admin.staff.show', $staffProfile) }}" class="casa-button-secondary w-full" data-panel-dismiss>{{ __('Cancel') }}</a>
             </div>
         </x-app-card>
     </aside>

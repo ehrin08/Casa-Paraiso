@@ -24,9 +24,7 @@
 .schedules-grid td .schedules-shift a, .schedules-shift a { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; justify-content: space-between; min-height: 2.75rem; color: var(--color-casa-palm-dark); font-weight: 700; }
 .schedules-shift a span { font-size: .875rem; text-decoration: underline; }
 .schedules-remove { color: var(--color-casa-danger-text); font-size: .875rem; }
-.schedules-remove summary { min-height: 2.75rem; display: flex; align-items: center; cursor: pointer; text-decoration: underline; }
-.schedules-remove form { display: grid; gap: .6rem; padding-top: .4rem; }
-.schedules-remove button { min-height: 2.75rem; border: 1px solid color-mix(in srgb, var(--color-casa-danger) 30%, white); border-radius: var(--radius-casa-control); padding: .4rem; font-weight: 700; }
+.schedules-remove-trigger { min-height: 2.75rem; display: flex; align-items: center; cursor: pointer; color: var(--color-casa-danger-text); text-decoration: underline; }
 .schedules-empty-hours { padding: .4rem 0; color: var(--color-casa-muted); }
 .schedules-grid td .schedules-add, .schedules-add { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: .4rem; border: 1px dashed var(--color-casa-border); border-radius: var(--radius-casa-control); color: var(--color-casa-palm-dark); font-weight: 700; }
 .schedules-grid td .schedules-exception, .schedules-exception { display: block; min-height: 2.75rem; border-left: 3px solid var(--color-casa-cacao); padding: .4rem .55rem; color: var(--color-casa-cacao); background: var(--color-casa-sand); line-height: 1.5; }
@@ -49,7 +47,7 @@
 .schedules-conflicts strong { align-self: center; }
 .schedules-conflicts span, .schedules-conflicts p { grid-column: 1 / -1; }
 .schedules-dialog { width: min(58rem, calc(100vw - 2rem)); max-width: none; max-height: 90dvh; margin: auto; padding: 0; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); color: var(--color-casa-ink); box-shadow: 0 24px 70px rgb(25 35 26 / 25%); }
-.schedules-dialog::backdrop { background: rgb(25 35 26 / 65%); }
+.schedules-dialog::backdrop { background: color-mix(in srgb, var(--color-casa-charcoal) 45%, transparent); backdrop-filter: blur(8px); }
 body.schedules-dialog-open { overflow: hidden; }
 .schedules-editor { display: flex; flex-direction: column; max-height: 89dvh; min-width: 0; }
 .schedules-editor [hidden] { display: none !important; }

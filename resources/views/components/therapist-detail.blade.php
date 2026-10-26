@@ -30,7 +30,7 @@
                 <svg class="size-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
             </summary>
             <div class="therapists-menu-links">
-                <a href="{{ $editUrl }}">{{ __('Edit therapist') }}</a>
+                <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ $editUrl }}">{{ __('Edit therapist') }}</a>
                 <a href="{{ route('admin.staff.show', $staffProfile) }}">{{ __('Open full profile') }}</a>
             </div>
         </details>
@@ -83,7 +83,7 @@
         <section class="therapists-section">
             <div class="therapists-section-heading">
                 <h3>{{ __('Services offered (:count)', ['count' => $staffProfile->services_count]) }}</h3>
-                <a href="{{ $editUrl }}" class="therapists-action-link">{{ __('Edit services') }} <span aria-hidden="true">→</span></a>
+                <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ $editUrl }}" class="therapists-action-link">{{ __('Edit services') }} <span aria-hidden="true">→</span></a>
             </div>
             <div class="therapists-service-list">
                 @forelse ($staffProfile->services as $service)
@@ -165,14 +165,14 @@
         <section class="therapists-section">
             <div class="therapists-section-heading">
                 <h3>{{ __('Upcoming exceptions') }}</h3>
-                <a href="{{ route('admin.staff.schedule-exceptions.create', $staffProfile) }}" class="therapists-action-link">{{ __('Add exception') }} <span aria-hidden="true">+</span></a>
+                <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.schedule-exceptions.create', $staffProfile) }}" class="therapists-action-link">{{ __('Add exception') }} <span aria-hidden="true">+</span></a>
             </div>
             <div class="therapists-exception-list">
                 @forelse ($upcomingExceptions as $exception)
                     <div class="therapists-exception">
                         <div class="therapists-section-heading">
                             <strong>{{ $exception->exception_date->format('M d, Y') }}</strong>
-                            <a href="{{ route('admin.staff.schedule-exceptions.edit', [$staffProfile, $exception]) }}" class="therapists-action-link therapists-action-link--plain">{{ __('Edit') }}</a>
+                            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.schedule-exceptions.edit', [$staffProfile, $exception]) }}" class="therapists-action-link therapists-action-link--plain">{{ __('Edit') }}</a>
                         </div>
                         <p>
                             <span @class(['therapists-pill', 'therapists-pill--active' => $exception->exception_type === \App\Models\StaffScheduleException::TYPE_AVAILABLE, 'therapists-pill--unavailable' => $exception->exception_type !== \App\Models\StaffScheduleException::TYPE_AVAILABLE])>{{ ucfirst($exception->exception_type) }}</span>
