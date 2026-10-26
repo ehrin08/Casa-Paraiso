@@ -24,6 +24,10 @@ Defined in the `@theme` block of `resources/css/app.css`. The existing `--color-
 | `--shadow-casa-lift` | unchanged | Dialogs and drawers |
 | `--color-casa-glass` | paper at about 80% | Frosted header, dock and dialog bars |
 | `--color-casa-danger`, `--color-casa-danger-dark` | the existing error reds | Danger buttons and errors, replacing hardcoded hex |
+| `--color-casa-success`, `-warning`, `-info`, `-danger-text` and their `-bg` pairs | existing status shades | Status pills, notices and calendar events |
+| `--color-casa-violet`, `--color-casa-rose` and their `-bg` pairs | existing categorical shades | Therapist calendar lanes and role badges |
+
+Page stylesheets contain no raw hex values. Tints, lines and chart shades are `color-mix()` blends of these tokens. Only `landing.css` keeps its local `--landing-*` variables.
 
 ## Component rules
 
