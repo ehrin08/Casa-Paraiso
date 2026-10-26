@@ -35,7 +35,7 @@ Page stylesheets contain no raw hex values. Tints, lines and chart shades are `c
 - **Inputs** use the control radius, a paper fill, a hairline border and a soft palm focus ring.
 - **Cards** use the card radius, a paper surface, a hairline border and the soft shadow. Operational panels use the panel radius.
 - **Header:** the page header and the mobile top bar are frosted (glass color plus backdrop blur), sticky, with a hairline bottom border. Text on glass must keep AA contrast.
-- **Sidebar:** a light paper sidebar replaces the dark wood panel. Its active link is a pale palm pill with palm-dark text. The collapse rail, tooltips, badges and the mobile drawer keep their behavior.
+- **Navigation:** a sticky frosted top bar on every width has ☰, a logo and View site link to the public homepage, a notification bell and an initials avatar menu (profile, settings, user accounts, system issues, log out). ☰ opens a deep palm drawer with cream links and a brass active pill. Related pages share one drawer link and switch through a pill section-tab row: admin Payments | Commissions, admin Reports | Feedback | Customer rewards, and therapist Payments | My commissions. The collapsible rail, tooltips and `casa.sidebar.collapsed` preference are gone. `resources/js/workspace-drawer.js` owns the drawer state.
 - **Badges, chips and pagination controls** are pills.
 - **Density:** the workspaces keep their compact table density and 12–16px gaps. Only shape, surface and elevation change there.
 

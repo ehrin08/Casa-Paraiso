@@ -44,7 +44,7 @@ Casa Brass is decorative and should not carry small text. Use Brass Light for me
 - Admin and staff surfaces keep compact metrics and information-dense tables inside those shapes.
 - Primary controls have a minimum 44px target size.
 - Customer appointment and feedback history use responsive cards. Operational record lists remain tables with keyboard-focusable horizontal scrolling.
-- In the Blade application, Admin and staff use a persistent desktop sidebar and mobile drawer. Customers use a desktop sidebar and mobile bottom navigation for My appointments, My feedback, and My profile.
+- In the Blade application, every role uses a sticky top bar with a ☰ button that opens the workspace drawer over the page at every width. Customers also keep the mobile bottom navigation for My appointments, My feedback, and My profile.
 
 ## Public Homepage
 
@@ -68,7 +68,7 @@ Compact density applies only inside the authenticated application shell. Public 
 
 | Element | Authenticated standard |
 | --- | --- |
-| Desktop sidebar | 256px (`16rem`) expanded; 80px (`5rem`) collapsed icon rail, at 1024px and above |
+| Workspace navigation | 64px sticky top bar; overlay drawer `min(18rem, 86vw)` wide, opened from ☰ at every width |
 | Page and section rhythm | 12–16px gaps; 16px base card padding, increasing to 20px where a form needs it |
 | Operational card radius | 16px panels and 20px cards with the soft resort shadow; controls use 12px and buttons are pills |
 | Page title | 24–30px |
@@ -77,8 +77,9 @@ Compact density applies only inside the authenticated application shell. Public 
 | Buttons, fields, tabs, and page controls | 44px minimum interaction target |
 
 - Use the shared `page-heading` component for authenticated page titles. Customer headings may use its editorial variant; admin and staff headings use the operational variant.
-- The desktop sidebar and mobile drawer use the light frosted resort surface with a pale palm pill for the active link; the page header and mobile top bar are frosted glass bars.
-- All roles share a desktop sidebar toggle with a browser-local preference (`casa.sidebar.collapsed`), initially expanded. The collapsed rail retains accessible link names, hover/focus labels, active states, badges, account initials, and logout. Mobile navigation stays independent. Sidebar and page offset animate together for 180ms only on a user toggle, respecting reduced motion.
+- **Top bar:** frosted glass with a soft shadow. It holds ☰, the logo (links to the public homepage), a "View site" house link, a notification bell with the unread booking count (admin, reception and therapist), and an initials avatar that opens the account menu: role, name and email, then My profile, Settings, User accounts and System issues as permitted, and Log out.
+- **Drawer:** a deep palm gradient (palm-dark to charcoal) with a faint brass glow, cream links and a brass-tinted active pill with a brass indicator. Groups are separated by dividers without visible labels. There is no account card or hours text. It closes on Escape, backdrop click, link choice or navigation. Focus moves into the drawer, Tab stays inside it, and closing returns focus to ☰. Page scrolling is locked while it is open.
+- **Fewer destinations:** admin Payments covers Payments and Commissions, and Insights covers Reports, Feedback and Customer rewards; therapist Payments covers Payments and My commissions. The merged pages keep their routes and switch through a pill section-tab row at the top of the page content.
 - Use `stat-strip` for compact context on detail pages and appointment calendars. Reserve larger metric cards for dashboards, feedback, customer rewards, transactions, and reports.
 - Put record totals and useful status counts in toolbar chips. Do not add generic “Showing” or “Search Ready” metric cards above lists.
 - List filters collapse below the 1024px breakpoint. The toggle exposes an accessible expanded state and active-filter count; render “Clear filters” only when at least one filter is active.
