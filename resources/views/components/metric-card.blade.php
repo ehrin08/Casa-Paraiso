@@ -6,15 +6,16 @@
 ])
 
 @php
-    $accent = match ($tone) {
-        'green' => 'bg-casa-green',
-        'gold' => 'bg-casa-brass',
-        'charcoal' => 'bg-casa-charcoal',
-        default => 'bg-casa-cacao',
+    $toneClass = match ($tone) {
+        'green' => 'casa-tone-palm',
+        'gold' => 'casa-tone-brass',
+        'charcoal' => 'casa-tone-blue',
+        default => 'casa-tone-cacao',
     };
+    $accent = 'bg-[var(--tone)]';
 @endphp
 
-<div data-metric-card {{ $attributes->merge(['class' => 'casa-card-compact casa-metric-card relative min-w-0 overflow-hidden p-3 sm:p-4']) }}>
+<div data-metric-card {{ $attributes->merge(['class' => 'casa-card-compact casa-metric-card relative min-w-0 overflow-hidden p-3 sm:p-4 '.$toneClass]) }}>
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
             <p class="text-sm font-extrabold uppercase tracking-[0.06em] text-casa-muted">{{ $label }}</p>

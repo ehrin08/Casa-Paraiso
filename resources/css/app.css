@@ -114,6 +114,92 @@
     box-shadow: 0 8px 18px -10px rgba(51, 71, 54, 0.7);
 }
 
+/* Soft tone accents: each tone pairs a readable ink with its pastel wash, all from Casa tokens. */
+.casa-tone-palm { --tone: var(--color-casa-palm-dark); --tone-bg: var(--color-casa-palm-tint); }
+.casa-tone-brass { --tone: var(--color-casa-warning); --tone-bg: var(--color-casa-warning-bg); }
+.casa-tone-cacao { --tone: var(--color-casa-cacao); --tone-bg: color-mix(in srgb, var(--color-casa-cacao) 14%, var(--color-casa-paper)); }
+.casa-tone-blue { --tone: var(--color-casa-info); --tone-bg: var(--color-casa-info-bg); }
+.casa-tone-rose { --tone: var(--color-casa-rose); --tone-bg: var(--color-casa-rose-bg); }
+.casa-tone-violet { --tone: var(--color-casa-violet); --tone-bg: var(--color-casa-violet-bg); }
+
+/* Metric grids cycle through the tones by position unless a card names its own tone. */
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > :not([class*="casa-tone-"]):nth-child(6n + 1) { --tone: var(--color-casa-palm-dark); --tone-bg: var(--color-casa-palm-tint); }
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > :not([class*="casa-tone-"]):nth-child(6n + 2) { --tone: var(--color-casa-warning); --tone-bg: var(--color-casa-warning-bg); }
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > :not([class*="casa-tone-"]):nth-child(6n + 3) { --tone: var(--color-casa-info); --tone-bg: var(--color-casa-info-bg); }
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > :not([class*="casa-tone-"]):nth-child(6n + 4) { --tone: var(--color-casa-rose); --tone-bg: var(--color-casa-rose-bg); }
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > :not([class*="casa-tone-"]):nth-child(6n + 5) { --tone: var(--color-casa-violet); --tone-bg: var(--color-casa-violet-bg); }
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > :not([class*="casa-tone-"]):nth-child(6n) { --tone: var(--color-casa-cacao); --tone-bg: color-mix(in srgb, var(--color-casa-cacao) 14%, var(--color-casa-paper)); }
+
+/* Sentiment keeps its meaning: positive palm, neutral amber, negative rose. */
+.casa-app-page .feedback-metrics > :nth-child(3) { --tone: var(--color-casa-rose); --tone-bg: var(--color-casa-rose-bg); }
+
+.casa-app-page :is(.casa-dashboard-metrics, .casa-metric-grid, .payments-metrics, .commissions-metrics, .rewards-metrics, .reports-metrics, .feedback-metrics, .casa-appointment-stats) > *,
+.casa-app-page .casa-metric-card {
+    border-top: 3px solid color-mix(in srgb, var(--tone, var(--color-casa-palm)) 35%, transparent);
+    background-image: linear-gradient(140deg, color-mix(in srgb, var(--tone-bg, var(--color-casa-palm-tint)) 60%, var(--color-casa-paper)) 0%, var(--color-casa-paper) 58%);
+}
+
+.casa-app-page :is(.casa-dashboard-icon, .payments-metric-icon, .rewards-metric-icon, .reports-metric-icon, .feedback-metric-icon, .casa-appointment-stat-icon, .settings-icon-circle) {
+    background: var(--tone-bg, var(--color-casa-palm-tint));
+    color: var(--tone, var(--color-casa-palm-dark));
+}
+
+.casa-page-band {
+    position: relative;
+    border-color: color-mix(in srgb, var(--color-casa-border) 78%, white);
+    background: linear-gradient(100deg, color-mix(in srgb, var(--color-casa-palm-tint) 85%, var(--color-casa-paper)) 0%, var(--color-casa-paper) 46%, color-mix(in srgb, var(--color-casa-warning-bg) 70%, var(--color-casa-paper)) 100%);
+}
+
+.casa-page-band[data-header-variant="editorial"] {
+    background: linear-gradient(100deg, color-mix(in srgb, var(--color-casa-rose-bg) 80%, var(--color-casa-paper)) 0%, var(--color-casa-paper) 48%, color-mix(in srgb, var(--color-casa-warning-bg) 70%, var(--color-casa-paper)) 100%);
+}
+
+/* A faint brass glow keeps the band from reading as a flat stripe. */
+.casa-page-band::after {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: min(26rem, 60%);
+    background: radial-gradient(ellipse at 85% 50%, color-mix(in srgb, var(--color-casa-brass) 16%, transparent), transparent 70%);
+    content: "";
+    pointer-events: none;
+}
+
+.casa-page-band > * {
+    position: relative;
+    z-index: 1;
+}
+
+.casa-nav-icon {
+    display: inline-grid;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--tone-bg);
+    color: var(--tone);
+}
+
+.casa-nav-icon > svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+/* On the deep palm drawer each pastel chip carries its tone; the active chip adds a brass ring. */
+.casa-drawer .casa-nav-icon {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.casa-drawer .casa-nav-link-active .casa-nav-icon {
+    box-shadow: 0 0 0 2px var(--color-casa-brass-light);
+}
+
+.casa-app-page .casa-appointment-stat-icon.is-cancelled {
+    background: var(--color-casa-rose-bg);
+    color: var(--color-casa-rose);
+}
+
 .casa-icon-button-active {
     border-color: var(--color-casa-palm);
     background: var(--color-casa-palm-tint);
