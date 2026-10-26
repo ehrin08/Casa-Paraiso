@@ -20,6 +20,7 @@
 /public/build
 /public/hot
 /public/storage
+/output/hostinger-release/
 /storage/*.key
 /storage/pail
 /storage/backups/*

@@ -24,4 +24,6 @@ Run tests and build assets with:
 .\scripts\casa-docker.ps1 compose exec -T app npm run build
 ```
 
-Existing MySQL installations must follow [the MariaDB migration runbook](docs/MARIADB_MIGRATION.md) before setup. See [the Docker workflow](docs/DOCKER_WORKFLOW.md), [Hostinger database deployment](docs/HOSTINGER_DEPLOYMENT.md), [project memory](docs/PROJECT_MEMORY.md), and [AGENTS.md](AGENTS.md) for operational rules. The [Render and Oracle deployment](docs/RENDER_ORACLE_DEPLOYMENT.md) is retained for historical reference.
+Build the audited Hostinger Unlimited upload package with `.\scripts\casa-hostinger.ps1 package`. It includes production PHP dependencies and compiled assets, with credentials, business data and uploads transferred separately. Follow [Hostinger deployment](docs/HOSTINGER_DEPLOYMENT.md) for the private application/public-directory layout, data preservation, production settings and live verification.
+
+Existing MySQL installations must follow [the MariaDB migration runbook](docs/MARIADB_MIGRATION.md) before setup. See [the Docker workflow](docs/DOCKER_WORKFLOW.md), [project memory](docs/PROJECT_MEMORY.md), and [AGENTS.md](AGENTS.md) for operational rules. The [Render and Oracle deployment](docs/RENDER_ORACLE_DEPLOYMENT.md) is retained for historical reference.

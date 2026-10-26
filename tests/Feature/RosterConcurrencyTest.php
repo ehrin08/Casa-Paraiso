@@ -62,10 +62,11 @@ class RosterConcurrencyTest extends TestCase
     public function test_concurrent_duplicate_shift_submissions_cannot_create_overlapping_rows(): void
     {
         [$staff, , , $week] = $this->fixture();
-        DB::beginTransaction();
-        StaffScheduleWeek::whereKey($week->id)->lockForUpdate()->firstOrFail();
         $data = ['staff_profile_id' => $staff->id, 'schedule_date' => '2026-10-18', 'start_time' => '18:00', 'end_time' => '19:00', 'ends_next_day' => false];
         $worker = $this->worker(['operation' => 'shift', 'week_id' => $week->id, 'revision' => 1, 'shift' => $data]);
+        DB::beginTransaction();
+        StaffScheduleWeek::whereKey($week->id)->lockForUpdate()->firstOrFail();
+        $this->releaseWorker($worker);
         $this->waitForRowLock($worker, 'staff_schedule_weeks');
         app(WeeklyRoster::class)->saveShift($week, $data, 1);
         DB::commit();
@@ -77,10 +78,11 @@ class RosterConcurrencyTest extends TestCase
     public function test_stale_bulk_replacement_cannot_overwrite_another_admins_committed_hours(): void
     {
         [$staff, , , $week] = $this->fixture();
-        DB::beginTransaction();
-        StaffScheduleWeek::whereKey($week->id)->lockForUpdate()->firstOrFail();
         $data = ['mode' => 'hours', 'staff_ids' => [$staff->id], 'dates' => ['2026-10-18'], 'start_time' => '15:00', 'end_time' => '16:00'];
         $worker = $this->worker(['operation' => 'bulk', 'week_id' => $week->id, 'revision' => 1, 'bulk' => $data]);
+        DB::beginTransaction();
+        StaffScheduleWeek::whereKey($week->id)->lockForUpdate()->firstOrFail();
+        $this->releaseWorker($worker);
         $this->waitForRowLock($worker, 'staff_schedule_weeks');
         app(WeeklyRoster::class)->bulkReplace($week, [...$data, 'start_time' => '14:00', 'end_time' => '17:00'], 1);
         DB::commit();
@@ -95,9 +97,10 @@ class RosterConcurrencyTest extends TestCase
         [$staff, $service, $customer, $week, $admin] = $this->fixture();
         $shift = $week->shifts()->sole();
         $shift->update(['end_time' => '14:00']);
+        $worker = $this->worker(['operation' => 'publish', 'week_id' => $week->id, 'actor_id' => $admin->id, 'revision' => 1]);
         DB::beginTransaction();
         StaffProfile::whereKey($staff->id)->lockForUpdate()->firstOrFail();
-        $worker = $this->worker(['operation' => 'publish', 'week_id' => $week->id, 'actor_id' => $admin->id, 'revision' => 1]);
+        $this->releaseWorker($worker);
         $this->waitForRowLock($worker, 'staff_profiles');
         $appointment = app(AppointmentWorkflow::class)->autoBook(['customer_profile_id' => $customer->id], $service, Carbon::parse('2026-10-18 15:00:00', 'Asia/Manila'), $staff->id);
         DB::commit();
@@ -112,9 +115,10 @@ class RosterConcurrencyTest extends TestCase
     {
         [$staff, $service, $customer, $week, $admin] = $this->fixture();
         $week->shifts()->sole()->update(['end_time' => '14:00']);
+        $worker = $this->worker(['operation' => 'booking', 'week_id' => $week->id, 'staff_id' => $staff->id, 'service_id' => $service->id, 'customer_id' => $customer->id, 'starts_at' => '2026-10-18 15:00:00']);
         DB::beginTransaction();
         app(WeeklyRoster::class)->publish($week, $admin->id, 1);
-        $worker = $this->worker(['operation' => 'booking', 'week_id' => $week->id, 'staff_id' => $staff->id, 'service_id' => $service->id, 'customer_id' => $customer->id, 'starts_at' => '2026-10-18 15:00:00']);
+        $this->releaseWorker($worker);
         $this->waitForRowLock($worker, 'staff_profiles');
         DB::commit();
         $result = $this->workerResult($worker);
@@ -142,20 +146,32 @@ class RosterConcurrencyTest extends TestCase
         $directory = sys_get_temp_dir().'/casa-roster-'.bin2hex(random_bytes(8));
         mkdir($directory, 0700);
         file_put_contents($directory.'/input.json', json_encode([...$data, 'directory' => $directory, 'now' => '2026-10-18 10:00:00'], JSON_THROW_ON_ERROR));
-        $process = new Process([PHP_BINARY, base_path('tests/Support/roster-worker.php'), $directory.'/input.json'], base_path(), timeout: 20);
+        $process = new Process([PHP_BINARY, base_path('tests/Support/roster-worker.php'), $directory.'/input.json'], base_path(), timeout: 120);
         $process->start();
         $this->workers[] = [$process, $directory];
+        $worker = count($this->workers) - 1;
+        $deadline = microtime(true) + 30;
+        while (! is_file($directory.'/ready.json') && microtime(true) < $deadline) {
+            $this->assertWorkerRunning($worker, 'bootstrap');
+            usleep(25000);
+        }
+        $this->assertFileExists($directory.'/ready.json', $this->workerDiagnostic($worker, 'bootstrap'));
 
-        return count($this->workers) - 1;
+        return $worker;
+    }
+
+    private function releaseWorker(int $worker): void
+    {
+        file_put_contents($this->workers[$worker][1].'/go', 'go');
     }
 
     private function waitForRowLock(int $worker, string $table): void
     {
         [$process, $directory] = $this->workers[$worker];
-        $deadline = microtime(true) + 10;
+        $deadline = microtime(true) + 15;
         while (microtime(true) < $deadline) {
-            if (is_file($directory.'/started.json')) {
-                $started = json_decode(file_get_contents($directory.'/started.json'), true, flags: JSON_THROW_ON_ERROR);
+            if (is_file($directory.'/ready.json')) {
+                $started = json_decode(file_get_contents($directory.'/ready.json'), true, flags: JSON_THROW_ON_ERROR);
                 foreach (DB::select('SHOW FULL PROCESSLIST') as $row) {
                     $query = strtolower((string) $row->Info);
                     if ((int) $row->Id === (int) $started['connection_id'] && str_contains($query, $table) && str_contains($query, 'for update')) {
@@ -163,21 +179,38 @@ class RosterConcurrencyTest extends TestCase
                     }
                 }
             }
-            if (! $process->isRunning()) {
-                $this->fail('Worker finished before reaching the expected row lock: '.$process->getErrorOutput());
-            }
+            $this->assertWorkerRunning($worker, $table.' row lock');
             usleep(25000);
         }
-        $this->fail('Worker did not reach the expected '.$table.' row lock.');
+        $this->fail($this->workerDiagnostic($worker, $table.' row lock'));
     }
 
     private function workerResult(int $worker): array
     {
         [$process, $directory] = $this->workers[$worker];
+        $deadline = microtime(true) + 30;
+        while ($process->isRunning() && microtime(true) < $deadline) {
+            usleep(25000);
+        }
+        $this->assertFalse($process->isRunning(), $this->workerDiagnostic($worker, 'completion'));
         $process->wait();
         $this->assertSame(0, $process->getExitCode(), $process->getErrorOutput());
         $this->assertFileExists($directory.'/result.json');
 
         return json_decode(file_get_contents($directory.'/result.json'), true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    private function assertWorkerRunning(int $worker, string $phase): void
+    {
+        $this->assertTrue($this->workers[$worker][0]->isRunning(), $this->workerDiagnostic($worker, $phase));
+    }
+
+    private function workerDiagnostic(int $worker, string $expected): string
+    {
+        [$process, $directory] = $this->workers[$worker];
+        $phase = is_file($directory.'/phase') ? trim(file_get_contents($directory.'/phase')) : 'not started';
+
+        return 'Roster worker expected '.$expected.'; phase='.$phase.'; exit='.var_export($process->getExitCode(), true)
+            .'; stderr='.substr($process->getErrorOutput(), -2000);
     }
 }
