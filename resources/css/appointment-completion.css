@@ -29,8 +29,13 @@
     height: 44px;
     place-items: center;
     border: 1px solid var(--color-casa-border);
-    border-radius: var(--radius-casa-control);
-    background: var(--color-casa-bg);
+    border-radius: var(--radius-casa-pill);
+    background: var(--color-casa-paper);
+    transition: background-color 180ms ease;
+}
+
+.casa-completion-close:hover {
+    background: var(--color-casa-sand);
 }
 
 .casa-completion-close:focus-visible {
@@ -43,6 +48,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 1.25rem;
+    background: color-mix(in srgb, var(--color-casa-sand) 35%, var(--color-casa-paper));
 }
 
 .casa-completion-details {
@@ -55,11 +61,23 @@
     min-width: 0;
 }
 
+.casa-completion-details section {
+    padding: 1rem 1.15rem 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-casa-border) 78%, white);
+    border-radius: var(--radius-casa-panel);
+    background: var(--color-casa-paper);
+    box-shadow: var(--shadow-casa-soft);
+}
+
 .casa-completion-fields > div {
     display: grid;
     gap: 0.25rem;
     padding-block: 0.75rem;
-    border-bottom: 1px solid var(--color-casa-border);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-casa-border) 70%, white);
+}
+
+.casa-completion-fields > div:last-child {
+    border-bottom: 0;
 }
 
 .casa-completion-fields dt {
@@ -79,8 +97,9 @@
 .casa-completion-footer {
     justify-content: flex-end;
     flex-wrap: wrap;
-    border-top: 1px solid var(--color-casa-border);
-    background: var(--color-casa-bg);
+    border-top: 1px solid color-mix(in srgb, var(--color-casa-border) 78%, white);
+    background: var(--color-casa-glass);
+    backdrop-filter: blur(18px);
 }
 
 @media (min-width: 768px) {
