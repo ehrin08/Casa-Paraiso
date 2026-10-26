@@ -2,7 +2,7 @@
 .casa-page-heading .feedback-heading h1 { font-size: clamp(1.5rem, 2.5vw, 1.875rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
 .feedback-heading p { margin-top: 0.4rem; color: var(--color-casa-muted); font-size: 1rem; line-height: 1.5; }
 .feedback-workspace { display: grid; gap: 1rem; min-width: 0; color: var(--color-casa-text); }
-.feedback-workspace ::selection { background: #dcebd8; color: var(--color-casa-success); }
+.feedback-workspace ::selection { background: var(--color-casa-palm-tint); color: var(--color-casa-success); }
 .feedback-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .feedback-metric, .feedback-filters, .feedback-panel { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); background: var(--color-casa-paper); min-width: 0; box-shadow: var(--shadow-casa-soft); }
 .feedback-metric { display: flex; align-items: center; gap: 1.25rem; padding: 1.25rem; }
@@ -56,7 +56,7 @@ body[data-workspace-role] .feedback-workspace .feedback-service-table :is(thead 
 .feedback-service-total { font-weight: 700; font-variant-numeric: tabular-nums; }
 .feedback-sentiment { display: inline-flex; justify-content: center; min-width: 5.5rem; padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.875rem; line-height: 1.35; }
 .feedback-sentiment--positive { color: var(--color-casa-success); background: var(--color-casa-success-bg); }
-.feedback-sentiment--neutral { color: var(--color-casa-warning); background: #f9edda; }
+.feedback-sentiment--neutral { color: var(--color-casa-warning); background: var(--color-casa-warning-bg); }
 .feedback-sentiment--negative { color: var(--color-casa-danger-text); background: var(--color-casa-danger-bg); }
 .feedback-topics { display: grid; gap: 1rem; }
 .feedback-topic-label { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.25rem 0.75rem; font-size: 0.875rem; line-height: 1.5; }
