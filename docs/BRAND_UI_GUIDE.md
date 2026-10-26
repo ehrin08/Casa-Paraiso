@@ -40,8 +40,8 @@ Casa Brass is decorative and should not carry small text. Use Brass Light for me
 
 ## Components and Layout
 
-- Customer editorial cards use 24–32px radii and generous breathing room. Public homepage cards follow the reference layout below.
-- Admin and staff surfaces use 14–16px radii, compact metrics, and information-dense tables.
+- **Modern Resort shapes (redesign branch):** cards and dialogs use `--radius-casa-card` (20px), operational panels and tables `--radius-casa-panel` (16px), inputs and icon controls `--radius-casa-control` (12px), and buttons, badges, chips and pagination are pills. Surfaces use Casa Paper with hairline borders and the soft `--shadow-casa-soft` elevation. See [REDESIGN_MODERN_RESORT.md](REDESIGN_MODERN_RESORT.md).
+- Admin and staff surfaces keep compact metrics and information-dense tables inside those shapes.
 - Primary controls have a minimum 44px target size.
 - Customer appointment and feedback history use responsive cards. Operational record lists remain tables with keyboard-focusable horizontal scrolling.
 - In the Blade application, Admin and staff use a persistent desktop sidebar and mobile drawer. Customers use a desktop sidebar and mobile bottom navigation for My appointments, My feedback, and My profile.
@@ -50,7 +50,7 @@ Casa Brass is decorative and should not carry small text. Use Brass Light for me
 
 The public `/` page follows the approved cream-and-forest-green reference as a continuous scroll: fixed navigation, split booking hero with an arched lobby photo, hours/starting-price strip, published About content and team chart, treatments, booking steps, optional additions, split contact panel, and footer. Sections fit their content rather than each filling a viewport. Homepage styles live in `resources/css/landing.css`; the authenticated workspaces retain their existing tokens and density.
 
-Use Cormorant Garamond headings, Manrope body text, fine borders, 3–5px card/button corners, and restrained palm linework. The hero and contact panel use the real lobby photos; About uses the real towel detail; booking steps and VIP Room use the real treatment room. Preserve the original logo artwork and existing readable header/footer presentation.
+Use Cormorant Garamond headings, Manrope body text, a frosted fixed header, 20px treatment/add-on/contact cards with soft shadows, pill buttons and a pill facts strip, and restrained palm linework. The hero and contact panel use the real lobby photos; About uses the real towel detail; booking steps and VIP Room use the real treatment room. Preserve the original logo artwork and existing readable header/footer presentation.
 
 Active service names, descriptions, durations, PHP prices, and add-ons remain database-driven. Display every active service in centered wrapping rows of four cards from 1024px, two from 640–1023px, and one below 640px. Shorter final rows stay centered with the same card widths as full rows; section headings and card text remain left aligned. Desktop treatment cards use 1rem gaps and padding, with titles sized at `clamp(1.5rem, 2vw, 1.8rem)`. Add-ons use five columns from 1024px, three from 640–1023px, and two below 640px. Split content stacks below 768px; the header uses its mobile menu below 1024px. Controls have 44px targets, section anchors clear the fixed header, and images below the hero load lazily.
 
@@ -70,13 +70,14 @@ Compact density applies only inside the authenticated application shell. Public 
 | --- | --- |
 | Desktop sidebar | 256px (`16rem`) expanded; 80px (`5rem`) collapsed icon rail, at 1024px and above |
 | Page and section rhythm | 12–16px gaps; 16px base card padding, increasing to 20px where a form needs it |
-| Operational card radius | 14–16px with a light, low-spread shadow; compact controls may use 10–12px |
+| Operational card radius | 16px panels and 20px cards with the soft resort shadow; controls use 12px and buttons are pills |
 | Page title | 24–30px |
 | Section heading | 18–22px |
 | Meaningful text | 14px minimum |
 | Buttons, fields, tabs, and page controls | 44px minimum interaction target |
 
 - Use the shared `page-heading` component for authenticated page titles. Customer headings may use its editorial variant; admin and staff headings use the operational variant.
+- The desktop sidebar and mobile drawer use the light frosted resort surface with a pale palm pill for the active link; the page header and mobile top bar are frosted glass bars.
 - All roles share a desktop sidebar toggle with a browser-local preference (`casa.sidebar.collapsed`), initially expanded. The collapsed rail retains accessible link names, hover/focus labels, active states, badges, account initials, and logout. Mobile navigation stays independent. Sidebar and page offset animate together for 180ms only on a user toggle, respecting reduced motion.
 - Use `stat-strip` for compact context on detail pages and appointment calendars. Reserve larger metric cards for dashboards, feedback, customer rewards, transactions, and reports.
 - Put record totals and useful status counts in toolbar chips. Do not add generic “Showing” or “Search Ready” metric cards above lists.
@@ -87,7 +88,7 @@ Compact density applies only inside the authenticated application shell. Public 
 
 ## Customer Appointments
 
-My appointments uses a restorative serif heading, three compact icon status cards, and a connected Monday–Sunday calendar beside next-visit and feedback cards. Use cream surfaces, thin borders, 8px card corners, and palm-green actions. Panels run beside each other at a 52rem content width and stack below it; status cards stack below 640px. The shared customer sidebar, logo, and mobile dock remain in use.
+My appointments uses a restorative serif heading, three compact icon status cards, and a connected Monday–Sunday calendar beside next-visit and feedback cards. Use cream surfaces, thin borders, 16px panel corners, and palm-green pill actions. Panels run beside each other at a 52rem content width and stack below it; status cards stack below 640px. The shared customer sidebar, logo, and mobile dock remain in use.
 
 Calendar badges show readable status and Manila start time, with two visits per date and a date-filtered history link for additional visits. Keep all four appointment statuses, text labels, 44px targets, keyboard date movement, Retry, and an internally scrolling narrow-screen grid. The next-visit card shows the earliest upcoming confirmed booking and its saved duration; the feedback card shows the latest completed visit awaiting feedback. Counts and side cards remain independent of calendar navigation and filtering.
 
@@ -208,13 +209,13 @@ The saved chart preview connects labelled Owner, Administrator, and Team tiers, 
 
 ## User Accounts
 
-The super-admin User accounts page uses a separate cream name/email, role, and status toolbar above a five-column account table beside an add/edit form. Panels use an approximately 65/35 split from 1280px and stack below that width. Initials, saved emails, textual role/status pills, and pencil actions keep the list compact; the protected super administrator has no edit action. Styles live in `resources/css/users.css` with 8px corners, Manrope text, 44px controls, mobile filter disclosure, keyboard-focusable table scrolling, and fixed 15-record pagination.
+The super-admin User accounts page uses a separate cream name/email, role, and status toolbar above a five-column account table beside an add/edit form. Panels use an approximately 65/35 split from 1280px and stack below that width. Initials, saved emails, textual role/status pills, and pencil actions keep the list compact; the protected super administrator has no edit action. Styles live in `resources/css/users.css` with 16px panel corners, Manrope text, 44px controls, mobile filter disclosure, keyboard-focusable table scrolling, and fixed 15-record pagination.
 
 The pencil selects an editable account on the current filtered page and opens it in the right-hand form. Search, role, status, and pagination reset selection; Cancel returns to the add form while retaining list context. Creation and edits use the existing normal Laravel POST/PUT requests. Validation preserves the submitted form values, Google-linked emails remain read-only, and future confirmed appointments still guard therapist deactivation or role removal. Use Active/Inactive instead of a delete action. The existing shared sidebar, logo, and other workspaces retain their presentation.
 
 ## My Profile
 
-All five roles use a full-width identity banner with account initials, saved name, and role above equal Profile information and Password cards. The cards sit side by side from 1024px and stack below that width. Profile-only styles live in `resources/css/profile.css`: cream surfaces, subtle borders, 8px card corners, 20px form padding, 16px gaps, and palm-green actions with at least 44px targets. Desktop form actions align at the bottom without fixed card heights; long names wrap and mobile controls fit the viewport. The shared sidebar, header, logo, and navigation retain their presentation.
+All five roles use a full-width identity banner with account initials, saved name, and role above equal Profile information and Password cards. The cards sit side by side from 1024px and stack below that width. Profile-only styles live in `resources/css/profile.css`: cream surfaces, subtle borders, 16px panel corners, 20px form padding, 16px gaps, and palm-green actions with at least 44px targets. Desktop form actions align at the bottom without fixed card heights; long names wrap and mobile controls fit the viewport. The shared sidebar, header, logo, and navigation retain their presentation.
 
 Keep the sign-in email disabled and explain that it cannot be changed here. Preserve optional phone, customer address/contact preference, password visibility controls, field validation, Google password confirmation/setup, reset-link fallback, and existing success toasts. The customer-only Delete account section appears below the forms and retains its existing identity confirmation and anonymization behavior.
 

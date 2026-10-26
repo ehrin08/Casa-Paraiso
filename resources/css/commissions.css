@@ -4,12 +4,12 @@
 .commissions-export { gap: 0.65rem; text-transform: none; letter-spacing: normal; box-shadow: none; }
 .commissions-workspace { display: grid; gap: 1rem; min-width: 0; color: var(--color-casa-text); }
 .commissions-workspace .commissions-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.commissions-metrics .casa-appointment-stat { min-height: 108px; gap: 1.25rem; padding: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); }
+.commissions-metrics .casa-appointment-stat { min-height: 108px; gap: 1.25rem; padding: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); background: var(--color-casa-paper); box-shadow: var(--shadow-casa-soft); }
 .commissions-metrics .casa-appointment-stat-icon { width: 4rem; height: 4rem; flex: 0 0 auto; color: var(--color-casa-palm-dark); background: color-mix(in srgb, var(--color-casa-palm) 13%, var(--color-casa-paper)); }
 .commissions-metrics .casa-appointment-stat > div { min-width: 0; }
 .commissions-metrics .casa-appointment-stat dt { font-size: 1rem; font-weight: 500; text-transform: none; letter-spacing: normal; }
 .commissions-metrics .casa-appointment-stat dd { font-size: clamp(1.5rem, 2.4vw, 2.25rem); line-height: 1.25; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.commissions-toolbar, .commissions-records, .commissions-detail { min-width: 0; border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); }
+.commissions-toolbar, .commissions-records, .commissions-detail { min-width: 0; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); background: var(--color-casa-paper); box-shadow: var(--shadow-casa-soft); }
 body[data-workspace-role] .commissions-workspace .commissions-toolbar { display: block; padding: 1rem 1.25rem; }
 .commissions-toolbar > .min-w-0:empty { display: none; }
 .commissions-filter-form { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(140px, 0.85fr) minmax(280px, 1.4fr) auto; align-items: end; gap: 1rem; }
@@ -45,9 +45,9 @@ body[data-workspace-role] .commissions-workspace .casa-table-wrap td { padding: 
 .commissions-amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .commissions-net { font-weight: 700; }
 .commissions-status { display: inline-flex; align-items: center; justify-content: center; min-width: 4.5rem; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; }
-.commissions-status--pending { background: #ffecd0; color: #7a3e14; }
+.commissions-status--pending { background: #ffecd0; color: var(--color-casa-cacao); }
 .commissions-status--paid { background: color-mix(in srgb, var(--color-casa-palm) 14%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
-.commissions-view { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; }
+.commissions-view { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--radius-casa-panel); }
 .commissions-view:hover { background: var(--color-casa-sand); color: var(--color-casa-palm-dark); }
 .commissions-pagination { margin-top: 1rem; }
 .commissions-detail { scroll-margin-top: 1rem; }
@@ -78,7 +78,7 @@ body[data-workspace-role] .commissions-workspace .commissions-breakdown-table tf
 .commissions-empty-detail > svg { width: 3rem; height: 3rem; margin-top: 2rem; color: var(--color-casa-palm); }
 .commissions-empty-detail > p { margin-top: 1rem; color: var(--color-casa-muted); font-size: 0.875rem; line-height: 1.5; }
 .commissions-standalone { max-width: 48rem; margin-inline: auto; }
-.commissions-workspace a:focus-visible, .commissions-workspace button:focus-visible, .commissions-workspace summary:focus-visible, .commissions-export:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: 8px; }
+.commissions-workspace a:focus-visible, .commissions-workspace button:focus-visible, .commissions-workspace summary:focus-visible, .commissions-export:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: var(--radius-casa-control); }
 .commissions-clear:hover, .commissions-source-details a:hover, .commissions-therapist > a:hover { text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 1535px) {
     .commissions-filter-form { grid-template-columns: minmax(130px, 1fr) minmax(120px, 0.85fr) minmax(270px, 1.6fr); }

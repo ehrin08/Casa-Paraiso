@@ -6,9 +6,9 @@
     max-width: 70rem;
     margin-inline: auto;
     border: 1px solid var(--color-casa-border);
-    border-radius: 16px;
+    border-radius: var(--radius-casa-card);
     background: var(--color-casa-paper);
-    overflow: hidden;
+    overflow: hidden; box-shadow: var(--shadow-casa-soft);
 }
 
 .casa-booking-summary-details {
@@ -42,7 +42,7 @@
 .booking-preference, .booking-therapist-field { max-width: 32rem; }
 .booking-therapist-field { margin-top: 1.25rem; }
 .booking-customer-search { position: relative; min-width: 0; }
-.booking-customer-results { position: absolute; z-index: 5; top: 5rem; inset-inline: 0; max-height: 19rem; overflow-y: auto; border: 1px solid var(--color-casa-border); border-radius: 10px; background: var(--color-casa-paper); box-shadow: 0 8px 24px rgba(38, 48, 40, .14); }
+.booking-customer-results { position: absolute; z-index: 5; top: 5rem; inset-inline: 0; max-height: 19rem; overflow-y: auto; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); box-shadow: 0 8px 24px rgba(38, 48, 40, .14); }
 .booking-customer-result { display: block; width: 100%; padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--color-casa-border); }
 .booking-customer-result strong, .booking-customer-result span { display: block; overflow-wrap: anywhere; }
 .booking-customer-result strong { font-size: .875rem; font-weight: 700; }
@@ -59,9 +59,9 @@
     background-size: 1rem;
 }
 .booking-time-panel { min-width: 0; }
-.booking-optional { border: 1px solid var(--color-casa-border); border-radius: 12px; background: var(--color-casa-sand); padding: 1rem; }
+.booking-optional { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-sand); padding: 1rem; }
 .booking-optional summary { cursor: pointer; font-size: .875rem; font-weight: 700; }
-.booking-addon, .booking-service { display: flex; gap: .75rem; border: 1px solid var(--color-casa-border); background: var(--color-casa-paper); border-radius: 10px; padding: 1rem; font-size: .875rem; }
+.booking-addon, .booking-service { display: flex; gap: .75rem; border: 1px solid var(--color-casa-border); background: var(--color-casa-paper); border-radius: var(--radius-casa-control); padding: 1rem; font-size: .875rem; }
 .booking-addon { cursor: pointer; align-items: start; }
 .booking-addon input { margin-top: .25rem; flex-shrink: 0; }
 .booking-addon strong, .booking-addon span span, .booking-service strong, .booking-service > span, .booking-service-details > span, .booking-voucher-options span span { display: block; }
@@ -75,7 +75,7 @@
 .booking-voucher-options { display: grid; gap: .75rem; font-size: .875rem; }
 .booking-voucher-options label { display: flex; gap: .75rem; align-items: start; cursor: pointer; }
 .booking-calendar-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
-.booking-calendar { border: 1px solid var(--color-casa-border); border-radius: 12px; padding: 1rem; background: var(--color-casa-sand); min-width: 0; }
+.booking-calendar { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); padding: 1rem; background: var(--color-casa-sand); min-width: 0; }
 .booking-calendar-bar { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
 .booking-calendar-bar h3, .booking-time-panel h3, .booking-review-card h3 { font-weight: 800; font-size: 1rem; }
 .booking-weekdays, .booking-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .375rem; text-align: center; }
@@ -99,8 +99,8 @@
 .booking-calendar-message { margin-top: 1rem; font-size: .875rem; line-height: 1.6; color: var(--color-casa-muted); }
 .booking-calendar-error, .booking-step-error { padding: .75rem 1rem; margin-block: .75rem; border: 1px solid #e4b5aa; border-radius: 10px; background: #fff6f2; color: #8d3528; font-size: .875rem; }
 .booking-text-button { margin-top: .5rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-.booking-info { display: grid; gap: .25rem; padding: 1rem; margin-bottom: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: 10px; background: var(--color-casa-sand); font-size: .875rem; }
-.booking-review-card { padding: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: 12px; background: var(--color-casa-sand); }
+.booking-info { display: grid; gap: .25rem; padding: 1rem; margin-bottom: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-sand); font-size: .875rem; }
+.booking-review-card { padding: 1.25rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-sand); }
 .booking-review-date { margin-top: 1rem; font-size: 1rem; font-weight: 700; }
 .booking-review-total { display: flex; justify-content: space-between; gap: .75rem; border-top: 1px solid var(--color-casa-border); padding-top: 1rem; font-weight: 700; }
 .booking-review-total strong { color: var(--color-casa-palm); }
@@ -115,7 +115,7 @@
 
 .casa-panel-host.is-centered { padding: 1.5rem; }
 .casa-panel-host.is-centered.is-open { display: grid; place-items: center; }
-.casa-panel-host.is-centered .casa-panel { position: relative; inset: auto; width: min(70rem, 100%); max-width: 70rem; height: min(48rem, 90dvh); max-height: 90dvh; border: 1px solid var(--color-casa-border); border-radius: 16px; box-shadow: 0 24px 70px rgba(38, 48, 40, .3); transform: none; }
+.casa-panel-host.is-centered .casa-panel { position: relative; inset: auto; width: min(70rem, 100%); max-width: 70rem; height: min(48rem, 90dvh); max-height: 90dvh; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); box-shadow: 0 24px 70px rgba(38, 48, 40, .3); transform: none; }
 .casa-panel-host.is-centered [data-panel-eyebrow] { display: none; }
 .casa-panel-host.is-centered .casa-panel__bar { padding: 1rem 1.5rem; flex-shrink: 0; }
 .casa-panel-host.is-booking .casa-panel__content { display: flex; min-height: 0; padding: 0; overflow: hidden; }

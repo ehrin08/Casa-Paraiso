@@ -22,6 +22,7 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [Screen Flow](SCREEN_FLOW.md)
 - [Brand UI Guide](BRAND_UI_GUIDE.md)
 - [Frontend Consistency Audit](FRONTEND_CONSISTENCY_AUDIT.md)
+- [Modern Resort Redesign](REDESIGN_MODERN_RESORT.md) (`redesign` branch only)
 
 ## Operations and Deployment
 

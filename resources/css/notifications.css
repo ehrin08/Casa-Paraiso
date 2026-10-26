@@ -1,7 +1,7 @@
 .casa-page-heading .notifications-heading h1 { font-size: clamp(1.75rem, 2.5vw, 2rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
 .notifications-heading p { margin-top: 0.35rem; color: var(--color-casa-muted); font-size: 1rem; }
 .notifications-workspace { display: grid; grid-template-columns: minmax(0, 62fr) minmax(0, 38fr); align-items: stretch; gap: 1rem; min-width: 0; }
-.notifications-inbox, .notifications-detail { min-width: 0; padding: 1rem; border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); }
+.notifications-inbox, .notifications-detail { min-width: 0; padding: 1rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); background: var(--color-casa-paper); box-shadow: var(--shadow-casa-soft); }
 body[data-workspace-role] .notifications-workspace .notifications-toolbar { display: block; padding-bottom: 0; }
 .notifications-toolbar > .min-w-0:empty { display: none; }
 .notifications-toolbar > :last-child { width: 100%; }
@@ -11,7 +11,7 @@ body[data-workspace-role] .notifications-workspace .notifications-toolbar { disp
 .notifications-tab.is-active { border-color: var(--color-casa-palm); color: var(--color-casa-palm-dark); font-weight: 700; }
 .notifications-search { position: relative; flex: 1 1 18rem; margin-bottom: 0.5rem; }
 .notifications-search .casa-input { width: 100%; min-height: 44px; padding-left: 2.75rem; font-size: 0.875rem; }
-.notifications-search button { position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; color: var(--color-casa-muted); }
+.notifications-search button { position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-casa-control); color: var(--color-casa-muted); }
 .notifications-search svg, .notifications-view svg, .notifications-detail-actions svg, .notifications-note > svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
 .notifications-tools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 0.5rem 1rem; }
 .notifications-tools a, .notifications-tools button { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-casa-palm-dark); font-size: 0.875rem; text-decoration: underline; text-underline-offset: 3px; }
@@ -31,7 +31,7 @@ body[data-workspace-role] .notifications-workspace .notifications-booking a { mi
 .notifications-dates { width: 25%; }
 .notifications-dates time { white-space: nowrap; }
 .notifications-action { width: 1%; white-space: nowrap; }
-.notifications-view { display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0.5rem; border-radius: 10px; background: #e8f2e5; color: var(--color-casa-palm-dark); font-size: 0.875rem; font-weight: 600; }
+.notifications-view { display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0.5rem; border-radius: var(--radius-casa-control); background: var(--color-casa-palm-tint); color: var(--color-casa-palm-dark); font-size: 0.875rem; font-weight: 600; }
 .notifications-view:hover:not(:disabled) { background: color-mix(in srgb, var(--color-casa-palm) 20%, var(--color-casa-paper)); }
 .notifications-pagination { margin-top: 1rem; }
 .notifications-detail { display: flex; flex-direction: column; scroll-margin-top: 1rem; overflow-wrap: anywhere; }
@@ -39,17 +39,17 @@ body[data-workspace-role] .notifications-workspace .notifications-booking a { mi
 .notifications-detail-heading p { font-weight: 700; }
 .notifications-detail-heading > div > span { display: block; margin-top: 0.15rem; color: var(--color-casa-muted); }
 .notifications-status { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.65rem; border-radius: 999px; background: var(--color-casa-sand); color: var(--color-casa-muted); font-size: 0.875rem; }
-.notifications-status.is-unread { background: #e8f2e5; color: var(--color-casa-palm-dark); }
+.notifications-status.is-unread { background: var(--color-casa-palm-tint); color: var(--color-casa-palm-dark); }
 .notifications-status > span { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
 .notifications-detail h2 { margin-top: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-casa-border); font-size: 1.375rem; line-height: 1.4; font-weight: 800; }
 .notifications-details { display: grid; gap: 1.25rem; padding-block: 1rem; font-size: 0.875rem; }
 .notifications-detail-item { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 1rem; }
-.notifications-detail-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--color-casa-palm-dark); background: #e8f2e5; }
+.notifications-detail-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--color-casa-palm-dark); background: var(--color-casa-palm-tint); }
 .notifications-detail-icon svg { width: 1.5rem; height: 1.5rem; }
 .notifications-detail-item dt { margin-bottom: 0.2rem; font-weight: 700; }
 .notifications-detail-item dd { line-height: 1.5; }
 .notifications-detail-item dd > span, .notifications-detail-item dd > time { display: block; }
-.notifications-note { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: 10px; background: color-mix(in srgb, var(--color-casa-sand) 45%, var(--color-casa-paper)); font-size: 0.875rem; }
+.notifications-note { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: var(--radius-casa-control); background: color-mix(in srgb, var(--color-casa-sand) 45%, var(--color-casa-paper)); font-size: 0.875rem; }
 .notifications-note > div { min-width: 0; }
 .notifications-note h3 { font-size: 0.875rem; font-weight: 700; }
 .notifications-note p { margin-top: 0.2rem; color: var(--color-casa-muted); white-space: pre-line; }
@@ -59,6 +59,6 @@ body[data-workspace-role] .notifications-workspace .notifications-booking a { mi
 .notifications-workspace button:disabled { cursor: not-allowed; opacity: 0.6; }
 .notifications-unavailable { display: grid; justify-items: start; gap: 1rem; padding-block: 2rem; color: var(--color-casa-muted); font-size: 0.875rem; line-height: 1.6; }
 .notifications-unavailable svg { width: 2rem; height: 2rem; color: var(--color-casa-palm); }
-.notifications-workspace a:focus-visible, .notifications-workspace button:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: 6px; }
+.notifications-workspace a:focus-visible, .notifications-workspace button:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: var(--radius-casa-control); }
 @media (max-width: 1279px) { .notifications-workspace { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 639px) { .notifications-controls { flex-direction: column; align-items: stretch; } .notifications-search { flex-basis: auto; } .notifications-tools { justify-content: space-between; } .notifications-detail-actions { grid-template-columns: minmax(0, 1fr); } }

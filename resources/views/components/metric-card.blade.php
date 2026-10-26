@@ -15,7 +15,6 @@
 @endphp
 
 <div data-metric-card {{ $attributes->merge(['class' => 'casa-card-compact casa-metric-card relative min-w-0 overflow-hidden p-3 sm:p-4']) }}>
-    <span class="absolute inset-y-0 start-0 w-1 {{ $accent }}"></span>
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
             <p class="text-sm font-extrabold uppercase tracking-[0.06em] text-casa-muted">{{ $label }}</p>

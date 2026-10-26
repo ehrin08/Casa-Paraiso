@@ -2,11 +2,11 @@
 .casa-page-heading .feedback-heading h1 { font-size: clamp(1.5rem, 2.5vw, 1.875rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
 .feedback-heading p { margin-top: 0.4rem; color: var(--color-casa-muted); font-size: 1rem; line-height: 1.5; }
 .feedback-workspace { display: grid; gap: 1rem; min-width: 0; color: var(--color-casa-text); }
-.feedback-workspace ::selection { background: #dcebd8; color: #20482b; }
+.feedback-workspace ::selection { background: #dcebd8; color: var(--color-casa-success); }
 .feedback-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.feedback-metric, .feedback-filters, .feedback-panel { border: 1px solid var(--color-casa-border); border-radius: 14px; background: var(--color-casa-paper); min-width: 0; }
+.feedback-metric, .feedback-filters, .feedback-panel { border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-card); background: var(--color-casa-paper); min-width: 0; box-shadow: var(--shadow-casa-soft); }
 .feedback-metric { display: flex; align-items: center; gap: 1.25rem; padding: 1.25rem; }
-.feedback-metric-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; flex: 0 0 auto; border-radius: 50%; color: var(--color-casa-palm-dark); background: #e2f1dd; }
+.feedback-metric-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; flex: 0 0 auto; border-radius: 50%; color: var(--color-casa-palm-dark); background: var(--color-casa-success-bg); }
 .feedback-icon { width: 1.35rem; height: 1.35rem; flex: 0 0 auto; }
 .feedback-metric-icon svg { width: 2rem; height: 2rem; }
 .feedback-metric h2 { font-size: 0.875rem; font-weight: 500; }
@@ -22,7 +22,7 @@
 .feedback-workspace .casa-input::placeholder { color: var(--color-casa-muted); opacity: 1; }
 .feedback-search { position: relative; min-width: 0; }
 .feedback-search input { padding-inline-start: 2.75rem; }
-.feedback-search button { position: absolute; inset-inline-start: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; color: var(--color-casa-muted); }
+.feedback-search button { position: absolute; inset-inline-start: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--radius-casa-control); color: var(--color-casa-muted); }
 .feedback-search button:hover { color: var(--color-casa-palm-dark); background: var(--color-casa-sand); }
 .feedback-filter-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 .feedback-filter-actions:empty { display: none; }
@@ -52,12 +52,12 @@ body[data-workspace-role] .feedback-workspace :is(.feedback-service-table, .feed
 .feedback-service-table tbody th { width: 40%; overflow-wrap: anywhere; }
 body[data-workspace-role] .feedback-workspace .feedback-service-table :is(thead th:not(:first-child), td) { text-align: center; }
 .feedback-service-table thead { position: sticky; top: 0; z-index: 1; }
-.feedback-count { display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; padding: 0.2rem 0.5rem; border-radius: 8px; font-variant-numeric: tabular-nums; }
+.feedback-count { display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; padding: 0.2rem 0.5rem; border-radius: var(--radius-casa-panel); font-variant-numeric: tabular-nums; }
 .feedback-service-total { font-weight: 700; font-variant-numeric: tabular-nums; }
 .feedback-sentiment { display: inline-flex; justify-content: center; min-width: 5.5rem; padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.875rem; line-height: 1.35; }
-.feedback-sentiment--positive { color: #20482b; background: #e2f1dd; }
-.feedback-sentiment--neutral { color: #634619; background: #f9edda; }
-.feedback-sentiment--negative { color: #852e28; background: #ffe3de; }
+.feedback-sentiment--positive { color: var(--color-casa-success); background: var(--color-casa-success-bg); }
+.feedback-sentiment--neutral { color: var(--color-casa-warning); background: #f9edda; }
+.feedback-sentiment--negative { color: var(--color-casa-danger-text); background: var(--color-casa-danger-bg); }
 .feedback-topics { display: grid; gap: 1rem; }
 .feedback-topic-label { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.25rem 0.75rem; font-size: 0.875rem; line-height: 1.5; }
 .feedback-topic-label > :last-child { color: var(--color-casa-muted); font-variant-numeric: tabular-nums; }
@@ -66,7 +66,7 @@ body[data-workspace-role] .feedback-workspace .feedback-service-table :is(thead 
 .feedback-topic meter::-webkit-meter-optimum-value { border-radius: 3px; background: var(--color-casa-palm); }
 .feedback-topic meter::-moz-meter-bar { border-radius: 3px; background: var(--color-casa-palm); }
 .feedback-topic-help { margin-top: 1rem; font-size: 0.875rem; line-height: 1.5; color: var(--color-casa-muted); }
-.feedback-review-table th a { min-height: 44px; border-radius: 6px; }
+.feedback-review-table th a { min-height: 44px; border-radius: var(--radius-casa-control); }
 .feedback-customer { width: 22%; min-width: 170px; max-width: 250px; overflow-wrap: anywhere; }
 .feedback-customer > a { display: flex; align-items: center; min-height: 44px; font-weight: 600; }
 .feedback-customer > a:hover, .feedback-comment > a:hover { color: var(--color-casa-palm-dark); text-decoration: underline; text-underline-offset: 4px; }
@@ -76,7 +76,7 @@ body[data-workspace-role] .feedback-workspace .feedback-service-table :is(thead 
 .feedback-comment { width: 33%; min-width: 240px; max-width: 450px; overflow-wrap: anywhere; line-height: 1.5; }
 .feedback-comment > a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-casa-palm-dark); font-weight: 600; }
 .feedback-pagination { margin-top: 1rem; }
-.feedback-workspace :is(a, button, summary):focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: 8px; }
+.feedback-workspace :is(a, button, summary):focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: var(--radius-casa-control); }
 @media (max-width: 1279px) {
     .feedback-insights { grid-template-columns: minmax(0, 1fr); }
     .feedback-metric { gap: 0.75rem; padding: 1rem; }

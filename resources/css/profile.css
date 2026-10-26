@@ -13,8 +13,8 @@
     min-width: 0;
     padding: 20px;
     border: 1px solid var(--color-casa-border);
-    border-radius: 8px;
-    background: var(--color-casa-paper);
+    border-radius: var(--radius-casa-panel);
+    background: var(--color-casa-paper); box-shadow: var(--shadow-casa-soft);
 }
 
 .profile-workspace .profile-identity {
@@ -104,7 +104,7 @@
 
 body[data-workspace-role] .profile-workspace .casa-input {
     min-height: 44px;
-    border-radius: 6px;
+    border-radius: var(--radius-casa-control);
     background-color: #fff;
 }
 
@@ -121,7 +121,7 @@ body[data-workspace-role] .profile-workspace .casa-button-secondary {
     min-width: min(100%, 15rem);
     max-width: 100%;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: var(--radius-casa-pill);
     padding: 10px 20px;
     text-align: center;
     text-transform: none;
