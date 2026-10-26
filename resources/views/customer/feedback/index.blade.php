@@ -69,7 +69,7 @@
         </section>
 
         <aside class="space-y-4">
-            <x-app-card class="lg:sticky lg:top-6">
+            <x-app-card class="lg:sticky lg:top-20">
                 <p class="casa-eyebrow">{{ __('Ready to review') }}</p>
                 <h2 class="mt-4 font-editorial text-3xl font-semibold text-casa-text">{{ __('Completed visits') }}</h2>
                 <p class="mt-2 text-sm leading-6 text-casa-muted">{{ __('A short, honest note helps the team understand what felt good and what could feel better.') }}</p>
