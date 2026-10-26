@@ -39,7 +39,12 @@ Continue the Hostinger deployment: verify Gmail SMTP, check for data drift, swit
 
 ## Follow-ups
 
-- [ ] Live signed-in checks: password and Google sign-in, both Google flows, role restrictions, and the booking, reports, settings and attendance workspaces. No sign-in reached the site during this session.
+- [ ] Live signed-in checks. The interactive Google sign-in now works end to end: an existing Google-linked customer account signed in, no new account was created and no errors were logged. A user-approved, rolled-back server-side render as the existing accounts passed:
+  - all 27 super-administrator pages (with the calendar, insights and QR feeds)
+  - all customer pages and calendar feeds
+  - the cross-role 403 restrictions
+
+  The only staff account still has no password and an unverified email (its team invitation is pending), so the staff workspace waits on a delivered invitation email. Still needed: browser password sign-in, the profile-password Google flow and the attendance camera on a device.
 - [ ] Send a real test email (only on the user's instruction) and confirm delivery.
 - [x] Redirect `www.casaparaiso.site` to the bare domain. A `public/.htaccess` rule now sends `www.` hosts to the bare HTTPS domain (301, path and query kept). It is deployed and verified on the live site and in local Apache, and the full suite (483 tests), asset build and Docker startup passed.
 - [ ] Recheck the domain registration email warning in hPanel.
