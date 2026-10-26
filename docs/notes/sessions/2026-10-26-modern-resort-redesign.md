@@ -38,5 +38,6 @@ Plan and start a visual redesign on the local `redesign` branch only, keeping th
 
 - [x] Review the admin and customer workspaces visually.
 - [ ] Review the therapist and reception workspaces once those local accounts can sign in.
-- [ ] Interactive states (dialogs, booking wizard, calendars with live feeds) need a real signed-in browser session.
+- [x] Booking wizard and appointment dialogs polished (`appointment-form.css`, `appointment-completion.css`). The changes cover the pill stepper, lifted treatment and add-on cards with a selected check badge, a paper calendar with palm-tint open days, pill time slots, token error banners, paper review cards, a frosted footer, glass dialog bars, a pill close button, and paper detail panels in the completion dialog. Reviewed through rolled-back snapshots with sample calendar data injected into Alpine state (display only) at desktop and 375px. Confirmation and Finish service dialogs were checked open. The snapshots were deleted afterwards.
+- [ ] Live calendar feeds and the in-dialog booking panel still need a real signed-in browser session.
 - [ ] Convert remaining page-only hex shades during per-workspace polish.
