@@ -101,24 +101,19 @@
         ->implode('');
 @endphp
 
-<nav x-data data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif>
-    <div class="casa-topbar casa-glass-bar sticky top-0 z-40 border-b">
+<nav x-data data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif class="sticky top-0 z-40">
+    <div class="casa-topbar casa-glass-bar border-b">
         <div class="mx-auto flex h-16 max-w-[90rem] items-center gap-2 px-3 sm:gap-3 sm:px-5 lg:px-6">
             <button type="button" class="casa-icon-button" data-drawer-toggle aria-controls="workspace-navigation" x-bind:aria-expanded="$store.drawer.isOpen" aria-label="Open navigation" @click="$store.drawer.open($el)">
                 <x-nav-icon name="menu" />
             </button>
 
-            <a href="{{ url('/') }}" class="casa-topbar-logo min-w-0 rounded-2xl bg-white px-2 py-1" aria-label="Casa Paraiso website" data-site-home-link>
+            {{-- The logo is the only top-bar link to the public site. --}}
+            <a href="{{ url('/') }}" class="casa-topbar-logo min-w-0 rounded-2xl bg-white px-2 py-1" aria-label="{{ __('View the Casa Paraiso website') }}" title="{{ __('View site') }}" data-site-home-link data-view-site-link>
                 <x-application-logo class="origin-left scale-[0.72]" />
             </a>
 
             <div class="ms-auto flex items-center gap-2">
-                <a href="{{ url('/') }}" class="casa-topbar-link" data-view-site-link>
-                    <x-nav-icon name="home" />
-                    <span class="hidden sm:inline">{{ __('View site') }}</span>
-                    <span class="sr-only sm:hidden">{{ __('View site') }}</span>
-                </a>
-
                 @if ($receivesBookingNotifications)
                     <a href="{{ route('notifications.index') }}" @class(['casa-icon-button relative', 'casa-icon-button-active' => request()->routeIs('notifications.*')]) data-notification-bell @if(request()->routeIs('notifications.*')) aria-current="page" @endif>
                         <x-nav-icon name="notifications" />

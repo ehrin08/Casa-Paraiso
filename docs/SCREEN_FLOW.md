@@ -28,7 +28,7 @@ Route prefixes:
 ## Shared Layout Rules
 
 - Use Laravel Blade server-rendered pages with Tailwind CSS.
-- Use a shared authenticated layout shell with a sticky top bar (☰, logo to the public homepage, View site, notification bell, account avatar menu), a role-specific overlay drawer and a consistent page-heading wrapper.
+- Use a shared authenticated layout shell with a sticky top bar (☰, logo as the single View site link to the public homepage, notification bell, account avatar menu), a role-specific overlay drawer and a consistent page-heading wrapper.
 - The same drawer serves desktop and mobile; page content always uses the full width.
 - Customer small-screen navigation uses a persistent three-item bottom bar for My appointments, My feedback, and My profile.
 - Admin and staff pages should use the drawer with task-based navigation, page title, search/filter area where needed, and clear primary action buttons.

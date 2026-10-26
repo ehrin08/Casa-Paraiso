@@ -33,6 +33,11 @@
 }
 
 /* Workspace top bar and overlay drawer (redesign branch). */
+/* The top bar stays pinned, so anchor jumps land below it. */
+html:has(body[data-workspace-role]) {
+    scroll-padding-top: 4.5rem;
+}
+
 .casa-topbar {
     box-shadow: 0 1px 0 rgba(55, 44, 32, 0.04), 0 10px 28px -18px rgba(38, 48, 40, 0.35);
 }
