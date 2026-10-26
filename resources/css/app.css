@@ -876,10 +876,13 @@ html[data-sidebar-collapsed="true"] {
         justify-content: center;
         gap: 0.2rem;
         border-radius: 22px;
+        padding: 0.3rem 0.35rem;
         color: var(--color-casa-muted);
         font-size: 0.875rem;
         font-weight: 700;
         letter-spacing: 0.01em;
+        line-height: 1.15;
+        text-align: center;
     }
 
     .casa-mobile-dock-link-active {
@@ -915,6 +918,17 @@ body[data-workspace-role] {
 .casa-page-heading [class*="text-4xl"],
 .casa-page-heading [class*="text-3xl"] {
     font-size: inherit;
+}
+
+.casa-app-page .casa-page-heading h1 {
+    font-size: clamp(1.5rem, 1.65vw, 1.875rem);
+}
+
+.casa-app-page [data-page-heading-variant="editorial"] h1 {
+    font-family: var(--font-editorial);
+    font-size: clamp(2rem, 3.4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.1;
 }
 
 body[data-workspace-role] .casa-section-label,
