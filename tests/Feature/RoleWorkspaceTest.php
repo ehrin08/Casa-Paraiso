@@ -139,7 +139,9 @@ class RoleWorkspaceTest extends TestCase
             ->assertDontSee('data-prefetch', false)
             ->assertSee('data-workspace-role="customer"', false)
             ->assertSee('data-role-navigation="customer"', false)
-            ->assertSee('data-desktop-sidebar', false)
+            ->assertSee('data-workspace-drawer', false)
+            ->assertSee('data-drawer-toggle', false)
+            ->assertDontSee('data-notification-bell', false)
             ->assertSee('data-turbo-preload', false)
             ->assertSee('data-mobile-customer-navigation', false)
             ->assertSee('Customer lounge')
@@ -161,13 +163,17 @@ class RoleWorkspaceTest extends TestCase
         $therapistsPage = $this->actingAs($admin)
             ->get(route('admin.staff.index'))
             ->assertOk()
-            ->assertSeeInOrder(['Daily work', 'Manage', 'Review', 'Account'])
+            ->assertSeeInOrder(['Daily work navigation', 'Manage navigation'], false)
             ->assertSee('href="'.route('admin.staff.index').'" data-sidebar-label="Therapists"', false)
             ->assertSee('href="'.route('admin.services.index').'" data-sidebar-label="Services"', false)
-            ->assertSee('href="'.route('admin.promotions.index').'" data-sidebar-label="Customer rewards"', false)
-            ->assertSee('href="'.route('admin.feedback.index').'" data-sidebar-label="Feedback"', false)
-            ->assertSee('href="'.route('admin.reports.index').'" data-sidebar-label="Reports"', false)
-            ->assertDontSee('data-sidebar-label="User accounts"', false);
+            ->assertSee('href="'.route('admin.transactions.index').'" data-sidebar-label="Payments"', false)
+            ->assertSee('href="'.route('admin.reports.index').'" data-sidebar-label="Insights"', false)
+            ->assertDontSee('data-sidebar-label="Customer rewards"', false)
+            ->assertDontSee('data-sidebar-label="Commissions"', false)
+            ->assertSee('href="'.route('admin.settings.index').'" data-sidebar-label="Settings"', false)
+            ->assertDontSee('data-sidebar-label="User accounts"', false)
+            ->assertSee('data-notification-bell', false)
+            ->assertDontSee('data-section-tabs', false);
 
         $this->assertMatchesRegularExpression('/<a[^>]*data-sidebar-label="Therapists"[^>]*aria-current="page"/', $therapistsPage->getContent());
         $this->assertDoesNotMatchRegularExpression('/<a[^>]*data-sidebar-label="Services"[^>]*aria-current="page"/', $therapistsPage->getContent());
@@ -178,6 +184,43 @@ class RoleWorkspaceTest extends TestCase
 
         $this->assertMatchesRegularExpression('/<a[^>]*data-sidebar-label="Services"[^>]*aria-current="page"/', $servicesPage->getContent());
         $this->assertDoesNotMatchRegularExpression('/<a[^>]*data-sidebar-label="Therapists"[^>]*aria-current="page"/', $servicesPage->getContent());
+    }
+
+    public function test_merged_admin_pages_share_a_drawer_link_and_section_tabs(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $commissions = $this->actingAs($admin)->get(route('admin.commissions.index'))->assertOk();
+        $commissions->assertSee('data-section-tabs', false)
+            ->assertSee('aria-label="Payments sections"', false)
+            ->assertSee('href="'.route('admin.transactions.index').'" class="casa-section-tab"', false);
+        $this->assertMatchesRegularExpression('/<a[^>]*data-sidebar-label="Payments"[^>]*aria-current="page"/', $commissions->getContent());
+        $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('admin.commissions.index'), '/').'"\s+class="casa-section-tab is-active"\s+aria-current="page"/', $commissions->getContent());
+
+        foreach (['admin.reports.index', 'admin.feedback.index', 'admin.promotions.index'] as $routeName) {
+            $page = $this->actingAs($admin)->get(route($routeName))->assertOk()
+                ->assertSee('aria-label="Insights sections"', false)
+                ->assertSeeInOrder(['Reports', 'Feedback', 'Customer rewards']);
+            $this->assertMatchesRegularExpression('/<a[^>]*data-sidebar-label="Insights"[^>]*aria-current="page"/', $page->getContent());
+        }
+    }
+
+    public function test_workspace_top_bar_links_home_and_keeps_account_links_in_the_avatar_menu(): void
+    {
+        config(['auth.super_admin_email' => 'owner@casaparaiso.test']);
+        $superAdmin = User::factory()->create(['email' => 'owner@casaparaiso.test', 'role' => User::ROLE_SUPER_ADMIN]);
+
+        $this->actingAs($superAdmin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('href="'.url('/').'" class="casa-topbar-logo', false)
+            ->assertSee('data-view-site-link', false)
+            ->assertSee('data-account-menu', false)
+            ->assertSee('href="'.route('profile.edit').'" data-sidebar-label="My profile"', false)
+            ->assertSee('data-sidebar-label="User accounts"', false)
+            ->assertSee('data-sidebar-label="System issues"', false)
+            ->assertSee('action="'.route('logout').'"', false)
+            ->assertSee('href="'.route('notifications.index').'"', false);
     }
 
     public function test_each_role_gets_plain_language_navigation_for_its_work(): void
@@ -191,14 +234,23 @@ class RoleWorkspaceTest extends TestCase
             ->assertOk()
             ->assertSee('data-sidebar-label="Staff attendance"', false)
             ->assertSee('data-sidebar-label="Appointments"', false)
-            ->assertDontSee('data-sidebar-label="Reports"', false);
+            ->assertDontSee('data-sidebar-label="Reports"', false)
+            ->assertSee('data-notification-bell', false);
 
         $this->actingAs($staff)
             ->get(route('staff.dashboard'))
             ->assertOk()
             ->assertSee('data-sidebar-label="My appointments"', false)
             ->assertSee('data-sidebar-label="My attendance"', false)
-            ->assertSee('data-sidebar-label="My commissions"', false);
+            ->assertSee('data-sidebar-label="Payments"', false)
+            ->assertDontSee('data-sidebar-label="My commissions"', false)
+            ->assertSee('data-notification-bell', false);
+
+        $this->actingAs($staff)
+            ->get(route('staff.transactions.index'))
+            ->assertOk()
+            ->assertSee('data-section-tabs', false)
+            ->assertSee('href="'.route('staff.commissions.index').'" class="casa-section-tab"', false);
 
         $this->actingAs($customer)
             ->get(route('customer.appointments.index'))
@@ -240,7 +292,7 @@ class RoleWorkspaceTest extends TestCase
             ->get('/admin/dashboard')
             ->assertOk()
             ->assertSee('data-panel-link data-turbo="false"', false)
-            ->assertSee('action="'.route('logout').'" class="mt-auto pt-6" data-turbo="false"', false);
+            ->assertSee('action="'.route('logout').'" data-turbo="false"', false);
 
         $this->actingAs($admin)
             ->get('/admin/reports')
