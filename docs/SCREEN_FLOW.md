@@ -4,7 +4,7 @@
 
 Document the implemented MVP pages, role-based navigation, shared workspace behavior, and main user journeys. Use this flow when extending Laravel routes, controllers, Blade views, or navigation.
 
-The implemented interface uses separate dashboards for admin, receptionist, therapist, and customer. Authenticated roles use a persistent sidebar on desktop. Operational roles use a navigation drawer on smaller screens, while customers use a compact header plus bottom navigation for Appointments, Feedback, and Profile. Customers land on appointment-focused pages after login.
+The implemented interface uses separate dashboards for admin, receptionist, therapist, and customer. Authenticated roles use a sticky top bar whose ☰ button opens an overlay navigation drawer at every width, while customers also keep a compact header plus bottom navigation for Appointments, Feedback, and Profile. Customers land on appointment-focused pages after login.
 
 ## Route Groups
 
@@ -28,11 +28,11 @@ Route prefixes:
 ## Shared Layout Rules
 
 - Use Laravel Blade server-rendered pages with Tailwind CSS.
-- Use a shared authenticated layout shell with a compact 256px role-specific desktop sidebar and consistent page-heading wrapper.
-- Admin and staff collapse the sidebar into a mobile drawer.
+- Use a shared authenticated layout shell with a sticky top bar (☰, logo to the public homepage, View site, notification bell, account avatar menu), a role-specific overlay drawer and a consistent page-heading wrapper.
+- The same drawer serves desktop and mobile; page content always uses the full width.
 - Customer small-screen navigation uses a persistent three-item bottom bar for My appointments, My feedback, and My profile.
-- Admin and staff pages should use the persistent sidebar with task-based navigation, page title, search/filter area where needed, and clear primary action buttons.
-- Customer pages should stay simpler and appointment-first, with sidebar navigation focused on My appointments, My feedback, and My profile.
+- Admin and staff pages should use the drawer with task-based navigation, page title, search/filter area where needed, and clear primary action buttons.
+- Customer pages should stay simpler and appointment-first, with drawer navigation focused on My appointments and My feedback, and My profile in the account menu.
 - Complex management CRUD uses dedicated create/edit pages. Appointment create and admin/reception edit actions use the centered booking wizard with full-page route fallbacks. Other contextual dialogs include the atomic Admin Finish service flow, short feedback or note entry, and destructive/action confirmation.
 - Use compact stat strips for detail and calendar context; reserve larger metric cards for dashboards and analytics-heavy summaries.
 - Paginate authenticated record lists at the fixed server-controlled size of 15. Preserve filters and sorting across pages, show the result range on every non-empty page, and do not expose a page-size selector.
@@ -41,7 +41,7 @@ Route prefixes:
 - Keep operational tables inside labeled, keyboard-focusable horizontal-scroll regions. Workspace calendar week strips and customer month grids may scroll horizontally when seven full-size date targets do not fit; booking wizard calendars fit seven columns without horizontal scrolling.
 - Appointment calendars, dashboard previews, detail-history previews, and form selector collections remain unpaginated. The admin service queue uses 15-record pagination with `queue_page` and `#service-queue`.
 - All role dashboards should show only actions the current role is allowed to perform.
-- Admin, receptionist, and therapist sidebars show their unread customer-booking number beside Appointments or My appointments. The number updates live and clears after the appointment page is displayed; the Notifications inbox remains available as history without its own badge.
+- Admin, receptionist, and therapist navigation shows the unread customer-booking number on the top-bar bell and beside Appointments or My appointments in the drawer. The number updates live and clears after the appointment page is displayed; the Notifications inbox remains available as history without its own badge.
 - Avoid SPA-only navigation patterns; pages should work as standard Laravel routes.
 
 ### Workspace navigation
@@ -49,8 +49,8 @@ Route prefixes:
 - Admin: Daily work (Today, Appointments, Customers); Manage (Therapists, Services, Payments, Commissions, Attendance); Review (Customer rewards, Feedback, Reports); Account (Notifications, Settings, My profile). Super admins also see User accounts and System issues under Account.
 - Receptionist: Daily work (Today, Appointments, Customers, Payments, Staff attendance); Account (Notifications, My profile).
 - Therapist: Daily work (Today, My appointments, My attendance); Review (Customers, Payments, My commissions, Feedback); Account (Notifications, My profile).
-- Customer: My care (My appointments, My feedback); Account (My profile). The mobile bottom navigation uses those same three labels.
-- Each menu choice opens its own existing route and highlights only its related pages. The desktop sidebar, mobile drawer, and customer bottom navigation retain their current responsive behavior.
+- Customer: My appointments and My feedback in the drawer; My profile in the account menu. The mobile bottom navigation uses all three labels.
+- Each menu choice opens its own existing route and highlights only its related pages. Admin Payments also covers Commissions, admin Insights covers Reports, Feedback and Customer rewards, and therapist Payments covers My commissions; those pages share a section-tab row. The drawer and the customer bottom navigation keep their responsive behavior.
 
 ## Notifications
 
@@ -175,7 +175,7 @@ Post-registration redirect:
 
 ## Admin Screens
 
-Admin navigation uses sidebar modules.
+Admin navigation uses drawer modules.
 
 ### Admin Dashboard
 
@@ -479,7 +479,7 @@ Rules:
 
 ## Staff Screens
 
-Staff navigation uses sidebar modules focused on daily operations.
+Staff navigation uses drawer modules focused on daily operations.
 
 ### Staff Dashboard
 

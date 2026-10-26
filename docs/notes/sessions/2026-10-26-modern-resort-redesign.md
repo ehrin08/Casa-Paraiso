@@ -40,6 +40,13 @@ Plan and start a visual redesign on the local `redesign` branch only, keeping th
   - The service photo preview uses 16px corners.
 - Intentional exceptions kept: small radii on calendar events, chart bars, meters, focus outlines and table-header corners; the deep palm `casa-dark-panel` accents; the skip-link `rounded-lg`.
 
+### Navigation redesign
+
+- **Top bar and drawer:** the user chose a ☰ overlay drawer at every width, a deep palm drawer, an avatar account menu, a notification bell, fewer destinations, no drawer extras, and a logo plus View site link to the public homepage.
+- **Destinations:** admin goes from 16 nav and account links to 8 drawer links. Commissions joins Payments, and Feedback and Customer rewards join Insights (Reports), through a shared section-tab row. The therapist's My commissions joins Payments.
+- **Code:** `resources/js/sidebar.js` is replaced by `resources/js/workspace-drawer.js`. The collapse rail, tooltips and pre-render preference script are removed. `x-dropdown` now closes on Escape, returns focus and exposes `aria-expanded`.
+- **Tests:** `RoleWorkspaceTest` is updated for the new structure and covers the merged-page tabs and active links, the home links, bell visibility per role, and the account menu contents. The new `tests/js/workspace-drawer.test.mjs` covers the drawer store.
+
 ## Decisions
 
 - Work stays on `redesign`. `main` is untouched, and no Hostinger package is built from this branch.
