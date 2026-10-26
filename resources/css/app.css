@@ -174,6 +174,11 @@ html[data-sidebar-collapsed="true"] {
     --color-casa-danger-bg: #FFE3DE;
     --color-casa-info: #234761;
     --color-casa-info-bg: #E0EFFA;
+    /* Categorical tones for therapist calendar lanes and role badges. */
+    --color-casa-violet: #583B7D;
+    --color-casa-violet-bg: #EEE5FA;
+    --color-casa-rose: #702C43;
+    --color-casa-rose-bg: #FBE3E8;
 
     --radius-casa-card: 20px;
     --radius-casa-panel: 16px;
