@@ -23,8 +23,10 @@ Plan and start a visual redesign on the local `redesign` branch only, keeping th
 
 - `npm run build` succeeded through the Docker wrapper.
 - Homepage checked in the browser at desktop and 375px: no horizontal overflow, readable frosted header, pill controls. The login page renders the new buttons.
-- The full Laravel suite ran after the Blade component changes; see the commit for the result.
-- Signed-in workspaces were not visually reviewed. The local database copy has no local demo account, and real account passwords were not used.
+- The full Laravel suite had 482 of 483 passing. The modal test still expected the old `backdrop-blur-sm` hook; it now checks `backdrop-blur-md` and passes.
+- Local sign-in had been failing because a stopped Cloudflare preview left secure-only session cookies and a tunnel `APP_URL`. `scripts/casa-preview.ps1 stop` restored the four journaled settings. The local app is `http://localhost:18001`.
+- Signed-in review: a temporary helper rendered 33 GET pages as the existing local super-admin and a customer account. It used an in-memory session and a rolled-back transaction. The therapist account redirects because its invitation is pending, and there is no local receptionist account. The pages were reviewed in the browser pane at desktop width and 375px. None overflowed sideways, and the light sidebar, mobile drawer, cards, pills and status badges render consistently. The helper and snapshots were deleted afterwards.
+- Fixes from the review: the customer dock labels are centered with tighter wrapping, and page titles now have explicit sizes. Operational titles are 24–30px Manrope; customer editorial titles are larger Cormorant Garamond. A `text-4xl` inherit rule had shrunk the customer titles to 16px.
 
 ## Decisions
 
@@ -34,5 +36,7 @@ Plan and start a visual redesign on the local `redesign` branch only, keeping th
 
 ## Follow-ups
 
-- [ ] The user signs in locally in the browser pane so each workspace can be reviewed (customer, admin, reception, therapist) and polished.
-- [ ] After the review, polish individual workspaces and commit them one at a time on `redesign`.
+- [x] Review the admin and customer workspaces visually.
+- [ ] Review the therapist and reception workspaces once those local accounts can sign in.
+- [ ] Interactive states (dialogs, booking wizard, calendars with live feeds) need a real signed-in browser session.
+- [ ] Convert remaining page-only hex shades during per-workspace polish.
