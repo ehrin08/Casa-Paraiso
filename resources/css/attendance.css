@@ -35,8 +35,8 @@ body[data-workspace-role] .attendance-workspace .attendance-table td { padding: 
 .attendance-time, .attendance-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .attendance-status { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.65rem; border-radius: var(--radius-casa-pill); font-size: 0.875rem; white-space: nowrap; background: var(--color-casa-bg); color: var(--color-casa-text); }
 .attendance-status > span { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; }
-.attendance-status--duty { background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
-.attendance-status--completed, .attendance-status--unrecorded { background: var(--color-casa-sand); color: var(--color-casa-muted); }
+.attendance-status--duty { background: var(--color-casa-success-bg); color: var(--color-casa-success); }
+.attendance-status--completed { background: var(--color-casa-info-bg); color: var(--color-casa-info); }
 .attendance-correct { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.4rem 0.65rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); font-weight: 600; white-space: nowrap; box-shadow: var(--shadow-casa-soft); }
 .attendance-correct:hover { border-color: var(--color-casa-palm); color: var(--color-casa-palm-dark); }
 .attendance-pagination { margin-top: 1rem; }
