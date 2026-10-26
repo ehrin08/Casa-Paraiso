@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-10-26: [Redesign live on casaparaiso.site](sessions/2026-10-26-redesign-live.md)
 - 2026-10-26: [Project memory consistency check](sessions/2026-10-26-memory-consistency-check.md)
 - 2026-10-26: [Modal CRUD and consistent dialogs](sessions/2026-10-26-modal-crud-consistency.md)
 - 2026-10-26: [Modern Resort redesign, first pass](sessions/2026-10-26-modern-resort-redesign.md)
