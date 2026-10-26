@@ -7,7 +7,7 @@
 .schedules-roster { overflow: hidden; }
 .schedules-roster-heading { border-bottom: 1px solid var(--color-casa-border); }
 .schedules-actions { justify-content: flex-end; }
-.schedules-view-toggle { display: flex; border: 1px solid var(--color-casa-border); border-radius: 8px; overflow: hidden; }
+.schedules-view-toggle { display: flex; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-pill); overflow: hidden; }
 .schedules-view-toggle a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: .5rem .7rem; color: var(--color-casa-muted); font-size: .875rem; font-weight: 700; }
 .schedules-view-toggle [aria-current] { background: var(--color-casa-palm); color: white; }
 .schedules-text-link { min-height: 2.75rem; display: inline-flex; align-items: center; font-weight: 700; color: var(--color-casa-cacao); }
@@ -37,7 +37,7 @@
 .schedules-mobile-person { border-bottom: 1px solid var(--color-casa-border); }
 .schedules-mobile-person > summary { padding: 1rem; font-weight: 800; cursor: pointer; min-height: 2.75rem; }
 .schedules-mobile-person > summary span { display: block; margin-top: .35rem; color: var(--color-casa-muted); font-size: .875rem; font-weight: 500; }
-.schedules-mobile-day { display: grid; gap: .65rem; margin: 0 1rem 1rem; padding: 1rem; border: 1px solid var(--color-casa-border); border-radius: 8px; }
+.schedules-mobile-day { display: grid; gap: .65rem; margin: 0 1rem 1rem; padding: 1rem; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); }
 .schedules-mobile-day h3 { font-weight: 800; }
 .schedules-notice { border: 1px solid color-mix(in srgb, var(--color-casa-danger) 30%, white); background: color-mix(in srgb, var(--color-casa-danger-bg) 50%, var(--color-casa-paper)); color: var(--color-casa-danger-text); padding: .9rem 1rem; border-radius: var(--radius-casa-panel); line-height: 1.5; box-shadow: var(--shadow-casa-soft); }
 .schedules-notice--success { border-color: var(--color-casa-border); background: color-mix(in srgb, var(--color-casa-palm) 7%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }

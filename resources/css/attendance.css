@@ -33,7 +33,7 @@ body[data-workspace-role] .attendance-workspace .attendance-table td { padding: 
 .attendance-name { font-weight: 600; }
 .attendance-email, .attendance-source { font-size: 0.875rem; color: var(--color-casa-muted); }
 .attendance-time, .attendance-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.attendance-status { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.5rem; border-radius: 7px; font-size: 0.875rem; white-space: nowrap; background: var(--color-casa-bg); color: var(--color-casa-text); }
+.attendance-status { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.65rem; border-radius: var(--radius-casa-pill); font-size: 0.875rem; white-space: nowrap; background: var(--color-casa-bg); color: var(--color-casa-text); }
 .attendance-status > span { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; }
 .attendance-status--duty { background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--color-casa-paper)); color: var(--color-casa-palm-dark); }
 .attendance-status--completed, .attendance-status--unrecorded { background: var(--color-casa-sand); color: var(--color-casa-muted); }

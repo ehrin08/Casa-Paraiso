@@ -10,7 +10,7 @@
     @endif
 
     @if ($errors->has('google'))
-        <div class="mb-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800" role="alert">
+        <div class="mb-5 rounded-2xl border border-casa-danger/25 bg-casa-danger-bg px-4 py-3 text-sm leading-6 text-casa-danger-text" role="alert">
             {{ $errors->first('google') }}
         </div>
     @endif

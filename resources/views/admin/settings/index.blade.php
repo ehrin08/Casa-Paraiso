@@ -14,7 +14,7 @@
         </div>
     @endif
     @if ($errors->any())
-        <div role="alert" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div role="alert" class="mb-4 rounded-xl border border-casa-danger/20 bg-casa-danger-bg p-4 text-sm text-casa-danger-text">
             <p class="font-bold">{{ __('Please review the highlighted settings and try again.') }}</p>
             <ul class="mt-2 list-disc space-y-1 pl-5">
                 @foreach ($errors->all() as $error)

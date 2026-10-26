@@ -14,7 +14,7 @@
                 <button type="submit" class="casa-button-primary self-end">{{ __('Apply filters') }}</button>
             </form>
         </x-list-toolbar>
-        @if ($errors->any())<div role="alert" class="mt-3 text-sm text-red-700">@foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
+        @if ($errors->any())<div role="alert" class="mt-3 text-sm text-casa-danger-text">@foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
         <div class="mt-4">
             @if ($appointments->isEmpty())
                 <x-empty-state title="{{ __('No matching appointments') }}" description="{{ __('Try another customer, date range, or status.') }}" />

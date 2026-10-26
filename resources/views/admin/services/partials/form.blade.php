@@ -54,7 +54,7 @@
     <aside class="space-y-4">
         <x-app-card>
             <h2 class="font-display text-xl font-black text-casa-text">{{ __('Service photo') }}</h2>
-            <img src="{{ $servicePhotos->url($service->photo_path, $service->slug ?? '') }}" alt="{{ __('Current service photo') }}" width="720" height="480" class="mt-4 aspect-[3/2] w-full rounded-lg object-cover" decoding="async">
+            <img src="{{ $servicePhotos->url($service->photo_path, $service->slug ?? '') }}" alt="{{ __('Current service photo') }}" width="720" height="480" class="mt-4 aspect-[3/2] w-full rounded-2xl object-cover" decoding="async">
             <p class="mt-3 text-sm leading-6 text-casa-muted">{{ __('Shown on the homepage and when customers choose a treatment.') }}</p>
             <div class="mt-4">
                 <x-input-label for="photo" :value="__('Upload a photo (optional)')" />

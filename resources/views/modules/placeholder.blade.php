@@ -17,7 +17,7 @@
     </x-slot>
 
     <div class="space-y-6">
-        <section class="casa-dark-panel rounded-[24px] p-6 shadow-casa-card sm:p-8">
+        <section class="casa-dark-panel rounded-[20px] p-6 shadow-casa-card sm:p-8">
             <div class="max-w-3xl">
                 <p class="text-xs font-black uppercase tracking-[0.18em] text-casa-gold">{{ __('Workspace ready') }}</p>
                 <h2 class="mt-3 font-display text-2xl font-black text-white">{{ $title }}</h2>
