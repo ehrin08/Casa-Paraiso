@@ -10,7 +10,7 @@
 
         <div class="flex flex-wrap gap-3">
             <a href="{{ route('admin.services.index') }}" class="casa-button-secondary">{{ __('All services') }}</a>
-            <a href="{{ route('admin.services.edit', $service) }}" class="casa-button-primary">{{ __('Edit service') }}</a>
+            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.services.edit', $service) }}" class="casa-button-primary">{{ __('Edit service') }}</a>
         </div>
     </x-slot>
 

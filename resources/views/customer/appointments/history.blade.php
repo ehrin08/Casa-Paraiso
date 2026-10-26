@@ -61,7 +61,7 @@
                                 <a href="{{ route('customer.feedback.create', ['appointment_id' => $appointment->id]) }}" class="casa-button-primary">{{ __('Submit feedback') }}</a>
                             @endif
                             @if ($appointment->status === \App\Models\Appointment::STATUS_CONFIRMED && $appointment->scheduled_start_at?->isFuture())
-                                <x-confirm-action :action="route('customer.appointments.cancel', $appointment)" method="PATCH" label="{{ __('Cancel booking') }}" confirm-title="{{ __('Cancel this confirmed booking?') }}" confirm-message="{{ __('The reserved therapist and time will become available to other customers immediately.') }}" confirm-button="{{ __('Cancel booking') }}" button-class="casa-danger-button" />
+                                <x-confirm-action :action="route('customer.appointments.cancel', $appointment)" method="PATCH" label="{{ __('Cancel booking') }}" confirm-title="{{ __('Cancel this confirmed booking?') }}" confirm-message="{{ __('The reserved therapist and time will become available to other customers immediately.') }}" confirm-button="{{ __('Cancel booking') }}" button-class="casa-danger-button" tone="danger" dismiss-label="{{ __('Keep booking') }}" />
                             @endif
                         </div>
                     </div>

@@ -148,14 +148,14 @@
                     <div class="appointment-detail-visit-actions">
                         @if ($canFinish)
                             <button type="button" class="casa-button-primary w-full" x-data="" x-on:click="$dispatch('open-modal', '{{ $completionModal }}')"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l14-8Z"/></svg>{{ __('Finish service') }}</button>
-                            <x-confirm-action :action="route('admin.appointments.outcome', $appointment)" method="PATCH" label="{{ __('Mark as no-show') }}" confirm-title="{{ __('Mark this visit as no-show?') }}" confirm-message="{{ __('The visit will leave the active queue and no transaction will be created.') }}" confirm-button="{{ __('Mark no-show') }}" button-class="casa-button-secondary w-full"><input type="hidden" name="status" value="no_show"></x-confirm-action>
+                            <x-confirm-action :action="route('admin.appointments.outcome', $appointment)" method="PATCH" label="{{ __('Mark as no-show') }}" confirm-title="{{ __('Mark this visit as no-show?') }}" confirm-message="{{ __('The visit will leave the active queue and no transaction will be created.') }}" confirm-button="{{ __('Mark no-show') }}" button-class="casa-button-secondary w-full" tone="danger"><input type="hidden" name="status" value="no_show"></x-confirm-action>
                         @else
                             <button type="button" class="casa-button-primary w-full" disabled aria-describedby="detail-visit-start"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l14-8Z"/></svg>{{ __('Finish service') }}</button>
                             <button type="button" class="casa-button-secondary w-full" disabled aria-describedby="detail-visit-start">{{ __('Mark as no-show') }}</button>
                             <p id="detail-visit-start" class="appointment-detail-action-help">{{ __('Finish and no-show are available once the visit starts.') }}</p>
                         @endif
                         <div class="appointment-detail-cancel">
-                            <x-confirm-action :action="route('admin.appointments.outcome', $appointment)" method="PATCH" label="{{ __('Cancel appointment') }}" confirm-title="{{ __('Cancel this appointment?') }}" confirm-message="{{ __('The therapist reservation will be released. This appointment will remain in your records.') }}" confirm-button="{{ __('Cancel appointment') }}" button-class="appointment-detail-cancel-button w-full"><input type="hidden" name="status" value="cancelled"></x-confirm-action>
+                            <x-confirm-action :action="route('admin.appointments.outcome', $appointment)" method="PATCH" label="{{ __('Cancel appointment') }}" confirm-title="{{ __('Cancel this appointment?') }}" confirm-message="{{ __('The therapist reservation will be released. This appointment will remain in your records.') }}" confirm-button="{{ __('Cancel appointment') }}" button-class="appointment-detail-cancel-button w-full" tone="danger" dismiss-label="{{ __('Keep appointment') }}"><input type="hidden" name="status" value="cancelled"></x-confirm-action>
                         </div>
                     </div>
                 @endif
@@ -173,7 +173,7 @@
                 </dl>
                 @unless ($isPreview)
                 @if (! $confirmed)
-                    <a href="{{ route('admin.transactions.create', ['appointment_id' => $appointment]) }}" class="casa-button-secondary w-full"><x-nav-icon name="payments" />{{ __('Record payment') }}</a>
+                    <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.transactions.create', ['appointment_id' => $appointment]) }}" class="casa-button-secondary w-full"><x-nav-icon name="payments" />{{ __('Record payment') }}</a>
                 @else
                     <p class="appointment-detail-action-help">{{ __('Record the visit and payment together using Finish service.') }}</p>
                 @endif

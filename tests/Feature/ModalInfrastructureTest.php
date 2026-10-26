@@ -36,7 +36,7 @@ class ModalInfrastructureTest extends TestCase
         $this->assertStringContainsString("window.addEventListener('open-modal'", $script);
         $this->assertStringContainsString("window.addEventListener('close-modal'", $script);
         $this->assertStringContainsString('let panelTrigger = null;', $script);
-        $this->assertStringContainsString('const openPanel = async (url, trigger = document.activeElement)', $script);
+        $this->assertStringContainsString('const openPanel = async (url, trigger = document.activeElement, { restore = false } = {})', $script);
         $this->assertStringContainsString('panelFocusTarget(trigger)?.focus({ preventScroll: true })', $script);
         $this->assertStringContainsString('closePanel({ restoreFocus: false });', $script);
         $this->assertStringContainsString('openPanel(url, link);', $script);

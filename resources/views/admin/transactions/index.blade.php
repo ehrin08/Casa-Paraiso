@@ -6,7 +6,7 @@
         </div>
 
         <div class="payments-header-actions">
-            <a href="{{ route('admin.transactions.create') }}" class="casa-button-primary">
+            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.transactions.create') }}" class="casa-button-primary">
                 <x-payment-icon name="plus" />
                 {{ __('Record payment') }}
             </a>
@@ -91,7 +91,7 @@
                         @if ($activeFilters > 0)
                             <a href="{{ route('admin.transactions.index') }}" class="casa-button-secondary">{{ __('Clear filters') }}</a>
                         @else
-                            <a href="{{ route('admin.transactions.create') }}" class="casa-button-primary">{{ __('Record payment') }}</a>
+                            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.transactions.create') }}" class="casa-button-primary">{{ __('Record payment') }}</a>
                         @endif
                     </x-slot>
                 </x-empty-state>
@@ -148,7 +148,7 @@
                                 <td>
                                     <div class="payments-row-actions">
                                         <a href="{{ route('admin.transactions.show', $transaction) }}" aria-label="{{ __('View payment :number', ['number' => $transaction->transaction_number]) }}" title="{{ __('View payment') }}"><x-payment-icon name="eye" /></a>
-                                        <a href="{{ route('admin.transactions.edit', $transaction) }}" aria-label="{{ __('Edit payment :number', ['number' => $transaction->transaction_number]) }}" title="{{ __('Edit payment') }}"><x-payment-icon name="pencil" /></a>
+                                        <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.transactions.edit', $transaction) }}" aria-label="{{ __('Edit payment :number', ['number' => $transaction->transaction_number]) }}" title="{{ __('Edit payment') }}"><x-payment-icon name="pencil" /></a>
                                     </div>
                                 </td>
                             </tr>

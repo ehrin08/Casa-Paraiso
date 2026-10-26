@@ -32,8 +32,8 @@ class AddonController extends Controller
         $data = $request->validated();
         $data['code'] = $this->uniqueCode($data['name']);
         $data['is_active'] = $request->boolean('is_active');
-        $addon = Addon::query()->create($data);
-        return redirect()->route('admin.addons.edit', $addon)->with('status', 'addon-created');
+        Addon::query()->create($data);
+        return redirect()->route('admin.addons.index')->with('status', 'addon-created');
     }
 
     public function edit(Addon $addon): View { return view('admin.addons.edit', compact('addon')); }
@@ -43,7 +43,7 @@ class AddonController extends Controller
         $data = $request->validated();
         $data['is_active'] = $request->boolean('is_active');
         $addon->update($data);
-        return redirect()->route('admin.addons.edit', $addon)->with('status', 'addon-updated');
+        return redirect()->route('admin.addons.index')->with('status', 'addon-updated');
     }
 
     public function toggle(Addon $addon): RedirectResponse

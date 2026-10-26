@@ -49,6 +49,8 @@
                             confirm-title="{{ __('Dismiss this reward?') }}"
                             confirm-message="{{ __('The customer will no longer be able to use this reward. This cannot be undone.') }}"
                             confirm-button="{{ __('Dismiss reward') }}"
+                            tone="danger"
+                            dismiss-label="{{ __('Keep reward') }}"
                         />
                     </div>
                 @endif

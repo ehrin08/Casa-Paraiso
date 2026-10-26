@@ -10,7 +10,7 @@
         <div class="flex flex-wrap gap-3">
             <a href="{{ route('admin.staff-roster.index') }}" class="casa-button-secondary">{{ __('Manage schedule') }}</a>
         @if (auth()->user()->isSuperAdmin())
-            <a href="{{ route('admin.staff.create') }}" class="casa-button-primary">
+            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.create') }}" class="casa-button-primary">
                 <x-nav-icon name="plus" />
                 {{ __('Add therapist') }}
             </a>
@@ -70,7 +70,7 @@
                             @if ($activeFilters)
                                 <a href="{{ route('admin.staff.index') }}" class="casa-button-secondary">{{ __('Clear filters') }}</a>
                             @elseif (auth()->user()->isSuperAdmin())
-                                <a href="{{ route('admin.staff.create') }}" class="casa-button-primary">{{ __('Add therapist') }}</a>
+                                <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.create') }}" class="casa-button-primary">{{ __('Add therapist') }}</a>
                             @endif
                         </x-slot>
                     </x-empty-state>

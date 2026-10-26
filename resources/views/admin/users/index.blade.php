@@ -139,7 +139,7 @@
                         </select>
                         @if ($hasOldInput)<x-input-error :messages="$errors->get('is_active')" />@endif
                     </div>
-                    @if ($selectedUser?->isStaff() && $selectedUser->staffProfile)<a class="users-profile-link" href="{{ route('admin.staff.edit', $selectedUser->staffProfile) }}">{{ __('Manage therapist profile') }}</a>@endif
+                    @if ($selectedUser?->isStaff() && $selectedUser->staffProfile)<a data-panel-link data-turbo="false" aria-haspopup="dialog" class="users-profile-link" href="{{ route('admin.staff.edit', $selectedUser->staffProfile) }}">{{ __('Manage therapist profile') }}</a>@endif
                     <div class="users-access-notice users-form-notice"><x-nav-icon name="team"/><div><strong>{{ __('Super admin only') }}</strong><p>{{ __('User account management is restricted to super administrators.') }}</p></div></div>
                     <div class="users-form-actions">
                         <button type="submit" class="casa-button-primary">{{ $selectedUser ? __('Save changes') : __('Create user') }}</button>

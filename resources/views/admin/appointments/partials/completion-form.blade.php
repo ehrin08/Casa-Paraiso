@@ -4,7 +4,7 @@
     $completionValue = fn ($key, $default = null) => $isActiveCompletion ? old($key, $default) : $default;
     $completionErrors = fn ($key) => $isActiveCompletion ? $errors->get($key) : [];
 @endphp
-<form method="POST" action="{{ route('admin.appointments.complete', $appointment) }}" class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+<form method="POST" action="{{ $completeAction ?? route('admin.appointments.complete', $appointment) }}" class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
     @csrf
     <input type="hidden" name="_modal" value="{{ $modalName }}">
     @foreach ($queueContext ?? [] as $key => $value)

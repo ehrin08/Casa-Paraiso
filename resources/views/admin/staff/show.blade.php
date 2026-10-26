@@ -10,7 +10,7 @@
 
         <div class="flex flex-wrap gap-3">
             <a href="{{ route('admin.staff.index') }}" class="casa-button-secondary">{{ __('All therapists') }}</a>
-            <a href="{{ route('admin.staff.edit', $staffProfile) }}" class="casa-button-primary">{{ __('Edit therapist') }}</a>
+            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.edit', $staffProfile) }}" class="casa-button-primary">{{ __('Edit therapist') }}</a>
         </div>
     </x-slot>
 
@@ -112,7 +112,7 @@
                         <p class="casa-section-label">{{ __('Exceptions') }}</p>
                         <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Upcoming overrides') }}</h2>
                     </div>
-                    <a href="{{ route('admin.staff.schedule-exceptions.create', $staffProfile) }}" class="casa-button-secondary">{{ __('Add exception') }}</a>
+                    <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.schedule-exceptions.create', $staffProfile) }}" class="casa-button-secondary">{{ __('Add exception') }}</a>
                 </div>
 
                 <div class="mt-5 space-y-4">
@@ -138,7 +138,7 @@
                                     @endif
                                 </div>
                                 <div class="flex gap-3 text-sm">
-                                    <a href="{{ route('admin.staff.schedule-exceptions.edit', [$staffProfile, $scheduleException]) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark">{{ __('Edit') }}</a>
+                                    <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.staff.schedule-exceptions.edit', [$staffProfile, $scheduleException]) }}" class="font-bold text-casa-primary hover:text-casa-primary-dark">{{ __('Edit') }}</a>
                                     <x-confirm-action
                                         :action="route('admin.staff.schedule-exceptions.destroy', [$staffProfile, $scheduleException])"
                                         method="DELETE"
@@ -147,6 +147,8 @@
                                         confirm-message="{{ __('This date-specific schedule override will no longer affect appointment availability.') }}"
                                         confirm-button="{{ __('Remove') }}"
                                         button-class="font-bold text-casa-muted hover:text-casa-danger-text"
+                                        tone="danger"
+                                        dismiss-label="{{ __('Keep exception') }}"
                                     />
                                 </div>
                             </div>

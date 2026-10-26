@@ -8,15 +8,11 @@
                 <span>{{ $rangeLabel }}</span>
             @endif
             @if ($cell['can_edit'])
-                <details class="schedules-remove">
-                    <summary>{{ __('Remove') }}</summary>
-                    <form method="POST" action="{{ route('admin.staff-roster.shifts.destroy', [$roster, $range['id']]) }}" data-turbo="false" data-schedule-submit>
-                        @csrf @method('DELETE')
+                <div class="schedules-remove">
+                    <x-confirm-action :action="route('admin.staff-roster.shifts.destroy', [$roster, $range['id']])" method="DELETE" :label="__('Remove')" :confirm-title="__('Remove this shift?')" :confirm-message="__('Remove :hours for :name on :day from the draft. Nothing changes for customers until the draft is published.', ['hours' => $rangeLabel, 'name' => $person->user->name, 'day' => $day['heading']])" :confirm-button="__('Remove shift')" :dismiss-label="__('Keep shift')" button-class="schedules-remove-trigger" tone="danger">
                         @include('admin.staff-schedules.partials.context')
-                        <p>{{ __('Remove this range from the draft?') }}</p>
-                        <button type="submit">{{ __('Remove shift') }}</button>
-                    </form>
-                </details>
+                    </x-confirm-action>
+                </div>
             @endif
         </div>
     @empty

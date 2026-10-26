@@ -24,9 +24,9 @@
             <div class="mt-5 rounded-2xl border border-casa-border bg-casa-paper p-5"><p class="text-sm font-black text-casa-text">{{ __('Sanitized message') }}</p><p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-casa-muted">{{ $report->message }}</p></div>
             <div class="mt-5 flex flex-wrap gap-3">
                 @if ($report->resolved_at)
-                    <form method="POST" action="{{ route('admin.system-errors.reopen', $report) }}">@csrf @method('PATCH')<button class="casa-button-secondary">{{ __('Reopen') }}</button></form>
+                    <x-confirm-action :action="route('admin.system-errors.reopen', $report)" method="PATCH" :label="__('Reopen')" :confirm-title="__('Reopen this issue?')" :confirm-message="__('It returns to the open issues list until it is marked resolved again.')" button-class="casa-button-secondary" />
                 @else
-                    <form method="POST" action="{{ route('admin.system-errors.resolve', $report) }}">@csrf @method('PATCH')<button class="casa-button-secondary">{{ __('Mark resolved') }}</button></form>
+                    <x-confirm-action :action="route('admin.system-errors.resolve', $report)" method="PATCH" :label="__('Mark resolved')" :confirm-title="__('Mark this issue resolved?')" :confirm-message="__('It leaves the open issues list. A new occurrence of the same error reopens it automatically.')" button-class="casa-button-secondary" />
                 @endif
             </div>
         </x-app-card>

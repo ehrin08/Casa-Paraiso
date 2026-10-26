@@ -7,7 +7,7 @@
             </p>
         </div>
 
-        <a href="{{ route('admin.services.create') }}" class="casa-button-primary services-add-button">
+        <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.services.create') }}" class="casa-button-primary services-add-button">
             <x-nav-icon name="plus" />
             {{ __('Add service') }}
         </a>
@@ -56,7 +56,7 @@
                             @if ($hasCatalog)
                                 <a href="{{ route('admin.services.index') }}" class="casa-button-secondary">{{ __('Clear filters') }}</a>
                             @else
-                                <a href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
+                                <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.services.create') }}" class="casa-button-primary">{{ __('Add service') }}</a>
                             @endif
                         </x-slot>
                     </x-empty-state>
@@ -111,7 +111,7 @@
                                     </td>
                                     <td>
                                         <div class="services-actions">
-                                            <a href="{{ route('admin.services.edit', $service) }}" class="services-action services-action--edit" aria-label="{{ __('Edit :name', ['name' => $service->name]) }}">
+                                            <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.services.edit', $service) }}" class="services-action services-action--edit" aria-label="{{ __('Edit :name', ['name' => $service->name]) }}">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                                     <path d="m16 4 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6 5-2" />
                                                 </svg>
@@ -125,6 +125,7 @@
                                                 :confirm-message="$service->is_active ? __('Customers will no longer be able to book this service until it is activated again.') : __('Customers will be able to request this service once it is active.')"
                                                 :confirm-button="$service->is_active ? __('Deactivate') : __('Activate')"
                                                 :button-class="$service->is_active ? 'services-action services-action--deactivate' : 'services-action services-action--activate'"
+                                                :tone="$service->is_active ? 'danger' : 'default'"
                                             >
                                                 <x-slot name="trigger">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

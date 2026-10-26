@@ -6,6 +6,8 @@
     'confirmButton' => null,
     'buttonClass' => 'casa-button-primary',
     'modalWidth' => 'md',
+    'tone' => 'default',
+    'dismissLabel' => null,
 ])
 
 @php
@@ -13,23 +15,22 @@
 @endphp
 
 <div @class(['block w-full' => str_contains($buttonClass, 'w-full'), 'inline' => ! str_contains($buttonClass, 'w-full')])>
-    <button type="button" class="{{ $buttonClass }}" x-data="" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')">
+    <button type="button" class="{{ $buttonClass }}" aria-haspopup="dialog" x-data="" x-on:click.prevent="$dispatch('open-modal', '{{ $modalName }}')">
         {{ $label }}
     </button>
 
-    <x-modal :name="$modalName" :maxWidth="$modalWidth">
-        <div class="p-6">
-            <h2 class="font-display text-xl font-black text-casa-text">{{ $confirmTitle }}</h2>
-            <p class="mt-3 text-sm leading-6 text-casa-muted">{{ $confirmMessage }}</p>
+    <x-modal :name="$modalName" :maxWidth="$modalWidth" :labelled-by="$modalName.'-title'" centered focusable>
+        <x-modal-shell :title="$confirmTitle" :title-id="$modalName.'-title'">
+            <p class="text-sm leading-6 text-casa-muted">{{ $confirmMessage }}</p>
 
-            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <x-slot name="footer">
                 <button type="button" class="casa-button-secondary" x-on:click="$dispatch('close-modal', '{{ $modalName }}')">
-                    {{ __('Cancel') }}
+                    {{ $dismissLabel ?? __('Cancel') }}
                 </button>
-                <button type="submit" form="{{ $form }}" class="casa-button-primary">
+                <button type="submit" form="{{ $form }}" class="{{ $tone === 'danger' ? 'casa-danger-button' : 'casa-button-primary' }}">
                     {{ $confirmButton ?? $label }}
                 </button>
-            </div>
-        </div>
+            </x-slot>
+        </x-modal-shell>
     </x-modal>
 </div>
