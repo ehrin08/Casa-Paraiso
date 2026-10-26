@@ -5,6 +5,7 @@
         'success' => 'border-casa-success/15 bg-casa-success-bg text-casa-success',
         'warning' => 'border-casa-warning/15 bg-casa-warning-bg text-casa-warning',
         'danger' => 'border-casa-danger/15 bg-casa-danger-bg text-casa-danger-text',
+        'info' => 'border-casa-info/15 bg-casa-info-bg text-casa-info',
         'dark' => 'border-casa-charcoal/20 bg-casa-charcoal/10 text-casa-charcoal',
         default => 'border-casa-border bg-casa-sand/55 text-casa-muted',
     };
