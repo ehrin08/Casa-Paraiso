@@ -154,7 +154,7 @@ An initial background Chrome audit tab allowed focus to remain behind a service 
 
 ## Consistency rulebook and fix order
 
-Use [BRAND_UI_GUIDE.md](BRAND_UI_GUIDE.md) and [SCREEN_FLOW.md](SCREEN_FLOW.md) as the baseline. Apply an explicit page-specific approved rule before a general visual default. Homepage 3–5px corners, some referenced workspaces' 8px cards, and generic operational 14–16px surfaces are documented variations, not automatic defects. Customer and operational calendars intentionally have different week-start conventions.
+Use [BRAND_UI_GUIDE.md](BRAND_UI_GUIDE.md) and [SCREEN_FLOW.md](SCREEN_FLOW.md) as the baseline. Apply an explicit page-specific approved rule before a general visual default. Homepage 3–5px corners, some referenced workspaces' 8px cards, and generic operational 14–16px surfaces are documented variations, not automatic defects. On the `redesign` branch these corner variations are replaced by the shared Modern Resort tokens (20px cards, 16px panels, 12px controls, pill buttons); see [REDESIGN_MODERN_RESORT.md](REDESIGN_MODERN_RESORT.md). Customer and operational calendars intentionally have different week-start conventions.
 
 1. **Shared foundations first:** F02 heading reset; F03 modal title associations; F04 optional safe-action label/tone; F05 field/error attributes; F06–F08 target, text, and boundary tokens; F09 toolbar fallback. Fix shared owners before adding local CSS patches.
 2. **Customer completion path:** F01 visible email registration, then apply the shared confirmation/feedback corrections to booking cancellation and feedback. Recheck the homepage → login → registration path and booking/history flow at phone widths.

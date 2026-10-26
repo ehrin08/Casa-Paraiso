@@ -28,6 +28,18 @@ Plan and start a visual redesign on the local `redesign` branch only, keeping th
 - Signed-in review: a temporary helper rendered 33 GET pages as the existing local super-admin and a customer account. It used an in-memory session and a rolled-back transaction. The therapist account redirects because its invitation is pending, and there is no local receptionist account. The pages were reviewed in the browser pane at desktop width and 375px. None overflowed sideways, and the light sidebar, mobile drawer, cards, pills and status badges render consistently. The helper and snapshots were deleted afterwards.
 - Fixes from the review: the customer dock labels are centered with tighter wrapping, and page titles now have explicit sizes. Operational titles are 24–30px Manrope; customer editorial titles are larger Cormorant Garamond. A `text-4xl` inherit rule had shrunk the customer titles to 16px.
 
+### Branch verification and consistency pass
+
+- JavaScript: `node --test tests/js/*.test.mjs` passed 78 of 78. A bare directory argument is not supported by this Node version.
+- The scans found no raw hex in page CSS and no `app.css` hex outside `@theme`. Docs links resolve, every doc is linked from HOME, documented tokens all exist, and `git diff --check main..redesign` is clean.
+- Fixed in this pass:
+  - Raw Tailwind `red-*` classes in nine views (error notices, the calendar error dot, the delete-account section) now use the danger tokens.
+  - Attendance status and staff labels are pills.
+  - The schedule view toggle is a pill, and the schedule mobile day cards use the panel radius.
+  - The three accent `casa-dark-panel` cards use 20px corners.
+  - The service photo preview uses 16px corners.
+- Intentional exceptions kept: small radii on calendar events, chart bars, meters, focus outlines and table-header corners; the deep palm `casa-dark-panel` accents; the skip-link `rounded-lg`.
+
 ## Decisions
 
 - Work stays on `redesign`. `main` is untouched, and no Hostinger package is built from this branch.
