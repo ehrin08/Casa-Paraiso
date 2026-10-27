@@ -19,6 +19,7 @@
 @import "./settings.css";
 @import "./profile.css";
 @import "./users.css";
+@import "./team.css";
 @import "./staff-schedules.css";
 
 @plugin "@tailwindcss/forms";
@@ -224,6 +225,27 @@ html:has(body[data-workspace-role]) {
     font-weight: 800;
     letter-spacing: 0.04em;
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-casa-palm) 30%, transparent), var(--shadow-casa-soft);
+}
+
+/* x-user-avatar: callers size the frame; an uploaded photo fills it. */
+.casa-user-avatar.has-photo {
+    overflow: hidden;
+    padding: 0;
+}
+
+.casa-user-avatar.has-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.casa-avatar-button > .casa-user-avatar {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    border-radius: 50%;
 }
 
 .casa-avatar-dot {
@@ -1418,48 +1440,6 @@ body[data-workspace-role] .casa-list-toolbar > :last-child {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
-}
-
-/* ── Org chart scroll-reveal animation ── */
-@keyframes org-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(18px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-[data-org-animate] {
-    opacity: 0;
-}
-
-[data-org-animate].is-visible {
-    animation: org-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    animation-delay: var(--org-delay, 0s);
-}
-
-/* ── Org chart avatar initials gradient backgrounds ── */
-.org-avatar-initials {
-    background: linear-gradient(135deg, var(--color-casa-brass) 0%, var(--color-casa-cacao) 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.org-avatar-initials-team {
-    background: linear-gradient(135deg, var(--color-casa-palm) 0%, var(--color-casa-charcoal) 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    text-transform: uppercase;
 }
 
 /* Record filters use one toolbar layout across operational and customer lists. */

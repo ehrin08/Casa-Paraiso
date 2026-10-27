@@ -23,6 +23,7 @@ class RestorePanelForm
         '/admin/customers/',
         '/admin/staff/',
         '/admin/services/',
+        '/admin/team/',
         '/admin/transactions/',
         '/admin/promotions/',
         '/admin/feedback/',

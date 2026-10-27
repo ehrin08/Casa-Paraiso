@@ -78,7 +78,10 @@
 
     $accountLinks = [
         ['label' => 'My profile', 'icon' => 'profile', 'route' => 'profile.edit', 'active' => 'profile.*', 'preload' => $isCustomer],
-        ...($user->isAdmin() ? [['label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*']] : []),
+        ...($user->isAdmin() ? [
+            ['label' => 'Team page', 'icon' => 'team', 'route' => 'admin.team.index', 'active' => 'admin.team.*'],
+            ['label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*'],
+        ] : []),
         ...($user->isSuperAdmin() ? [
             ['label' => 'User accounts', 'icon' => 'team', 'route' => 'admin.users.index', 'active' => 'admin.users.*'],
             ['label' => 'System issues', 'icon' => 'errors', 'route' => 'admin.system-errors.index', 'active' => 'admin.system-errors.*', 'badge' => $systemIssues],
@@ -90,15 +93,9 @@
         'Today' => 'palm', 'Appointments' => 'blue', 'My appointments' => 'blue', 'Customers' => 'rose',
         'Therapists' => 'violet', 'Services' => 'brass', 'Payments' => 'cacao', 'Attendance' => 'palm',
         'My attendance' => 'palm', 'Staff attendance' => 'violet', 'Insights' => 'blue', 'Feedback' => 'rose',
-        'My feedback' => 'rose', 'My profile' => 'palm', 'Settings' => 'brass', 'User accounts' => 'violet',
+        'My feedback' => 'rose', 'My profile' => 'palm', 'Team page' => 'rose', 'Settings' => 'brass', 'User accounts' => 'violet',
         'System issues' => 'rose',
     ];
-
-    $initials = collect(preg_split('/\s+/', trim($user->name)))
-        ->filter()
-        ->take(2)
-        ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
-        ->implode('');
 @endphp
 
 <nav x-data data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif class="sticky top-0 z-40">
@@ -125,7 +122,7 @@
                 <x-dropdown align="right" width="w-72" content-classes="p-2 bg-casa-paper">
                     <x-slot name="trigger">
                         <button type="button" class="casa-avatar-button" data-account-menu-trigger aria-haspopup="menu" aria-label="{{ __('Account menu for :name', ['name' => $user->name]) }}">
-                            <span>{{ $initials }}</span>
+                            <x-user-avatar :user="$user" />
                             @if ($systemIssues > 0)
                                 <span class="casa-avatar-dot" aria-hidden="true"></span>
                             @endif

@@ -23,23 +23,26 @@
             $accountUrl = $homeUrl ?? route('login');
             $bookingLabel = $homeUrl ? __('Open workspace') : __('Book an appointment');
             $startingRate = $services->min('price');
-            $organizationChart = $applicationSettings->publicOrganizationChart();
-            $showCompanyProfile = $applicationSettings->hasPublicCompanyProfile();
+            $organizationChart = collect($organizationChart ?? [])->filter(fn ($members) => $members->isNotEmpty());
+            $hasHistory = filled($applicationSettings->company_history);
+            $hasChart = $organizationChart->isNotEmpty();
+            $showCompanyProfile = $hasHistory || $hasChart;
+            $tierLabels = [
+                \App\Models\User::ORG_TIER_OWNER => __('Owner'),
+                \App\Models\User::ORG_TIER_LEADERSHIP => __('Leadership'),
+                \App\Models\User::ORG_TIER_TEAM => __('Our team'),
+            ];
             $navigationItems = [
                 '#treatments' => __('Treatments'),
                 '#how-it-works' => __('How it works'),
                 '#visit' => __('Visit & contact'),
             ];
+            if ($hasChart) {
+                $navigationItems = ['#team' => __('Our team')] + $navigationItems;
+            }
             if ($showCompanyProfile) {
                 $navigationItems = ['#about' => __('About')] + $navigationItems;
             }
-            $hasHistory = filled($applicationSettings->company_history);
-            $leaders = collect([
-                'owner' => $organizationChart['owner'] ?? null,
-                'admin' => $organizationChart['admin'] ?? null,
-            ])->filter();
-            $hasTeam = $organizationChart['team'] !== [];
-            $hasChart = $leaders->isNotEmpty() || $hasTeam;
             $neutralImage = 'images/spa/casa-towel-detail-720.webp';
             $addonImages = [
                 'back-massage-30' => 'images/spa/casa-massage-720.webp',
@@ -129,26 +132,26 @@
                         </div>
                     </section>
                     @if ($hasChart)
-                        <section class="landing-team landing-section" aria-labelledby="landing-team-title" data-landing-section="team" data-organization-chart>
+                        <section id="team" class="landing-team landing-section" aria-labelledby="landing-team-title" data-landing-section="team" data-organization-chart>
                             <x-landing-palm class="landing-palm landing-palm--team-left" />
                             <x-landing-palm class="landing-palm landing-palm--team-right" />
                             <div class="landing-container">
-                                <h2 id="landing-team-title">The people behind your care</h2>
-                                <div class="landing-org-chart" role="list" aria-label="Casa Paraiso reporting structure">
-                                    @if ($leaders->isNotEmpty())
-                                        <div class="landing-leaders {{ $hasTeam ? 'landing-leaders--with-team' : '' }}" role="presentation">
-                                            @foreach ($leaders as $tier => $node)
-                                                <x-landing-org-node :node="$node" data-org-tier="{{ $tier }}" />
-                                            @endforeach
+                                <div class="landing-team-heading">
+                                    <p class="landing-kicker">Meet the team</p>
+                                    <h2 id="landing-team-title">The people behind your care</h2>
+                                    <p>The faces who welcome you, plan your visit and look after you in the treatment room.</p>
+                                </div>
+                                <div class="landing-org-chart">
+                                    @foreach ($organizationChart as $tier => $members)
+                                        <div class="landing-org-tier landing-org-tier--{{ $tier }}" data-org-tier="{{ $tier }}">
+                                            <p class="landing-org-tier-label" id="landing-org-tier-{{ $tier }}">{{ $tierLabels[$tier] }}</p>
+                                            <ul class="landing-org-row" role="list" aria-labelledby="landing-org-tier-{{ $tier }}">
+                                                @foreach ($members as $member)
+                                                    <li><x-landing-org-node :member="$member" :tier="$tier" /></li>
+                                                @endforeach
+                                            </ul>
                                         </div>
-                                    @endif
-                                    @if ($hasTeam)
-                                        <div class="landing-team-grid {{ $leaders->isNotEmpty() ? 'landing-team-grid--connected' : '' }}" role="presentation">
-                                            @foreach ($organizationChart['team'] as $node)
-                                                <x-landing-org-node :node="$node" tier="team" data-org-tier="team" />
-                                            @endforeach
-                                        </div>
-                                    @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </section>

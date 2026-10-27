@@ -22,6 +22,7 @@ class ApplicationSetting extends Model
         'messenger_url',
         'map_url',
         'company_history',
+        // Retired hand-typed chart, kept read-only as a backup; the public chart now comes from staff accounts.
         'organization_chart',
         'default_payment_method',
         'promotion_voucher_validity_days',
@@ -83,46 +84,6 @@ class ApplicationSetting extends Model
             'organization_chart' => 'array',
             'promotion_voucher_validity_days' => 'integer',
         ];
-    }
-
-    /** @return array{owner?: array{title: string, name?: string|null, description?: string|null, photo?: string|null}, admin?: array{title: string, name?: string|null, description?: string|null, photo?: string|null}, team: array<int, array{title: string, name?: string|null, description?: string|null, photo?: string|null}>} */
-    public function publicOrganizationChart(): array
-    {
-        $chart = is_array($this->organization_chart) ? $this->organization_chart : [];
-        $team = collect($chart['team'] ?? [])
-            ->filter(static fn (mixed $role): bool => is_array($role) && filled($role['title'] ?? null))
-            ->values()
-            ->all();
-
-        return array_filter([
-            'owner' => is_array($chart['owner'] ?? null) && filled($chart['owner']['title'] ?? null) ? $chart['owner'] : null,
-            'admin' => is_array($chart['admin'] ?? null) && filled($chart['admin']['title'] ?? null) ? $chart['admin'] : null,
-            'team' => $team,
-        ], static fn (mixed $value, string $key): bool => $key === 'team' || $value !== null, ARRAY_FILTER_USE_BOTH);
-    }
-
-    /** Get the public URL for an org chart photo path, or null if the path is empty or file doesn't exist. */
-    public static function orgChartPhotoUrl(?string $path): ?string
-    {
-        if (blank($path)) {
-            return null;
-        }
-
-        if (! \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-            return null;
-        }
-
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
-    }
-
-    public function hasPublicCompanyProfile(): bool
-    {
-        $chart = $this->publicOrganizationChart();
-
-        return filled($this->company_history)
-            || isset($chart['owner'])
-            || isset($chart['admin'])
-            || $chart['team'] !== [];
     }
 
     public function updatedBy()

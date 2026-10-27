@@ -1,8 +1,6 @@
 @props(['staffProfile', 'selectedTab', 'selectionQuery', 'schedule', 'weekStart', 'weekEnd', 'upcomingExceptions'])
 
 @php
-    $initials = \Illuminate\Support\Str::of($staffProfile->user->name)->squish()->explode(' ')
-        ->filter()->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('');
     $tabUrl = fn ($tab) => route('admin.staff.index', array_merge($selectionQuery, ['selected' => $staffProfile->id, 'tab' => $tab])).'#therapist-detail';
     $editUrl = route('admin.staff.edit', $staffProfile);
     $scheduleUrl = route('admin.staff-roster.index', ['staff_profile_id' => $staffProfile->id]);
@@ -12,7 +10,7 @@
 
 <aside id="therapist-detail" class="therapists-detail" aria-labelledby="therapist-detail-name" tabindex="-1" data-selected-therapist="{{ $staffProfile->id }}" data-selected-tab="{{ $selectedTab }}">
     <div class="therapists-identity">
-        <span class="therapists-avatar therapists-avatar--large" aria-hidden="true">{{ mb_strtoupper($initials) }}</span>
+        <x-user-avatar :user="$staffProfile->user" class="therapists-avatar therapists-avatar--large" />
         <div class="therapists-identity-copy">
             <h2 id="therapist-detail-name">{{ $staffProfile->user->name }}</h2>
             <p class="therapists-muted">{{ $staffProfile->position ?: __('Therapist') }}</p>
@@ -31,6 +29,7 @@
             </summary>
             <div class="therapists-menu-links">
                 <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ $editUrl }}">{{ __('Edit therapist') }}</a>
+                <a data-panel-link data-turbo="false" aria-haspopup="dialog" href="{{ route('admin.team.edit', $staffProfile->user) }}">{{ __('Edit team card') }}</a>
                 <a href="{{ route('admin.staff.show', $staffProfile) }}">{{ __('Open full profile') }}</a>
             </div>
         </details>

@@ -25,19 +25,10 @@
     @endif
 
     @php
-        $organizationChart = old('organization_chart', $settings->publicOrganizationChart()) ?? [];
-        $organizationTeam = collect(data_get($organizationChart, 'team', []))->map(function ($role, $index) {
-            $role['photoUrl'] = \App\Models\ApplicationSetting::orgChartPhotoUrl($role['photo'] ?? null);
-            $role['removePhoto'] = (bool) old("organization_chart_remove_photos.team.{$index}", false);
-            return $role;
-        })->values()->all();
-        $savedChart = $settings->publicOrganizationChart();
-        $hasSavedChart = isset($savedChart['owner']) || isset($savedChart['admin']) || $savedChart['team'] !== [];
         $publicDetailsInvalid = $errors->hasAny(['location_landmarks', 'facebook_url', 'messenger_url', 'map_url']);
-        $chartInvalid = collect($errors->keys())->contains(fn ($key) => str_starts_with($key, 'organization_chart'));
     @endphp
 
-    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="settings-workspace" data-settings-workspace>
+    <form method="POST" action="{{ route('admin.settings.update') }}" class="settings-workspace" data-settings-workspace>
         @csrf
         @method('PATCH')
         <x-input-error :messages="$errors->get('settings')" />
@@ -135,60 +126,13 @@
             </div>
         </div>
 
-        <section class="settings-card settings-chart-card" aria-labelledby="organization-chart-heading">
-                <h2 id="organization-chart-heading">{{ __('Public organization chart') }}</h2>
-                <p class="settings-description">{{ __('Your saved team structure, shown on the public landing page.') }}</p>
-                @if ($hasSavedChart)
-                    <ol class="settings-chart" aria-label="{{ __('Owner, Administrator and Team reporting structure') }}" tabindex="0" data-settings-chart-preview>
-                        @foreach (['owner' => __('Owner'), 'admin' => __('Administrator')] as $tier => $label)
-                            @if (isset($savedChart[$tier]))
-                                <li class="settings-chart-tier">
-                                    <p class="settings-chart-tier-label">{{ $label }}</p>
-                                    <x-settings-chart-node :role="$savedChart[$tier]" :label="$label" />
-                                </li>
-                            @endif
-                        @endforeach
-                        @if ($savedChart['team'] !== [])
-                            <li class="settings-chart-tier settings-chart-team">
-                                <p class="settings-chart-tier-label settings-chart-team-label">{{ __('Team') }}</p>
-                                @foreach ($savedChart['team'] as $role)
-                                    <x-settings-chart-node :role="$role" :label="__('Team role')" />
-                                @endforeach
-                            </li>
-                        @endif
-                    </ol>
-                @else
-                    <div class="settings-chart-empty" data-settings-chart-empty>
-                        <span class="settings-icon-circle"><x-nav-icon name="team" /></span>
-                        <p>{{ __('No public organization chart yet.') }}</p>
-                        <p class="settings-help">{{ __('Open Edit chart to add your owner, administrator and team roles.') }}</p>
-                    </div>
-                @endif
-                <details id="settings-chart-editor" class="settings-disclosure settings-chart-editor" @if($chartInvalid) open @endif>
-                    <summary><x-nav-icon name="settings" />{{ __('Edit chart') }}</summary>
-                    <dialog open class="settings-chart-dialog" data-settings-chart-dialog aria-labelledby="settings-chart-dialog-heading" aria-describedby="settings-chart-dialog-help">
-                    <header class="settings-chart-dialog-header">
-                        <div>
-                            <h2 id="settings-chart-dialog-heading">{{ __('Edit organization chart') }}</h2>
-                            <p id="settings-chart-dialog-help" class="settings-help">{{ __('Edits are kept when you close this editor. Use Save changes on the Settings page to publish them.') }}</p>
-                        </div>
-                        <button type="button" class="casa-button-secondary" data-settings-chart-close hidden aria-label="{{ __('Close chart editor') }}">{{ __('Close') }}</button>
-                    </header>
-                    <div class="settings-chart-editor-body">
-                        <p class="settings-help">{{ __('Use public role labels and short responsibilities. Save changes to publish the chart; leave every field blank to hide it.') }}</p>
-                        <div class="settings-chart-leadership">
-                        @foreach (['owner' => __('Owner / Leadership'), 'admin' => __('Administration')] as $tier => $label)
-                            <x-settings-chart-fields :role="data_get($organizationChart, $tier, [])" :tier="$tier" :label="$label" />
-                        @endforeach
-                        </div>
-                        <x-settings-chart-team-editor :team="$organizationTeam" />
-                    </div>
-                    <footer class="settings-chart-dialog-footer" hidden>
-                        <p class="settings-help">{{ __('Use the page’s Save changes button to publish your edits.') }}</p>
-                        <button type="button" class="casa-button-primary" data-settings-chart-close>{{ __('Done') }}</button>
-                    </footer>
-                    </dialog>
-                </details>
+        <section class="settings-card settings-team-card" aria-labelledby="organization-chart-heading" data-settings-team-link>
+            <span class="settings-icon-circle"><x-nav-icon name="team" /></span>
+            <div>
+                <h2 id="organization-chart-heading">{{ __('Public team chart') }}</h2>
+                <p class="settings-description">{{ __('The homepage chart is built from staff accounts. Add photos, titles and levels on the Team page; staff can also update their own photo from My profile.') }}</p>
+            </div>
+            <a href="{{ route('admin.team.index') }}" class="casa-button-secondary">{{ __('Open Team page') }}</a>
         </section>
 
         <details class="settings-card settings-disclosure settings-operating-details">
