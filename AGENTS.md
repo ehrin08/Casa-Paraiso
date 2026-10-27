@@ -10,7 +10,7 @@ Earlier client, API, database, and hosted-pilot integrations are retired. The ar
 
 For every task, read this file, then `docs/PROJECT_MEMORY.md` once; reuse their contents while unchanged. Then read `docs/HOME.md`, the three newest entries in `docs/notes/SESSIONS.md`, and any linked notes relevant to the task. Read only task-relevant sections of authoritative documents and representative tests. Documentation-only work does not require application-test inspection. Update project memory with durable changes to routes, models, migrations, services, Docker workflow, or verification steps.
 
-Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_DESIGN.md`, `docs/SCREEN_FLOW.md`, `docs/DOCKER_WORKFLOW.md`, `docs/IMPLEMENTATION_ROADMAP.md`, `docs/BRAND_UI_GUIDE.md`, and `docs/SECURITY_HARDENING.md`.
+Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_DESIGN.md`, `docs/SCREEN_FLOW.md`, `docs/DOCKER_WORKFLOW.md`, `docs/HOSTINGER_DEPLOYMENT.md`, `docs/BRAND_UI_GUIDE.md`, and `docs/SECURITY_HARDENING.md`. `docs/archive/` holds finished or retired documents; read them only for history.
 
 ## Obsidian Knowledge Base
 
