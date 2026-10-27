@@ -22,8 +22,8 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 
 ## Efficient Agent Workflow
 
-- Call `ctx_compose` before individual reads or searches, using a focused question and the narrowest useful directory. Expand discovery only to resolve missing dependencies or unanswered questions.
-- Route file reads, searches, and shell output through lean-ctx. Reuse source already returned; fetch exact source when needed for edits or evidence. Never treat compressed summaries as exact content; use `lean-ctx raw` for exact shell evidence.
+- Start with a focused question and the narrowest useful directory. Expand discovery only to resolve missing dependencies or unanswered questions.
+- Use `rg` for code search and standard file and shell tools. Reuse source already returned; fetch exact source when needed for edits or evidence.
 - Batch independent reads and searches. Retrieve only relevant tool definitions and avoid repeated metadata dumps.
 - Keep generated output, dependencies, logs, and archived material out of ordinary discovery unless the task concerns them.
 - After a permanent tool failure, use an available supported alternative rather than retrying an unchanged call.
