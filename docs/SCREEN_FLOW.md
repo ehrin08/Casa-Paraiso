@@ -94,7 +94,7 @@ Access: guest and authenticated users.
 Purpose:
 
 - Introduce Casa Paraiso - Body and Wellness Spa.
-- Show the admin-managed company history and the staff team chart (published staff accounts with photo, name and title, grouped Owner → Leadership → Team) when either has content.
+- Show the admin-managed company history and the staff team chart in one About section when either has content. The history sits on the left and the chart on the right (stacked below 768px). The chart shows only the portraits of published staff, grouped Owner → Leadership → Team; selecting a portrait opens a dialog with the person's photo, name, title and bio. Without a published team, the section shows the towel photo instead.
 - Show the four massage packages, add-on price list, business hours, and call to action.
 - Use the marketing line: "Reserve your spot. You deserve this."
 

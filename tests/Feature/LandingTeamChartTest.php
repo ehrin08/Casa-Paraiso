@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ApplicationSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -30,9 +31,10 @@ class LandingTeamChartTest extends TestCase
         $this->publish(['role' => User::ROLE_SUPER_ADMIN, 'name' => 'Omar Owner'], User::ORG_TIER_OWNER);
 
         $response = $this->get('/')->assertOk()
-            ->assertSee('href="#team"', false)
-            ->assertSee('id="team"', false)
-            ->assertSee('The people behind your care')
+            ->assertSee('href="#about"', false)
+            ->assertDontSee('href="#team"', false)
+            ->assertSee('id="about"', false)
+            ->assertSee('data-organization-chart', false)
             ->assertSeeInOrder(['Omar Owner', 'Lea Leader', 'Alma Team', 'Bianca Team'])
             ->assertSee('Senior Therapist')
             ->assertSee('Keeps every day running smoothly.')
@@ -45,6 +47,21 @@ class LandingTeamChartTest extends TestCase
         }
         // Without a public title the role label is shown.
         $this->assertStringContainsString('Therapist', $html);
+        // The chart shows portraits only; each one opens its own details dialog.
+        $this->assertSame(4, substr_count($html, 'data-org-member'));
+        $this->assertSame(4, substr_count($html, 'data-org-dialog'));
+        $this->assertSame(0, substr_count($html, 'class="landing-org-copy"'));
+        $this->assertStringContainsString('aria-label="About Alma Team, Senior Therapist"', $html);
+    }
+
+    public function test_the_about_section_keeps_its_photo_when_no_team_is_published(): void
+    {
+        ApplicationSetting::factory()->create(['id' => 1, 'company_history' => 'Founded to help guests slow down.']);
+
+        $this->get('/')->assertOk()
+            ->assertSee('id="about"', false)
+            ->assertSee('casa-towel-detail-1024.webp', false)
+            ->assertDontSee('data-organization-chart', false);
     }
 
     public function test_hidden_inactive_customer_and_unplaced_accounts_never_appear(): void
