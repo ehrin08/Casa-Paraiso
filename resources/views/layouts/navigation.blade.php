@@ -98,7 +98,7 @@
     ];
 @endphp
 
-<nav x-data data-role-navigation="{{ $user->role }}" @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif class="sticky top-0 z-40">
+<nav x-data data-role-navigation="{{ $user->role }}" data-scroll-header @if($receivesBookingNotifications) data-booking-notifications data-booking-notifications-user-id="{{ $user->id }}" data-booking-notifications-count-url="{{ route('notifications.bookings.count') }}" data-booking-notifications-read-url="{{ route('notifications.bookings.read') }}" @endif class="sticky top-0 z-40">
     <div class="casa-topbar casa-glass-bar border-b">
         <div class="mx-auto flex h-16 max-w-[90rem] items-center gap-2 px-3 sm:gap-3 sm:px-5 lg:px-6">
             <button type="button" class="casa-icon-button" data-drawer-toggle aria-controls="workspace-navigation" x-bind:aria-expanded="$store.drawer.isOpen" aria-label="Open navigation" @click="$store.drawer.open($el)">

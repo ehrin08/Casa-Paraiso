@@ -54,7 +54,7 @@
         <a href="#main-content" class="landing-skip-link">Skip to content</a>
 
         <div class="casa-landing">
-            <header class="casa-landing-header" x-data="{ open: false }" x-on:keydown.escape.window="open = false" x-on:click.outside="open = false" data-landing-header="fixed">
+            <header class="casa-landing-header" x-data="{ open: false }" x-on:keydown.escape.window="open = false" x-on:click.outside="open = false" data-landing-header="fixed" data-scroll-header>
                 <div class="landing-container landing-header-inner">
                     <a href="{{ url('/') }}" class="landing-logo" aria-label="Casa Paraiso home">
                         <img src="{{ asset('images/casa_paraiso_logo.jpg') }}" alt="Casa Paraiso Body and Wellness Spa" width="500" height="500">

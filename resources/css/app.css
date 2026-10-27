@@ -41,6 +41,20 @@ html:has(body[data-workspace-role]) {
 
 .casa-topbar {
     box-shadow: 0 1px 0 rgba(55, 44, 32, 0.04), 0 10px 28px -18px rgba(38, 48, 40, 0.35);
+    transition: transform 250ms ease;
+}
+
+/* Only the bar slides away: transforming the nav would break its fixed drawer and mobile dock. */
+[data-scroll-header].is-scroll-hidden > .casa-topbar {
+    transform: translateY(-100%);
+}
+
+[data-scroll-header].is-scroll-hidden {
+    pointer-events: none;
+}
+
+[data-scroll-header].is-scroll-hidden > :not(.casa-topbar) {
+    pointer-events: auto;
 }
 
 .casa-topbar-link {
