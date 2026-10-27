@@ -31,6 +31,18 @@ class User extends Authenticatable implements MustVerifyEmail
         self::ROLE_CUSTOMER,
     ];
 
+    public const ORG_TIER_OWNER = 'owner';
+
+    public const ORG_TIER_LEADERSHIP = 'leadership';
+
+    public const ORG_TIER_TEAM = 'team';
+
+    public const ORG_TIERS = [
+        self::ORG_TIER_OWNER,
+        self::ORG_TIER_LEADERSHIP,
+        self::ORG_TIER_TEAM,
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -44,6 +56,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'is_active',
+        'public_title',
+        'public_bio',
+        'org_chart_tier',
+        'org_chart_order',
+        'show_on_org_chart',
     ];
 
     /**
@@ -67,7 +84,49 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'is_active' => 'boolean',
             'password' => 'hashed',
+            'org_chart_order' => 'integer',
+            'show_on_org_chart' => 'boolean',
         ];
+    }
+
+    /** Active staff accounts an admin has published on the public team chart. */
+    public function scopePubliclyListed($query)
+    {
+        return $query
+            ->where('show_on_org_chart', true)
+            ->where('is_active', true)
+            ->where('role', '!=', self::ROLE_CUSTOMER)
+            ->whereIn('org_chart_tier', self::ORG_TIERS);
+    }
+
+    public function scopeTeamMembers($query)
+    {
+        return $query->where('role', '!=', self::ROLE_CUSTOMER);
+    }
+
+    public function roleLabel(): string
+    {
+        return match ($this->role) {
+            self::ROLE_SUPER_ADMIN => __('Owner'),
+            self::ROLE_ADMIN => __('Administrator'),
+            self::ROLE_RECEPTIONIST => __('Receptionist'),
+            self::ROLE_STAFF => __('Therapist'),
+            default => __('Customer'),
+        };
+    }
+
+    public function publicTitle(): string
+    {
+        return filled($this->public_title) ? $this->public_title : $this->roleLabel();
+    }
+
+    public function initials(): string
+    {
+        return collect(preg_split('/\s+/u', trim((string) $this->name)))
+            ->filter()
+            ->take(2)
+            ->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
+            ->implode('');
     }
 
     public function isAdmin(): bool

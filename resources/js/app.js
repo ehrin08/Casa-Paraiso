@@ -6,7 +6,6 @@ import { createOperationsBooking, createCustomerBooking } from './appointment-bo
 import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
 import { isCustomerModalUrl, restoreCustomerDetail, clearCustomerDetailRecovery } from './customer-dialog';
 import { isFormPanelUrl, attachPanelReturn, takePanelRestore } from './panel-form';
-import { initializeSettingsChartDialog } from './settings-dialog';
 import { initializeScheduleDialog } from './schedule-dialog';
 import { createCustomerAppointmentCalendar } from './customer-appointment-calendar';
 
@@ -589,90 +588,9 @@ window.attendanceStation = (config) => ({
     async refreshQr() { try { this.qr = (await window.axios.get(config.qrUrl)).data.qr; await this.render(); } catch { this.error = 'The live QR could not refresh.'; } },
 });
 
-window.organizationChartEditor = () => ({
-    team: [],
-    nextKey: 0,
-
-    init() {
-        try {
-            const team = JSON.parse(this.$root.dataset.initialTeam || '[]');
-            this.team = Array.isArray(team) ? team.map(role => ({ ...role, key: this.nextKey++, removePhoto: Boolean(role.removePhoto) })) : [];
-        } catch {
-            this.team = [];
-        }
-
-        if (this.team.length === 0) {
-            this.addRole();
-        }
-    },
-
-    addRole() {
-        if (this.team.length >= 8) {
-            return;
-        }
-
-        this.team.push({ key: this.nextKey++, title: '', name: '', description: '', photo: '', photoUrl: '', removePhoto: false });
-    },
-
-    removeRole(index) {
-        this.team.splice(index, 1);
-
-        if (this.team.length === 0) {
-            this.addRole();
-        }
-    },
-});
-
-window.orgPhotoUpload = (existingUrl) => ({
-    previewUrl: existingUrl || '',
-    hasExisting: !!existingUrl,
-    removing: false,
-
-    handleFileChange(event) {
-        const file = event.target.files[0];
-        if (file) {
-            this.previewUrl = URL.createObjectURL(file);
-            this.removing = false;
-        }
-    },
-});
-
-/* ── Org chart scroll animation (landing page) ── */
-if (typeof IntersectionObserver !== 'undefined') {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (!prefersReducedMotion) {
-        const orgObserver = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                        orgObserver.unobserve(entry.target);
-                    }
-                });
-            },
-            { threshold: 0.15 },
-        );
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-org-animate]').forEach((el) => {
-                orgObserver.observe(el);
-            });
-        });
-    } else {
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-org-animate]').forEach((el) => {
-                el.classList.add('is-visible');
-            });
-        });
-    }
-}
-
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', initializeBookingNotifications);
-document.addEventListener('DOMContentLoaded', () => initializeSettingsChartDialog());
-document.addEventListener('turbo:load', () => initializeSettingsChartDialog());
 document.addEventListener('DOMContentLoaded', () => initializeScheduleDialog());
 document.addEventListener('turbo:load', () => initializeScheduleDialog());
 
@@ -921,6 +839,7 @@ const panelPathPrefixes = [
     '/admin/customers/',
     '/admin/staff/',
     '/admin/services/',
+    '/admin/team/',
     '/admin/transactions/',
     '/admin/promotions/',
     '/admin/feedback/',

@@ -20,10 +20,7 @@
 
     @php
         $activeFilters = collect([$search, $status, $bookable])->filter(fn ($value) => filled($value))->count();
-        $selectionQuery = request()->only(['q', 'status', 'bookable', 'sort', 'direction', 'page']);
-        $initials = fn ($name) => \Illuminate\Support\Str::of($name)->squish()->explode(' ')
-            ->filter()->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('');
-    @endphp
+        $selectionQuery = request()->only(['q', 'status', 'bookable', 'sort', 'direction', 'page']);    @endphp
 
     <div class="therapists-workspace" data-therapists-workspace>
         <x-list-toolbar :count="$staffProfiles->total()" :reset-url="route('admin.staff.index')" :active-filters="$activeFilters" :collapsible="true" class="therapists-toolbar casa-list-toolbar--filters">
@@ -104,7 +101,7 @@
                                 <tr @class(['therapists-row', 'is-selected' => $isSelected]) data-therapist-id="{{ $staffProfile->id }}">
                                     <td>
                                         <a href="{{ $selectionUrl }}" class="therapists-row-link therapists-person" @if ($isSelected) aria-current="true" @endif>
-                                            <span class="therapists-avatar" aria-hidden="true">{{ mb_strtoupper($initials($staffProfile->user->name)) }}</span>
+                                            <x-user-avatar :user="$staffProfile->user" class="therapists-avatar" />
                                             <span>{{ $staffProfile->user->name }}</span>
                                         </a>
                                     </td>

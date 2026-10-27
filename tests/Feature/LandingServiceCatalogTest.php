@@ -195,37 +195,44 @@ class LandingServiceCatalogTest extends TestCase
 
     public function test_public_chart_preserves_missing_tiers_and_every_published_team_entry(): void
     {
-        $settings = ApplicationSetting::factory()->create(['id' => 1]);
-        $team = array_map(fn (int $number) => ['title' => 'Published role '.$number, 'name' => 'Team Member '.$number], range(1, 8));
+        ApplicationSetting::factory()->create(['id' => 1, 'company_history' => null]);
+        $publish = fn (string $tier) => ['show_on_org_chart' => true, 'org_chart_tier' => $tier];
 
-        foreach ([
-            ['owner' => ['title' => 'Owner', 'name' => 'Published Owner']],
-            ['admin' => ['title' => 'Administrator', 'name' => 'Published Administrator']],
-            ['team' => $team],
-        ] as $chart) {
-            $settings->update(['company_history' => null, 'organization_chart' => $chart]);
-            $response = $this->get('/')->assertOk()->assertSee('data-organization-chart', false);
-            $html = $response->getContent();
-            $this->assertSame(isset($chart['owner']) ? 1 : 0, substr_count($html, 'data-org-tier="owner"'));
-            $this->assertSame(isset($chart['admin']) ? 1 : 0, substr_count($html, 'data-org-tier="admin"'));
-            $this->assertSame(count($chart['team'] ?? []), substr_count($html, 'data-org-tier="team"'));
-            foreach ($chart['team'] ?? [] as $node) {
-                $response->assertSee($node['name']);
-            }
+        $owner = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN, 'name' => 'Published Owner'] + $publish(User::ORG_TIER_OWNER));
+        $response = $this->get('/')->assertOk()->assertSee('data-organization-chart', false)->assertSee('Published Owner');
+        $this->assertSame(1, substr_count($response->getContent(), 'data-org-tier="owner"'));
+        $this->assertSame(0, substr_count($response->getContent(), 'data-org-tier="team"'));
+
+        $owner->update(['show_on_org_chart' => false]);
+        foreach (range(1, 9) as $number) {
+            User::factory()->staff()->create(['name' => 'Team Member '.$number] + $publish(User::ORG_TIER_TEAM));
+        }
+        $response = $this->get('/')->assertOk()->assertDontSee('Published Owner');
+        $html = $response->getContent();
+        $this->assertSame(0, substr_count($html, 'data-org-tier="owner"'));
+        $this->assertSame(1, substr_count($html, 'data-org-tier="team"'));
+        $this->assertSame(9, substr_count($html, 'data-org-member'));
+        foreach (range(1, 9) as $number) {
+            $response->assertSee('Team Member '.$number);
         }
     }
 
     public function test_unpublished_profile_and_missing_contact_links_are_omitted(): void
     {
         Addon::query()->update(['is_active' => false]);
+        User::factory()->staff()->create(['show_on_org_chart' => false, 'org_chart_tier' => User::ORG_TIER_TEAM]);
         ApplicationSetting::factory()->create([
-            'id' => 1, 'company_history' => null, 'organization_chart' => null,
+            'id' => 1, 'company_history' => null,
+            // The retired hand-typed chart is kept as a backup only and never rendered.
+            'organization_chart' => ['owner' => ['title' => 'Legacy Owner'], 'team' => []],
             'business_address' => '', 'location_landmarks' => null,
             'messenger_url' => null, 'facebook_url' => null, 'map_url' => null,
         ]);
 
         $this->get('/')->assertOk()
             ->assertDontSee('href="#about"', false)
+            ->assertDontSee('href="#team"', false)
+            ->assertDontSee('Legacy Owner')
             ->assertDontSee('data-organization-chart', false)
             ->assertDontSee('data-landing-section="addons"', false)
             ->assertDontSee('Message us')

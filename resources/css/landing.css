@@ -91,33 +91,42 @@
     .landing-history { white-space: pre-line; }
     .landing-about-image { display: block; width: 100%; height: clamp(13rem, 20vw, 19rem); object-fit: cover; object-position: center 65%; border-radius: var(--landing-radius); box-shadow: var(--shadow-casa-card); }
     .landing-team { position: relative; overflow: hidden; background: var(--landing-sand); }
-    .landing-team h2 { font-size: clamp(2rem, 3vw, 3rem); text-align: center; }
+    .landing-team-heading { position: relative; z-index: 1; max-width: 40rem; margin-inline: auto; text-align: center; }
+    .landing-team h2 { font-size: clamp(2rem, 3vw, 3rem); }
+    .landing-team-heading p:not(.landing-kicker) { margin-block-start: 0.75rem; color: var(--landing-muted); }
     .landing-palm--team-left { inset-inline-start: -4.5rem; inset-block-start: 1rem; transform: rotate(-8deg); }
     .landing-palm--team-right { inset-inline-end: -4rem; inset-block-end: -3rem; transform: scaleX(-1) rotate(8deg); }
-    .landing-org-chart { position: relative; z-index: 1; max-width: 58rem; margin: 2rem auto 0; }
-    .landing-leaders { width: min(100%, 23rem); margin-inline: auto; display: grid; gap: 1.75rem; }
-    .landing-org-node { position: relative; display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: 1.2rem; align-items: start; }
-    .landing-org-avatar { display: flex; align-items: center; justify-content: center; width: 4rem; height: 4rem; overflow: hidden; border-radius: 50%; background: var(--color-casa-palm-tint); color: var(--color-casa-palm-dark); box-shadow: 0 0 0 4px var(--landing-paper); font-family: var(--font-editorial); font-size: 1.5rem; font-weight: 600; }
-    .landing-org-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .landing-org-copy { padding-top: 0.35rem; }
+
+    /* Tiers stack Owner → Leadership → Team, joined by a short palm line. */
+    .landing-org-chart { position: relative; z-index: 1; display: grid; gap: 2.75rem; max-width: 72rem; margin: 2.5rem auto 0; }
+    .landing-org-tier { position: relative; display: grid; justify-items: center; gap: 1rem; }
+    .landing-org-tier + .landing-org-tier::before { content: ""; position: absolute; inset-block-start: -2.25rem; inset-inline-start: 50%; width: 1px; height: 1.75rem; background: color-mix(in srgb, var(--color-casa-palm) 55%, var(--landing-line)); }
+    .landing-org-tier-label { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase; color: var(--landing-brown); }
+    .landing-org-tier-label::before,
+    .landing-org-tier-label::after { content: ""; width: 1.5rem; height: 1px; background: var(--landing-line); }
+    .landing-org-row { --landing-card-width: 13.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; width: 100%; }
+    .landing-org-row > li { display: flex; flex: 0 1 var(--landing-card-width); min-width: 0; }
+    .landing-org-tier--owner .landing-org-row { --landing-card-width: 17rem; }
+    .landing-org-tier--leadership .landing-org-row { --landing-card-width: 15rem; }
+
+    .landing-org-node { display: flex; flex-direction: column; align-items: center; width: 100%; padding: 1.25rem 1.1rem 1.4rem; border: 1px solid color-mix(in srgb, var(--landing-line) 75%, white); border-radius: var(--landing-radius); background: var(--landing-paper); box-shadow: var(--shadow-casa-soft); text-align: center; transition: box-shadow 200ms ease; }
+    .landing-org-node:hover { box-shadow: var(--shadow-casa-card); }
+    .landing-org-portrait { display: grid; place-items: center; width: 100%; max-width: 9.5rem; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 999px 999px var(--radius-casa-control) var(--radius-casa-control); background: linear-gradient(160deg, var(--color-casa-palm-tint), var(--landing-sand)); color: var(--color-casa-palm-dark); font-family: var(--font-editorial); font-size: 2.75rem; font-weight: 600; }
+    .landing-org-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+    .landing-org-node--owner .landing-org-portrait { max-width: 12rem; font-size: 3.5rem; }
+    .landing-org-node--team .landing-org-portrait { max-width: 8.5rem; background: linear-gradient(160deg, var(--color-casa-sand), var(--landing-sand)); color: var(--color-casa-cacao); }
+    .landing-org-copy { display: grid; justify-items: center; gap: 0.45rem; margin-block-start: 1rem; min-width: 0; }
     .landing-org-copy h3 { font-size: 1.45rem; }
-    .landing-org-title { font-size: 0.875rem; color: var(--color-casa-cacao); font-weight: 700; }
-    .landing-org-description { margin-top: 0.15rem; font-size: 0.875rem; color: var(--landing-muted); }
-    .landing-leaders .landing-org-node:not(:last-child)::after,
-    .landing-leaders--with-team .landing-org-node:last-child::after { content: ""; position: absolute; inset-inline-start: 2rem; top: 4.25rem; height: calc(100% - 4rem + 1.25rem); width: 1px; background: var(--color-casa-border); }
-    .landing-leaders--with-team .landing-org-node:last-child::after { height: calc(100% - 4rem + 0.75rem); }
-    .landing-team-grid { --landing-team-columns: 4; position: relative; display: grid; grid-template-columns: repeat(var(--landing-team-columns), minmax(0, 1fr)); max-width: calc(var(--landing-team-columns) * 12rem + (var(--landing-team-columns) - 1) * 1.5rem); gap: 1.5rem; margin: 2rem auto 0; }
-    .landing-team-grid:has(> :only-child) { --landing-team-columns: 1; }
-    .landing-team-grid:has(> :nth-child(2):last-child) { --landing-team-columns: 2; }
-    .landing-team-grid:has(> :nth-child(3):last-child) { --landing-team-columns: 3; }
-    .landing-team-grid:not(.landing-team-grid--connected) { margin-top: 0; }
-    .landing-org-node--team { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; }
-    .landing-org-node--team .landing-org-avatar { background: var(--color-casa-sand); color: var(--color-casa-cacao); }
-    .landing-org-node--team h3 { font-size: 1.25rem; }
-    .landing-team-grid--connected::before { content: ""; position: absolute; top: -1rem; inset-inline: calc(50% / var(--landing-team-columns)); height: 1px; background: var(--color-casa-border); }
-    .landing-team-grid--connected .landing-org-node:nth-child(-n+4)::before { content: ""; position: absolute; top: -1rem; left: 50%; height: 0.8rem; width: 1px; background: var(--color-casa-border); }
-    .landing-team-grid--connected:has(> :only-child)::before,
-    .landing-team-grid--connected:has(> :only-child) > .landing-org-node::before { display: none; }
+    .landing-org-node--owner .landing-org-copy h3 { font-size: 1.8rem; }
+    .landing-org-title { padding: 0.2rem 0.75rem; border-radius: var(--radius-casa-pill); background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--landing-paper)); color: var(--color-casa-palm-dark); font-size: 0.8125rem; font-weight: 700; line-height: 1.5; }
+    .landing-org-description { font-size: 0.875rem; color: var(--landing-muted); }
+
+    @supports (animation-timeline: view()) {
+        @media (prefers-reduced-motion: no-preference) {
+            .landing-org-node { animation: landing-org-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+        }
+    }
+    @keyframes landing-org-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
     .landing-treatments { padding-block-end: 2.5rem; }
     .landing-treatment-grid { --landing-treatment-columns: 4; --landing-treatment-gap: 1.25rem; display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: var(--landing-treatment-gap); margin-block-start: 1.25rem; }
@@ -218,11 +227,13 @@
     .landing-about-grid,
     .landing-how-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
     .landing-about-image { height: 15rem; }
-    .landing-team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; }
-    .landing-team-grid:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
-    .landing-team-grid--connected::before,
-    .landing-team-grid--connected .landing-org-node::before,
-    .landing-leaders--with-team .landing-org-node:last-child::after { display: none; }
+    .landing-org-chart { gap: 2.25rem; }
+    .landing-org-tier + .landing-org-tier::before { inset-block-start: -1.85rem; height: 1.4rem; }
+    .landing-org-row { gap: 1rem; }
+    .landing-org-tier--team .landing-org-row > li { flex-basis: calc((100% - 1rem) / 2); }
+    .landing-org-tier--team .landing-org-row > li:only-child { flex-basis: min(100%, 15rem); }
+    .landing-org-node { padding: 1rem 0.75rem 1.15rem; }
+    .landing-org-node--team .landing-org-copy h3 { font-size: 1.2rem; }
     .landing-palm--team-left,
     .landing-palm--team-right { width: 8rem; opacity: 0.2; }
     .landing-how-image { order: 2; }

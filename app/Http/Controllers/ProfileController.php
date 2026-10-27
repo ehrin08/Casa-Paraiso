@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileTeamCardRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\CustomerProfile;
 use App\Models\User;
 use App\Services\PasswordSetupConfirmation;
+use App\Services\UserPhotoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +54,21 @@ class ProfileController extends Controller
         });
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the staff member's own public team card.
+     */
+    public function updateTeamCard(ProfileTeamCardRequest $request, UserPhotoService $photos): RedirectResponse
+    {
+        $photos->save(
+            $request->user(),
+            $request->safe()->only(['public_title', 'public_bio']),
+            $request->file('photo'),
+            $request->boolean('remove_photo'),
+        );
+
+        return Redirect::route('profile.edit')->with('status', 'team-card-updated');
     }
 
     /**

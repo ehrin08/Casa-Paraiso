@@ -1,0 +1,35 @@
+/* Admin Team page: publishes staff accounts on the homepage chart. */
+.team-heading h1 { font-size: clamp(1.75rem, 2.5vw, 2.25rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
+.team-heading p { margin-top: 0.4rem; max-width: 42rem; color: var(--color-casa-muted); line-height: 1.5; }
+.team-workspace { display: grid; gap: 1rem; min-width: 0; color: var(--color-casa-text); }
+.team-workspace :focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; }
+.team-flash { border-radius: var(--radius-casa-control); padding: 0.75rem 1rem; color: var(--color-casa-success); background: var(--color-casa-success-bg); font-weight: 600; }
+.team-filter-form { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; min-width: 0; }
+.team-filter-form > div { flex: 0 1 14rem; min-width: 0; }
+.team-filter-form > .team-search { flex: 1 1 18rem; }
+.team-filter-form .casa-input { width: 100%; min-height: 44px; }
+.team-records { min-width: 0; overflow: hidden; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); }
+.team-table { border: 0; border-radius: 0; box-shadow: none; }
+.team-table table { width: 100%; min-width: 760px; }
+.team-table thead { background: color-mix(in srgb, var(--color-casa-sand) 28%, var(--color-casa-paper)); text-align: left; }
+body[data-workspace-role] .team-table th { padding: 0.6rem 1rem; color: var(--color-casa-muted); font-size: 0.875rem; font-weight: 700; }
+body[data-workspace-role] .team-table td { padding: 0.75rem 1rem; border-bottom: 1px solid color-mix(in srgb, var(--color-casa-border) 65%, var(--color-casa-paper)); vertical-align: middle; }
+.team-table tbody tr:last-child td { border-bottom: 0; }
+.team-person { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.team-avatar { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--color-casa-palm); color: var(--color-casa-paper); font-weight: 700; }
+.team-name { font-weight: 800; overflow-wrap: anywhere; }
+.team-role { margin-top: 0.1rem; color: var(--color-casa-muted); font-size: 0.875rem; }
+.team-order { font-variant-numeric: tabular-nums; }
+.team-status { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; color: var(--color-casa-muted); background: color-mix(in srgb, var(--color-casa-muted) 12%, var(--color-casa-paper)); }
+.team-status--shown { color: var(--color-casa-success); background: var(--color-casa-success-bg); }
+.team-edit { display: inline-flex; min-height: 44px; align-items: center; padding: 0.5rem 1rem; border: 1px solid var(--color-casa-taupe); border-radius: var(--radius-casa-control); font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
+.team-edit:hover { background: var(--color-casa-sand); }
+.team-locked { color: var(--color-casa-muted); font-size: 0.875rem; }
+
+/* Photo field shared by the admin card form and the staff profile card. */
+.team-photo-field { display: flex; align-items: flex-start; gap: 1rem; min-width: 0; }
+.team-photo-preview { display: grid; place-items: center; flex: 0 0 88px; width: 88px; height: 88px; border-radius: 50%; background: var(--color-casa-palm-tint); color: var(--color-casa-palm-dark); font-family: var(--font-editorial); font-size: 2rem; font-weight: 600; }
+.team-photo-inputs { flex: 1; min-width: 0; }
+@media (max-width: 479px) {
+    .team-photo-field { flex-direction: column; }
+}

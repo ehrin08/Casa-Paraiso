@@ -6,7 +6,6 @@ use App\Models\ApplicationSetting;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -23,10 +22,10 @@ class AdminSettingsTest extends TestCase
         ])] as $user) {
             $response = $this->actingAs($user)->get(route('admin.settings.index'))
                 ->assertOk()
-                ->assertSeeInOrder(['Business identity', 'Company history', 'Payments', 'Environment checks', 'Public organization chart'])
+                ->assertSeeInOrder(['Business identity', 'Company history', 'Payments', 'Environment checks', 'Public team chart'])
                 ->assertSee('More public details')
                 ->assertSee('Operating rules and user access')
-                ->assertSee('No public organization chart yet.')
+                ->assertSee(route('admin.team.index'), false)
                 ->assertSee('Debug mode')
                 ->assertSee('HTTPS cookies')
                 ->assertSee('Session encryption')
@@ -36,122 +35,48 @@ class AdminSettingsTest extends TestCase
             $xpath = $this->settingsXPath($response->getContent());
             $this->assertSame(1, $xpath->query('//form[@data-settings-workspace]//button[@type="submit"]')->length);
             $this->assertSame('Save changes', trim($xpath->query('//form[@data-settings-workspace]//button[@type="submit"]')->item(0)->textContent));
-            $this->assertSame(0, $xpath->query('//details[@id="settings-chart-editor" or @id="settings-public-details"][@open]')->length);
-            $this->assertSame(1, $xpath->query('//form[@data-settings-workspace]//dialog[@data-settings-chart-dialog][@open]')->length);
-            $this->assertSame(0, $xpath->query('//dialog//form')->length);
-            $this->assertSame(2, $xpath->query('//dialog//input[@name="organization_chart[owner][title]" or @name="organization_chart[admin][title]"]')->length);
-            $this->assertSame(8, $xpath->query('//dialog//noscript//input[contains(@name, "[title]")]')->length);
-            $this->assertSame(2, $xpath->query('//dialog//input[@type="file"][not(ancestor::template)][not(ancestor::noscript)]')->length);
-            $this->assertSame(0, $xpath->query('//dialog//button[@type="submit"]')->length);
+            $this->assertSame(0, $xpath->query('//details[@id="settings-public-details"][@open]')->length);
+            // The hand-typed chart editor is retired; the chart comes from staff accounts.
+            $this->assertSame(0, $xpath->query('//form[@data-settings-workspace]//dialog | //form[@data-settings-workspace]//input[@type="file"] | //*[starts-with(@name, "organization_chart")]')->length);
         }
     }
 
-    public function test_a_no_javascript_unrelated_save_preserves_the_collapsed_chart_and_photos(): void
+    public function test_a_no_javascript_save_leaves_the_retired_chart_backup_untouched(): void
     {
         Storage::fake('public');
         $chart = [
             'owner' => ['title' => 'Owner', 'name' => 'Ana', 'description' => 'Leads the spa.', 'photo' => 'org-chart/owner.webp'],
-            'admin' => ['title' => 'Administrator', 'name' => 'Bea', 'description' => 'Runs operations.', 'photo' => 'org-chart/admin.webp'],
-            'team' => [
-                ['title' => 'Therapists', 'name' => 'Care team', 'description' => 'Treatments.', 'photo' => 'org-chart/team-0.webp'],
-                ['title' => 'Reception', 'name' => 'Welcome team', 'description' => 'Arrivals.', 'photo' => 'org-chart/team-1.webp'],
-            ],
+            'team' => [['title' => 'Therapists', 'name' => 'Care team', 'description' => 'Treatments.', 'photo' => 'org-chart/team-0.webp']],
         ];
-        foreach (['owner.webp', 'admin.webp', 'team-0.webp', 'team-1.webp'] as $file) {
+        foreach (['owner.webp', 'team-0.webp'] as $file) {
             Storage::disk('public')->put('org-chart/'.$file, 'retained-photo');
         }
         $settings = ApplicationSetting::factory()->create(['id' => 1, 'organization_chart' => $chart]);
         $this->actingAs(User::factory()->admin()->create());
-        $response = $this->get(route('admin.settings.index'))->assertOk()->assertSee('data-settings-chart-preview', false);
-        $payload = $this->noJavascriptFormPayload($response->getContent());
+        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
         $payload['contact_phone'] = '09171234567';
+        $payload['organization_chart'] = ['owner' => ['title' => 'Injected']];
 
         $this->patch(route('admin.settings.update'), $payload)->assertSessionHasNoErrors()->assertSessionHas('status', 'settings-updated');
 
         $this->assertSame($chart, $settings->fresh()->organization_chart);
         $this->assertSame('09171234567', $settings->fresh()->contact_phone);
-        foreach (['owner.webp', 'admin.webp', 'team-0.webp', 'team-1.webp'] as $file) {
+        foreach (['owner.webp', 'team-0.webp'] as $file) {
             Storage::disk('public')->assertExists('org-chart/'.$file);
         }
     }
 
-    public function test_chart_photo_upload_replacement_and_removal_keep_the_existing_workflow(): void
-    {
-        Storage::fake('public');
-        $this->actingAs(User::factory()->admin()->create());
-        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
-        $payload['organization_chart'] = [
-            'owner' => ['title' => 'Owner'], 'admin' => ['title' => 'Administrator'],
-            'team' => [['title' => 'Therapists']],
-        ];
-        $payload['organization_chart_photos'] = [
-            'owner' => UploadedFile::fake()->image('owner.png'),
-            'admin' => UploadedFile::fake()->image('admin.jpg'),
-            'team' => [UploadedFile::fake()->image('team.png')],
-        ];
-        $this->patch(route('admin.settings.update'), $payload)->assertSessionHasNoErrors();
-        foreach (['owner.webp', 'admin.webp', 'team-0.webp'] as $file) {
-            Storage::disk('public')->assertExists('org-chart/'.$file);
-        }
-
-        $ownerBefore = Storage::disk('public')->get('org-chart/owner.webp');
-        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
-        $payload['organization_chart_photos']['owner'] = UploadedFile::fake()->image('replacement.png', 300, 100);
-        $replacement = imagecreatetruecolor(300, 100);
-        imagefill($replacement, 0, 0, imagecolorallocate($replacement, 80, 110, 80));
-        imagepng($replacement, $payload['organization_chart_photos']['owner']->getRealPath());
-        imagedestroy($replacement);
-        $payload['organization_chart_remove_photos'] = ['admin' => '1', 'team' => ['1']];
-        $this->patch(route('admin.settings.update'), $payload)->assertSessionHasNoErrors();
-
-        $chart = ApplicationSetting::current()->organization_chart;
-        $this->assertSame('org-chart/owner.webp', $chart['owner']['photo']);
-        $this->assertNotSame($ownerBefore, Storage::disk('public')->get('org-chart/owner.webp'));
-        $this->assertNull($chart['admin']['photo']);
-        $this->assertNull($chart['team'][0]['photo']);
-        Storage::disk('public')->assertMissing(['org-chart/admin.webp', 'org-chart/team-0.webp']);
-    }
-
-    public function test_validation_opens_both_disclosures_and_retains_draft_chart_values(): void
+    public function test_validation_opens_the_public_details_disclosure(): void
     {
         $this->actingAs(User::factory()->admin()->create());
         $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->assertOk()->getContent());
         $payload['facebook_url'] = 'https://example.com/private';
-        $payload['organization_chart'] = [
-            'owner' => ['title' => 'Draft owner', 'name' => 'Draft name'],
-            'admin' => ['title' => 'Administrator'],
-            'team' => [['title' => 'Therapists', 'name' => str_repeat('x', 101)]],
-        ];
-        $payload['organization_chart_photos']['owner'] = UploadedFile::fake()->create('invalid.txt', 1, 'text/plain');
         $this->from(route('admin.settings.index'))->patch(route('admin.settings.update'), $payload)
-            ->assertSessionHasErrors(['facebook_url', 'organization_chart.team.0.name', 'organization_chart_photos.owner']);
-        $response = $this->get(route('admin.settings.index'))->assertOk()->assertSee('Draft owner')->assertSee('Draft name');
-        $xpath = $this->settingsXPath($response->getContent());
-        $this->assertSame(2, $xpath->query('//details[@id="settings-chart-editor" or @id="settings-public-details"][@open]')->length);
-        $this->assertSame('Draft owner', $xpath->query('//dialog//input[@name="organization_chart[owner][title]"]')->item(0)->getAttribute('value'));
-        $this->assertSame(1, $xpath->query('//dialog[@data-settings-chart-dialog][@open]')->length);
+            ->assertSessionHasErrors(['facebook_url']);
+
+        $xpath = $this->settingsXPath($this->get(route('admin.settings.index'))->assertOk()->getContent());
+        $this->assertSame(1, $xpath->query('//details[@id="settings-public-details"][@open]')->length);
         $this->assertDatabaseCount('application_settings', 0);
-    }
-
-    public function test_chart_validation_retains_photo_removal_choices_inside_the_editor(): void
-    {
-        Storage::fake('public');
-        Storage::disk('public')->put('org-chart/owner.webp', 'retained-photo');
-        $settings = ApplicationSetting::factory()->create(['id' => 1, 'organization_chart' => [
-            'owner' => ['title' => 'Owner', 'photo' => 'org-chart/owner.webp'],
-            'team' => [],
-        ]]);
-        $this->actingAs(User::factory()->admin()->create());
-        $payload = $this->noJavascriptFormPayload($this->get(route('admin.settings.index'))->getContent());
-        $payload['organization_chart']['owner']['name'] = str_repeat('x', 101);
-        $payload['organization_chart_remove_photos']['owner'] = '1';
-        $this->from(route('admin.settings.index'))->patch(route('admin.settings.update'), $payload)
-            ->assertSessionHasErrors('organization_chart.owner.name');
-
-        $xpath = $this->settingsXPath($this->get(route('admin.settings.index'))->getContent());
-        $this->assertSame(1, $xpath->query('//details[@id="settings-chart-editor"][@open]//dialog//input[@name="organization_chart_remove_photos[owner]"][@checked]')->length);
-        $this->assertSame('org-chart/owner.webp', $settings->fresh()->organization_chart['owner']['photo']);
-        Storage::disk('public')->assertExists('org-chart/owner.webp');
     }
 
     private function settingsXPath(string $html): \DOMXPath
@@ -196,7 +121,7 @@ class AdminSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('Business identity')
             ->assertSee('Company history')
-            ->assertSee('Public organization chart')
+            ->assertSee('Public team chart')
             ->assertSee('Environment checks')
             ->assertSee('Default payment method');
 
@@ -211,19 +136,6 @@ class AdminSettingsTest extends TestCase
                 'messenger_url' => 'https://m.me/61579320037378',
                 'map_url' => 'https://www.google.com/maps/search/?api=1&query=Casa+Paraiso',
                 'company_history' => 'Casa Paraiso began with a commitment to thoughtful, restorative care.',
-                'organization_chart' => [
-                    'owner' => ['title' => 'Owner / Super Administrator', 'description' => 'Guides the spa mission.'],
-                    'admin' => ['title' => 'Administrator', 'description' => 'Coordinates daily operations.'],
-                    'team' => [
-                        ['title' => 'Receptionist', 'description' => 'Welcomes and assists guests.'],
-                        ['title' => 'Therapists', 'description' => 'Deliver each wellness ritual.'],
-                    ],
-                ],
-                'organization_chart_remove_photos' => [
-                    'owner' => '',
-                    'admin' => '',
-                    'team' => [0 => ''],
-                ],
                 'default_payment_method' => Transaction::METHOD_GCASH,
             ])
             ->assertRedirect()
@@ -242,8 +154,6 @@ class AdminSettingsTest extends TestCase
         $settings = ApplicationSetting::query()->firstOrFail();
 
         $this->assertSame('Casa Paraiso began with a commitment to thoughtful, restorative care.', $settings->company_history);
-        $this->assertSame('Owner / Super Administrator', data_get($settings->organization_chart, 'owner.title'));
-        $this->assertSame('Therapists', data_get($settings->organization_chart, 'team.1.title'));
     }
 
     public function test_settings_validation_rejects_invalid_values(): void
@@ -262,11 +172,6 @@ class AdminSettingsTest extends TestCase
                 'messenger_url' => 'https://facebook.com/messages',
                 'map_url' => 'https://maps.example.com/casa-paraiso',
                 'company_history' => str_repeat('a', 6001),
-                'organization_chart' => [
-                    'owner' => ['title' => '', 'description' => str_repeat('a', 301)],
-                    'admin' => ['title' => str_repeat('a', 101), 'description' => null],
-                    'team' => array_fill(0, 9, ['title' => 'Team role', 'description' => null]),
-                ],
                 'default_payment_method' => 'Cryptocurrency',
             ])
             ->assertRedirect(route('admin.settings.index'))
@@ -280,10 +185,6 @@ class AdminSettingsTest extends TestCase
                 'messenger_url',
                 'map_url',
                 'company_history',
-                'organization_chart.owner.title',
-                'organization_chart.owner.description',
-                'organization_chart.admin.title',
-                'organization_chart.team',
                 'default_payment_method',
             ]);
 
@@ -297,14 +198,12 @@ class AdminSettingsTest extends TestCase
         ApplicationSetting::factory()->create([
             'id' => 1,
             'company_history' => "Founded around restorative care.\n\n<script>alert('unsafe')</script>",
-            'organization_chart' => [
-                'owner' => ['title' => 'Owner / Super Administrator', 'description' => 'Sets the direction.'],
-                'admin' => ['title' => 'Administrator', 'description' => 'Leads daily operations.'],
-                'team' => [
-                    ['title' => 'Receptionist', 'description' => 'Supports every arrival.'],
-                    ['title' => 'Therapists', 'description' => 'Provide wellness care.'],
-                ],
-            ],
+        ]);
+        User::factory()->receptionist()->create([
+            'name' => 'Rina Reyes',
+            'public_bio' => "<script>alert('bio')</script>",
+            'show_on_org_chart' => true,
+            'org_chart_tier' => User::ORG_TIER_TEAM,
         ]);
 
         $this->get('/')
@@ -314,12 +213,11 @@ class AdminSettingsTest extends TestCase
             ->assertSee('data-company-history', false)
             ->assertSee('data-organization-chart', false)
             ->assertSee('Founded around restorative care.')
-            ->assertSee('Owner / Super Administrator')
-            ->assertSee('Administrator')
+            ->assertSee('Rina Reyes')
             ->assertSee('Receptionist')
-            ->assertSee('Therapists')
             ->assertSee('&lt;script&gt;alert(&#039;unsafe&#039;)&lt;/script&gt;', false)
-            ->assertDontSee("<script>alert('unsafe')</script>", false);
+            ->assertDontSee("<script>alert('unsafe')</script>", false)
+            ->assertDontSee("<script>alert('bio')</script>", false);
     }
 
     public function test_non_admin_roles_cannot_read_or_update_settings(): void

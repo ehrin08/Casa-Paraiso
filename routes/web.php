@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Admin\StaffScheduleExceptionController as AdminStaffScheduleExceptionController;
 use App\Http\Controllers\Admin\StaffWeeklyScheduleController as AdminStaffWeeklyScheduleController;
 use App\Http\Controllers\Admin\SystemErrorReportController as AdminSystemErrorReportController;
+use App\Http\Controllers\Admin\TeamProfileController as AdminTeamProfileController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserManagementController as AdminUserManagementController;
 use App\Http\Controllers\Admin\WeeklyRosterController as AdminWeeklyRosterController;
@@ -44,6 +45,7 @@ use App\Http\Middleware\MeasureApplicationRequest;
 use App\Models\Addon;
 use App\Models\ApplicationSetting;
 use App\Models\Service;
+use App\Services\OrganizationChart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +59,7 @@ Route::get('/', function () {
 
     return view('welcome', [
         'applicationSettings' => ApplicationSetting::current(),
+        'organizationChart' => app(OrganizationChart::class)->tiers(),
         'services' => $servicesAreBookable
             ? $activeServices
             : collect(config('casa.service_packages', []))->map(static fn (array $package): object => (object) $package),
@@ -80,6 +83,7 @@ Route::get('/dashboard', function (Request $request) {
 Route::middleware(['auth', 'active', 'verified', MeasureApplicationRequest::class])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/team-card', [ProfileController::class, 'updateTeamCard'])->name('profile.team-card.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->middleware('throttle:user-sensitive')->name('profile.destroy');
     Route::get('/profile/delete/google', [GoogleDeletionController::class, 'redirect'])->middleware('throttle:user-sensitive')->name('profile.deletion.google');
     Route::get('/profile/delete/google/callback', [GoogleDeletionController::class, 'callback'])->middleware('throttle:user-sensitive')->name('profile.deletion.google.callback');
@@ -150,6 +154,9 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::get('/reports/insights', [AdminReportController::class, 'insights'])->name('reports.insights');
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/team', [AdminTeamProfileController::class, 'index'])->name('team.index');
+        Route::get('/team/{member}/edit', [AdminTeamProfileController::class, 'edit'])->whereNumber('member')->name('team.edit');
+        Route::patch('/team/{member}', [AdminTeamProfileController::class, 'update'])->whereNumber('member')->name('team.update');
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
         Route::patch('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
     });

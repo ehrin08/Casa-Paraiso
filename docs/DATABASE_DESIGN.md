@@ -49,6 +49,12 @@ Key columns:
 - `role`
 - `phone` nullable
 - `is_active` boolean default true
+- `photo_path` nullable; managed `user-photos/{uuid}.webp` portrait on the `public` disk
+- `public_title` nullable string(80); public team-card title, falling back to the role label
+- `public_bio` nullable string(280)
+- `org_chart_tier` nullable: `owner`, `leadership`, or `team`
+- `org_chart_order` unsigned small integer default 0
+- `show_on_org_chart` boolean default false; customers and inactive accounts never appear even when set
 - `remember_token`
 - `created_at`, `updated_at`
 
@@ -57,6 +63,7 @@ Indexes:
 - Unique index on `email`
 - Index on `role`
 - Index on `is_active`
+- `users_org_chart_index` on (`show_on_org_chart`, `org_chart_tier`, `org_chart_order`)
 
 Relationships:
 
@@ -445,7 +452,7 @@ Key columns:
 - `business_address` nullable
 - `location_landmarks`, `facebook_url`, `messenger_url`, and `map_url` nullable public contact fields
 - `company_history` nullable plain-text public narrative
-- `organization_chart` nullable JSON object containing the owner tier, administrator tier, and up to eight team roles
+- `organization_chart` nullable JSON object containing the owner tier, administrator tier, and up to eight team roles. Retired on 2026-10-27: kept unchanged as a backup and no longer edited or rendered; the public chart comes from `users` team-card columns.
 - `default_payment_method`
 - `updated_by` nullable foreign key to `users.id`
 - `created_at`, `updated_at`
@@ -456,7 +463,7 @@ Rules:
 - Safe configuration defaults are used before the migration is applied, so public and payment forms remain available while saving is disabled.
 - The payment default only prefills forms and never marks a transaction paid or initiates a transfer.
 - Admin-managed company-profile content is escaped when rendered publicly; an entirely blank history and chart keep the landing-page About section hidden.
-- Organizational chart content is role-based and does not query or expose staff accounts.
+- The public team chart reads only presentation columns (`name`, `role`, `photo_path`, `public_title`, `public_bio`, tier and order) of published staff accounts; email, phone and sign-in fields are never exposed.
 - Booking hours, intervals, timezone, commission rate, and security controls remain configuration-controlled.
 
 ## RFM Promotions

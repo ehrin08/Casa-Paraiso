@@ -1,10 +1,5 @@
 <x-app-layout>
     @php
-        $initials = collect(preg_split('/\s+/', trim($user->name)))
-            ->filter()
-            ->take(2)
-            ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
-            ->implode('');
         $roleLabel = match (true) {
             $user->isSuperAdmin() => __('Super administrator'),
             $user->isAdmin() => __('Administrator'),
@@ -22,7 +17,7 @@
 
     <div class="profile-workspace">
         <section class="profile-panel profile-identity" aria-labelledby="profile-identity-name">
-            <div class="profile-avatar" aria-hidden="true">{{ $initials }}</div>
+            <x-user-avatar :user="$user" class="profile-avatar" />
             <div class="profile-identity-copy">
                 <h2 id="profile-identity-name">{{ $user->name }}</h2>
                 <p class="profile-role">{{ $roleLabel }}</p>
@@ -33,6 +28,9 @@
             @include('profile.partials.update-profile-information-form')
             @include('profile.partials.update-password-form')
         </div>
+        @unless ($user->isCustomer())
+            @include('profile.partials.update-team-card-form')
+        @endunless
         @if ($user->isCustomer())
             <div id="delete-account" class="profile-panel profile-deletion">
                 @include('profile.partials.delete-user-form')

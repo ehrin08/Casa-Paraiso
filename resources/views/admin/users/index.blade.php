@@ -5,7 +5,6 @@
         $cancelUrl = route('admin.users.index', $selectionQuery);
         $hasOldInput = old('_user_form') === ($selectedUser ? 'edit' : 'create') && (! $selectedUser || (int) old('_user_id') === $selectedUser->id);
         $formValue = fn ($field, $default = '') => $hasOldInput ? old($field, $default) : $default;
-        $initials = fn ($name) => collect(preg_split('/\s+/u', trim($name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('');
     @endphp
 
     <x-slot name="header">
@@ -83,7 +82,7 @@
                         <tbody>
                             @foreach ($users as $managedUser)
                                 <tr @class(['is-selected' => $selectedUser?->id === $managedUser->id]) data-user-id="{{ $managedUser->id }}">
-                                    <td><div class="users-person"><span class="users-avatar" aria-hidden="true">{{ $initials($managedUser->name) }}</span><span>{{ $managedUser->name }}</span></div></td>
+                                    <td><div class="users-person"><x-user-avatar :user="$managedUser" class="users-avatar" /><span>{{ $managedUser->name }}</span></div></td>
                                     <td class="users-email">{{ $managedUser->email }}</td>
                                     <td><span class="users-role users-role--{{ $managedUser->role }}">{{ $roleLabels[$managedUser->role] ?? $managedUser->role }}</span></td>
                                     <td><span @class(['users-status', 'users-status--inactive' => ! $managedUser->is_active])>{{ $managedUser->is_active ? __('Active') : __('Inactive') }}</span></td>
@@ -140,6 +139,7 @@
                         @if ($hasOldInput)<x-input-error :messages="$errors->get('is_active')" />@endif
                     </div>
                     @if ($selectedUser?->isStaff() && $selectedUser->staffProfile)<a data-panel-link data-turbo="false" aria-haspopup="dialog" class="users-profile-link" href="{{ route('admin.staff.edit', $selectedUser->staffProfile) }}">{{ __('Manage therapist profile') }}</a>@endif
+                    @if ($selectedUser && ! $selectedUser->isCustomer())<a data-panel-link data-turbo="false" aria-haspopup="dialog" class="users-profile-link" href="{{ route('admin.team.edit', $selectedUser) }}" data-team-card-link>{{ __('Edit public team card') }}</a>@endif
                     <div class="users-access-notice users-form-notice"><x-nav-icon name="team"/><div><strong>{{ __('Super admin only') }}</strong><p>{{ __('User account management is restricted to super administrators.') }}</p></div></div>
                     <div class="users-form-actions">
                         <button type="submit" class="casa-button-primary">{{ $selectedUser ? __('Save changes') : __('Create user') }}</button>
