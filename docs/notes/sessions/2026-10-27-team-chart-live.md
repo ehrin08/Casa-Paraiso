@@ -43,8 +43,8 @@ Deploy the latest `redesign` work to https://casaparaiso.site: the sticky worksp
 
 ## Follow-ups
 
-- [ ] Repoint the hPanel cron to `casa-paraiso-redesign-20261027/artisan schedule:run`, then remove the 20261026 job.
+- [x] Repoint the hPanel cron to `casa-paraiso-redesign-20261027/artisan schedule:run`, then remove the 20261026 job. The user asked for this through Claude in Chrome. The new every-minute Custom job was added, and its first output was the normal "No scheduled commands are ready to run". The old job was then deleted, leaving only the new one.
 - [ ] Admins publish staff cards on the Team page. The homepage `#team` section stays hidden until someone is published.
-- [ ] Rollback if needed: from the domain directory, `ln -s "$PWD/casa-paraiso-redesign-20261026/public" public_html.new && mv -T public_html.new public_html`.
+- [ ] Rollback if needed: from the domain directory, `ln -s "$PWD/casa-paraiso-redesign-20261026/public" public_html.new && mv -T public_html.new public_html`, then point the cron back at that release.
 - [ ] Look into the Docker bridge network failing to reach `packagist.org`. Until it is fixed, `scripts/casa-hostinger.ps1 package` fails at its audit step.
 - [ ] The previous release logged one Google sign-in `InvalidStateException` and slow-request warnings at 12:14–12:30 (Asia/Manila), before this deploy. Watch whether they recur.
