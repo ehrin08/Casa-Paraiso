@@ -1,6 +1,7 @@
 import './bootstrap';
 import { initializeBookingNotifications } from './booking-notifications';
 import { initializeWorkspaceDrawer } from './workspace-drawer';
+import { initializeScrollHeaders } from './scroll-header';
 import { manilaDateKey, mondayOf, manilaTime, positionWeekEvents, therapistColor } from './calendar-week';
 import { createOperationsBooking, createCustomerBooking } from './appointment-booking';
 import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
@@ -18,6 +19,7 @@ turboSession.drive = false;
 
 window.Alpine = Alpine;
 initializeWorkspaceDrawer(Alpine);
+initializeScrollHeaders();
 
 const modalStoreName = 'casaModal';
 

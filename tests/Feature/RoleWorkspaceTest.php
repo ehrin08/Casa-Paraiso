@@ -214,6 +214,7 @@ class RoleWorkspaceTest extends TestCase
             ->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('class="sticky top-0 z-40"', false)
+            ->assertSee('data-role-navigation="'.User::ROLE_SUPER_ADMIN.'" data-scroll-header', false)
             ->assertSee('href="'.url('/').'" class="casa-topbar-logo', false)
             ->assertSee('data-site-home-link data-view-site-link>', false)
             ->assertDontSee('class="casa-topbar-link" data-view-site-link', false)

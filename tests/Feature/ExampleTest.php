@@ -55,7 +55,7 @@ class ExampleTest extends TestCase
         $response = $this->get('/')->assertOk();
         $html = $response->getContent();
         $this->assertIsString($html);
-        $this->assertStringContainsString('data-landing-header="fixed"', $html);
+        $this->assertStringContainsString('data-landing-header="fixed" data-scroll-header', $html);
         $this->assertStringContainsString('data-landing-mobile-menu', $html);
         $this->assertStringContainsString('aria-controls="landing-mobile-navigation"', $html);
         $this->assertStringContainsString('id="landing-mobile-navigation"', $html);
