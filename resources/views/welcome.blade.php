@@ -37,9 +37,6 @@
                 '#how-it-works' => __('How it works'),
                 '#visit' => __('Visit & contact'),
             ];
-            if ($hasChart) {
-                $navigationItems = ['#team' => __('Our team')] + $navigationItems;
-            }
             if ($showCompanyProfile) {
                 $navigationItems = ['#about' => __('About')] + $navigationItems;
             }
@@ -118,8 +115,12 @@
 
                 @if ($showCompanyProfile)
                     <section id="about" class="landing-about landing-section" aria-labelledby="landing-about-title" data-landing-section="about" data-landing-company-profile>
+                        @if ($hasChart)
+                            <x-landing-palm class="landing-palm landing-palm--about-left" />
+                            <x-landing-palm class="landing-palm landing-palm--about-right" />
+                        @endif
                         <div class="landing-container landing-about-grid">
-                            <div>
+                            <div class="landing-about-copy">
                                 <p class="landing-kicker">About Casa Paraiso</p>
                                 <h2 id="landing-about-title">A place to pause.</h2>
                                 @if ($hasHistory)
@@ -127,21 +128,12 @@
                                 @else
                                     <p>Thoughtful care, a welcoming space, and treatments that help you leave the day behind.</p>
                                 @endif
+                                @if ($hasChart)
+                                    <p class="landing-org-hint">Meet the people behind your care. Select a portrait to learn more.</p>
+                                @endif
                             </div>
-                            <img class="landing-about-image" src="{{ asset('images/spa/casa-towel-detail-1024.webp') }}" srcset="{{ asset('images/spa/casa-towel-detail-720.webp') }} 720w, {{ asset('images/spa/casa-towel-detail-1024.webp') }} 1024w" sizes="(max-width: 767px) 90vw, 45vw" width="1024" height="768" alt="A prepared towel and tray in the Casa Paraiso treatment room" loading="lazy">
-                        </div>
-                    </section>
-                    @if ($hasChart)
-                        <section id="team" class="landing-team landing-section" aria-labelledby="landing-team-title" data-landing-section="team" data-organization-chart>
-                            <x-landing-palm class="landing-palm landing-palm--team-left" />
-                            <x-landing-palm class="landing-palm landing-palm--team-right" />
-                            <div class="landing-container">
-                                <div class="landing-team-heading">
-                                    <p class="landing-kicker">Meet the team</p>
-                                    <h2 id="landing-team-title">The people behind your care</h2>
-                                    <p>The faces who welcome you, plan your visit and look after you in the treatment room.</p>
-                                </div>
-                                <div class="landing-org-chart">
+                            @if ($hasChart)
+                                <div class="landing-org-chart" aria-label="Our team" data-organization-chart>
                                     @foreach ($organizationChart as $tier => $members)
                                         <div class="landing-org-tier landing-org-tier--{{ $tier }}" data-org-tier="{{ $tier }}">
                                             <p class="landing-org-tier-label" id="landing-org-tier-{{ $tier }}">{{ $tierLabels[$tier] }}</p>
@@ -153,9 +145,11 @@
                                         </div>
                                     @endforeach
                                 </div>
-                            </div>
-                        </section>
-                    @endif
+                            @else
+                                <img class="landing-about-image" src="{{ asset('images/spa/casa-towel-detail-1024.webp') }}" srcset="{{ asset('images/spa/casa-towel-detail-720.webp') }} 720w, {{ asset('images/spa/casa-towel-detail-1024.webp') }} 1024w" sizes="(max-width: 767px) 90vw, 45vw" width="1024" height="768" alt="A prepared towel and tray in the Casa Paraiso treatment room" loading="lazy">
+                            @endif
+                        </div>
+                    </section>
                 @endif
 
                 <section id="treatments" class="landing-treatments landing-section" aria-labelledby="landing-treatments-title" data-landing-section="treatments">

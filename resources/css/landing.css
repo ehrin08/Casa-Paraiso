@@ -5,7 +5,9 @@
         scrollbar-color: var(--color-casa-taupe) var(--color-casa-sand);
     }
 
-    .casa-landing {
+    /* Team dialogs teleport to <body>, so they repeat the landing tokens. */
+    .casa-landing,
+    .landing-org-dialog-panel {
         --landing-paper: var(--color-casa-paper);
         --landing-sand: #f6efe4;
         --landing-green: #334b39;
@@ -86,44 +88,49 @@
     .landing-facts .landing-icon { width: 1.5rem; height: 1.5rem; color: var(--color-casa-palm); }
     .landing-facts a { text-decoration: underline; }
 
-    .landing-about-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 3rem; align-items: center; }
-    .landing-about p:not(.landing-kicker) { max-width: 65ch; margin-block-start: 1rem; color: var(--landing-muted); }
+    .landing-about { position: relative; overflow: hidden; }
+    .landing-about-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 3rem; align-items: center; }
+    .landing-about-copy p:not(.landing-kicker) { max-width: 65ch; margin-block-start: 1rem; color: var(--landing-muted); }
     .landing-history { white-space: pre-line; }
+    .landing-about-copy .landing-org-hint { font-size: 0.875rem; font-weight: 700; color: var(--color-casa-palm-dark); }
     .landing-about-image { display: block; width: 100%; height: clamp(13rem, 20vw, 19rem); object-fit: cover; object-position: center 65%; border-radius: var(--landing-radius); box-shadow: var(--shadow-casa-card); }
-    .landing-team { position: relative; overflow: hidden; background: var(--landing-sand); }
-    .landing-team-heading { position: relative; z-index: 1; max-width: 40rem; margin-inline: auto; text-align: center; }
-    .landing-team h2 { font-size: clamp(2rem, 3vw, 3rem); }
-    .landing-team-heading p:not(.landing-kicker) { margin-block-start: 0.75rem; color: var(--landing-muted); }
-    .landing-palm--team-left { inset-inline-start: -4.5rem; inset-block-start: 1rem; transform: rotate(-8deg); }
-    .landing-palm--team-right { inset-inline-end: -4rem; inset-block-end: -3rem; transform: scaleX(-1) rotate(8deg); }
+    .landing-palm--about-left { inset-inline-start: -4.5rem; inset-block-start: 1rem; transform: rotate(-8deg); }
+    .landing-palm--about-right { inset-inline-end: -4rem; inset-block-end: -3rem; transform: scaleX(-1) rotate(8deg); }
 
-    /* Tiers stack Owner → Leadership → Team, joined by a short palm line. */
-    .landing-org-chart { position: relative; z-index: 1; display: grid; gap: 2.75rem; max-width: 72rem; margin: 2.5rem auto 0; }
-    .landing-org-tier { position: relative; display: grid; justify-items: center; gap: 1rem; }
-    .landing-org-tier + .landing-org-tier::before { content: ""; position: absolute; inset-block-start: -2.25rem; inset-inline-start: 50%; width: 1px; height: 1.75rem; background: color-mix(in srgb, var(--color-casa-palm) 55%, var(--landing-line)); }
-    .landing-org-tier-label { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase; color: var(--landing-brown); }
+    /* Tiers stack Owner → Leadership → Team, joined by a short palm line; portraits open a details dialog. */
+    .landing-org-chart { display: grid; gap: 2rem; padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1rem, 2.5vw, 2rem); border: 1px solid color-mix(in srgb, var(--landing-line) 75%, white); border-radius: var(--landing-radius); background: var(--landing-sand); }
+    .landing-org-tier { position: relative; display: grid; justify-items: center; gap: 0.75rem; }
+    .landing-org-tier + .landing-org-tier::before { content: ""; position: absolute; inset-block-start: -1.75rem; inset-inline-start: 50%; width: 1px; height: 1.4rem; background: color-mix(in srgb, var(--color-casa-palm) 55%, var(--landing-line)); }
+    .landing-org-tier-label { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase; color: var(--landing-brown); }
     .landing-org-tier-label::before,
-    .landing-org-tier-label::after { content: ""; width: 1.5rem; height: 1px; background: var(--landing-line); }
-    .landing-org-row { --landing-card-width: 13.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; width: 100%; }
-    .landing-org-row > li { display: flex; flex: 0 1 var(--landing-card-width); min-width: 0; }
-    .landing-org-tier--owner .landing-org-row { --landing-card-width: 17rem; }
-    .landing-org-tier--leadership .landing-org-row { --landing-card-width: 15rem; }
+    .landing-org-tier-label::after { content: ""; width: 1.25rem; height: 1px; background: var(--landing-line); }
+    .landing-org-row { --landing-portrait-width: 5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.85rem; width: 100%; }
+    .landing-org-row > li { display: flex; flex: 0 0 var(--landing-portrait-width); min-width: 0; }
+    .landing-org-tier--owner .landing-org-row { --landing-portrait-width: 8rem; }
+    .landing-org-tier--leadership .landing-org-row { --landing-portrait-width: 6.5rem; gap: 1.1rem; }
 
-    .landing-org-node { display: flex; flex-direction: column; align-items: center; width: 100%; padding: 1.25rem 1.1rem 1.4rem; border: 1px solid color-mix(in srgb, var(--landing-line) 75%, white); border-radius: var(--landing-radius); background: var(--landing-paper); box-shadow: var(--shadow-casa-soft); text-align: center; transition: box-shadow 200ms ease; }
-    .landing-org-node:hover { box-shadow: var(--shadow-casa-card); }
-    .landing-org-portrait { display: grid; place-items: center; width: 100%; max-width: 9.5rem; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 999px 999px var(--radius-casa-control) var(--radius-casa-control); background: linear-gradient(160deg, var(--color-casa-palm-tint), var(--landing-sand)); color: var(--color-casa-palm-dark); font-family: var(--font-editorial); font-size: 2.75rem; font-weight: 600; }
+    .landing-org-node { display: block; width: 100%; padding: 0; border: 0; border-radius: 999px 999px var(--radius-casa-control) var(--radius-casa-control); background: none; cursor: pointer; transition: transform 200ms ease, box-shadow 200ms ease; box-shadow: var(--shadow-casa-soft); }
+    .landing-org-node:hover { transform: translateY(-3px); box-shadow: var(--shadow-casa-card); }
+    .landing-org-node:focus-visible { outline: 3px solid var(--color-casa-palm); outline-offset: 3px; }
+    .landing-org-portrait { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 999px 999px var(--radius-casa-control) var(--radius-casa-control); background: linear-gradient(160deg, var(--color-casa-palm-tint), var(--landing-paper)); color: var(--color-casa-palm-dark); font-family: var(--font-editorial); font-size: 1.75rem; font-weight: 600; }
     .landing-org-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
-    .landing-org-node--owner .landing-org-portrait { max-width: 12rem; font-size: 3.5rem; }
-    .landing-org-node--team .landing-org-portrait { max-width: 8.5rem; background: linear-gradient(160deg, var(--color-casa-sand), var(--landing-sand)); color: var(--color-casa-cacao); }
-    .landing-org-copy { display: grid; justify-items: center; gap: 0.45rem; margin-block-start: 1rem; min-width: 0; }
-    .landing-org-copy h3 { font-size: 1.45rem; }
-    .landing-org-node--owner .landing-org-copy h3 { font-size: 1.8rem; }
+    .landing-org-node--owner .landing-org-portrait { font-size: 2.75rem; }
+    .landing-org-node--leadership .landing-org-portrait { font-size: 2.25rem; }
+    .landing-org-node--team .landing-org-portrait { background: linear-gradient(160deg, var(--color-casa-sand), var(--landing-paper)); color: var(--color-casa-cacao); }
+
+    .landing-org-dialog-panel { overflow: hidden; }
+    .landing-org-dialog { position: relative; display: grid; justify-items: center; gap: 0.6rem; padding: 2.25rem 1.75rem 2rem; text-align: center; }
+    .landing-org-dialog h3 { margin-block-start: 0.4rem; font-family: var(--font-editorial); font-size: 1.9rem; line-height: 1.15; }
+    .landing-org-dialog-portrait { max-width: 11rem; font-size: 3.25rem; box-shadow: var(--shadow-casa-soft); }
+    .landing-org-dialog-close { position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 999px; color: var(--landing-muted); }
+    .landing-org-dialog-close:hover { background: var(--landing-sand); color: var(--color-casa-palm-dark); }
+    .landing-org-dialog-close .landing-icon { width: 1.25rem; height: 1.25rem; }
     .landing-org-title { padding: 0.2rem 0.75rem; border-radius: var(--radius-casa-pill); background: color-mix(in srgb, var(--color-casa-palm) 12%, var(--landing-paper)); color: var(--color-casa-palm-dark); font-size: 0.8125rem; font-weight: 700; line-height: 1.5; }
-    .landing-org-description { font-size: 0.875rem; color: var(--landing-muted); }
+    .landing-org-description { max-width: 40ch; margin-block-start: 0.4rem; font-size: 0.9375rem; color: var(--landing-muted); }
 
     @supports (animation-timeline: view()) {
         @media (prefers-reduced-motion: no-preference) {
-            .landing-org-node { animation: landing-org-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+            .landing-org-row > li { animation: landing-org-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
         }
     }
     @keyframes landing-org-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
@@ -227,15 +234,13 @@
     .landing-about-grid,
     .landing-how-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
     .landing-about-image { height: 15rem; }
-    .landing-org-chart { gap: 2.25rem; }
-    .landing-org-tier + .landing-org-tier::before { inset-block-start: -1.85rem; height: 1.4rem; }
-    .landing-org-row { gap: 1rem; }
-    .landing-org-tier--team .landing-org-row > li { flex-basis: calc((100% - 1rem) / 2); }
-    .landing-org-tier--team .landing-org-row > li:only-child { flex-basis: min(100%, 15rem); }
-    .landing-org-node { padding: 1rem 0.75rem 1.15rem; }
-    .landing-org-node--team .landing-org-copy h3 { font-size: 1.2rem; }
-    .landing-palm--team-left,
-    .landing-palm--team-right { width: 8rem; opacity: 0.2; }
+    .landing-org-chart { gap: 1.75rem; }
+    .landing-org-tier + .landing-org-tier::before { inset-block-start: -1.5rem; height: 1.2rem; }
+    .landing-org-row { --landing-portrait-width: 4.5rem; gap: 0.7rem; }
+    .landing-org-tier--owner .landing-org-row { --landing-portrait-width: 7rem; }
+    .landing-org-tier--leadership .landing-org-row { --landing-portrait-width: 5.75rem; }
+    .landing-palm--about-left,
+    .landing-palm--about-right { width: 8rem; opacity: 0.2; }
     .landing-how-image { order: 2; }
     .landing-how { padding-block-start: 1rem; }
     .landing-addons-heading { align-items: start; flex-direction: column; gap: 0.65rem; }
