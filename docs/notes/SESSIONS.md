@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-10-27: [Docs and repo cleanup](sessions/2026-10-27-docs-cleanup.md)
 - 2026-10-27: [About and team combined into one section](sessions/2026-10-27-combined-about-team.md)
 - 2026-10-27: [Team chart and sticky top bar live](sessions/2026-10-27-team-chart-live.md)
 - 2026-10-27: [Staff-account team chart](sessions/2026-10-27-staff-org-chart.md)
