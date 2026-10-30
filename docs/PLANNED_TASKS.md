@@ -4,7 +4,7 @@ Work the user has asked to record for later. Nothing here is implemented yet. Ea
 
 Added 2026-10-30. Status of every task below: planned, not started.
 
-Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso - Therapist Roster" Google Sheet (IDs T1–T5 match the tasks below). This file keeps the specifications.
+Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso Tracker" Google Sheet (formerly "Casa Paraiso - Therapist Roster") (IDs T1–T5 match the tasks below). This file keeps the specifications.
 
 ## Task 1: Pretrained XLM-RoBERTa Sentiment Model for Feedback
 
