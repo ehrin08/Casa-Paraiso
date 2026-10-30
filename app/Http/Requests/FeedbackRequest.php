@@ -22,6 +22,7 @@ class FeedbackRequest extends FormRequest
             'appointment_id' => ['required', 'integer', Rule::exists('appointments', 'id')],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['nullable', 'string', 'max:5000'],
+            'is_anonymous' => ['nullable', 'boolean'],
         ];
     }
 }

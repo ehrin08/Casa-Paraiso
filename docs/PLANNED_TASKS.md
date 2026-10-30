@@ -28,19 +28,19 @@ Done 2026-10-30 ([session note](notes/sessions/2026-10-30-star-rating.md)). The 
 
 ## Task 3: Optional Name on Feedback
 
-Today feedback is linked to the customer profile through the appointment. The form has no name field, and staff and admin views show the customer's name.
+Done 2026-10-30 ([session note](notes/sessions/2026-10-30-feedback-anonymity-and-prompt.md)). Feedback had been linked to the customer profile through the appointment, and every staff and admin view showed the customer's name.
 
-- [ ] Confirm the meaning with the user: an anonymous option that hides the name from staff, or a free-text display name.
-- [ ] Planned reading: add an optional "show my name" or anonymous choice. Keep the record linked to the customer for eligibility and the one-feedback-per-appointment rule, but hide the identity in feedback views when the customer chooses anonymous.
-- [ ] Add the field through an additive migration, and update the admin and staff feedback views, reports and CSV export.
+- [x] Confirm the meaning with the user. (Chosen: an anonymous choice that hides the name from therapists only. Admins still see it with an Anonymous badge.)
+- [x] Keep the record linked to the customer for eligibility and the one-feedback-per-appointment rule, but hide the identity in therapist feedback views when the customer chooses anonymous. (`feedback.is_anonymous`, "Hide my name from my therapist".)
+- [x] Add the field through an additive migration, and update the admin and staff feedback views, reports and CSV export. (CSV column `Hidden From Therapist`. Therapist customer pages leave anonymous feedback out.)
 
 ## Task 4: Feedback Pop-up When a Customer Is Eligible
 
-Today customer My appointments shows the most recent completed visit awaiting feedback (`Customer\AppointmentController` queries `whereDoesntHave('feedback')`). The feedback form already supports modal mode through `$modalName` and `_modal` recovery.
+Done 2026-10-30 ([session note](notes/sessions/2026-10-30-feedback-anonymity-and-prompt.md)). Before this, customer My appointments only showed a card for the most recent completed visit awaiting feedback.
 
-- [ ] When a customer has a completed appointment without feedback, open the existing feedback form automatically in an `x-modal`, with that appointment preselected.
-- [ ] Add a "Later" dismissal that stops the prompt for the rest of the session (session flag).
-- [ ] Show the pop-up only in the customer workspace.
+- [x] When a customer has a completed appointment without feedback, open the existing feedback form automatically in an `x-modal`, with that appointment preselected. (`x-customer-feedback-prompt`, on every customer page except the feedback and booking pages.)
+- [x] Add a "Later" dismissal that stops the prompt for the rest of the session (session flag). (`customer.feedback.prompt.dismiss`.)
+- [x] Show the pop-up only in the customer workspace.
 
 ## Task 5: Prevent Troll Appointments
 

@@ -18,7 +18,8 @@ class FeedbackController extends Controller
         $sentiment = (string) $request->query('sentiment_label');
         $search = trim((string) $request->query('q'));
         $sorts = [
-            'customer' => 'feedback_customers.name',
+            // Anonymous rows sort as blank so the order cannot reveal a hidden name.
+            'customer' => 'feedback_customer_sort_name',
             'service' => 'feedback_services.name',
             'rating' => 'feedback.rating',
             'sentiment' => 'feedback.sentiment_label',
@@ -33,10 +34,11 @@ class FeedbackController extends Controller
             ->leftJoin('users as feedback_customers', 'feedback_customers.id', '=', 'feedback_customer_profiles.user_id')
             ->leftJoin('services as feedback_services', 'feedback_services.id', '=', 'feedback.service_id')
             ->select('feedback.*')
+            ->selectRaw('CASE WHEN feedback.is_anonymous = 1 THEN NULL ELSE feedback_customers.name END as feedback_customer_sort_name')
             ->whereHas('appointment', fn ($query) => $query->where('staff_profile_id', $staffProfile?->id ?? 0))
             ->when(in_array($sentiment, Feedback::SENTIMENT_LABELS, true), fn ($query) => $query->where('feedback.sentiment_label', $sentiment))
             ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
-                $query->where('feedback_customers.name', 'like', "%{$search}%")
+                $query->where(fn ($query) => $query->where('feedback.is_anonymous', false)->where('feedback_customers.name', 'like', "%{$search}%"))
                     ->orWhere('feedback_services.name', 'like', "%{$search}%")
                     ->orWhere('feedback.comment', 'like', "%{$search}%");
             }))

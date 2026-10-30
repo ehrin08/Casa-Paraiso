@@ -31,7 +31,7 @@ class CustomerController extends Controller
             ->leftJoin('users', 'users.id', '=', 'customer_profiles.user_id')
             ->select('customer_profiles.*')
             ->selectRaw(CustomerProfile::displayNameSql().' as customer_display_name')
-            ->withCount(['appointments', 'feedback'])
+            ->withCount(['appointments', 'feedback' => fn ($query) => $query->where('is_anonymous', false)])
             ->orderBy($sorts[$sort], $direction)
             ->orderBy('customer_display_name')
             ->paginate((int) config('casa.pagination.per_page', 15))
@@ -54,10 +54,11 @@ class CustomerController extends Controller
                 ->latest('requested_start_at')
                 ->limit(10),
             'feedback' => fn ($query) => $query
+                ->where('is_anonymous', false)
                 ->with(['service', 'appointment'])
                 ->latest('submitted_at')
                 ->limit(8),
-        ])->loadCount(['appointments', 'feedback']);
+        ])->loadCount(['appointments', 'feedback' => fn ($query) => $query->where('is_anonymous', false)]);
 
         return view('staff.customers.show', [
             'customer' => $customer,

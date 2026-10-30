@@ -185,6 +185,7 @@
                             <tr>
                                 <td class="feedback-customer">
                                     <a href="{{ route('admin.feedback.show', $item) }}" aria-label="{{ __('View feedback from :customer', ['customer' => $customer?->display_name ?: __('Customer unavailable')]) }}">{{ $customer?->display_name ?: __('Customer unavailable') }}</a>
+                                    @if ($item->is_anonymous)<x-status-badge class="mt-1" title="{{ __('The customer hid their name from the therapist.') }}">{{ __('Anonymous') }}</x-status-badge>@endif
                                     @if (filled($contact))<p>{{ $contact }}</p>@endif
                                 </td>
                                 <td class="feedback-service">{{ $item->service?->name ?: __('Unassigned service') }}</td>

@@ -297,7 +297,7 @@ class ReportController extends Controller
             'transactions' => ['Number', 'Customer', 'Service', 'Amount', 'Status', 'Method', 'Paid At'],
             'customers' => ['Code', 'Name', 'Email', 'Phone', 'Joined At', 'Status', 'Appointments', 'Transactions', 'Feedback', 'Rewards'],
             'promotions' => ['Customer', 'Customer Group', 'Days Since Last Paid Visit', 'Paid Visits', 'Paid Total', 'Reward', 'Status', 'Expires At'],
-            'feedback' => ['Customer', 'Service', 'Rating', 'Sentiment', 'Submitted At', 'Comment'],
+            'feedback' => ['Customer', 'Service', 'Rating', 'Sentiment', 'Submitted At', 'Comment', 'Hidden From Therapist'],
             default => ['Number', 'Customer', 'Service', 'Staff', 'Appointment Date', 'Status'],
         };
     }
@@ -311,7 +311,7 @@ class ReportController extends Controller
             'transactions' => [$record->transaction_number, $record->customerProfile?->display_name, $record->service?->name, $record->amount, $record->payment_status, $record->payment_method, $record->paid_at?->toDateTimeString()],
             'customers' => [$record->customer_code, $record->display_name, $record->display_email, $record->display_phone, $record->created_at?->toDateTimeString(), $record->is_guest ? 'guest' : ($record->user?->is_active ? 'active' : 'inactive'), $record->appointments_count, $record->transactions_count, $record->feedback_count, $record->promotion_suggestions_count],
             'promotions' => [$record->customerProfile?->display_name, $record->rfmSegment?->name, $record->recency_days, $record->frequency_count, $record->monetary_total, $record->addonName() ?: $record->suggested_offer, $record->lifecycle(), $record->expires_at?->toDateTimeString()],
-            'feedback' => [$record->customerProfile?->display_name, $record->service?->name, $record->rating, $record->sentiment_label, $record->submitted_at?->toDateTimeString(), $record->comment],
+            'feedback' => [$record->customerProfile?->display_name, $record->service?->name, $record->rating, $record->sentiment_label, $record->submitted_at?->toDateTimeString(), $record->comment, $record->is_anonymous ? 'yes' : 'no'],
             default => [$record->appointment_number, $record->customerProfile?->display_name, $record->service?->name, $record->staffProfile?->user?->name, ($record->scheduled_start_at ?? $record->requested_start_at)?->toDateTimeString(), $record->status],
         };
 

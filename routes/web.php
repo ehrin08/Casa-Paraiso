@@ -227,6 +227,7 @@ Route::middleware(['auth', 'active', 'verified', 'role:customer', MeasureApplica
         Route::get('/appointments/history', [CustomerAppointmentController::class, 'history'])->name('appointments.history');
         Route::patch('/appointments/{appointment}/cancel', [CustomerAppointmentController::class, 'cancel'])->name('appointments.cancel');
         Route::resource('appointments', CustomerAppointmentController::class)->only(['index', 'create', 'store', 'show']);
+        Route::post('/feedback/prompt/dismiss', [CustomerFeedbackController::class, 'dismissPrompt'])->name('feedback.prompt.dismiss');
         Route::resource('feedback', CustomerFeedbackController::class)->only(['index', 'create', 'store']);
         Route::redirect('/profile', '/profile')->name('profile.edit');
     });

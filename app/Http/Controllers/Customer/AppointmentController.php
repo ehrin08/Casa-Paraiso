@@ -44,12 +44,7 @@ class AppointmentController extends Controller
 
         $feedbackVisit = Appointment::query()
             ->with('service')
-            ->where('customer_profile_id', $customerProfileId)
-            ->where('status', Appointment::STATUS_COMPLETED)
-            ->whereDoesntHave('feedback')
-            ->orderByDesc('completed_at')
-            ->orderByRaw('COALESCE(scheduled_start_at, requested_start_at) DESC')
-            ->orderByDesc('id')
+            ->awaitingFeedback($customerProfileId)
             ->first();
 
         return view('customer.appointments.index', [
