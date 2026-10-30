@@ -4,6 +4,8 @@ Work the user has asked to record for later. Nothing here is implemented yet. Ea
 
 Added 2026-10-30. Status of every task below: planned, not started.
 
+Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso - Therapist Roster" Google Sheet (IDs T1–T5 match the tasks below). This file keeps the specifications.
+
 ## Task 1: Pretrained XLM-RoBERTa Sentiment Model for Feedback
 
 Today `App\Services\HybridSentimentClassifier` chooses between the rules in `SentimentClassifier` and `LocalSentimentModel` (a native PHP JSON artifact trained by `scripts/train_sentiment_model.py`). The `rules`, `shadow` and `model` modes come from `SENTIMENT_CLASSIFIER_MODE` in `config/sentiment.php`, which defaults to `shadow`.

@@ -2,6 +2,8 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-10-30: [Task tracker sheet](sessions/2026-10-30-task-tracker-sheet.md)
+- 2026-10-30: [Therapist roster template](sessions/2026-10-30-therapist-roster-template.md)
 - 2026-10-30: [Planned tasks backlog](sessions/2026-10-30-planned-tasks-backlog.md)
 - 2026-10-30: [Main merge and release live](sessions/2026-10-30-main-merge-live.md)
 - 2026-10-30: [Faster Laravel tests](sessions/2026-10-30-faster-laravel-tests.md)
