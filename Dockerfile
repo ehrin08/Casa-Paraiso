@@ -19,7 +19,10 @@ RUN apt-get update \
 WORKDIR /var/www/html
 
 COPY docker/app/entrypoint.sh /usr/local/bin/casa-entrypoint
-RUN chmod +x /usr/local/bin/casa-entrypoint
+COPY docker/app/php/zz-casa-cli.ini /usr/local/etc/php/conf.d/zz-casa-cli.ini
+RUN chmod +x /usr/local/bin/casa-entrypoint \
+    && mkdir -p /tmp/opcache \
+    && chmod 1777 /tmp/opcache
 
 ENTRYPOINT ["casa-entrypoint"]
 CMD ["apache2-foreground"]

@@ -42,6 +42,15 @@ For commands with Compose options, use an explicit argument array: PowerShell ca
 .\scripts\casa-docker.ps1 -Action compose -ComposeArguments @('up', '-d', 'mariadb')
 ```
 
+### Test Speed
+
+The project folder is bind-mounted from Windows, and each file read through that share takes milliseconds (about 1,000 times slower than a Docker volume). Every test boots Laravel again, so file reads, not the database, set the pace of `php artisan test`. Two settings keep that down:
+
+- `docker/app/php/zz-casa-cli.ini` turns on OPcache for command-line PHP and keeps a file cache in `/tmp/opcache`, so test runs and roster worker processes reuse compiled code. Timestamps are still checked every 2 seconds, so code edits are picked up.
+- `phpunit.xml` sets `VIEW_COMPILED_PATH=/tmp/casa-testing-views`, so tests compile Blade views inside the container instead of in `storage/framework/views`.
+
+The ini file is part of the image. After pulling a change to it, rebuild with `.\scripts\casa-docker.ps1 setup`. Run `php artisan test --profile` to list the slowest tests.
+
 ## Isolated Verification
 
 After the normal setup has built the app image and installed dependencies, `compose.testing.yaml` provides a private MariaDB `testing` database plus separate framework/cache/log volumes and a distinct browser session cookie. Supply an explicit non-default `-ProjectName`; the normal project remains `casa-paraiso-web`. The test app binds to loopback port 18002 (`TEST_APP_PORT` may override it). Never reuse an account-bearing database volume.
