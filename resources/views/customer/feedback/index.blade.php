@@ -51,9 +51,8 @@
                                         <p class="mt-2 text-sm leading-7 text-casa-muted">“{{ $item->comment }}”</p>
                                     @endif
                                 </div>
-                                <div class="flex shrink-0 items-center gap-1 rounded-full bg-casa-brass/12 px-3 py-2 text-casa-cacao" aria-label="{{ trans_choice(':count star|:count stars', $item->rating) }}">
-                                    <svg class="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.77 5.61 6.2.9-4.49 4.37 1.06 6.18L12 16.95l-5.54 2.91 1.06-6.18-4.49-4.37 6.2-.9L12 2.8Z"/></svg>
-                                    <span class="text-sm font-extrabold">{{ $item->rating }}/5</span>
+                                <div class="flex shrink-0 items-center rounded-full bg-casa-brass/12 px-3 py-2">
+                                    <x-star-rating :value="$item->rating" />
                                 </div>
                             </div>
                         </article>

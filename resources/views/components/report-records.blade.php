@@ -50,7 +50,7 @@
                 @elseif ($type === 'promotions')
                     <td>{{ $record->customerProfile?->display_name }}</td><td>{{ $record->rfmSegment?->name }}</td><td>{{ $rewardNames[$record->addon_code] ?? $record->suggested_offer }}</td><td>{{ __(':days days · :visits paid visits', ['days' => $record->recency_days ?? __('N/A'), 'visits' => $record->frequency_count ?? 0]) }}</td><td><x-status-badge>{{ ucfirst($record->lifecycle()) }}</x-status-badge></td>
                 @elseif ($type === 'feedback')
-                    <td>{{ $record->customerProfile?->display_name }}</td><td>{{ $record->service?->name }}</td><td>{{ $record->rating }}/5</td><td><x-status-badge>{{ ucfirst($record->sentiment_label ?? 'Unclassified') }}</x-status-badge></td><td>{{ $record->submitted_at?->timezone('Asia/Manila')->format('M j, Y') }}</td>
+                    <td>{{ $record->customerProfile?->display_name }}</td><td>{{ $record->service?->name }}</td><td><x-star-rating :value="$record->rating" /></td><td><x-status-badge>{{ ucfirst($record->sentiment_label ?? 'Unclassified') }}</x-status-badge></td><td>{{ $record->submitted_at?->timezone('Asia/Manila')->format('M j, Y') }}</td>
                 @else
                     <td>{{ ($record->scheduled_start_at ?? $record->requested_start_at)?->timezone('Asia/Manila')->format('M j, Y g:i A') }}</td><td>{{ $record->appointment_number }}</td><td>{{ $record->customerProfile?->display_name }}</td><td>{{ $record->service?->name }}</td><td><x-status-badge>{{ ucfirst(str_replace('_', ' ', $record->status)) }}</x-status-badge></td>
                 @endif

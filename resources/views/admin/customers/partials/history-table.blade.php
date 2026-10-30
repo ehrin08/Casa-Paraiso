@@ -26,7 +26,7 @@
                                 <td class="px-4 py-4 font-semibold text-casa-text">PHP {{ number_format((float) $record->amount, 2) }}</td>
                                 <td class="px-4 py-4"><x-status-badge>{{ ucfirst($record->payment_status) }}</x-status-badge></td>
                             @elseif ($type === 'feedback')
-                                <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->rating }}/5</td>
+                                <td class="px-4 py-4"><x-star-rating :value="$record->rating" /></td>
                                 <td class="px-4 py-4 text-casa-muted">{{ $record->service?->name }}</td>
                                 <td class="px-4 py-4 text-casa-muted">{{ str($record->comment)->limit(80) ?: __('No comment') }}</td>
                                 <td class="px-4 py-4"><x-status-badge>{{ ucfirst($record->sentiment_label) }}</x-status-badge></td>

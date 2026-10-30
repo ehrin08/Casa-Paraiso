@@ -21,7 +21,7 @@
                                 <td class="px-4 py-4 text-casa-muted">{{ ($record->scheduled_start_at ?? $record->requested_start_at)?->format('M d, Y g:i A') }}</td>
                                 <td class="px-4 py-4"><x-status-badge>{{ ucfirst(str_replace('_', ' ', $record->status)) }}</x-status-badge></td>
                             @else
-                                <td class="px-4 py-4 font-semibold text-casa-text">{{ $record->rating }}/5</td>
+                                <td class="px-4 py-4"><x-star-rating :value="$record->rating" /></td>
                                 <td class="px-4 py-4 text-casa-muted">{{ $record->service?->name }}</td>
                                 <td class="px-4 py-4 text-casa-muted">{{ str($record->comment)->limit(90) ?: __('No comment') }}</td>
                                 <td class="px-4 py-4"><x-status-badge>{{ ucfirst($record->sentiment_label) }}</x-status-badge></td>

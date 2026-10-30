@@ -42,7 +42,7 @@
                         <tr class="casa-table-row">
                             <td class="px-4 py-4 font-semibold text-casa-text">{{ $item->customerProfile?->display_name }}</td>
                             <td class="px-4 py-4 text-casa-muted">{{ $item->service?->name }}</td>
-                            <td class="px-4 py-4 text-casa-muted">{{ $item->rating }}/5</td>
+                            <td class="px-4 py-4"><x-star-rating :value="$item->rating" /></td>
                                     <td class="px-4 py-4">
                                         <x-status-badge>{{ ucfirst($item->sentiment_label) }}</x-status-badge>
                                         @if ($item->topics->isNotEmpty())
