@@ -2,7 +2,38 @@
   "schema_version": 1,
   "status": "internal-seed-required",
   "sources": [],
-  "required_fields": ["text", "rating", "label", "language", "topics", "split"],
-  "redaction": ["names", "phone_numbers", "email_addresses", "booking_numbers", "addresses", "urls"],
-  "policy": "Do not export or train on customer text until it has been redacted and independently reviewed."
+  "required_fields": [
+    "text",
+    "rating",
+    "label",
+    "language",
+    "topics",
+    "split"
+  ],
+  "redaction": [
+    "names",
+    "phone_numbers",
+    "email_addresses",
+    "booking_numbers",
+    "addresses",
+    "urls"
+  ],
+  "policy": "Do not export or train on customer text until it has been redacted and independently reviewed.",
+  "models": [
+    {
+      "id": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+      "url": "https://huggingface.co/cardiffnlp/twitter-xlm-roberta-base-sentiment",
+      "revision": "f2f1202b1bdeb07342385c3f807f9c07cd8f5cf8",
+      "base_model": "xlm-roberta-base (MIT)",
+      "license": "not declared on the model card as of 2026-10-30; confirm with the authors before production use",
+      "labels": [
+        "negative",
+        "neutral",
+        "positive"
+      ],
+      "training_data": "multilingual tweets (Barbieri et al., XLM-T); Tagalog is not one of its fine-tuning languages",
+      "usage": "inference only through SENTIMENT_XLMR_URL; no Casa Paraiso text is used for training",
+      "classifier_version": "xlmr-twitter-base-v1"
+    }
+  ]
 }
