@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-10-30: [Main merge and release live](sessions/2026-10-30-main-merge-live.md)
 - 2026-10-30: [Redesign work-in-progress wrap-up](sessions/2026-10-30-redesign-wip-wrap-up.md)
 - 2026-10-27: [Google questionnaire tab](sessions/2026-10-27-google-questionnaire-tab.md)
 - 2026-10-27: [IT expert evaluation questionnaire](sessions/2026-10-27-it-expert-questionnaire.md)
