@@ -15,6 +15,7 @@ List the pending tasks and make the owner's Google Sheet the task tracker.
 - Columns: ID, Task, Details, Status, Priority, Open decision, Source, Updated, Notes. The header row is bold and frozen, and text wraps.
 - Status (D2:D100) has a drop-down with Not started, In progress, Blocked and Done. Priority (E2:E100) has High, Medium and Low.
 - Styled in the brand palette from [BRAND_UI_GUIDE.md](../../BRAND_UI_GUIDE.md): a Casa Palm header with Casa Paper text, alternating Casa Paper and Casa Sand rows to row 50, Casa Border borders, and a Casa Palm sheet tab. The drop-down chips are coloured: Status uses grey, yellow, red and green; Priority uses red, orange and green.
+- Renamed the spreadsheet to "Casa Paraiso Tracker". The `Therapists` and `Tasks` tabs stay in it.
 - Rows T1–T5 come from [PLANNED_TASKS.md](../../PLANNED_TASKS.md). T6 is completing the therapist roster, and T7 is committing the roster session note.
 - [PLANNED_TASKS.md](../../PLANNED_TASKS.md) now says the sheet holds live status and the file keeps the specifications.
 
