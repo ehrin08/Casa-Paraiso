@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-10-30: [Therapist import and schedules](sessions/2026-10-30-therapist-import.md)
 - 2026-10-30: [Anonymous feedback and feedback pop-up (T3, T4)](sessions/2026-10-30-feedback-anonymity-and-prompt.md)
 - 2026-10-30: [Tracker status update](sessions/2026-10-30-tracker-status-update.md)
 - 2026-10-30: [XLM-RoBERTa feedback sentiment (T1)](sessions/2026-10-30-xlm-roberta-sentiment.md)
