@@ -162,6 +162,8 @@ The apply command must only be run after reviewing the dry-run transitions and c
 
 The local-model foundation is implemented: native PHP JSON-artifact inference, `rules`/`shadow`/`model` mode configuration, append-only sentiment runs, private annotations, admin review endpoints, and a development-only scikit-learn export script. The default remains `shadow`; promotion requires the evaluation gate above and can be rolled back with `SENTIMENT_CLASSIFIER_MODE=rules`.
 
+Since 2026-10-30 the hybrid adapter can use a pretrained multilingual XLM-RoBERTa checkpoint (`cardiffnlp/twitter-xlm-roberta-base-sentiment`) instead of the local artifact. `SENTIMENT_MODEL_DRIVER=xlmr` selects `App\Services\XlmRobertaSentimentModel`, which posts the comment to `SENTIMENT_XLMR_URL` in the Hugging Face text-classification format and records the result as the `model` candidate (version `xlmr-twitter-base-v1`). Blank comments, a missing URL, timeouts, errors and unexpected payloads all leave the rules in charge. The optional Docker `sentiment` profile serves the same API locally. `casa:sentiment-predictions {dataset} {output} --driver=rules|local|xlmr` writes predictions for `scripts/evaluate_sentiment_model.py`, so the checkpoint can be compared on the locked test set once that set exists. Until it passes the gate, production stays on `rules` with the `local` driver.
+
 ## Recommended first implementation slice
 
 Start with Phases 1–3: dataset governance, a small manually verified Casa Paraiso set, and a baseline evaluation of the existing classifier. This produces evidence about whether a trained model is worth the additional deployment and maintenance cost before changing production classification behavior.

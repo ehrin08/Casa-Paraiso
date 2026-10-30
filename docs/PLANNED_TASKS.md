@@ -10,11 +10,13 @@ Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso Tracker" 
 
 Today `App\Services\HybridSentimentClassifier` chooses between the rules in `SentimentClassifier` and `LocalSentimentModel` (a native PHP JSON artifact trained by `scripts/train_sentiment_model.py`). The `rules`, `shadow` and `model` modes come from `SENTIMENT_CLASSIFIER_MODE` in `config/sentiment.php`, which defaults to `shadow`.
 
-- [ ] Choose a pretrained multilingual XLM-RoBERTa sentiment checkpoint, or fine-tune one, that covers English, Tagalog and Taglish.
-- [ ] Record the model's source and license in [sentiment-dataset-manifest.json](sentiment-dataset-manifest.json).
-- [ ] Decide how to run inference. Hostinger shared hosting cannot run a Python or transformer worker, and the [Sentiment Analysis Implementation Plan](SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md) rules out a mandatory external AI service. Options to compare: an ONNX export run from PHP, batch or offline classification, or a separate approved inference host.
-- [ ] Add the model as another classifier behind the existing hybrid adapter. Keep the `positive`, `neutral` and `negative` labels and the rules fallback.
-- [ ] Pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`.
+In progress since 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-roberta-sentiment.md)).
+
+- [x] Choose a pretrained multilingual XLM-RoBERTa sentiment checkpoint, or fine-tune one, that covers English, Tagalog and Taglish. (`cardiffnlp/twitter-xlm-roberta-base-sentiment`, pretrained; Tagalog quality still has to be measured.)
+- [x] Record the model's source and license in [sentiment-dataset-manifest.json](sentiment-dataset-manifest.json). (The model card declares no license; confirm before production use.)
+- [x] Decide how to run inference. Hostinger shared hosting cannot run a Python or transformer worker, and the [Sentiment Analysis Implementation Plan](SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md) rules out a mandatory external AI service. (Chosen: an optional HTTP endpoint in the Hugging Face format, with a short timeout and the rules as fallback. Locally it runs as the Docker `sentiment` profile. The production host is not chosen yet.)
+- [x] Add the model as another classifier behind the existing hybrid adapter. Keep the `positive`, `neutral` and `negative` labels and the rules fallback. (`SENTIMENT_MODEL_DRIVER=xlmr`.)
+- [ ] Build the redacted, labelled locked test set, then pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`.
 
 ## Task 2: Star Rating Instead of a Dropdown
 

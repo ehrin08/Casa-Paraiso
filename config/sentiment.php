@@ -6,6 +6,16 @@ return [
     'model_path' => env('SENTIMENT_MODEL_PATH', base_path('resources/sentiment/model-v1.json')),
     'model_threshold' => (float) env('SENTIMENT_MODEL_THRESHOLD', 0.80),
     'model_version' => 'model-v1.0.0',
+    // local: PHP JSON artifact; xlmr: XLM-RoBERTa behind an HTTP inference endpoint.
+    'model_driver' => env('SENTIMENT_MODEL_DRIVER', 'local'),
+    'xlmr' => [
+        'url' => env('SENTIMENT_XLMR_URL'),
+        'token' => env('SENTIMENT_XLMR_TOKEN'),
+        'timeout' => (float) env('SENTIMENT_XLMR_TIMEOUT', 3),
+        'checkpoint' => 'cardiffnlp/twitter-xlm-roberta-base-sentiment',
+        'version' => 'xlmr-twitter-base-v1',
+        'max_chars' => 1000,
+    ],
     'terms' => [
         'positive' => [
             'en' => [

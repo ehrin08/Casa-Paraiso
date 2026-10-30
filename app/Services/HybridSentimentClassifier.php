@@ -9,6 +9,7 @@ class HybridSentimentClassifier
     public function __construct(
         private readonly SentimentClassifier $rules,
         private readonly LocalSentimentModel $model,
+        private readonly XlmRobertaSentimentModel $xlmr,
     ) {
     }
 
@@ -19,7 +20,9 @@ class HybridSentimentClassifier
         $model = null;
 
         try {
-            $model = $this->model->classify($rating, $comment);
+            $model = config('sentiment.model_driver') === 'xlmr'
+                ? $this->xlmr->classify($rating, $comment)
+                : $this->model->classify($rating, $comment);
         } catch (\Throwable) {
             $model = null;
         }
