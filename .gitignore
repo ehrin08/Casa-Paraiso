@@ -21,6 +21,7 @@
 /public/hot
 /public/storage
 /output/hostinger-release/
+/output/questionnaire/
 /storage/*.key
 /storage/pail
 /storage/backups/*
