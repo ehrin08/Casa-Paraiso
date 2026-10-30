@@ -48,6 +48,6 @@ Merge `redesign` into `main`, then deploy the result to https://casaparaiso.site
 
 ## Follow-ups
 
-- [ ] Repoint the hPanel cron to `casa-paraiso-redesign-20261030/artisan schedule:run`, then remove the 20261027 job. The old cron still works against the same database in the meantime.
+- [x] Repoint the hPanel cron to `casa-paraiso-redesign-20261030/artisan schedule:run`. The user asked for this through Claude in Chrome. A new every-minute Custom job was added, and its output was the normal "No scheduled commands are ready to run". The 20261027 job was then deleted, leaving only the new one.
 - [ ] Rollback if needed: from the domain directory, `ln -s "$PWD/casa-paraiso-redesign-20261027/public" public_html.new && mv -T public_html.new public_html`.
 - [ ] Old upload ZIP `casa-paraiso-hostinger-20261026-044221-be8a29.zip` still sits in the domain directory. Remove it when convenient.
