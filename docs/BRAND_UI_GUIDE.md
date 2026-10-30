@@ -44,6 +44,7 @@ On the `redesign` branch, soft tone accents (palm, brass, cacao, and the blue, r
 - Admin and staff surfaces keep compact metrics and information-dense tables inside those shapes.
 - Primary controls have a minimum 44px target size.
 - Customer appointment and feedback history use responsive cards. Operational record lists remain tables with keyboard-focusable horizontal scrolling.
+- Feedback ratings are entered with `x-star-rating-input`: five brass stars on 44px targets, built as a native radio group, with no star chosen by default. Lists and tables show ratings with `x-star-rating` (filled brass and empty border-colored stars, with an "N out of 5 stars" label for assistive technology).
 - In the Blade application, every role uses a sticky top bar with a ☰ button that opens the workspace drawer over the page at every width. Customers also keep the mobile bottom navigation for My appointments, My feedback, and My profile.
 
 ## Public Homepage

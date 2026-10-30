@@ -18,11 +18,11 @@ Today `App\Services\HybridSentimentClassifier` chooses between the rules in `Sen
 
 ## Task 2: Star Rating Instead of a Dropdown
 
-Today the customer feedback form (`resources/views/customer/feedback/partials/form.blade.php`) uses a `<select name="rating">` listing 5 down to 1.
+Done 2026-10-30 ([session note](notes/sessions/2026-10-30-star-rating.md)). The customer feedback form had used a `<select name="rating">` listing 5 down to 1.
 
-- [ ] Replace the dropdown with a 1–5 star control built as a styled radio group, so it works with the keyboard, screen readers and no JavaScript.
-- [ ] Keep the `rating` field name so `FeedbackRequest` validation (`required`, integer, 1–5) and storage stay unchanged.
-- [ ] Optionally show stars instead of `N/5` in the read-only views (admin and staff feedback, customer history, reports).
+- [x] Replace the dropdown with a 1–5 star control built as a styled radio group, so it works with the keyboard, screen readers and no JavaScript. (`x-star-rating-input`; it starts with no star chosen.)
+- [x] Keep the `rating` field name so `FeedbackRequest` validation (`required`, integer, 1–5) and storage stay unchanged.
+- [x] Show stars instead of `N/5` in the read-only lists and tables (customer history, staff feedback, admin and staff customer history, report records) with `x-star-rating`. The admin and staff feedback detail stat cards keep `N/5`.
 
 ## Task 3: Optional Name on Feedback
 

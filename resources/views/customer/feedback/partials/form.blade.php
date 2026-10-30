@@ -24,13 +24,8 @@
             </div>
 
             <div>
-                <x-input-label for="rating" :value="__('Rating')" />
-                <select id="rating" name="rating" class="casa-input mt-2" required>
-                    @for ($rating = 5; $rating >= 1; $rating--)
-                        <option value="{{ $rating }}" @selected((int) old('rating', 5) === $rating)>{{ $rating }} / 5</option>
-                    @endfor
-                </select>
-                <x-input-error class="mt-2" :messages="$errors->get('rating')" />
+                <x-star-rating-input :value="old('rating')" :described-by="$errors->has('rating') ? 'rating-error' : null" />
+                <x-input-error id="rating-error" class="mt-2" :messages="$errors->get('rating')" />
             </div>
 
             <div>
