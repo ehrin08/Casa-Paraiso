@@ -7,6 +7,7 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [MVP Scope](MVP_SCOPE.md)
 - [Tech Stack](TECH_STACK.md)
 - [Project Memory](PROJECT_MEMORY.md)
+- [Planned Tasks](PLANNED_TASKS.md) (recorded, not started)
 
 ## Data
 
