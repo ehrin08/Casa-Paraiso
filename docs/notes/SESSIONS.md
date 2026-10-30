@@ -2,6 +2,11 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-10-30: [Redesign work-in-progress wrap-up](sessions/2026-10-30-redesign-wip-wrap-up.md)
+- 2026-10-27: [Google questionnaire tab](sessions/2026-10-27-google-questionnaire-tab.md)
+- 2026-10-27: [IT expert evaluation questionnaire](sessions/2026-10-27-it-expert-questionnaire.md)
+- 2026-10-27: [Google Doc access check](sessions/2026-10-27-google-doc-access-check.md)
+- 2026-10-27: [Obsidian access check](sessions/2026-10-27-obsidian-access-check.md)
 - 2026-10-27: [Team chart leaf portraits](sessions/2026-10-27-team-chart-leaf-portraits.md)
 - 2026-10-27: [Hide-on-scroll navbars](sessions/2026-10-27-hide-on-scroll-navbars.md)
 - 2026-10-27: [Docs and repo cleanup](sessions/2026-10-27-docs-cleanup.md)
