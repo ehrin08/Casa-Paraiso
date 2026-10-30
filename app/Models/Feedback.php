@@ -31,6 +31,7 @@ class Feedback extends Model
         'service_id',
         'rating',
         'comment',
+        'is_anonymous',
         'sentiment_label',
         'sentiment_score',
         'sentiment_analysis_version',
@@ -44,11 +45,24 @@ class Feedback extends Model
     {
         return [
             'rating' => 'integer',
+            'is_anonymous' => 'boolean',
             'sentiment_score' => 'decimal:2',
             'sentiment_evidence' => 'array',
             'sentiment_confidence' => 'decimal:4',
             'submitted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The name a therapist may see; anonymous feedback hides the customer from staff only.
+     */
+    public function staffDisplayName(): string
+    {
+        if ($this->is_anonymous) {
+            return __('Anonymous customer');
+        }
+
+        return $this->customerProfile?->display_name ?? __('Customer');
     }
 
     public function customerProfile()

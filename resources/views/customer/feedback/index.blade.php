@@ -45,6 +45,7 @@
                                     <div class="flex flex-wrap items-center gap-2">
                                         <x-status-badge :tone="$tone">{{ ucfirst($item->sentiment_label) }}</x-status-badge>
                                         <span class="text-xs font-bold text-casa-muted">{{ $item->submitted_at?->format('M d, Y') }}</span>
+                                        @if ($item->is_anonymous)<x-status-badge>{{ __('Hidden from therapist') }}</x-status-badge>@endif
                                     </div>
                                     <h2 class="mt-3 text-lg font-extrabold text-casa-text">{{ $item->service?->name ?? __('Spa service') }}</h2>
                                     @if ($item->comment)

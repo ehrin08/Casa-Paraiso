@@ -582,6 +582,7 @@ Screens:
 Rules:
 
 - Staff can view feedback but should not edit submitted customer feedback.
+- Feedback the customer hid from the therapist shows "Anonymous customer". Searching or sorting by customer name never matches or orders those rows, and therapist customer pages leave them out of the feedback list and count.
 
 ## Customer Screens
 
@@ -688,6 +689,8 @@ Rules:
 
 - One feedback record per completed appointment in the MVP.
 - Customers can view their own feedback only.
+- The form has an optional "Hide my name from my therapist" checkbox. Admins still see the name, with an Anonymous badge.
+- Feedback pop-up: while a completed visit awaits feedback, every customer page except the feedback pages and the booking page opens the feedback form in a modal, with the most recent visit preselected. Later (a normal POST to `customer.feedback.prompt.dismiss`) stops it for the rest of the session. Escape closes it for the current page only.
 
 ### Profile
 
@@ -727,8 +730,8 @@ Primary actions:
 
 ### Feedback Submission
 
-1. Customer opens a completed appointment.
-2. Customer submits rating and comment.
+1. Customer opens a completed appointment, or answers the feedback pop-up.
+2. Customer submits rating and comment, and may hide their name from the therapist.
 3. System stores sentiment label.
 4. Admin sees feedback in feedback reports and dashboard summaries.
 

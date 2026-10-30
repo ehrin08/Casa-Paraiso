@@ -9,6 +9,7 @@ use App\Models\Appointment;
 use App\Models\Feedback;
 use App\Services\HybridSentimentClassifier;
 use App\Services\FeedbackSentimentUpdater;
+use App\View\Components\CustomerFeedbackPrompt;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -74,11 +75,8 @@ class FeedbackController extends Controller
     {
         $customerProfile = $request->user()->customerProfile;
         $appointments = Appointment::query()
-            ->with(['service', 'feedback'])
-            ->where('customer_profile_id', $customerProfile?->id ?? 0)
-            ->where('status', Appointment::STATUS_COMPLETED)
-            ->whereDoesntHave('feedback')
-            ->latest('completed_at')
+            ->with('service')
+            ->awaitingFeedback($customerProfile?->id ?? 0)
             ->get();
 
         $selectedAppointmentId = $request->integer('appointment_id') ?: null;
@@ -111,6 +109,7 @@ class FeedbackController extends Controller
             'service_id' => $appointment->service_id,
             'rating' => $data['rating'],
             'comment' => $data['comment'] ?? null,
+            'is_anonymous' => $request->boolean('is_anonymous'),
             'sentiment_label' => $sentiment['label'],
             'sentiment_score' => $sentiment['score'],
             'submitted_at' => now(),
@@ -125,5 +124,12 @@ class FeedbackController extends Controller
         return redirect()
             ->route('customer.feedback.index')
             ->with('status', 'feedback-submitted');
+    }
+
+    public function dismissPrompt(Request $request): RedirectResponse
+    {
+        $request->session()->put(CustomerFeedbackPrompt::DISMISSED_SESSION_KEY, true);
+
+        return back();
     }
 }

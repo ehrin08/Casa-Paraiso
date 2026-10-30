@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Service;
 use App\Models\StaffProfile;
+use App\View\Components\CustomerFeedbackPrompt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -101,7 +102,9 @@ class CustomerAppointmentHistoryTest extends TestCase
             strpos($content, 'APT-HISTORY-LATER'),
         );
 
+        // The feedback pop-up lists the completed visit; dismiss it so only the history list is checked.
         $this->actingAs($customer->user)
+            ->withSession([CustomerFeedbackPrompt::DISMISSED_SESSION_KEY => true])
             ->get(route('customer.appointments.history', [
                 'date_from' => now()->addDay()->toDateString(),
                 'date_to' => now()->addDays(3)->toDateString(),

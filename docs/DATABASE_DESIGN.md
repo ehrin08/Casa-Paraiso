@@ -585,6 +585,7 @@ Key columns:
 - `service_id` nullable foreign key to `services.id`
 - `rating` tiny integer
 - `comment` nullable
+- `is_anonymous` boolean, default false (additive migration `2026_10_30_120000`). When true, therapist views show "Anonymous customer" and leave the record out of therapist customer histories. Admins still see the customer, and the link to the customer profile stays for eligibility and the one-feedback-per-appointment rule.
 - `sentiment_label`
 - `sentiment_score` nullable decimal(5,2)
 - `sentiment_analysis_version` nullable classifier version

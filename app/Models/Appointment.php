@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\AppointmentFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -145,6 +146,19 @@ class Appointment extends Model
     public function latestTransaction()
     {
         return $this->hasOne(Transaction::class)->latestOfMany();
+    }
+
+    /**
+     * Completed visits of one customer that still await feedback, most recent first.
+     */
+    public function scopeAwaitingFeedback(Builder $query, int $customerProfileId): void
+    {
+        $query->where('customer_profile_id', $customerProfileId)
+            ->where('status', self::STATUS_COMPLETED)
+            ->whereDoesntHave('feedback')
+            ->orderByDesc('completed_at')
+            ->orderByRaw('COALESCE(scheduled_start_at, requested_start_at) DESC')
+            ->orderByDesc('id');
     }
 
     public function feedback()

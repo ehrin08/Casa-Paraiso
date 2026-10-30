@@ -82,6 +82,8 @@
                     {{ $slot }}
                 </main>
             </div>
+
+            @if ($isCustomer)<x-customer-feedback-prompt />@endif
         </div>
         @stack('scripts')
     </body>
