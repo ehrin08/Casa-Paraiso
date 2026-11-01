@@ -2,28 +2,28 @@
 
 Work the user has asked to record for later. Nothing here is implemented yet. Each task must follow `AGENTS.md` (additive migrations, server-rendered forms, full verification gate) when it is picked up. Move this file to `archive/` once every task is done.
 
-Added 2026-10-30. Status of every task below: planned, not started.
+Added 2026-10-30. Each task below records its own status.
 
 Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso Tracker" Google Sheet (formerly "Casa Paraiso - Therapist Roster") (IDs T1–T5 match Tasks 1–5 below, and T8 matches Task 6; T6 and T7 are sheet-only rows). This file keeps the specifications.
 
-## Task 1: Pretrained XLM-RoBERTa Sentiment Model for Feedback
+## Task 1: Sentiment Model for Feedback
 
 Today `App\Services\HybridSentimentClassifier` chooses between the rules in `SentimentClassifier` and `LocalSentimentModel` (a native PHP JSON artifact trained by `scripts/train_sentiment_model.py`). The `rules`, `shadow` and `model` modes come from `SENTIMENT_CLASSIFIER_MODE` in `config/sentiment.php`, which defaults to `shadow`.
 
-Started 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-roberta-sentiment.md)). Evaluation done 2026-11-01: XLM-RoBERTa did not pass the gate on AI-drafted labels, so the rules stay in charge.
+Started 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-roberta-sentiment.md)). Done 2026-11-01: Google Gemini passed the gate and runs in `model` mode. XLM-RoBERTa failed both gates and its driver was removed on 2026-11-01 ([session note](notes/sessions/2026-11-01-xlmr-removal.md)); the checked items below that name it are history.
 
 - [x] Choose a pretrained multilingual XLM-RoBERTa sentiment checkpoint, or fine-tune one, that covers English, Tagalog and Taglish. (`cardiffnlp/twitter-xlm-roberta-base-sentiment`, pretrained; Tagalog quality still has to be measured.)
 - [x] Record the model's source and license in [sentiment-dataset-manifest.json](sentiment-dataset-manifest.json). (The model card declares no license; confirm before production use.)
 - [x] Decide how to run inference. Hostinger shared hosting cannot run a Python or transformer worker, and the [Sentiment Analysis Implementation Plan](SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md) rules out a mandatory external AI service. (Chosen: an optional HTTP endpoint in the Hugging Face format, with a short timeout and the rules as fallback. Locally it runs as the Docker `sentiment` profile. The production host is not chosen yet.)
 - [x] Add the model as another classifier behind the existing hybrid adapter. Keep the `positive`, `neutral` and `negative` labels and the rules fallback. (`SENTIMENT_MODEL_DRIVER=xlmr`.)
-- [ ] Build the redacted, labelled locked test set, then pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`. Real feedback is too sparse (2 comments locally), so on 2026-11-01 the user chose a curated set of 240 fictional comments with two-person CSV labelling ([session note](notes/sessions/2026-11-01-sentiment-test-set.md), [Labelling Guide](sentiment/LABELING_GUIDE.md)).
+- [x] Build the redacted, labelled locked test set, then pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`. Real feedback is too sparse (2 comments locally), so on 2026-11-01 the user chose a curated set of 240 fictional comments with two-person CSV labelling ([session note](notes/sessions/2026-11-01-sentiment-test-set.md), [Labelling Guide](sentiment/LABELING_GUIDE.md)).
   - [x] Draft the items, label sheets, agreement and lock scripts, and the gate verdict in `scripts/evaluate_sentiment_model.py`.
   - [x] ~~Two people fill in `labels-a.csv` and `labels-b.csv`.~~ No labellers were available, so on 2026-11-01 the user chose the AI-drafted labels in `suggested.csv`, disclosed as unverified ([session note](notes/sessions/2026-11-01-sentiment-gate-ai-labels.md)).
   - [x] Lock the set and record its SHA-256 in the manifest. (No agreement script or kappa, since there was only one source of labels.)
   - [x] Run rules, local and xlmr predictions and the gate. (Provisional result: xlmr macro-F1 0.694 against rules 0.839, failed all four checks, so it stays out of `shadow`. Production stays on `rules` with the `local` driver.)
 - [x] Try an improved rules v3 and gate it on a fresh held-out set ([session note](notes/sessions/2026-11-01-sentiment-rules-v3-reverted.md)). The AI-labelled `curated-v2` set (150 rows) was locked before tuning. Every classifier failed: v2 0.714, v3 0.710, local 0.725, xlmr 0.536. v3 was reverted and production stays on the v2 rules.
 - [x] Add a Google Gemini driver and gate it on `curated-v2` ([session note](notes/sessions/2026-11-01-gemini-sentiment-driver.md)). It passed with macro-F1 0.993, and the owner chose it for production in `model` mode on the free tier.
-- [ ] Later, optional: build a labelled Tagalog and Taglish training set and fine-tune XLM-RoBERTa, or move the Gemini project to paid billing so Google stops using the comments.
+- [ ] Later, optional: move the Gemini project to paid billing so Google stops using the comments.
 
 ## Task 2: Star Rating Instead of a Dropdown
 

@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [XLM-RoBERTa removal (Task 1 / T1)](sessions/2026-11-01-xlmr-removal.md)
 - 2026-11-01: [Gemini sentiment driver (Task 1 / T1)](sessions/2026-11-01-gemini-sentiment-driver.md)
 - 2026-11-01: [Sentiment rules v3 experiment, reverted (Task 1 / T1)](sessions/2026-11-01-sentiment-rules-v3-reverted.md)
 - 2026-11-01: [Sentiment gate on AI-drafted labels (Task 1 / T1)](sessions/2026-11-01-sentiment-gate-ai-labels.md)

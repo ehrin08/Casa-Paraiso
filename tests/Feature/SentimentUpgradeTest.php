@@ -60,17 +60,15 @@ class SentimentUpgradeTest extends TestCase
         ]);
     }
 
-    public function test_customer_feedback_records_an_xlmr_shadow_run(): void
+    public function test_customer_feedback_records_a_gemini_shadow_run(): void
     {
         Http::preventStrayRequests();
-        Http::fake(['inference.test/*' => Http::response([[
-            ['label' => 'positive', 'score' => 0.92],
-            ['label' => 'neutral', 'score' => 0.05],
-            ['label' => 'negative', 'score' => 0.03],
-        ]])]);
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['candidates' => [['content' => ['parts' => [
+            ['text' => '{"label":"positive","confidence":0.92}'],
+        ]]]]])]);
         Config::set('sentiment.mode', 'shadow');
-        Config::set('sentiment.model_driver', 'xlmr');
-        Config::set('sentiment.xlmr.url', 'https://inference.test/sentiment');
+        Config::set('sentiment.model_driver', 'gemini');
+        Config::set('sentiment.gemini.key', 'test-gemini-key');
 
         $customerUser = User::factory()->customer()->create();
         $customer = CustomerProfile::factory()->for($customerUser)->create();
@@ -95,7 +93,7 @@ class SentimentUpgradeTest extends TestCase
         $this->assertDatabaseHas('feedback_sentiment_runs', [
             'feedback_id' => $feedback->id,
             'source' => 'model',
-            'classifier_version' => 'xlmr-twitter-base-v1',
+            'classifier_version' => 'gemini-v1',
             'label' => Feedback::SENTIMENT_POSITIVE,
             'is_authoritative' => false,
         ]);
