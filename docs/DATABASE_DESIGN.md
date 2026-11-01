@@ -478,7 +478,7 @@ Rules:
 
 ### `rfm_segments`
 
-Five system-controlled customer-reward presets plus retained legacy segment records for historical references.
+Admin-managed RFM segment rules. The five seeded defaults keep their `preset_key`. The raw-threshold columns are retained for history but no longer read; matching uses the 1–5 score ranges. See [RFM Engine](RFM_ENGINE.md).
 
 Key columns:
 
@@ -486,7 +486,10 @@ Key columns:
 - `name`
 - `preset_key` nullable unique identifier for a fixed customer-reward group
 - `description` nullable
+- `priority` unsigned int, indexed; a lower number is evaluated first
 - `addon_code` nullable configured complimentary add-on for future rewards
+- `recommended_membership_tier_id` nullable FK to `membership_tiers`
+- `r_score_min`, `r_score_max`, `f_score_min`, `f_score_max`, `m_score_min`, `m_score_max` nullable tinyint 1–5; null means any
 - `recency_min_days` nullable
 - `recency_max_days` nullable
 - `frequency_min` nullable
@@ -578,6 +581,36 @@ Relationships:
 - Belongs to customer profile.
 - Optionally belongs to RFM segment and promotion rule.
 - Optionally belongs to reviewer user.
+
+`promotion_suggestions` also stores `r_score`, `f_score`, and `m_score` (nullable tinyint), which are the scores that issued the reward.
+
+## Memberships And Gift Vouchers
+
+See [Memberships and Gift Vouchers](MEMBERSHIPS_AND_VOUCHERS.md) for the business rules.
+
+- `membership_tiers`:
+  - `name`, unique `code`, `rank`, `stars`, `description`.
+  - `service_discount_percent`, `addon_discount_percent`, `addon_discount_codes` json, nullable `vip_room_price`.
+  - `birthday_treat_label`, `birthday_treat_addon_code`, nullable `birthday_treat_service_id`.
+  - `referral_reward_amount`, `validity_months`, `is_active`.
+  - Gold and Platinum are seeded idempotently by `code`.
+- `customer_memberships`:
+  - `customer_profile_id`, `membership_tier_id` (restrict delete), unique `card_number`.
+  - `issued_at` date, indexed `valid_until` date, `status` (`active` or `cancelled`).
+  - `issued_by`, `referred_by_customer_profile_id`, `cancelled_at`, `cancelled_by`, `notes`.
+- `membership_referral_credits`: `customer_profile_id`, `customer_membership_id`, `amount`, `used_transaction_id`, `used_at`.
+- `membership_perk_usages`: `customer_membership_id`, `transaction_id`, `perk` (`birthday`), `amount`, `used_at`.
+- `transaction_adjustments`: `transaction_id`, `type` (`service_discount`, `addon_discount`, `vip_room`, `birthday_treat`, or `referral_credit`), `label`, `amount`.
+- `gift_vouchers`:
+  - Unique `code`, `value`, `status` (`active`, `redeemed`, or `void`), `issued_at`, nullable `expires_at` date.
+  - Purchaser name or customer, `sale_payment_method`, `sold_by`.
+  - `redeemed_transaction_id`, `redeemed_at`, `applied_amount`, `forfeited_amount`.
+  - Void audit columns and `notes`.
+- `transactions` gains:
+  - `gross_amount` (nullable), `discount_amount` (default 0), and nullable `customer_membership_id`.
+  - Nullable `gift_voucher_id`, `gift_voucher_applied` (default 0), and nullable `amount_due`.
+  - `amount` remains the net service revenue.
+- `application_settings` gains `gift_voucher_denominations` json, `gift_voucher_default_expiry_months`, and `gift_voucher_combinable` (default false).
 
 ## Feedback And Sentiment
 

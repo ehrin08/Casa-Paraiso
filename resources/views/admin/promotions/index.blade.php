@@ -7,14 +7,14 @@
         <div class="rewards-header-actions">
             <a href="{{ route('admin.promotions.settings.edit') }}" class="casa-button-primary">
                 <x-reward-icon name="settings" />
-                {{ __('Automatic reward settings') }}
+                {{ __('RFM rules and settings') }}
             </a>
         </div>
     </x-slot>
 
     @php
         $activeFilters = collect([$search, $lifecycle, $dateFrom, $dateTo])->filter(fn ($value) => filled($value))->count();
-        $activeGroups = $presets->filter(fn ($preset) => $preset['segment']?->is_active);
+        $activeGroups = $segments->where('is_active', true);
         $rewardsEnabled = $activeGroups->isNotEmpty();
     @endphp
 
@@ -159,8 +159,8 @@
                 <section class="rewards-settings-section" aria-labelledby="reward-groups-heading">
                     <h3 id="reward-groups-heading">{{ __('Eligible customer groups') }}</h3>
                     <div class="rewards-group-chips">
-                        @forelse ($activeGroups as $preset)
-                            <span>{{ $preset['name'] }}</span>
+                        @forelse ($activeGroups as $segment)
+                            <span>{{ $segment->name }}</span>
                         @empty
                             <p>{{ __('No groups enabled') }}</p>
                         @endforelse

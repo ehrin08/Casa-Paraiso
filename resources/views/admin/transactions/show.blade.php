@@ -39,6 +39,7 @@
                 <dd class="mt-2 font-semibold text-casa-text">{{ $transaction->recorder?->name }}</dd>
             </div>
         </dl>
+        @include('admin.transactions.partials.breakdown', ['transaction' => $transaction])
         @if ($transaction->notes)
             <p class="mt-5 whitespace-pre-line text-sm leading-6 text-casa-muted">{{ $transaction->notes }}</p>
         @endif

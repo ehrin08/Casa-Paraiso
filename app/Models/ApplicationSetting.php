@@ -26,6 +26,9 @@ class ApplicationSetting extends Model
         'organization_chart',
         'default_payment_method',
         'promotion_voucher_validity_days',
+        'gift_voucher_denominations',
+        'gift_voucher_default_expiry_months',
+        'gift_voucher_combinable',
         'updated_by',
     ];
 
@@ -74,6 +77,9 @@ class ApplicationSetting extends Model
             'organization_chart' => null,
             'default_payment_method' => Transaction::METHOD_CASH,
             'promotion_voucher_validity_days' => (int) config('casa.customer_rewards.default_validity_days', 90),
+            'gift_voucher_denominations' => [300, 500, 1000],
+            'gift_voucher_default_expiry_months' => 6,
+            'gift_voucher_combinable' => false,
             'updated_by' => null,
         ];
     }
@@ -83,7 +89,19 @@ class ApplicationSetting extends Model
         return [
             'organization_chart' => 'array',
             'promotion_voucher_validity_days' => 'integer',
+            'gift_voucher_denominations' => 'array',
+            'gift_voucher_default_expiry_months' => 'integer',
+            'gift_voucher_combinable' => 'boolean',
         ];
+    }
+
+    /** @return list<int> */
+    public function giftVoucherDenominations(): array
+    {
+        $values = $this->gift_voucher_denominations ?: [300, 500, 1000];
+        sort($values);
+
+        return array_values(array_map('intval', $values));
     }
 
     public function updatedBy()

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
+use App\Models\RfmSegment;
 use App\Models\Service;
 use App\Models\Transaction;
 use App\Services\RfmAddonVoucher;
@@ -16,6 +17,13 @@ class CustomerRewardsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow('2026-07-14 12:00:00');
+    }
+
     protected function tearDown(): void
     {
         Carbon::setTestNow();
@@ -23,44 +31,88 @@ class CustomerRewardsTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_fixed_presets_match_in_priority_order(): void
+    public function test_top_scoring_customer_matches_the_high_value_rule_and_stores_scores(): void
     {
-        Carbon::setTestNow('2026-07-14 12:00:00');
+        $this->background(visits: 1, amount: 500, days: 100);
+        $customer = CustomerProfile::factory()->create();
 
-        foreach ([
-            ['expected' => 'high_value', 'visits' => 3, 'amount' => 2000, 'days' => 5],
-            ['expected' => 'loyal', 'visits' => 4, 'amount' => 500, 'days' => 5],
-            ['expected' => 'at_risk', 'visits' => 2, 'amount' => 500, 'days' => 100],
-            ['expected' => 'inactive', 'visits' => 1, 'amount' => 500, 'days' => 200],
-            ['expected' => 'new_customer', 'visits' => 1, 'amount' => 500, 'days' => 10],
-        ] as $case) {
-            $customer = CustomerProfile::factory()->create();
-            $transaction = $this->paidVisit($customer, $case['visits'], $case['amount'], $case['days']);
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 4, 2000, 1));
 
-            $reward = app(RfmPromotionGenerator::class)->generateForTransaction($transaction);
+        $this->assertSame('high_value', $reward?->rfmSegment?->preset_key);
+        $this->assertSame([5, 5, 5], [$reward->r_score, $reward->f_score, $reward->m_score]);
+        $this->assertSame(4, $reward->frequency_count);
+    }
 
-            $this->assertNotNull($reward);
-            $this->assertSame($case['expected'], $reward->rfmSegment?->preset_key);
-        }
+    public function test_recent_single_visit_customer_matches_the_new_customer_rule(): void
+    {
+        $this->background(visits: 3, amount: 1500, days: 100);
+        $customer = CustomerProfile::factory()->create();
+
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 1, 500, 1));
+
+        $this->assertSame('new_customer', $reward?->rfmSegment?->preset_key);
+        $this->assertSame([5, 1, 1], [$reward->r_score, $reward->f_score, $reward->m_score]);
+    }
+
+    public function test_frequent_customer_who_stopped_visiting_matches_the_at_risk_rule(): void
+    {
+        $this->background(visits: 1, amount: 500, days: 2);
+        $customer = CustomerProfile::factory()->create();
+
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 3, 500, 200));
+
+        $this->assertSame('at_risk', $reward?->rfmSegment?->preset_key);
+        $this->assertSame(1, $reward->r_score);
+        $this->assertSame(5, $reward->f_score);
+    }
+
+    public function test_admin_rule_priority_decides_between_overlapping_rules(): void
+    {
+        $this->background(visits: 1, amount: 500, days: 100);
+        $vip = RfmSegment::factory()->create([
+            'name' => 'Big spenders', 'addon_code' => 'hot-stone', 'priority' => 5,
+            'm_score_min' => 5, 'm_score_max' => null,
+        ]);
+        $customer = CustomerProfile::factory()->create();
+
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 4, 2000, 1));
+        $this->assertTrue($reward?->rfmSegment?->is($vip));
+
+        $vip->update(['is_active' => false]);
+        $other = CustomerProfile::factory()->create();
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($other, 5, 2500, 1));
+        $this->assertSame('high_value', $reward?->rfmSegment?->preset_key);
+    }
+
+    public function test_no_matching_rule_issues_no_reward(): void
+    {
+        $customer = CustomerProfile::factory()->create();
+
+        // A lone customer scores the neutral 3/3/3, which no default rule covers.
+        $this->assertNull(app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 1, 500, 1)));
     }
 
     public function test_expired_reward_does_not_block_the_next_qualifying_reward_and_is_not_bookable(): void
     {
-        Carbon::setTestNow('2026-07-14 12:00:00');
+        $this->background(visits: 1, amount: 500, days: 50);
         $customer = CustomerProfile::factory()->create();
-        $firstTransaction = $this->paidVisit($customer, 1, 500, 5);
-        $firstReward = app(RfmPromotionGenerator::class)->generateForTransaction($firstTransaction);
-        $this->assertNotNull($firstReward);
+        $firstReward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 1, 500, 1));
+        $this->assertSame('new_customer', $firstReward?->rfmSegment?->preset_key);
 
         $firstReward->update(['expires_at' => now()->subMinute()]);
         $this->assertTrue(app(RfmAddonVoucher::class)->availableFor($customer)->isEmpty());
 
-        $latestTransaction = $this->paidVisit($customer, 3, 2000, 1);
-        $secondReward = app(RfmPromotionGenerator::class)->generateForTransaction($latestTransaction);
+        $secondReward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 3, 2000, 1));
 
-        $this->assertNotNull($secondReward);
-        $this->assertSame('high_value', $secondReward->rfmSegment?->preset_key);
+        $this->assertSame('high_value', $secondReward?->rfmSegment?->preset_key);
         $this->assertSame('expired', $firstReward->fresh()->lifecycle());
+    }
+
+    private function background(int $visits, int $amount, int $days, int $customers = 4): void
+    {
+        for ($index = 0; $index < $customers; $index++) {
+            $this->paidVisit(CustomerProfile::factory()->create(), $visits, $amount, $days);
+        }
     }
 
     private function paidVisit(CustomerProfile $customer, int $count, int $amount, int $days): Transaction
