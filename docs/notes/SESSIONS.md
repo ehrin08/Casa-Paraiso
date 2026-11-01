@@ -2,6 +2,11 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [Uncommitted docs tidy-up](sessions/2026-11-01-uncommitted-docs-tidy.md)
+- 2026-11-01: [Curated Facebook photo library](sessions/2026-11-01-facebook-photo-library.md)
+- 2026-11-01: [Client Facebook page review](sessions/2026-11-01-client-facebook-review.md)
+- 2026-11-01: [Dummy data tracker](sessions/2026-11-01-dummy-data-tracker.md)
+- 2026-11-01: [XLM-RoBERTa manuscript revision](sessions/2026-11-01-xlmr-manuscript-revision.md)
 - 2026-11-01: [XLM-RoBERTa removal (Task 1 / T1)](sessions/2026-11-01-xlmr-removal.md)
 - 2026-11-01: [Gemini sentiment driver (Task 1 / T1)](sessions/2026-11-01-gemini-sentiment-driver.md)
 - 2026-11-01: [Sentiment rules v3 experiment, reverted (Task 1 / T1)](sessions/2026-11-01-sentiment-rules-v3-reverted.md)

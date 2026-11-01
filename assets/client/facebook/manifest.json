@@ -1,0 +1,86 @@
+{
+  "collected_on": "2026-11-01",
+  "source_page": "https://www.facebook.com/profile.php?id=61579320037378",
+  "photos": [
+    {
+      "id": "122113666490977334",
+      "name": "treatment-room-warm-light",
+      "file": "treatment-room-warm-light-122113666490977334.jpg",
+      "width": 1200,
+      "height": 1200,
+      "bytes": 121216,
+      "sha256": "828edb80ccb0f42155ca06ec4a86f50276bfc4e98d5f1312c1cb876115991b32",
+      "source": "https://www.facebook.com/photo/?fbid=122113666490977334"
+    },
+    {
+      "id": "122113666400977334",
+      "name": "cupping-stones-treatment-setup",
+      "file": "cupping-stones-treatment-setup-122113666400977334.jpg",
+      "width": 1200,
+      "height": 1200,
+      "bytes": 183025,
+      "sha256": "c6cc030baee1ff1ef93548d230428578c4f5fd1cfa04c22db853564e96b4b008",
+      "source": "https://www.facebook.com/photo/?fbid=122113666400977334"
+    },
+    {
+      "id": "122113666388977334",
+      "name": "cupping-hot-stones-closeup",
+      "file": "cupping-hot-stones-closeup-122113666388977334.jpg",
+      "width": 1200,
+      "height": 1200,
+      "bytes": 235034,
+      "sha256": "fd63659672edce74e18bd6e4642f3c4b31455aaf59dc01ac37c573201342c70e",
+      "source": "https://www.facebook.com/photo/?fbid=122113666388977334"
+    },
+    {
+      "id": "122113320698977334",
+      "name": "lobby-cover-wide",
+      "file": "lobby-cover-wide-122113320698977334.jpg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 282322,
+      "sha256": "03c4465c90b2644e10861790c5acd1096e654d2938a7bb74e49f9c14fe92f238",
+      "source": "https://www.facebook.com/photo/?fbid=122113320698977334"
+    },
+    {
+      "id": "122102496518977334",
+      "name": "casa-paraiso-page-logo",
+      "file": "casa-paraiso-page-logo-122102496518977334.jpg",
+      "width": 500,
+      "height": 500,
+      "bytes": 11943,
+      "sha256": "39bbd56e14ffb6a54753f6bca88892c064a337c5d79258f49b2f073b06af8ef5",
+      "source": "https://www.facebook.com/photo/?fbid=122102496518977334"
+    },
+    {
+      "id": "122176876490977334",
+      "name": "treatment-room-amber-light",
+      "file": "treatment-room-amber-light-122176876490977334.jpg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 164138,
+      "sha256": "4d1c2ccce82d12bad2505676919408b02157ab33ead8d4bcda86fdef7c36c51d",
+      "source": "https://www.facebook.com/photo/?fbid=122176876490977334"
+    },
+    {
+      "id": "122176876448977334",
+      "name": "reception-counter-display",
+      "file": "reception-counter-display-122176876448977334.jpg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 401399,
+      "sha256": "fc0b1c30fd1f77047657cab37eb42f8a78da3378d67523c5c9f537f4d08ba762",
+      "source": "https://www.facebook.com/photo/?fbid=122176876448977334"
+    },
+    {
+      "id": "122176876406977334",
+      "name": "lobby-reception-wide",
+      "file": "lobby-reception-wide-122176876406977334.jpg",
+      "width": 2048,
+      "height": 1536,
+      "bytes": 442540,
+      "sha256": "6429f174b8caa0148e5b3ababa52dc8734317a127ca1e0ee0c860b085668a138",
+      "source": "https://www.facebook.com/photo/?fbid=122176876406977334"
+    }
+  ]
+}

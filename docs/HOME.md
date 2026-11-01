@@ -39,6 +39,13 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [Sentiment Dataset Manifest](sentiment-dataset-manifest.json)
 - [Sentiment Labelling Guide](sentiment/LABELING_GUIDE.md): labels, mixed-comment rules, and the label, agree, lock and evaluate workflow for the curated test set.
 
+## Client Research
+
+Notes about the client kept apart from project scope. They are not requirements until moved into Planned Tasks.
+
+- [Facebook Photo Library](client/FACEBOOK_PHOTO_LIBRARY.md): eight selected business images, source links, dimensions, and a visual contact sheet (2026-11-01).
+- [Client Facebook Page Review](client/FACEBOOK_PAGE_REVIEW.md): the client's public page checked against the app (2026-11-01).
+
 ## Session Notes
 
 - [Session Index](notes/SESSIONS.md): per-task logs, newest first. Read the latest entries before starting a task.
