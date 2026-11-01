@@ -674,7 +674,7 @@ Main data:
 - Active services.
 - Available staff or preferred staff where supported.
 - Paid add-on catalog with individual prices.
-- Admin Add-ons management with create/edit and activate/deactivate controls.
+- Admin Add-ons management laid out like Services: sortable list, two-column create/edit form, a detail page with duration, price, bookings, and status, and activate/deactivate controls.
 - Eligible unused RFM add-on vouchers.
 - Preferred date/time.
 - Customer notes.
