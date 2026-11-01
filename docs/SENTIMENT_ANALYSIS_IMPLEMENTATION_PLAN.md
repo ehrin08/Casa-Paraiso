@@ -188,6 +188,34 @@ The agreement script reports Cohen's kappa and pre-fills `final` wherever the tw
 
 XLM-RoBERTa macro-F1 by language: English 0.739, Taglish 0.734, Tagalog 0.610 (rules 0.818, 0.857, 0.843). It scored 0.0 on the sarcasm rows but did better than the rules where the text disagrees with the stars (rating_conflict: 5 errors against 9). Decision: xlmr does not go to `shadow`; production stays on `rules` with the `local` driver. Rerun the gate on a human-labelled `curated-v2` or redacted real feedback before reconsidering.
 
+### Rules v3 experiment, 2026-11-01 (reverted)
+
+The v1 errors came from two sources:
+- **A definition mismatch.** The labels describe the text only, but the rules let the stars override it. A factual 4★ comment came out positive, and a 1★ "clicked by mistake, it was great" came out negative.
+- **Gaps in the keyword rules.** "but/pero" carried no weight, hedges like *medyo* and "okay lang" were ignored, and many complaint words were missing.
+
+A rules v3 was tried. It read the comment first and used the stars only when the text carried no signal. It added weights for intensifiers and hedges, emphasis after contrast words, neutral marker phrases, sarcasm cues, double weight for verdict words, Tagalog linker and *napaka-*/*pinaka-* handling, and a larger lexicon. It was tuned on a separate 90-row practice set, `resources/sentiment/eval/curated-v1-dev/`.
+
+On `curated-v1`, v3 with stars scored macro-F1 0.891 and failed only the negative-recall check (0.853). Fixing the bugs those misses exposed would have tuned v3 on the test set. So a new held-out set, `resources/sentiment/eval/curated-v2/`, was written and locked before any further change. It has 150 fictional rows, 50 per language, with AI-drafted labels and SHA-256 `1070af4eaa35a66eaea2f2587acc5787df2531da061961217fbe36298018bcb9`. Each classifier was then run on it once.
+
+| Classifier (curated-v2) | Macro-F1 | Negative recall | Tagalog macro-F1 | Gate against v2 |
+|---|---|---|---|---|
+| rules v2 (production) | 0.714 | 0.961 | 0.634 | baseline |
+| rules v3, text and stars | 0.710 | 0.824 | 0.697 | failed |
+| rules v3, text only | 0.476 | 0.275 | 0.572 | failed |
+| local | 0.725 | 0.941 | 0.696 | failed (macro-F1 below 0.80) |
+| xlmr | 0.536 | 0.647 | 0.432 | failed |
+
+The v2 baseline came from the committed v2 classifier and config, run outside the application. It reproduced the stored `c1-rules.csv` predictions exactly.
+
+**Decision:** v3 is reverted and production stays on the v2 rules. Its gains on `curated-v1` came from tuning to wording that had been seen. On unseen wording it ties v2 and finds fewer negative comments.
+
+**What the results suggest:**
+- On new text, keyword rules level off around macro-F1 0.71, and most of their accuracy comes from the stars.
+- Many of the remaining misses need world knowledge ("on the phone the whole time", "hair on the pillow").
+- Getting past that level needs a model trained on labelled Filipino review text, for example XLM-RoBERTa fine-tuned on Tagalog and Taglish, rather than more rules. That needs a training set, an inference host and privacy wording first.
+- `curated-v1` was seen during v3 tuning, so it no longer gives a clean measurement. Use `curated-v2` for future gates.
+
 ## Recommended first implementation slice
 
 Start with Phases 1–3: dataset governance, a small manually verified Casa Paraiso set, and a baseline evaluation of the existing classifier. This produces evidence about whether a trained model is worth the additional deployment and maintenance cost before changing production classification behavior.
