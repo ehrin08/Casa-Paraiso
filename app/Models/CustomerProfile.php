@@ -36,6 +36,9 @@ class CustomerProfile extends Model
         'contact_preference',
         'notes',
         'first_visit_at',
+        'online_booking_blocked_at',
+        'online_booking_block_reason',
+        'online_booking_blocked_by',
     ];
 
     protected function casts(): array
@@ -43,6 +46,7 @@ class CustomerProfile extends Model
         return [
             'birth_date' => 'date',
             'first_visit_at' => 'datetime',
+            'online_booking_blocked_at' => 'datetime',
         ];
     }
 
@@ -141,6 +145,16 @@ class CustomerProfile extends Model
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function onlineBookingBlockedBy()
+    {
+        return $this->belongsTo(User::class, 'online_booking_blocked_by');
+    }
+
+    public function isOnlineBookingBlocked(): bool
+    {
+        return $this->online_booking_blocked_at !== null;
     }
 
     public function transactions()

@@ -34,6 +34,13 @@ return [
         'slot_interval_minutes' => 30,
         'customer_booking_lead_time_minutes' => 30,
     ],
+    'customer_booking_limits' => [
+        'submissions_per_window' => 3,
+        'submission_window_minutes' => 10,
+        'max_upcoming' => 2,
+        'no_show_threshold' => 2,
+        'no_show_lookback_days' => 90,
+    ],
     'service_packages' => [
         [
             'name' => 'GAIA TOUCH',
