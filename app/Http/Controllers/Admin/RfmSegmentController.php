@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\RfmSegmentRequest;
 use App\Models\Addon;
 use App\Models\MembershipTier;
 use App\Models\RfmSegment;
+use App\Services\RfmScorer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -85,10 +86,13 @@ class RfmSegmentController extends Controller
 
     private function form(RfmSegment $segment): View
     {
+        $scorer = app(RfmScorer::class);
+
         return view('admin.promotions.segment-form', [
             'segment' => $segment,
             'addons' => Addon::query()->where('is_active', true)->orderBy('name')->get(),
             'tiers' => MembershipTier::query()->ordered()->get(),
+            'cutoffs' => $scorer->cutoffs($scorer->population()),
         ]);
     }
 

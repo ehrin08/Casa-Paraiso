@@ -1,20 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="rewards-heading">
-            <h1>{{ __('RFM rules and settings') }}</h1>
-            <p>{{ __('Customers are scored 1–5 on recency, frequency and spending, then matched to the first rule that fits.') }}</p>
+            <h1>{{ __('Customer groups and rewards') }}</h1>
+            <p>{{ __('Customers are sorted into groups by when they last visited, how often they come and how much they spend. Each group can earn a free add-on.') }}</p>
         </div>
         <a href="{{ route('admin.promotions.index') }}" class="casa-button-secondary">{{ __('Back to customer rewards') }}</a>
     </x-slot>
 
-    @php
-        $metricLabels = ['r' => __('Recency'), 'f' => __('Frequency'), 'm' => __('Monetary')];
-        $formatValue = fn (string $metric, $value) => match ($metric) {
-            'r' => trans_choice(':count day|:count days', (int) $value),
-            'f' => trans_choice(':count visit|:count visits', (int) $value),
-            default => '₱'.number_format((float) $value, fmod((float) $value, 1) === 0.0 ? 0 : 2),
-        };
-    @endphp
+    @inject('rfmWords', 'App\Services\RfmVocabulary')
 
     <div class="rewards-workspace rewards-editor" data-rewards-settings-editor>
         <x-input-error class="mb-4" :messages="$errors->get('segment')" />
@@ -22,20 +15,19 @@
         <x-app-card>
             <div class="rewards-editor-heading">
                 <div>
-                    <h2>{{ __('Segment rules') }}</h2>
-                    <p>{{ __('Rules are checked from top to bottom; a customer gets the first active rule they match. Changes affect future rewards only.') }}</p>
+                    <h2>{{ __('Customer groups') }}</h2>
+                    <p>{{ __('Each customer joins the first active group they fit, starting from the top. Use the arrows to change the order. Changes affect future rewards only.') }}</p>
                 </div>
-                <a href="{{ route('admin.promotions.segments.create') }}" class="casa-button-primary">{{ __('Add rule') }}</a>
+                <a href="{{ route('admin.promotions.segments.create') }}" class="casa-button-primary">{{ __('Add group') }}</a>
             </div>
 
             <div class="mt-4">
-                <x-table-shell label="{{ __('Scrollable RFM segment rules') }}">
+                <x-table-shell label="{{ __('Scrollable customer groups') }}">
                     <thead class="bg-casa-bg text-left text-xs font-black uppercase tracking-[0.1em] text-casa-muted">
                         <tr>
                             <th class="px-4 py-3" scope="col">{{ __('Order') }}</th>
-                            <th class="px-4 py-3" scope="col">{{ __('Segment') }}</th>
-                            <th class="px-4 py-3" scope="col">{{ __('Conditions') }}</th>
-                            <th class="px-4 py-3" scope="col">{{ __('Reward') }}</th>
+                            <th class="px-4 py-3" scope="col">{{ __('Group') }}</th>
+                            <th class="px-4 py-3" scope="col">{{ __('Who it is for and what they get') }}</th>
                             <th class="px-4 py-3" scope="col">{{ __('Customers now') }}</th>
                             <th class="px-4 py-3" scope="col">{{ __('Actions') }}</th>
                         </tr>
@@ -49,13 +41,7 @@
                                     <p class="mt-1 text-xs text-casa-muted">{{ $segment->description }}</p>
                                     <div class="mt-2"><x-status-badge :tone="$segment->is_active ? 'success' : 'dark'">{{ $segment->is_active ? __('Active') : __('Inactive') }}</x-status-badge></div>
                                 </td>
-                                <td class="px-4 py-4 font-semibold whitespace-nowrap">{{ $segment->conditionSummary() }}</td>
-                                <td class="px-4 py-4">
-                                    {{ $segment->addon_code ? ($addonNames[$segment->addon_code] ?? $segment->addon_code) : __('No add-on') }}
-                                    @if ($segment->recommendedMembershipTier)
-                                        <p class="mt-1 text-xs text-casa-muted">{{ __('Recommends :tier card', ['tier' => $segment->recommendedMembershipTier->name]) }}</p>
-                                    @endif
-                                </td>
+                                <td class="px-4 py-4 min-w-64 leading-6" data-rfm-rule-sentence>{{ $rfmWords->sentence($segment, $segment->addon_code ? ($addonNames[$segment->addon_code] ?? $segment->addon_code) : null, $segment->recommendedMembershipTier?->name) }}</td>
                                 <td class="px-4 py-4">{{ $segment->is_active ? number_format($matches[$segment->id] ?? 0) : '—' }}</td>
                                 <td class="px-4 py-4">
                                     <div class="flex flex-wrap items-center gap-2">
@@ -74,56 +60,59 @@
                                             </form>
                                         @endunless
                                         <a href="{{ route('admin.promotions.segments.edit', $segment) }}" class="font-bold text-casa-primary">{{ __('Edit') }}</a>
-                                        <x-confirm-action :action="route('admin.promotions.segments.destroy', $segment)" method="DELETE" :label="__('Delete')" :confirm-title="__('Delete this rule?')" :confirm-message="__('Rules that already issued rewards are kept for history; deactivate those instead.')" :confirm-button="__('Delete')" tone="danger" />
+                                        <x-confirm-action :action="route('admin.promotions.segments.destroy', $segment)" method="DELETE" :label="__('Delete')" :confirm-title="__('Delete this group?')" :confirm-message="__('Groups that already gave rewards are kept for history; switch those off instead.')" :confirm-button="__('Delete')" tone="danger" />
                                     </div>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="px-4 py-8 text-center text-casa-muted">{{ __('No rules yet. Add a rule to start issuing rewards.') }}</td></tr>
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-casa-muted">{{ __('No groups yet. Add a group to start giving rewards.') }}</td></tr>
                         @endforelse
                     </tbody>
                 </x-table-shell>
             </div>
-            <p class="mt-3 text-sm text-casa-muted">{{ trans_choice(':count customer with paid visits is scored.|:count customers with paid visits are scored.', $population) }} {{ __('Customers who match no active rule stay unassigned.') }}</p>
+            <p class="mt-3 text-sm text-casa-muted">{{ trans_choice(':count customer with paid visits is sorted into groups.|:count customers with paid visits are sorted into groups.', $population) }} {{ __('Customers who fit no active group stay unassigned.') }}</p>
         </x-app-card>
 
         <x-app-card class="mt-5">
-            <div class="rewards-editor-heading">
-                <div>
-                    <h2>{{ __('How scoring works') }}</h2>
-                    <p>{{ __('Each score is a percent rank split into fifths: 5 is the best fifth of customers and 1 the lowest. Tied customers share the lower score. These ranges come from the current customer data and move as it grows.') }}</p>
-                </div>
-            </div>
-            <div class="mt-4">
-                <x-table-shell label="{{ __('Scrollable current RFM score ranges') }}">
-                    <thead class="bg-casa-bg text-left text-xs font-black uppercase tracking-[0.1em] text-casa-muted">
-                        <tr>
-                            <th class="px-4 py-3" scope="col">{{ __('Score') }}</th>
-                            @foreach ($metricLabels as $label)<th class="px-4 py-3" scope="col">{{ $label }}</th>@endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-casa-border text-sm" data-rfm-cutoffs>
-                        @foreach ([5, 4, 3, 2, 1] as $score)
+            <details class="rewards-how-it-works" data-rfm-how-it-works>
+                <summary>
+                    <div>
+                        <h2>{{ __('How it works (RFM scoring)') }}</h2>
+                        <p>{{ __('The technical method behind the groups, for staff who want the details.') }}</p>
+                    </div>
+                </summary>
+                <p class="mt-4 text-sm leading-6 text-casa-muted">{{ __('Behind the plain names, each customer gets an RFM score from 1 to 5 for Recency (last visit), Frequency (how often) and Monetary (total spent). Each score is a percent rank split into fifths: 5 is the best fifth of customers and 1 the lowest. Tied customers share the lower score. These ranges come from the current customer data and move as it grows.') }}</p>
+                <div class="mt-4">
+                    <x-table-shell label="{{ __('Scrollable current RFM score ranges') }}">
+                        <thead class="bg-casa-bg text-left text-xs font-black uppercase tracking-[0.1em] text-casa-muted">
                             <tr>
-                                <th class="px-4 py-3 text-left" scope="row">{{ $score }}</th>
-                                @foreach (array_keys($metricLabels) as $metric)
-                                    @php $range = $cutoffs[$metric][$score] ?? null; @endphp
-                                    <td class="px-4 py-3">
-                                        @if ($range === null)
-                                            <span class="text-casa-muted">—</span>
-                                        @elseif ($range['min'] == $range['max'])
-                                            {{ $formatValue($metric, $range['min']) }}
-                                        @else
-                                            {{ $formatValue($metric, $range['min']) }} – {{ $formatValue($metric, $range['max']) }}
-                                        @endif
-                                    </td>
-                                @endforeach
+                                <th class="px-4 py-3" scope="col">{{ __('Score') }}</th>
+                                @foreach (\App\Models\RfmSegment::METRICS as $metric => $technical)<th class="px-4 py-3" scope="col">{{ __($technical) }} · {{ $rfmWords->metric($metric) }}</th>@endforeach
                             </tr>
-                        @endforeach
-                    </tbody>
-                </x-table-shell>
-            </div>
-            <div class="rewards-info"><x-reward-icon name="info" /><p>{{ __('Recency counts days since the last paid visit, so fewer days earns a higher score. Frequency counts paid, completed visits and Monetary totals what the customer has paid.') }}</p></div>
+                        </thead>
+                        <tbody class="divide-y divide-casa-border text-sm" data-rfm-cutoffs>
+                            @foreach ([5, 4, 3, 2, 1] as $score)
+                                <tr>
+                                    <th class="px-4 py-3 text-left" scope="row">{{ $score }}</th>
+                                    @foreach (array_keys(\App\Models\RfmSegment::METRICS) as $metric)
+                                        <td class="px-4 py-3">
+                                            <span class="font-semibold">{{ $rfmWords->level($metric, $score) }}</span>
+                                            <span class="block text-casa-muted">{{ $rfmWords->valueHint($metric, $score, $cutoffs) ?? '—' }}</span>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </x-table-shell>
+                </div>
+                <h3 class="mt-5 text-sm font-bold">{{ __('Groups as score ranges') }}</h3>
+                <ul class="mt-2 space-y-1 text-sm" data-rfm-technical-rules>
+                    @foreach ($segments as $segment)
+                        <li><span class="font-semibold">{{ $segment->name }}:</span> <span class="text-casa-muted">{{ $segment->conditionSummary() }}</span></li>
+                    @endforeach
+                </ul>
+                <div class="rewards-info"><x-reward-icon name="info" /><p>{{ __('Recency counts days since the last paid visit, so fewer days earns a higher score. Frequency counts paid, completed visits and Monetary totals what the customer has paid. The first matching group wins, like a first-hit decision table.') }}</p></div>
+            </details>
         </x-app-card>
 
         <form method="POST" action="{{ route('admin.promotions.settings.update') }}" class="mt-5">

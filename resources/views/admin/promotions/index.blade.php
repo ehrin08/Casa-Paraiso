@@ -7,7 +7,7 @@
         <div class="rewards-header-actions">
             <a href="{{ route('admin.promotions.settings.edit') }}" class="casa-button-primary">
                 <x-reward-icon name="settings" />
-                {{ __('RFM rules and settings') }}
+                {{ __('Customer groups and rewards') }}
             </a>
         </div>
     </x-slot>

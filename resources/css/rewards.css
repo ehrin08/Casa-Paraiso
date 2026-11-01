@@ -90,6 +90,13 @@ body[data-workspace-role] .rewards-workspace .rewards-table th { padding: 0 0.5r
 .rewards-editor-group h3 { font-size: 1.125rem; font-weight: 800; }
 .rewards-active-control { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; font-size: 0.875rem; font-weight: 700; cursor: pointer; }
 .rewards-editor-group > .rewards-filter-field { margin-top: 1rem; }
+.rewards-how-it-works summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px; cursor: pointer; list-style: none; }
+.rewards-how-it-works summary::-webkit-details-marker { display: none; }
+.rewards-how-it-works summary::after { content: "+"; flex: none; font-size: 1.5rem; font-weight: 700; color: var(--color-casa-muted); }
+.rewards-how-it-works[open] summary::after { content: "−"; }
+.rewards-how-it-works summary h2 { font-size: 1.125rem; font-weight: 800; }
+.rewards-how-it-works summary p { display: block; margin-top: 0.25rem; font-size: 0.875rem; color: var(--color-casa-muted); }
+.rewards-how-it-works summary:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: var(--radius-casa-control); }
 .rewards-editor-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 0.75rem; padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--color-casa-border); }
 @media (max-width: 1279px) {
     .rewards-columns { grid-template-columns: minmax(0, 1fr); }

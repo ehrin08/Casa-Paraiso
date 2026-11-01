@@ -34,6 +34,7 @@ The local `redesign` branch carries the presentation-only Modern Resort redesign
   - `RfmScorer` gives 1–5 percent-rank quintile scores over customers with paid, completed visits.
   - `RfmRuleEngine` evaluates active `rfm_segments` by `priority`, and the first score-range match wins.
   - Issuing rewards, the Reports RFM table, the admin customer RFM profile, and membership recommendations all use both services.
+  - `RfmVocabulary` is display-only. It turns scores into plain names (Last visit / How often / Total spent, e.g. "Recent", "Top spenders"), rule sentences and real value hints for the admin group screens and the customer card. Form fields stay `*_score_min/max` (1–5).
 - Payments (see `docs/MEMBERSHIPS_AND_VOUCHERS.md`):
   - `PaymentPricing::settle` runs in `TransactionWorkflow`, `AppointmentCompletion`, and the staff transaction path.
   - It applies membership benefits and an optional gift voucher once, when a payment is first saved as paid.

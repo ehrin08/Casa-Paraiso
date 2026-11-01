@@ -377,8 +377,11 @@ Purpose:
 Screens:
 
 - Customer rewards workspace.
-- RFM rules and settings page at `/admin/promotions/settings` (`admin.promotions.settings.edit`). It shows the segment rules in priority order with matching-customer counts, a "How scoring works" table of the current value range for each score, and the reward-validity form.
-- Rule create and edit forms at `/admin/promotions/segments/create` and `/admin/promotions/segments/{segment}/edit`. Each rule has a name, a description, Min/Max (Any or 1–5) for R, F and M, a complimentary add-on, a recommended membership tier, and an Active switch.
+- Customer groups and rewards page at `/admin/promotions/settings` (`admin.promotions.settings.edit`), the plain-language face of the RFM rules. It shows:
+  - the groups in priority order, each as one sentence ("Customers who last visited recently or very recently … get a free VIP Room"), with matching-customer counts;
+  - a collapsed "How it works (RFM scoring)" panel with the score table, the current value range for each score and each group's R/F/M ranges;
+  - the reward-validity form.
+- Group create and edit forms at `/admin/promotions/segments/create` and `/admin/promotions/segments/{segment}/edit`. Each group has a name, a description, From/To choices (Any or a named level such as "Recent (4 – 12 days)") for Last visit, How often and Total spent, a free add-on, a recommended membership card, and an Active switch. The choices still submit 1–5 scores.
 - Customer reward detail with confirmed dismissal for available vouchers.
 
 Main data:
@@ -410,7 +413,7 @@ Screens and actions:
   - A filterable card list.
 - The issue form selects the customer and tier and pre-fills the next `CPBWS-0001` card number. The valid-until date and referrer are optional.
 - The card detail shows benefits and referral credits, with Renew and admin-only Cancel actions.
-- The admin customer detail shows the RFM profile, the active card, and any tier recommendation. The customer home page shows the active card and any unused referral credit.
+- The admin customer detail shows the customer group card (plain level names with the 1–5 score underneath), the active card, and any tier recommendation. The customer home page shows the active card and any unused referral credit.
 
 ### Gift Vouchers
 

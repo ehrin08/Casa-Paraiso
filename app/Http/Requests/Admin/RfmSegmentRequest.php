@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\Addon;
 use App\Models\RfmSegment;
+use App\Services\RfmVocabulary;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,12 +39,12 @@ class RfmSegmentRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
-                foreach (RfmSegment::METRICS as $metric => $label) {
+                foreach (array_keys(RfmSegment::METRICS) as $metric) {
                     $min = $this->input("{$metric}_score_min");
                     $max = $this->input("{$metric}_score_max");
 
                     if (filled($min) && filled($max) && (int) $min > (int) $max) {
-                        $validator->errors()->add("{$metric}_score_max", __('The highest :metric score must be at least the lowest score.', ['metric' => strtolower(__($label))]));
+                        $validator->errors()->add("{$metric}_score_max", __('For :metric, "To" cannot come before "From".', ['metric' => app(RfmVocabulary::class)->metric($metric)]));
                     }
                 }
             },
