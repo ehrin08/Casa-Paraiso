@@ -76,7 +76,7 @@ Before this, motion was limited to a few places: the drawer slide and fade and t
 
 ## Task 7: Make the RFM Rules Friendly for Non-Technical Users
 
-Added 2026-11-01. Wording done 2026-11-01 ([session note](notes/sessions/2026-11-01-rfm-friendly-rules.md)). Not yet in the tracker sheet.
+Added 2026-11-01. Wording done 2026-11-01 ([session note](notes/sessions/2026-11-01-rfm-friendly-rules.md)). Preview and templates done 2026-11-01 ([session note](notes/sessions/2026-11-01-rfm-preview-templates.md)). Not yet in the tracker sheet.
 
 The RFM rule engine (see [RFM Engine](RFM_ENGINE.md)) works, but the client found it too technical.
 - On **RFM rules and settings** (`admin.promotions.settings.edit`) and the rule form (`resources/views/admin/promotions/segment-form.blade.php`), admins set Min/Max scores of 1 to 5 for Recency, Frequency and Monetary.
@@ -89,9 +89,9 @@ The user chose to keep how it works and change only how it looks: the same engin
 - [x] Show each rule as a sentence, for example "Customers who last visited recently or very recently … get a free VIP Room."
 - [x] Rename R, F and M in the UI to "Last visit", "How often" and "Total spent". Keep the RFM terms only in a collapsible "How it works" panel, for the defense.
 - [x] Show real peso and day values for each level instead of score numbers. (In the form's options and the How it works table.)
-- [ ] Later, optional (adds behavior): a few example customers per group.
-- [ ] Later, optional (adds behavior): ready-made templates (Reward loyal regulars, Win back lost customers, Welcome new customers).
-- [ ] Later, optional (adds behavior): a plain-language "This rule would include 12 customers right now" preview before saving.
+- [ ] ~~Later, optional (adds behavior): a few example customers per group.~~ Not chosen on 2026-11-01.
+- [x] Ready-made templates (Reward loyal regulars, Win back lost customers, Welcome new customers). (GET links on Add group that only fill the form.)
+- [x] A plain-language "This rule would include 12 customers right now" preview before saving. (Shows who fits and who would join, given the groups above; updates live.)
 - [x] Update [RFM Engine](RFM_ENGINE.md), [Screen Flow](SCREEN_FLOW.md), and the tests (`AdminRfmSegmentTest`, `AdminRewardsLayoutTest`, new `RfmVocabularyTest`), then run the full gate.
 
 ## Task 8: Align the App With the Client's Facebook Page

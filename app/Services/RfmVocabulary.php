@@ -59,6 +59,26 @@ class RfmVocabulary
         };
     }
 
+    /**
+     * Ready-made starting points for a new group. They only fill the form; the admin still saves.
+     *
+     * @return array<string, array{name: string, description: string, r_score_min: ?int, r_score_max: ?int, f_score_min: ?int, f_score_max: ?int, m_score_min: ?int, m_score_max: ?int}>
+     */
+    public function templates(): array
+    {
+        $ranges = fn (array $r, array $f, array $m = [null, null]) => [
+            'r_score_min' => $r[0], 'r_score_max' => $r[1],
+            'f_score_min' => $f[0], 'f_score_max' => $f[1],
+            'm_score_min' => $m[0], 'm_score_max' => $m[1],
+        ];
+
+        return [
+            'loyal-regulars' => ['name' => __('Reward loyal regulars'), 'description' => __('Customers who come often and still visit fairly recently.'), ...$ranges([3, 5], [4, 5])],
+            'win-back' => ['name' => __('Win back lost customers'), 'description' => __('Customers who used to come regularly but have not been back for a long time.'), ...$ranges([1, 2], [3, 5])],
+            'welcome-new' => ['name' => __('Welcome new customers'), 'description' => __('Customers who visited recently for the first time.'), ...$ranges([4, 5], [1, 1])],
+        ];
+    }
+
     /** The whole rule as one sentence, e.g. "Customers who last visited recently or very recently … get a free VIP Room." */
     public function sentence(RfmSegment $segment, ?string $addonName = null, ?string $tierName = null): string
     {

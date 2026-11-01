@@ -88,6 +88,8 @@ Admins never have to read score numbers. `app/Services/RfmVocabulary.php` (displ
 
 - The groups page lists each rule as a sentence, for example "Customers who last visited recently or very recently, come often or very often and spend a lot or the most get a free VIP Room and are recommended the Platinum card."
 - The form's From/To choices show the named level with today's real values, for example "Recent (4 days – 12 days)". They still submit the same 1–5 scores, so the engine, validation and stored rules are unchanged.
+- The group form shows a live preview: how many customers fit the choices right now, and how many would actually join, since customers already matched by an active group higher in the list stay there. A new group is counted as last. A switched-off group takes nobody. `RfmRuleEngine::preview()` gives the first numbers on the server, and `resources/js/rfm-segment-preview.js` recounts in the browser as the choices change. The page carries only anonymous score triples and range lists, never customer names or IDs.
+- Add group offers three templates from `RfmVocabulary::templates()`: Reward loyal regulars (Last visit 3–5, How often 4–5), Win back lost customers (Last visit 1–2, How often 3–5) and Welcome new customers (Last visit 4–5, How often 1). A template is a GET link (`?template=<key>`) that only fills the form. Nothing is saved until the admin chooses Save group, and the reward is left for the admin to pick.
 - The technical view (scores, percent rank, R/F/M ranges per group) stays in a collapsed "How it works (RFM scoring)" panel, for the defense.
 
 ## When a reward is issued

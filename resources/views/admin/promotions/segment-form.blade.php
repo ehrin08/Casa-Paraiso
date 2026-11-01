@@ -14,9 +14,25 @@
             'f' => __('How often do they visit?'),
             'm' => __('How much have they spent in total?'),
         ];
+        $previewActive = (bool) old('is_active', $segment->is_active);
     @endphp
 
-    <div class="rewards-workspace rewards-editor" data-rfm-segment-form>
+    <div class="rewards-workspace rewards-editor" data-rfm-segment-form
+        x-data="rfmSegmentPreview(@js($previewScores), @js($previewRulesAbove), @js($preview))">
+        @if ($templates)
+            <x-app-card class="mb-5">
+                <div data-rfm-templates>
+                    <h2 class="text-sm font-bold">{{ __('Start from a template') }}</h2>
+                    <p class="mt-1 text-sm text-casa-muted">{{ __('A template fills in the form below. Nothing is saved until you choose Save group.') }}</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        @foreach ($templates as $key => $template)
+                            <a href="{{ route('admin.promotions.segments.create', ['template' => $key]) }}" class="casa-button-secondary" @if (request('template') === $key) aria-current="true" @endif>{{ $template['name'] }}</a>
+                        @endforeach
+                        <a href="{{ route('admin.promotions.segments.create') }}" class="casa-button-secondary">{{ __('Start blank') }}</a>
+                    </div>
+                </div>
+            </x-app-card>
+        @endif
         <form method="POST" action="{{ $segment->exists ? route('admin.promotions.segments.update', $segment) : route('admin.promotions.segments.store') }}">
             @csrf
             @if ($segment->exists)
@@ -63,6 +79,18 @@
                             @endforeach
                         </div>
                     </fieldset>
+
+                    <div class="rewards-preview" aria-live="polite" data-rfm-preview>
+                        <x-reward-icon name="info" />
+                        <div>
+                            <p>{{ __('Customers who fit right now:') }} <strong x-text="fits" data-rfm-preview-fits>{{ number_format($preview['fits']) }}</strong></p>
+                            <p x-show="active" @unless ($previewActive) style="display: none" @endunless>
+                                {{ __('Would join this group:') }} <strong x-text="lands" data-rfm-preview-lands>{{ number_format($preview['lands']) }}</strong>
+                                <span x-show="fits > lands" @if ($preview['fits'] === $preview['lands']) style="display: none" @endif>{{ __('The others are already in a group higher in the list.') }}</span>
+                            </p>
+                            <p x-show="! active" @if ($previewActive) style="display: none" @endif>{{ __('Would join this group: none, because it is switched off.') }}</p>
+                        </div>
+                    </div>
 
                     <div class="rewards-filter-field">
                         <x-input-label for="addon_code" :value="__('Free add-on reward')" />

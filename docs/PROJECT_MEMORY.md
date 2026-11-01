@@ -36,6 +36,7 @@ The local `redesign` branch carries the presentation-only Modern Resort redesign
   - `RfmRuleEngine` evaluates active `rfm_segments` by `priority`, and the first score-range match wins.
   - Issuing rewards, the Reports RFM table, the admin customer RFM profile, and membership recommendations all use both services.
   - `RfmVocabulary` is display-only. It turns scores into plain names (Last visit / How often / Total spent, e.g. "Recent", "Top spenders"), rule sentences and real value hints for the admin group screens and the customer card. Form fields stay `*_score_min/max` (1–5).
+  - The group form previews group size: `RfmRuleEngine::preview()` / `rulesAbove()` on the server, live in `resources/js/rfm-segment-preview.js` (`window.rfmSegmentPreview`), using anonymous score triples only. `RfmVocabulary::templates()` prefills Add group through `?template=`, without saving. Verify with `AdminRfmSegmentPreviewTest`, `RfmRuleEnginePreviewTest` and `tests/js/rfm-segment-preview.test.mjs`.
 - Payments (see `docs/MEMBERSHIPS_AND_VOUCHERS.md`):
   - `PaymentPricing::settle` runs in `TransactionWorkflow`, `AppointmentCompletion`, and the staff transaction path.
   - It applies membership benefits and an optional gift voucher once, when a payment is first saved as paid.
@@ -120,6 +121,7 @@ The local `redesign` branch carries the presentation-only Modern Resort redesign
 - The admin dashboard uses Manila-local daily metrics, overdue-visit/new-feedback attention links, five upcoming confirmed visits, the latest submitted feedback, and a Monday–Sunday chart counting confirmed plus completed appointments by scheduled date. Its styles are scoped in `resources/css/admin-dashboard.css`; shared navigation and other role dashboards are unchanged. `AdminDashboardTest` covers boundaries, previews, empty states, escaped feedback, and the populated dashboard's 15-query budget.
 
 - MariaDB 10.11 LTS is the local runtime and test database. Keep Laravel's existing `mysql` connection and `pdo_mysql`; do not add a second application database connection.
+- `phpunit.xml` forces `SENTIMENT_MODEL_DRIVER=local` and an empty `GEMINI_API_KEY`, so a local `.env` set to Gemini never makes tests call the real API. Gemini tests set a fake key and use `Http::fake`.
 - `phpunit.xml` always targets host `mariadb`, database `testing`; isolation coverage checks the actual server is MariaDB. Never use destructive test commands against real data.
 - MariaDB uses `mariadb-data`; the original `mysql-data` volume and ignored migration backups remain rollback evidence. Setup/start reject legacy `DB_HOST=mysql`. See `MARIADB_MIGRATION.md` for transfer and recovery.
 - The 2026-09-12 local cutover restored 37 tables/84 rows to MariaDB 10.11.19 with matching fingerprints, financial totals, constraints, sequence values, and audit results. All 243 Laravel tests and seven polling tests passed; see the migration runbook for retained backup location and verification details.

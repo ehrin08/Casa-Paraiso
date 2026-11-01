@@ -47,4 +47,40 @@ class RfmRuleEngine
     {
         return ($rules ?? $this->rules())->first(fn (RfmSegment $segment) => $segment->is_active && $segment->matchesScores($scores));
     }
+
+    /**
+     * How many customers an unsaved or edited rule fits, and how many it would actually take,
+     * since customers already matched by a rule above it stay there. Inactive rules take nobody.
+     *
+     * @param  Collection<int, array{r: int, f: int, m: int}>  $scores
+     * @param  Collection<int, RfmSegment>  $rulesAbove
+     * @return array{fits: int, lands: int}
+     */
+    public function preview(RfmSegment $candidate, Collection $scores, Collection $rulesAbove): array
+    {
+        $fitting = $scores->filter(fn (array $customerScores) => $candidate->matchesScores($customerScores));
+
+        return [
+            'fits' => $fitting->count(),
+            'lands' => $candidate->is_active ? $fitting->reject(fn (array $customerScores) => $this->match($customerScores, $rulesAbove) !== null)->count() : 0,
+        ];
+    }
+
+    /**
+     * Active rules a customer is checked against before the given one: all of them for a new rule,
+     * which is saved last, otherwise those ordered before it.
+     *
+     * @return Collection<int, RfmSegment>
+     */
+    public function rulesAbove(RfmSegment $segment): Collection
+    {
+        $rules = $this->rules()->reject(fn (RfmSegment $rule) => $rule->is($segment));
+
+        if (! $segment->exists) {
+            return $rules->values();
+        }
+
+        return $rules->filter(fn (RfmSegment $rule) => $rule->priority < $segment->priority
+            || ($rule->priority === $segment->priority && $rule->id < $segment->id))->values();
+    }
 }
