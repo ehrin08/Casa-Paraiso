@@ -44,16 +44,16 @@ Done 2026-10-30 ([session note](notes/sessions/2026-10-30-feedback-anonymity-and
 
 ## Task 5: Prevent Troll Appointments
 
-Today `CustomerAppointmentStoreRequest` has no booking rate or volume limit. The only throttles cover authentication and profile actions (`guest-sensitive` and `user-sensitive` in `AppServiceProvider`).
+Done 2026-11-01 ([session note](notes/sessions/2026-11-01-booking-safeguards.md), [design](superpowers/specs/2026-11-01-booking-safeguards-design.md), [plan](superpowers/plans/2026-11-01-booking-safeguards.md)). Before this, `CustomerAppointmentStoreRequest` had no booking rate or volume limit.
 
-- [ ] Choose the safeguards with the user. Candidates:
+- [x] Choose the safeguards with the user. (Chosen: a 3-per-10-minutes submission limit, a cap of 2 upcoming self-bookings, a pause after 2 no-shows in 90 days, and an admin block with a reason. Phone verification, late-cancellation tracking and staff approval were left out.) Candidates:
   - a rate limiter on customer booking submissions;
   - a cap on active upcoming self-bookings per customer;
   - a verified email or phone before self-booking;
   - blocking self-booking, or requiring staff approval, after repeated no-shows or late cancellations, with thresholds in `config/casa.php`;
   - an admin flag or block on a customer profile.
-- [ ] Enforce the limits inside the existing booking transaction, because confirmed appointments reserve therapist capacity.
-- [ ] Show customers a clear message when a limit stops a booking, and let admins see why.
+- [x] Enforce the limits inside the existing booking transaction, because confirmed appointments reserve therapist capacity. (`CustomerBookingGuard` inside `AppointmentWorkflow::autoBook`, after locking the profile row.)
+- [x] Show customers a clear message when a limit stops a booking, and let admins see why. (Booking notice for customers, Online booking card for admins, badge for reception.)
 
 ## Task 6: Animations Throughout the Project
 

@@ -116,6 +116,9 @@ Key columns:
 - `contact_preference` nullable
 - `notes` nullable
 - `first_visit_at` nullable
+- `online_booking_blocked_at` nullable timestamp; set when an admin stops this customer's online self-booking (additive migration `2026_11_01_120000`)
+- `online_booking_block_reason` nullable string (500); staff-only reason, never shown to the customer
+- `online_booking_blocked_by` nullable foreign key to `users.id`, null on delete
 - `deleted_at` nullable
 - `created_at`, `updated_at`
 
@@ -133,6 +136,11 @@ Guest booking rules:
 
 - Explicitly selecting an existing guest or enrolled profile reuses its ID without changing saved identity or contacts. Matching names alone never merge records.
 - New guest profiles are created only on final operational submission, in the appointment transaction; rejection rolls back both records. Customer self-booking always uses the signed-in account profile.
+
+Online booking limits (T5, `config/casa.php` `customer_booking_limits`):
+
+- `CustomerBookingGuard` stops self-booking when the profile is admin-blocked, has 2 or more no-shows with a scheduled start in the last 90 days, or already has 2 upcoming confirmed bookings it created itself (`created_by` = the customer's user). Staff-created bookings never count, and staff can always book the customer.
+- `AppointmentWorkflow::autoBook` locks the profile row (`lockForUpdate`) inside its transaction before the check, so concurrent submissions cannot exceed the cap.
 - Shared display/search helpers use linked user identity or guest fields. Reception contact edits write `guest_phone` for guests.
 - The additive `2026_10_04_155329_add_guest_identity_to_customer_profiles_table` migration preserves existing links, codes, and foreign keys. Reversing it refuses to proceed while any guest profiles remain, including soft-deleted guests.
 
