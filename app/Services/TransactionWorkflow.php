@@ -13,6 +13,7 @@ class TransactionWorkflow
         private readonly TransactionNumber $numbers,
         private readonly TherapistCommissionSynchronizer $commissions,
         private readonly RfmPromotionGenerator $promotions,
+        private readonly PaymentPricing $pricing,
     ) {}
 
     /** @param array<string, mixed> $data */
@@ -45,6 +46,7 @@ class TransactionWorkflow
                 $transaction = $this->numbers->create($attributes);
             }
 
+            $this->pricing->settle($transaction, (float) $data['amount'], ! $wasPaid && $transaction->payment_status === Transaction::PAYMENT_PAID, $data['gift_voucher_code'] ?? null);
             $this->commissions->synchronize($transaction);
 
             if (! $wasPaid && $transaction->payment_status === Transaction::PAYMENT_PAID) {

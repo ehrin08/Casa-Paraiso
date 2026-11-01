@@ -31,6 +31,7 @@ class TransactionRequest extends FormRequest
             'payment_method' => ['nullable', Rule::in(Transaction::PAYMENT_METHODS)],
             'paid_at' => ['nullable', 'date', 'before_or_equal:now'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'gift_voucher_code' => ['nullable', 'string', 'max:60'],
         ];
     }
 

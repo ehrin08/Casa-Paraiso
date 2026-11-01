@@ -10,10 +10,11 @@ use App\Models\ApplicationSetting;
 use App\Models\Appointment;
 use App\Models\PromotionSuggestion;
 use App\Models\RfmSegment;
+use App\Services\RfmRuleEngine;
+use App\Services\RfmScorer;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -53,7 +54,7 @@ class PromotionController extends Controller
             ->withQueryString();
 
         return view('admin.promotions.index', [
-            'presets' => $this->presets(),
+            'segments' => RfmSegment::query()->ordered()->get(),
             'settings' => ApplicationSetting::current(),
             'suggestions' => $suggestions,
             'addonNames' => Addon::query()->whereIn('code', $suggestions->getCollection()->pluck('addon_code')->filter()->unique())->pluck('name', 'code'),
@@ -70,12 +71,21 @@ class PromotionController extends Controller
         ]);
     }
 
-    public function editSettings(): View
+    public function editSettings(RfmScorer $scorer, RfmRuleEngine $rules): View
     {
+        $segments = RfmSegment::query()->with('recommendedMembershipTier')->ordered()->get();
+        $population = $scorer->population();
+        $scores = $scorer->scoreAll($population);
+        $activeRules = $segments->where('is_active', true)->values();
+        $matches = $scores->map(fn (array $customerScores) => $rules->match($customerScores, $activeRules)?->id)->countBy();
+
         return view('admin.promotions.settings', [
-            'presets' => $this->presets(),
+            'segments' => $segments,
+            'matches' => $matches,
+            'population' => $population->count(),
+            'cutoffs' => $scorer->cutoffs($population),
             'settings' => ApplicationSetting::current(),
-            'addons' => Addon::query()->where('is_active', true)->orderBy('name')->get(),
+            'addonNames' => Addon::query()->pluck('name', 'code'),
         ]);
     }
 
@@ -86,30 +96,17 @@ class PromotionController extends Controller
         DB::transaction(function () use ($data, $request): void {
             $current = ApplicationSetting::current();
 
+            // Only the reward field changes; defaults fill a missing singleton row.
             ApplicationSetting::updateCurrent(
                 [
-                    ...ApplicationSetting::defaults(),
-                    ...$current->only([
-                        'business_name', 'contact_email', 'contact_phone', 'business_address',
-                        'location_landmarks', 'facebook_url', 'messenger_url', 'map_url',
-                        'company_history', 'organization_chart', 'default_payment_method',
-                    ]),
+                    ...($current->exists ? [] : ApplicationSetting::defaults()),
                     'promotion_voucher_validity_days' => $data['promotion_voucher_validity_days'],
                     'updated_by' => $request->user()->id,
                 ],
             );
-
-            foreach ($data['groups'] as $key => $group) {
-                RfmSegment::query()
-                    ->where('preset_key', $key)
-                    ->update([
-                        'addon_code' => $group['addon_code'],
-                        'is_active' => (bool) $group['is_active'],
-                    ]);
-            }
         });
 
-        return to_route('admin.promotions.index')->with('status', 'customer-rewards-updated');
+        return to_route('admin.promotions.settings.edit')->with('status', 'customer-rewards-updated');
     }
 
     public function show(PromotionSuggestion $promotion): View
@@ -141,16 +138,6 @@ class PromotionController extends Controller
         }, 3);
 
         return back()->with('status', 'customer-reward-dismissed');
-    }
-
-    private function presets(): Collection
-    {
-        $segments = RfmSegment::query()->whereNotNull('preset_key')->get()->keyBy('preset_key');
-
-        return collect(config('casa.customer_rewards.presets', []))->map(fn (array $preset) => [
-            ...$preset,
-            'segment' => $segments->get($preset['key']),
-        ]);
     }
 
     private function activityQuery(string $lifecycle, ?Builder $query = null): Builder

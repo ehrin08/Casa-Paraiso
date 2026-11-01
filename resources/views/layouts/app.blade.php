@@ -61,6 +61,20 @@
                         ['label' => __('Payments sections'), 'tabs' => [
                             ['label' => __('Payments'), 'route' => 'admin.transactions.index', 'active' => 'admin.transactions.index'],
                             ['label' => __('Commissions'), 'route' => 'admin.commissions.index', 'active' => 'admin.commissions.index'],
+                            ['label' => __('Gift vouchers'), 'route' => 'admin.gift-vouchers.index', 'active' => 'admin.gift-vouchers.index'],
+                        ]],
+                        ['label' => __('Payments sections'), 'tabs' => [
+                            ['label' => __('Payments'), 'route' => 'reception.transactions.index', 'active' => 'reception.transactions.index'],
+                            ['label' => __('Gift vouchers'), 'route' => 'reception.gift-vouchers.index', 'active' => 'reception.gift-vouchers.index'],
+                        ]],
+                        ['label' => __('Customer sections'), 'tabs' => [
+                            ['label' => __('Customers'), 'route' => 'admin.customers.index', 'active' => 'admin.customers.index'],
+                            ['label' => __('Memberships'), 'route' => 'admin.memberships.index', 'active' => 'admin.memberships.index'],
+                            ['label' => __('Membership tiers'), 'route' => 'admin.membership-tiers.index', 'active' => 'admin.membership-tiers.index'],
+                        ]],
+                        ['label' => __('Customer sections'), 'tabs' => [
+                            ['label' => __('Customers'), 'route' => 'reception.customers.index', 'active' => 'reception.customers.index'],
+                            ['label' => __('Memberships'), 'route' => 'reception.memberships.index', 'active' => 'reception.memberships.index'],
                         ]],
                         ['label' => __('Insights sections'), 'tabs' => [
                             ['label' => __('Reports'), 'route' => 'admin.reports.index', 'active' => 'admin.reports.index'],

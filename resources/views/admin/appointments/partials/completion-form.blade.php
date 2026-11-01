@@ -18,10 +18,17 @@
         </div>
         <div class="mt-5 grid gap-5 sm:grid-cols-2">
             <div>
-                <x-input-label :for="$fieldPrefix.'amount'" :value="__('Amount')" />
+                <x-input-label :for="$fieldPrefix.'amount'" :value="__('Amount before member benefits')" />
                 <x-text-input :id="$fieldPrefix.'amount'" name="amount" type="number" step="0.01" min="0" class="mt-2" :value="$completionValue('amount', $appointment->expectedAmount())" required />
                 <x-input-error class="mt-2" :messages="$completionErrors('amount')" />
             </div>
+            <div>
+                <x-input-label :for="$fieldPrefix.'voucher'" :value="__('Gift voucher code (optional)')" />
+                <x-text-input :id="$fieldPrefix.'voucher'" name="gift_voucher_code" class="mt-2 uppercase" :value="$completionValue('gift_voucher_code')" maxlength="60" autocomplete="off" />
+                <x-input-error class="mt-2" :messages="$completionErrors('gift_voucher_code')" />
+            </div>
+            <x-payment-benefits class="sm:col-span-2" :appointment="$appointment" :modal="$isActiveCompletion ? null : $modalName" :amount-field="$fieldPrefix.'amount'" :voucher-field="$fieldPrefix.'voucher'"
+                :quote-url="request()->user()?->isReceptionist() ? route('reception.transactions.quote') : route('admin.transactions.quote')" />
             <div>
                 <x-input-label :for="$fieldPrefix.'status'" :value="__('Payment status')" />
                 <select id="{{ $fieldPrefix }}status" name="payment_status" class="casa-input mt-2" required>

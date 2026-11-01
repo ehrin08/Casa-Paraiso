@@ -8,16 +8,20 @@ use App\Http\Requests\TransactionRequest;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Transaction;
+use App\Services\PaymentPricing;
 use App\Services\TransactionNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class TransactionController extends Controller
 {
     use HandlesIndexSorting;
+
+    public function __construct(private readonly PaymentPricing $pricing) {}
 
     public function index(Request $request): View
     {
@@ -168,13 +172,17 @@ class TransactionController extends Controller
             'notes' => $data['notes'] ?? null,
         ];
 
-        if (! $transaction->exists) {
-            return $numbers->create($attributes);
-        }
+        return DB::transaction(function () use ($attributes, $numbers, $transaction): Transaction {
+            $wasPaid = $transaction->exists && $transaction->payment_status === Transaction::PAYMENT_PAID;
 
-        $transaction->update($attributes);
+            if ($transaction->exists) {
+                $transaction->update($attributes);
+            } else {
+                $transaction = $numbers->create($attributes);
+            }
 
-        return $transaction;
+            return $this->pricing->settle($transaction, (float) $attributes['amount'], ! $wasPaid && $transaction->payment_status === Transaction::PAYMENT_PAID);
+        }, 3);
     }
 
     private function authorizeTransaction(Request $request, Transaction $transaction): void

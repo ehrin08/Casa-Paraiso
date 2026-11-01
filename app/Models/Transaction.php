@@ -56,6 +56,12 @@ class Transaction extends Model
         'appointment_id',
         'service_id',
         'amount',
+        'gross_amount',
+        'discount_amount',
+        'customer_membership_id',
+        'gift_voucher_id',
+        'gift_voucher_applied',
+        'amount_due',
         'payment_status',
         'payment_method',
         'paid_at',
@@ -67,6 +73,10 @@ class Transaction extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'gross_amount' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'gift_voucher_applied' => 'decimal:2',
+            'amount_due' => 'decimal:2',
             'paid_at' => 'datetime',
         ];
     }
@@ -94,5 +104,20 @@ class Transaction extends Model
     public function therapistCommissions()
     {
         return $this->hasMany(TherapistCommission::class);
+    }
+
+    public function adjustments()
+    {
+        return $this->hasMany(TransactionAdjustment::class);
+    }
+
+    public function customerMembership()
+    {
+        return $this->belongsTo(CustomerMembership::class);
+    }
+
+    public function giftVoucher()
+    {
+        return $this->belongsTo(GiftVoucher::class);
     }
 }

@@ -73,15 +73,24 @@ Users authenticate with either a verified Google account or a verified email and
   - Recency: how recently the customer visited or completed a transaction.
   - Frequency: how often the customer books or completes services.
   - Monetary: how much the customer has spent.
-- Promotion output grants a complimentary add-on voucher, never a monetary or percentage discount.
-- The application uses five fixed, plain-language customer groups: High-value, Loyal, At-risk, Inactive, and New customer. Their RFM thresholds remain code-controlled.
-- Admin configures only each group’s active state, complimentary add-on, and the global voucher validity period; no RFM thresholds, rules, manual generation, or approval queue are exposed.
+- Each customer is scored 1–5 on Recency, Frequency, and Monetary by percent rank among all customers (quintile RFM scoring). See [RFM Engine](RFM_ENGINE.md).
+- Segments are admin-configurable rules of R/F/M score ranges, evaluated in priority order with the first match winning. The defaults are High-value, Loyal, At-risk, Inactive, and New customer. Admins can add, edit, reorder, deactivate, and delete unused rules.
+- RFM reward output grants a complimentary add-on voucher, never a monetary or percentage discount. A rule can also recommend a membership tier.
+- Manual generation and approval queues are not exposed.
 - A reward is issued automatically after an eligible completed paid visit. A customer can hold one available reward or one reward reserved against a confirmed appointment.
 - Eligible, unused vouchers are customer-visible and optional during booking; they expire after the configured 30, 60, 90, or 180-day period, or never when configured without expiry.
 - Attaching a voucher does not change the package price, transaction amount, or therapist commission basis. A 30-Minute Back Massage voucher still extends the reservation by 30 minutes.
 - A voucher is released when its confirmed appointment is cancelled or marked no-show.
 - Existing rewards retain their originally issued add-on and expiry even when future configuration changes.
 - RFM logic should be rule-based and application-driven to avoid external service dependencies.
+
+### Memberships And Gift Vouchers
+
+- Gold and Platinum membership cards mirror the spa's printed cards. Admins edit each tier's service and add-on discounts, VIP Room price, birthday treat, referral reward, and validity.
+- Admins and receptionists issue and renew cards. Admins cancel cards.
+- Gift vouchers (default ₱300, ₱500, ₱1,000) are recorded when sold and redeemed once at payment. Any excess is paid by another method, and any unused balance is forfeited.
+- By default, vouchers do not combine with member benefits or RFM rewards. An admin can allow combining.
+- Benefits and vouchers are applied when a payment is first saved as paid. The transaction amount stays the net service revenue. See [Memberships and Gift Vouchers](MEMBERSHIPS_AND_VOUCHERS.md).
 
 ### Feedback And Sentiment Analytics
 

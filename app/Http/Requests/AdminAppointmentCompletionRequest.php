@@ -18,6 +18,7 @@ class AdminAppointmentCompletionRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'gift_voucher_code' => ['nullable', 'string', 'max:60'],
             'payment_status' => ['required', Rule::in([
                 Transaction::PAYMENT_UNPAID,
                 Transaction::PAYMENT_PARTIAL,
