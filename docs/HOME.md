@@ -8,6 +8,7 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [Tech Stack](TECH_STACK.md)
 - [Project Memory](PROJECT_MEMORY.md)
 - [Planned Tasks](PLANNED_TASKS.md) (recorded, not started)
+- [Customer Booking Safeguards Design](superpowers/specs/2026-11-01-booking-safeguards-design.md) (T5, awaiting approval)
 
 ## Data
 
