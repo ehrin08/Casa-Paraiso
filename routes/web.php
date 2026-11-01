@@ -146,7 +146,7 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::patch('/services/{service}/toggle', [AdminServiceController::class, 'toggle'])->name('services.toggle');
         Route::resource('services', AdminServiceController::class)->except('destroy');
         Route::patch('/addons/{addon}/toggle', [AdminAddonController::class, 'toggle'])->name('addons.toggle');
-        Route::resource('addons', AdminAddonController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+        Route::resource('addons', AdminAddonController::class)->except('destroy');
         Route::get('/transactions/export', [AdminTransactionController::class, 'export'])->name('transactions.export');
         Route::get('/transactions/quote', TransactionQuoteController::class)->name('transactions.quote');
         Route::resource('transactions', AdminTransactionController::class)->except('destroy');

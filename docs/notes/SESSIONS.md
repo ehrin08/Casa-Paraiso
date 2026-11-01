@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [Add-on admin matches Services](sessions/2026-11-01-addon-service-parity.md)
 - 2026-11-01: [Subtle animations (Task 6 / T8)](sessions/2026-11-01-subtle-animations.md)
 - 2026-11-01: [Friendly RFM wording (Task 7)](sessions/2026-11-01-rfm-friendly-rules.md)
 - 2026-11-01: [RFM friendliness task recorded](sessions/2026-11-01-rfm-friendly-task.md)
