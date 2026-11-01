@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [Sentiment gate on AI-drafted labels (Task 1 / T1)](sessions/2026-11-01-sentiment-gate-ai-labels.md)
 - 2026-11-01: [Export formats: CSV, Excel, PDF, Print](sessions/2026-11-01-export-formats.md)
 - 2026-11-01: [Sentiment test set tooling (Task 1 / T1)](sessions/2026-11-01-sentiment-test-set.md)
 - 2026-11-01: [Add-on admin matches Services](sessions/2026-11-01-addon-service-parity.md)
