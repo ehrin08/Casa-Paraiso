@@ -4,7 +4,7 @@ Work the user has asked to record for later. Nothing here is implemented yet. Ea
 
 Added 2026-10-30. Each task below records its own status.
 
-Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso Tracker" Google Sheet (formerly "Casa Paraiso - Therapist Roster") (IDs T1–T5 match Tasks 1–5 below, and T8 matches Task 6; T6 and T7 are sheet-only rows). This file keeps the specifications.
+Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso Tracker" Google Sheet (formerly "Casa Paraiso - Therapist Roster") (IDs T1–T5 match Tasks 1–5 below, and T8 matches Task 6; T6, T7 and, since 2026-11-01, T9–T12 are sheet-only rows). This file keeps the specifications.
 
 ## Task 1: Sentiment Model for Feedback
 
@@ -107,3 +107,16 @@ Source: [Client Facebook Page Review](client/FACEBOOK_PAGE_REVIEW.md), which com
 - [ ] **Contact details in Settings.** The page lists a phone number and email, but `contact_phone` and `contact_email` default to empty. The admin enters them in Settings. No code change.
 - [ ] **Public business name.** The page uses "Casa Paraiso Body & Wellness Spa" and [MVP Scope](MVP_SCOPE.md) uses "Casa Paraiso - Body and Wellness Spa". Confirm the spelling the client prefers and set it in Settings.
 - [ ] **Move bookings from Messenger to the website.** Customers now book through Messenger messages. Ask the client to add casaparaiso.site to the page (a "Book now" button, a pinned post, and the Messenger auto-reply). This is a client action.
+
+## Task 9: Apply Changes in Real Time Instead of Reloading
+
+Added 2026-11-01. Not started. Not yet in the tracker sheet.
+
+Today most changes only show after a full page reload or a fresh navigation. Turbo Drive is opt-in (`turboSession.drive = false` in `resources/js/app.js`), and state-changing forms submit normally and redirect. The only live update is the booking-count badge, which uses authenticated HTTP polling every 30 seconds (`resources/js/booking-notifications.js`). The attendance scanner calls `window.location.reload()` after a scan. Hostinger shared hosting cannot run a WebSocket server, and no broadcast credentials or broadcast routes exist ([Project Memory](PROJECT_MEMORY.md)).
+
+- [ ] Agree the scope with the user: which screens should update without a reload (for example the appointments queue, calendars, reception and therapist views, attendance and notifications), and whether that means other users' changes appearing live, the user's own saves updating in place, or both.
+- [ ] Choose the transport that fits Hostinger shared hosting: extend the existing visible-page polling, Turbo Frames or Turbo Streams over normal HTTP responses, or a hosted broadcast service. A self-hosted WebSocket server is not possible there.
+- [ ] Keep state-changing actions as normal Laravel requests with validation, CSRF and a no-JavaScript fallback, as `AGENTS.md` requires. Live updates only refresh what is shown.
+- [ ] Keep therapist capacity safe: a live calendar or slot view must still be re-checked inside the booking transaction.
+- [ ] Replace the attendance scanner's page reload with an in-place update.
+- [ ] Update [Project Memory](PROJECT_MEMORY.md), [Tech Stack](TECH_STACK.md) and the tests, then run the full gate.

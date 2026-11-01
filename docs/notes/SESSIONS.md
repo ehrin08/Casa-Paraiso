@@ -2,6 +2,8 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [Realtime updates task recorded (Task 9)](sessions/2026-11-01-realtime-updates-task.md)
+- 2026-11-01: [Tracker update after the 20261101 release](sessions/2026-11-01-tracker-update.md)
 - 2026-11-01: [20261101 release live](sessions/2026-11-01-release-live.md)
 - 2026-11-01: [11 PM closing, back massage service and closed dates (Task 8)](sessions/2026-11-01-closing-time-back-massage-closed-dates.md)
 - 2026-11-01: [RFM client question sheet (Task 7)](sessions/2026-11-01-rfm-client-questions.md)
