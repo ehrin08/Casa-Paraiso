@@ -1,6 +1,6 @@
 # Customer Booking Safeguards (T5) Design
 
-Date: 2026-11-01. Status: awaiting owner approval. Source: [Planned Tasks](../../PLANNED_TASKS.md) Task 5.
+Date: 2026-11-01. Status: approved and implemented 2026-11-01. Source: [Planned Tasks](../../PLANNED_TASKS.md) Task 5.
 
 ## Intent
 

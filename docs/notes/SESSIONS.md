@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [Customer booking safeguards (T5)](sessions/2026-11-01-booking-safeguards.md)
 - 2026-10-30: [Animation task recorded (T8)](sessions/2026-10-30-animation-task.md)
 - 2026-10-30: [Therapist import and schedules](sessions/2026-10-30-therapist-import.md)
 - 2026-10-30: [Anonymous feedback and feedback pop-up (T3, T4)](sessions/2026-10-30-feedback-anonymity-and-prompt.md)

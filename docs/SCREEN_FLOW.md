@@ -71,7 +71,7 @@ Route prefixes:
 
 - Dashboard: today’s bookings, upcoming visits, customer count, and payment activity.
 - Appointments: weekly bookings and read-only therapist availability; confirmed create/edit, cancellation, no-show, and completion/payment actions.
-- Customers: search, contact details, appointment/payment history, and permitted contact/operational-note updates.
+- Customers: search, contact details, appointment/payment history, and permitted contact/operational-note updates. Customer detail shows a read-only Online booking paused badge when an admin block or the no-show rule applies.
 - Payments: create, edit, and review manual transactions.
 - Profile: shared account settings. Receptionists cannot access schedules, services, insights, reports, exports, settings, user administration, or commissions.
 
@@ -275,6 +275,7 @@ Primary actions:
 - View customer history.
 - Update customer notes.
 - Review promotion suggestions.
+- Block or allow online booking from the Online booking card (reason required). The card shows Allowed, Blocked by admin (reason, admin, date) or Paused by no-shows.
 
 ### Weekly Therapist Roster
 
@@ -608,7 +609,7 @@ Responsive behavior:
 
 Primary actions:
 
-- Book an appointment.
+- Book an appointment. When online booking is stopped (admin block, no-show pause or the upcoming-booking cap), the booking page and dialog show a notice instead of the form. More than 3 submissions in 10 minutes return a wait message.
 - View appointment details in a modal.
 - Cancel a confirmed booking before its start.
 - Submit feedback for completed appointment.
