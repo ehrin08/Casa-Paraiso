@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Casa Paraiso Body and Wellness Spa offers massage treatments with instant appointment confirmation every day from 1:00 PM to 12:00 MN.">
+        <meta name="description" content="Casa Paraiso Body and Wellness Spa offers massage treatments with instant appointment confirmation every day from 1:00 PM to 11:00 PM.">
         <title>Casa Paraiso Body and Wellness Spa</title>
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=cormorant-garamond:600,700|manrope:400,500,600,700,800&display=swap" rel="stylesheet">
@@ -102,7 +102,7 @@
                 <div class="landing-facts" aria-label="Spa hours and starting price">
                     <div class="landing-container landing-facts-inner">
                         <p><x-landing-icon name="clock" /> <span>{{ $businessHours['summary'] ?? __('Open every day') }}</span></p>
-                        <p><x-landing-icon name="moon" /> <span>{{ $businessHours['window'] ?? __('1:00 PM to 12:00 MN') }}</span></p>
+                        <p><x-landing-icon name="moon" /> <span>{{ $businessHours['window'] ?? __('1:00 PM to 11:00 PM') }}</span></p>
                         <p><x-landing-icon name="leaf" /> <span>
                             @if ($startingRate === null)
                                 <a href="#visit">Contact us for prices</a>
@@ -235,7 +235,7 @@
                         <p class="landing-kicker">Visit &amp; contact</p>
                         <h2 id="landing-visit-title">We look forward to welcoming you.</h2>
                         <div class="landing-contact-details">
-                            <p><x-landing-icon name="clock" /><span>{{ $businessHours['summary'] ?? __('Open every day') }} · {{ $businessHours['window'] ?? __('1:00 PM to 12:00 MN') }}</span></p>
+                            <p><x-landing-icon name="clock" /><span>{{ $businessHours['summary'] ?? __('Open every day') }} · {{ $businessHours['window'] ?? __('1:00 PM to 11:00 PM') }}</span></p>
                             @if (filled($applicationSettings->business_address))
                                 <p><x-landing-icon name="pin" /><span>{{ $applicationSettings->business_address }}@if (filled($applicationSettings->location_landmarks))<span class="landing-landmark">{{ $applicationSettings->location_landmarks }}</span>@endif</span></p>
                             @elseif (filled($applicationSettings->location_landmarks))

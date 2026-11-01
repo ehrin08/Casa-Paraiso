@@ -53,9 +53,9 @@ class OperationalBookingAvailabilityTest extends TestCase
         $slots = collect($this->getJson(route('admin.appointments.availability', ['service_id' => $service->id, 'month' => '2026-10']))->assertOk()->json('dates.2026-10-04'));
         $this->assertFalse($slots->contains('time', '19:00'));
         $this->assertTrue($slots->contains('time', '19:30'));
-        $this->assertTrue($slots->contains('time', '23:00'));
-        $this->assertFalse($slots->contains('time', '23:30'));
-        $this->assertSame('2026-10-05 00:00:00', $slots->firstWhere('time', '23:00')['ends_at']);
+        $this->assertTrue($slots->contains('time', '22:00'));
+        $this->assertFalse($slots->contains('time', '22:30'));
+        $this->assertSame('2026-10-04 23:00:00', $slots->firstWhere('time', '22:00')['ends_at']);
         $this->actingAs(User::factory()->customer()->create());
         $customerSlots = collect($this->getJson(route('customer.appointments.availability', ['service_id' => $service->id, 'month' => '2026-10']))->assertOk()->json('dates.2026-10-04'));
         $this->assertFalse($customerSlots->contains('time', '19:30'));
@@ -69,8 +69,8 @@ class OperationalBookingAvailabilityTest extends TestCase
         $this->assertSame([], $response->json('dates'));
         $this->assertNull($response->json('store_dates.2026-10-03'));
         $response->assertJsonPath('store_dates.2026-10-05.opens_at', '2026-10-05 13:00:00')
-            ->assertJsonPath('store_dates.2026-10-05.closes_at', '2026-10-06 00:00:00')
-            ->assertJsonCount(22, 'store_dates.2026-10-05.slots');
+            ->assertJsonPath('store_dates.2026-10-05.closes_at', '2026-10-05 23:00:00')
+            ->assertJsonCount(20, 'store_dates.2026-10-05.slots');
         $this->assertTrue(collect($response->json('store_dates.2026-10-05.slots'))->every(fn ($slot) => $slot['staff_count'] === 0));
     }
 
@@ -87,9 +87,9 @@ class OperationalBookingAvailabilityTest extends TestCase
         $this->assertSame(1, $today->firstWhere('time', '19:30')['staff_count']);
         $this->assertSame(0, $future->firstWhere('time', '14:00')['staff_count']);
         $this->assertSame(0, $future->firstWhere('time', '13:30')['staff_count']);
-        $this->assertSame(1, $future->firstWhere('time', '23:00')['staff_count']);
-        $this->assertSame('2026-10-06 00:00:00', $future->firstWhere('time', '23:00')['ends_at']);
-        $this->assertSame(0, $future->firstWhere('time', '23:30')['staff_count']);
+        $this->assertSame(1, $future->firstWhere('time', '22:00')['staff_count']);
+        $this->assertSame('2026-10-05 23:00:00', $future->firstWhere('time', '22:00')['ends_at']);
+        $this->assertSame(0, $future->firstWhere('time', '22:30')['staff_count']);
         $this->actingAs(User::factory()->customer()->create());
         $customer = collect($this->getJson(route('customer.appointments.availability', $params))->assertOk()->json('store_dates.2026-10-04.slots'));
         $this->assertSame(0, $customer->firstWhere('time', '19:30')['staff_count']);
@@ -97,8 +97,8 @@ class OperationalBookingAvailabilityTest extends TestCase
         $addon = Addon::query()->create(['code' => 'store-duration', 'name' => 'Extra time', 'price' => 299, 'duration_minutes' => 30, 'is_active' => true]);
         $this->actingAs(User::factory()->admin()->create());
         $extended = collect($this->getJson(route('admin.appointments.availability', [...$params, 'addon_codes' => [$addon->code]]))->assertOk()->json('store_dates.2026-10-05.slots'));
-        $this->assertSame(1, $extended->firstWhere('time', '22:30')['staff_count']);
-        $this->assertSame(0, $extended->firstWhere('time', '23:00')['staff_count']);
+        $this->assertSame(1, $extended->firstWhere('time', '21:30')['staff_count']);
+        $this->assertSame(0, $extended->firstWhere('time', '22:00')['staff_count']);
     }
 
     public function test_unavailable_roster_exception_disables_times_without_closing_the_store_date(): void
@@ -108,7 +108,7 @@ class OperationalBookingAvailabilityTest extends TestCase
         $this->actingAs(User::factory()->admin()->create());
         $response = $this->getJson(route('admin.appointments.availability', ['service_id' => $service->id, 'month' => '2026-10']))->assertOk();
         $this->assertNull($response->json('dates.2026-10-05'));
-        $response->assertJsonCount(22, 'store_dates.2026-10-05.slots');
+        $response->assertJsonCount(20, 'store_dates.2026-10-05.slots');
         $this->assertTrue(collect($response->json('store_dates.2026-10-05.slots'))->every(fn ($slot) => $slot['staff_count'] === 0));
     }
 
@@ -136,14 +136,14 @@ class OperationalBookingAvailabilityTest extends TestCase
         $back = Addon::query()->create(['code' => 'calendar-extra', 'name' => 'Extra care', 'price' => 299, 'duration_minutes' => 30, 'is_active' => true]);
         $this->actingAs(User::factory()->admin()->create());
         $slots = collect($this->getJson(route('admin.appointments.availability', ['service_id' => $service->id, 'month' => '2026-10', 'addon_codes' => [$back->code]]))->assertOk()->json('dates.2026-10-05'));
-        $this->assertTrue($slots->contains('time', '22:30'));
-        $this->assertFalse($slots->contains('time', '23:00'));
+        $this->assertTrue($slots->contains('time', '21:30'));
+        $this->assertFalse($slots->contains('time', '22:00'));
         $appointment = $this->reservation($service, $staff, '2026-10-05 14:00');
         $voucher = PromotionSuggestion::factory()->create(['customer_profile_id' => $appointment->customer_profile_id, 'addon_code' => $back->code]);
         $appointment->update(['promotion_suggestion_id' => $voucher->id, 'scheduled_end_at' => '2026-10-05 15:30:00']);
         $params = ['service_id' => $service->id, 'month' => '2026-10', 'appointment_id' => $appointment->id];
         $voucherSlots = collect($this->getJson(route('admin.appointments.availability', $params))->assertOk()->json('dates.2026-10-05'));
-        $this->assertFalse($voucherSlots->contains('time', '23:00'));
+        $this->assertFalse($voucherSlots->contains('time', '22:00'));
         $this->reservation($service, $staff, '2026-10-05 16:00');
         foreach ([['admin', 'admin'], ['reception', 'receptionist']] as [$workspace, $role]) {
             $this->actingAs(User::factory()->create(['role' => $role]));

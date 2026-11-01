@@ -67,7 +67,7 @@ class RosterShiftRules
             $interval = $this->windows->intervalForDate(Carbon::parse($date, 'Asia/Manila'), $start, $end, (bool) $shift['ends_next_day']);
             if ((int) substr($start, 3, 2) % 30 || (int) substr($end, 3, 2) % 30
                 || ($shift['ends_next_day'] && $end !== '00:00') || $interval['end']->lte($interval['start'])
-                || ! $this->windows->withinBusinessHours($interval['start'], $interval['end'])) {
+                || ! $this->withinShiftHours($interval)) {
                 throw ValidationException::withMessages(['start_time' => __(':label must use 30-minute boundaries between 1:00 PM and midnight.', ['label' => $label])]);
             }
             $key = $shift['staff_profile_id'].':'.$date;
@@ -78,5 +78,18 @@ class RosterShiftRules
             }
             $cells[$key][] = $interval;
         }
+    }
+
+    /**
+     * Shifts are work hours: they may run from opening until midnight, even though bookings
+     * stop at closing time, because the schedule resolver clamps bookable time to business hours.
+     *
+     * @param  array{start: Carbon, end: Carbon}  $interval
+     */
+    private function withinShiftHours(array $interval): bool
+    {
+        $opening = $this->windows->businessWindow($interval['start'])['start'];
+
+        return $interval['start']->gte($opening) && $interval['end']->lte($opening->copy()->startOfDay()->addDay());
     }
 }
