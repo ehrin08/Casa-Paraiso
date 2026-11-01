@@ -57,3 +57,5 @@ These are set in `items.csv` and help break the results down. Labellers don't ch
 2. The adjudicator fills in `final` on each row the labellers disagreed on. They may look at `suggested.csv` and this guide.
 3. Run `scripts/lock_sentiment_testset.py`. It writes `locked-test.csv` and prints its SHA-256, which goes into the [dataset manifest](../sentiment-dataset-manifest.json).
 4. Once the set is locked, nobody edits it or uses it to tune rules or models. A correction needs a new version, `curated-v2`.
+
+`curated-v1` did not follow steps 1 and 2. No labellers were available, so on 2026-11-01 it was locked with the AI-drafted labels from `suggested.csv` (every `adjudication.csv` row is marked `source=ai-draft`). A human-labelled `curated-v2` with these sheets would replace it.

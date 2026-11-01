@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "curated-test-set-awaiting-labels",
+  "status": "locked-ai-drafted-labels",
   "sources": [
     {
       "id": "curated-v1",
@@ -14,10 +14,12 @@
       ],
       "rows": 240,
       "design": "80 rows per language (30 positive, 25 neutral, 25 negative by draft label); 97 rows tagged mixed, negation, sarcasm, misspelling or rating_conflict",
-      "label_provenance": "two independent human labellers (labels-a.csv, labels-b.csv) following docs/sentiment/LABELING_GUIDE.md, then adjudication; suggested.csv holds the author's draft labels for the adjudicator only",
+      "label_provenance": "AI-drafted labels (suggested.csv, written by the same AI assistant that authored the comments) used as final labels on 2026-11-01 because no human labellers were available; not independently human-labelled or verified, no inter-annotator agreement (kappa) measured; adjudication.csv marks every row source=ai-draft; labels-a.csv and labels-b.csv were left blank",
       "split": "test",
       "permitted_use": "locked evaluation only; never used for training or tuning rules or models",
-      "locked_sha256": null
+      "locked_sha256": "b61daedfd07ac9e2b8abdb8803e59b1ddafce01d22b102570cedbfc4b0ee8753",
+      "locked_on": "2026-11-01",
+      "evaluation": "provisional, 2026-11-01: rules macro-F1 0.839, local 0.827 (gate failed), xlmr 0.694 (gate failed); see docs/SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md"
     }
   ],
   "required_fields": [

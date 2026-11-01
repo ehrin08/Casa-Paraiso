@@ -176,6 +176,18 @@ python scripts/evaluate_sentiment_model.py resources/sentiment/eval/curated-v1/l
 
 The agreement script reports Cohen's kappa and pre-fills `final` wherever the two labellers agree. The lock script refuses blank finals and never overwrites `locked-test.csv`. Record its SHA-256 in the manifest. The evaluator uses only the standard library and reports per-language and per-tag results. With `--baseline` it applies the governance gate and exits 2 on failure. The xlmr run needs the `sentiment` profile running and `SENTIMENT_XLMR_URL` set. Curated results show how the model handles representative cases, but they are not evidence from real customers. Repeat the gate on redacted real feedback once enough has accumulated.
 
+### Gate result, 2026-11-01 (provisional)
+
+`curated-v1` was locked without human labellers: the final labels are the AI-drafted labels from `suggested.csv`, there is no kappa, and the set's SHA-256 is `b61daedfd07ac9e2b8abdb8803e59b1ddafce01d22b102570cedbfc4b0ee8753`. The labels were drafted by the same assistant that wrote the comments, so they may agree with the keyword rules more than human labels would; the rules' perfect scores on sarcasm and negative recall should be read with that in mind.
+
+| Classifier | Accuracy | Macro-F1 | Negative recall | Taglish errors | Mixed errors | Gate |
+|---|---|---|---|---|---|---|
+| rules (baseline) | 0.846 | 0.839 | 1.000 | 11 | 15 | — |
+| local | 0.829 | 0.827 | 0.907 | 15 | 16 | Failed |
+| xlmr | 0.700 | 0.694 | 0.773 | 21 | 21 | Failed (all four checks) |
+
+XLM-RoBERTa macro-F1 by language: English 0.739, Taglish 0.734, Tagalog 0.610 (rules 0.818, 0.857, 0.843). It scored 0.0 on the sarcasm rows but did better than the rules where the text disagrees with the stars (rating_conflict: 5 errors against 9). Decision: xlmr does not go to `shadow`; production stays on `rules` with the `local` driver. Rerun the gate on a human-labelled `curated-v2` or redacted real feedback before reconsidering.
+
 ## Recommended first implementation slice
 
 Start with Phases 1–3: dataset governance, a small manually verified Casa Paraiso set, and a baseline evaluation of the existing classifier. This produces evidence about whether a trained model is worth the additional deployment and maintenance cost before changing production classification behavior.

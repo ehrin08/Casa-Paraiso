@@ -10,7 +10,7 @@ Live status is tracked in the `Tasks` tab of the owner's "Casa Paraiso Tracker" 
 
 Today `App\Services\HybridSentimentClassifier` chooses between the rules in `SentimentClassifier` and `LocalSentimentModel` (a native PHP JSON artifact trained by `scripts/train_sentiment_model.py`). The `rules`, `shadow` and `model` modes come from `SENTIMENT_CLASSIFIER_MODE` in `config/sentiment.php`, which defaults to `shadow`.
 
-In progress since 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-roberta-sentiment.md)).
+Started 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-roberta-sentiment.md)). Evaluation done 2026-11-01: XLM-RoBERTa did not pass the gate on AI-drafted labels, so the rules stay in charge.
 
 - [x] Choose a pretrained multilingual XLM-RoBERTa sentiment checkpoint, or fine-tune one, that covers English, Tagalog and Taglish. (`cardiffnlp/twitter-xlm-roberta-base-sentiment`, pretrained; Tagalog quality still has to be measured.)
 - [x] Record the model's source and license in [sentiment-dataset-manifest.json](sentiment-dataset-manifest.json). (The model card declares no license; confirm before production use.)
@@ -18,9 +18,10 @@ In progress since 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-rober
 - [x] Add the model as another classifier behind the existing hybrid adapter. Keep the `positive`, `neutral` and `negative` labels and the rules fallback. (`SENTIMENT_MODEL_DRIVER=xlmr`.)
 - [ ] Build the redacted, labelled locked test set, then pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`. Real feedback is too sparse (2 comments locally), so on 2026-11-01 the user chose a curated set of 240 fictional comments with two-person CSV labelling ([session note](notes/sessions/2026-11-01-sentiment-test-set.md), [Labelling Guide](sentiment/LABELING_GUIDE.md)).
   - [x] Draft the items, label sheets, agreement and lock scripts, and the gate verdict in `scripts/evaluate_sentiment_model.py`.
-  - [ ] Two people fill in `labels-a.csv` and `labels-b.csv` (user action).
-  - [ ] Run the agreement script, adjudicate, lock the set and record its SHA-256 in the manifest.
-  - [ ] Run rules, local and xlmr predictions and the gate. Run in `shadow` mode only if xlmr passes.
+  - [x] ~~Two people fill in `labels-a.csv` and `labels-b.csv`.~~ No labellers were available, so on 2026-11-01 the user chose the AI-drafted labels in `suggested.csv`, disclosed as unverified ([session note](notes/sessions/2026-11-01-sentiment-gate-ai-labels.md)).
+  - [x] Lock the set and record its SHA-256 in the manifest. (No agreement script or kappa, since there was only one source of labels.)
+  - [x] Run rules, local and xlmr predictions and the gate. (Provisional result: xlmr macro-F1 0.694 against rules 0.839, failed all four checks, so it stays out of `shadow`. Production stays on `rules` with the `local` driver.)
+- [ ] Later, optional: a human-labelled `curated-v2` or redacted real feedback, then rerun the gate.
 
 ## Task 2: Star Rating Instead of a Dropdown
 
