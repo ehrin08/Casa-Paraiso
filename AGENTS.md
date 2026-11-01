@@ -51,7 +51,7 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 - Keep the application server-rendered. Alpine.js and Turbo may enhance safe web interactions; state-changing actions remain normal Laravel requests.
 - Keep calendar mutation workflows on web form routes. Role-scoped JSON calendar feeds remain web support endpoints, not a public API contract.
 - Use `page-heading`, `stat-strip`, `list-toolbar`, `table-shell`, and `pagination.compact`; page size is `casa.pagination.per_page = 15`.
-- Booking is Asia/Manila, 1:00 PM through midnight, with 30-minute starts. Confirmed appointments reserve therapist capacity transactionally.
+- Booking is Asia/Manila, 1:00 PM to 11:00 PM, with 30-minute starts; treatments finish by closing, and admin-managed closed dates have no bookable time. Confirmed appointments reserve therapist capacity transactionally.
 - Keep browser attendance camera access limited to the attendance page.
 
 ## Verification and Delivery

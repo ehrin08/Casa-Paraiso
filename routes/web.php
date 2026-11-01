@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
 use App\Http\Controllers\Admin\RfmSegmentController as AdminRfmSegmentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
+use App\Http\Controllers\Admin\ClosedDateController as AdminClosedDateController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Admin\StaffScheduleExceptionController as AdminStaffScheduleExceptionController;
@@ -179,6 +180,9 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::get('/team', [AdminTeamProfileController::class, 'index'])->name('team.index');
         Route::get('/team/{member}/edit', [AdminTeamProfileController::class, 'edit'])->whereNumber('member')->name('team.edit');
         Route::patch('/team/{member}', [AdminTeamProfileController::class, 'update'])->whereNumber('member')->name('team.update');
+        Route::get('/closed-dates', [AdminClosedDateController::class, 'index'])->name('closed-dates.index');
+        Route::post('/closed-dates', [AdminClosedDateController::class, 'store'])->name('closed-dates.store');
+        Route::delete('/closed-dates/{closedDate}', [AdminClosedDateController::class, 'destroy'])->whereNumber('closedDate')->name('closed-dates.destroy');
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
         Route::patch('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
     });

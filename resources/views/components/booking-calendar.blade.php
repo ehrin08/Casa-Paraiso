@@ -12,11 +12,11 @@
                 <div>
                     <button type="button" class="booking-calendar-day" x-show="day.date" x-bind:disabled="!day.available || loading || !!error"
                         x-bind:class="{ 'is-open': day.available, 'is-selected': day.date === selectedDate }"
-                        x-bind:aria-label="`${day.date}, ${day.available ? 'store open' : 'unavailable'}`"
+                        x-bind:aria-label="`${day.date}, ${day.closed ? 'closed: ' + day.closed : (day.available ? 'store open' : 'unavailable')}`" x-bind:title="day.closed || ''"
                         x-bind:aria-pressed="day.date === selectedDate" x-bind:data-booking-calendar-day="day.date"
                         x-on:click="selectDate(day.date)" x-on:keydown.right.prevent="moveAvailableDate(day.date, 1)" x-on:keydown.left.prevent="moveAvailableDate(day.date, -1)"
                         x-on:keydown.down.prevent="moveAvailableDate(day.date, 7)" x-on:keydown.up.prevent="moveAvailableDate(day.date, -7)">
-                        <strong x-text="day.label"></strong><span class="booking-date-open" x-show="day.available">{{ __('Open') }}</span>
+                        <strong x-text="day.label"></strong><span class="booking-date-open" x-show="day.available">{{ __('Open') }}</span><span class="booking-date-closed" x-show="day.closed">{{ __('Closed') }}</span>
                         <span class="booking-date-preview" x-show="day.available"><template x-for="slot in day.previewSlots" x-bind:key="slot.starts_at"><span x-text="slot.label"></span></template><span x-show="day.moreSlots" x-text="moreSlotsLabel(day)"></span></span>
                     </button>
                 </div>

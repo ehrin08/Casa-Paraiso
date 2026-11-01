@@ -126,6 +126,15 @@
             </div>
         </div>
 
+        <section class="settings-card settings-team-card" aria-labelledby="closed-dates-heading" data-settings-closed-dates-link>
+            <span class="settings-icon-circle"><x-nav-icon name="calendar" /></span>
+            <div>
+                <h2 id="closed-dates-heading">{{ __('Closed dates') }}</h2>
+                <p class="settings-description">{{ __('Close the spa for holidays or other whole days. No one can book on a closed date.') }}</p>
+            </div>
+            <a href="{{ route('admin.closed-dates.index') }}" class="casa-button-secondary">{{ __('Manage closed dates') }}</a>
+        </section>
+
         <section class="settings-card settings-team-card" aria-labelledby="organization-chart-heading" data-settings-team-link>
             <span class="settings-icon-circle"><x-nav-icon name="team" /></span>
             <div>
