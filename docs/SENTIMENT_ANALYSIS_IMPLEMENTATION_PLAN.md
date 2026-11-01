@@ -164,6 +164,18 @@ The local-model foundation is implemented: native PHP JSON-artifact inference, `
 
 Since 2026-10-30 the hybrid adapter can use a pretrained multilingual XLM-RoBERTa checkpoint (`cardiffnlp/twitter-xlm-roberta-base-sentiment`) instead of the local artifact. `SENTIMENT_MODEL_DRIVER=xlmr` selects `App\Services\XlmRobertaSentimentModel`, which posts the comment to `SENTIMENT_XLMR_URL` in the Hugging Face text-classification format and records the result as the `model` candidate (version `xlmr-twitter-base-v1`). Blank comments, a missing URL, timeouts, errors and unexpected payloads all leave the rules in charge. The optional Docker `sentiment` profile serves the same API locally. `casa:sentiment-predictions {dataset} {output} --driver=rules|local|xlmr` writes predictions for `scripts/evaluate_sentiment_model.py`, so the checkpoint can be compared on the locked test set once that set exists. Until it passes the gate, production stays on `rules` with the `local` driver.
 
+Since 2026-11-01 there's a curated test set, because real feedback is still too sparse for Phase 2. `resources/sentiment/eval/curated-v1/` holds 240 fictional English, Tagalog and Taglish comments (`items.csv`), the author's draft labels for the adjudicator (`suggested.csv`), and two blank sheets for independent labellers. The [Labelling Guide](sentiment/LABELING_GUIDE.md) defines the labels. The workflow runs from the repository root:
+
+```text
+python scripts/sentiment_agreement.py resources/sentiment/eval/curated-v1
+python scripts/lock_sentiment_testset.py resources/sentiment/eval/curated-v1
+.\scripts\casa-docker.ps1 compose exec -T app php artisan casa:sentiment-predictions resources/sentiment/eval/curated-v1/locked-test.csv storage/app/private/c1-rules.csv --driver=rules
+.\scripts\casa-docker.ps1 compose exec -T app php artisan casa:sentiment-predictions resources/sentiment/eval/curated-v1/locked-test.csv storage/app/private/c1-xlmr.csv --driver=xlmr
+python scripts/evaluate_sentiment_model.py resources/sentiment/eval/curated-v1/locked-test.csv storage/app/private/c1-xlmr.csv storage/app/private/c1-xlmr.json --baseline storage/app/private/c1-rules.csv
+```
+
+The agreement script reports Cohen's kappa and pre-fills `final` wherever the two labellers agree. The lock script refuses blank finals and never overwrites `locked-test.csv`. Record its SHA-256 in the manifest. The evaluator uses only the standard library and reports per-language and per-tag results. With `--baseline` it applies the governance gate and exits 2 on failure. The xlmr run needs the `sentiment` profile running and `SENTIMENT_XLMR_URL` set. Curated results show how the model handles representative cases, but they are not evidence from real customers. Repeat the gate on redacted real feedback once enough has accumulated.
+
 ## Recommended first implementation slice
 
 Start with Phases 1–3: dataset governance, a small manually verified Casa Paraiso set, and a baseline evaluation of the existing classifier. This produces evidence about whether a trained model is worth the additional deployment and maintenance cost before changing production classification behavior.

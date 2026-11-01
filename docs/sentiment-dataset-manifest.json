@@ -1,7 +1,25 @@
 {
   "schema_version": 1,
-  "status": "internal-seed-required",
-  "sources": [],
+  "status": "curated-test-set-awaiting-labels",
+  "sources": [
+    {
+      "id": "curated-v1",
+      "path": "resources/sentiment/eval/curated-v1/",
+      "origin": "fictional comments authored for evaluation on 2026-11-01; not customer data and contains no personal information",
+      "license": "project-internal",
+      "languages": [
+        "en",
+        "tl",
+        "taglish"
+      ],
+      "rows": 240,
+      "design": "80 rows per language (30 positive, 25 neutral, 25 negative by draft label); 97 rows tagged mixed, negation, sarcasm, misspelling or rating_conflict",
+      "label_provenance": "two independent human labellers (labels-a.csv, labels-b.csv) following docs/sentiment/LABELING_GUIDE.md, then adjudication; suggested.csv holds the author's draft labels for the adjudicator only",
+      "split": "test",
+      "permitted_use": "locked evaluation only; never used for training or tuning rules or models",
+      "locked_sha256": null
+    }
+  ],
   "required_fields": [
     "text",
     "rating",

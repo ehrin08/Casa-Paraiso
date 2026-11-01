@@ -37,6 +37,7 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [Sentiment Analysis Implementation Plan](SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md)
 - [Sentiment Data Governance](SENTIMENT_DATA_GOVERNANCE.md)
 - [Sentiment Dataset Manifest](sentiment-dataset-manifest.json)
+- [Sentiment Labelling Guide](sentiment/LABELING_GUIDE.md): labels, mixed-comment rules, and the label, agree, lock and evaluate workflow for the curated test set.
 
 ## Session Notes
 

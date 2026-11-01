@@ -16,7 +16,11 @@ In progress since 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-rober
 - [x] Record the model's source and license in [sentiment-dataset-manifest.json](sentiment-dataset-manifest.json). (The model card declares no license; confirm before production use.)
 - [x] Decide how to run inference. Hostinger shared hosting cannot run a Python or transformer worker, and the [Sentiment Analysis Implementation Plan](SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md) rules out a mandatory external AI service. (Chosen: an optional HTTP endpoint in the Hugging Face format, with a short timeout and the rules as fallback. Locally it runs as the Docker `sentiment` profile. The production host is not chosen yet.)
 - [x] Add the model as another classifier behind the existing hybrid adapter. Keep the `positive`, `neutral` and `negative` labels and the rules fallback. (`SENTIMENT_MODEL_DRIVER=xlmr`.)
-- [ ] Build the redacted, labelled locked test set, then pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`.
+- [ ] Build the redacted, labelled locked test set, then pass the evaluation gate in the implementation plan (macro-F1 against the locked test set) and run in `shadow` mode before switching to `model`. Real feedback is too sparse (2 comments locally), so on 2026-11-01 the user chose a curated set of 240 fictional comments with two-person CSV labelling ([session note](notes/sessions/2026-11-01-sentiment-test-set.md), [Labelling Guide](sentiment/LABELING_GUIDE.md)).
+  - [x] Draft the items, label sheets, agreement and lock scripts, and the gate verdict in `scripts/evaluate_sentiment_model.py`.
+  - [ ] Two people fill in `labels-a.csv` and `labels-b.csv` (user action).
+  - [ ] Run the agreement script, adjudicate, lock the set and record its SHA-256 in the manifest.
+  - [ ] Run rules, local and xlmr predictions and the gate. Run in `shadow` mode only if xlmr passes.
 
 ## Task 2: Star Rating Instead of a Dropdown
 
