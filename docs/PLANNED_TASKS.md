@@ -93,3 +93,17 @@ The user chose to keep how it works and change only how it looks: the same engin
 - [ ] Later, optional (adds behavior): ready-made templates (Reward loyal regulars, Win back lost customers, Welcome new customers).
 - [ ] Later, optional (adds behavior): a plain-language "This rule would include 12 customers right now" preview before saving.
 - [x] Update [RFM Engine](RFM_ENGINE.md), [Screen Flow](SCREEN_FLOW.md), and the tests (`AdminRfmSegmentTest`, `AdminRewardsLayoutTest`, new `RfmVocabularyTest`), then run the full gate.
+
+## Task 8: Align the App With the Client's Facebook Page
+
+Added 2026-11-01. Planned, not started. Not yet in the tracker sheet.
+
+Source: [Client Facebook Page Review](client/FACEBOOK_PAGE_REVIEW.md), which compared the client's public page with the app. Each item starts by confirming the fact with the client. Items 1–4 change behavior, so each needs its own design choice and the full verification gate. Items 5–7 are settings or client actions and need no code.
+
+- [ ] **Closing time.** The page says the spa is open 1:00 PM to 11:00 PM. The app books until midnight (`business_hours.closes_at` `00:00` in `config/casa.php`, and "1:00 PM to 12:00 MN" in [MVP Scope](MVP_SCOPE.md)). Confirm the closing time and the latest start the client accepts. If it is 11:00 PM, change the config and the docs, and check the slot, availability and calendar tests. Existing appointments after the new close stay as they are.
+- [ ] **PHP 299 back massage on its own.** The page says "Price starts at 299". In the app, the 30-Minute Back Massage (PHP 299) is only an add-on, and the cheapest package is GAIA TOUCH (PHP 499). Confirm whether customers can book it alone. If so, add it as a bookable service with an idempotent seeder or data migration, and keep the add-on.
+- [ ] **Holiday and closed dates.** The spa closed on 1 and 2 November 2026, but the app has no closed-date setting. Design an admin-managed list of closed dates (additive migration), and remove those dates from customer, receptionist and admin booking availability. Decide how to treat appointments already booked on a newly closed date.
+- [ ] **Seasonal promos.** The Teachers' Month promo was PHP 50 off for teaching and non-teaching staff, 1–31 October 2026. The app's discounts come only from membership tiers and RFM rules. Ask how often the client runs promos like this. Then either record them as a manual transaction adjustment or design dated promos (amount, eligible group, start and end dates).
+- [ ] **Contact details in Settings.** The page lists a phone number and email, but `contact_phone` and `contact_email` default to empty. The admin enters them in Settings. No code change.
+- [ ] **Public business name.** The page uses "Casa Paraiso Body & Wellness Spa" and [MVP Scope](MVP_SCOPE.md) uses "Casa Paraiso - Body and Wellness Spa". Confirm the spelling the client prefers and set it in Settings.
+- [ ] **Move bookings from Messenger to the website.** Customers now book through Messenger messages. Ask the client to add casaparaiso.site to the page (a "Book now" button, a pinned post, and the Messenger auto-reply). This is a client action.
