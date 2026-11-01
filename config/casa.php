@@ -88,6 +88,18 @@ return [
             ],
         ],
         [
+            'name' => '30-Minute Back Massage',
+            'slug' => 'back-massage',
+            'description' => 'A focused 30-minute massage for the back, shoulders and neck.',
+            'duration_minutes' => 30,
+            'duration_label' => '30 Minutes',
+            'price' => 299.00,
+            'includes' => [
+                'Back Massage',
+                'Shoulders and Neck',
+            ],
+        ],
+        [
             'name' => 'AURORA BREEZE',
             'slug' => 'aurora-breeze',
             'description' => 'Extended Full Body Massage package with add-ons and VIP Room access.',

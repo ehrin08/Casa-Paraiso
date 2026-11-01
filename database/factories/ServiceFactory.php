@@ -13,7 +13,8 @@ class ServiceFactory extends Factory
 {
     public function definition(): array
     {
-        $package = fake()->randomElement(config('casa.service_packages'));
+        // Tests rely on the full-length packages; the 30-minute back massage is created explicitly.
+        $package = fake()->randomElement(collect(config('casa.service_packages'))->where('slug', '!=', 'back-massage')->values()->all());
         $name = $package['name'].' '.fake()->unique()->numberBetween(1, 9999);
 
         return [

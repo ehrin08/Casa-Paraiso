@@ -31,7 +31,8 @@ class DatabaseFoundationTest extends TestCase
             'email' => 'admin@casaparaiso.test',
             'role' => User::ROLE_ADMIN,
         ]);
-        $this->assertDatabaseCount('services', 4);
+        $this->assertDatabaseCount('services', 5);
+        $this->assertDatabaseHas('services', ['slug' => 'back-massage', 'duration_minutes' => 30, 'price' => 299.00, 'is_active' => true]);
         $this->assertDatabaseHas('services', [
             'name' => 'GAIA TOUCH',
             'slug' => 'gaia-touch',
