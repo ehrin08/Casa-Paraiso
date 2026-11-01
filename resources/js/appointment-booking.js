@@ -24,6 +24,7 @@ function bookingBase(config, get) {
         selectedSlot: canonicalStart(config.initialScheduledStart || config.initialSlot),
         slotsByDate: {},
         storeDates: {},
+        closedDates: {},
         loading: false,
         error: '',
         availabilityRequest: 0,
@@ -75,11 +76,11 @@ function bookingBase(config, get) {
             const [year, month] = this.month.split('-').map(Number);
             const firstDay = new Date(Date.UTC(year, month - 1, 1));
             const count = new Date(Date.UTC(year, month, 0)).getUTCDate();
-            const days = Array.from({ length: firstDay.getUTCDay() }, (_, index) => ({ key: `blank-${index}`, date: null, label: '', available: false, previewSlots: [], moreSlots: 0 }));
+            const days = Array.from({ length: firstDay.getUTCDay() }, (_, index) => ({ key: `blank-${index}`, date: null, label: '', available: false, closed: null, previewSlots: [], moreSlots: 0 }));
             for (let day = 1; day <= count; day++) {
                 const date = `${this.month}-${String(day).padStart(2, '0')}`;
                 const slots = this.slotsByDate[date] || [];
-                days.push({ key: date, date, label: day, available: Boolean(this.storeDates[date] || slots.length), previewSlots: slots.slice(0, this.slotPreviewLimit), moreSlots: Math.max(0, slots.length - this.slotPreviewLimit) });
+                days.push({ key: date, date, label: day, available: Boolean(this.storeDates[date] || slots.length), closed: this.closedDates[date] || null, previewSlots: slots.slice(0, this.slotPreviewLimit), moreSlots: Math.max(0, slots.length - this.slotPreviewLimit) });
             }
             return days;
         },
@@ -194,6 +195,7 @@ function bookingBase(config, get) {
             this.error = '';
             this.slotsByDate = {};
             this.storeDates = {};
+            this.closedDates = {};
             if (!this.serviceId || this.scheduleLocked) { this.loading = false; return; }
             this.loading = true;
             try {
@@ -201,6 +203,7 @@ function bookingBase(config, get) {
                 if (request !== this.availabilityRequest || this.destroyed) return;
                 this.slotsByDate = response.data.dates || {};
                 this.storeDates = response.data.store_dates || {};
+                this.closedDates = response.data.closed_dates || {};
                 if (this.selectedSlot && !this.selectedSlotData && !this.canUsePersistedSchedule) this.clearSlot();
                 this.availabilityLoaded();
             } catch (error) {

@@ -94,6 +94,7 @@
 .booking-calendar-day.is-open:not(:disabled):hover { border-color: var(--color-casa-palm); }
 .booking-calendar-day.is-selected, .booking-time-slot.is-selected { background: var(--color-casa-palm); border-color: var(--color-casa-palm); color: white; }
 .booking-date-open { display: block; font-size: .625rem; font-weight: 700; margin-top: .25rem; }
+.booking-date-closed { display: block; font-size: .625rem; font-weight: 700; margin-top: .25rem; color: var(--color-casa-muted); }
 .booking-date-preview { display: none; }
 .booking-calendar-legend { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; font-size: .75rem; color: var(--color-casa-muted); }
 .booking-open-dot, .booking-selected-dot { display: inline-block; width: .625rem; height: .625rem; border: 1px solid var(--color-casa-palm); border-radius: 50%; background: var(--color-casa-palm-tint); }

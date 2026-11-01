@@ -15,7 +15,7 @@ This design supports customer login, therapist scheduling, immediately confirmed
 - Store money as `decimal(10,2)`.
 - Store dates and times in server time for MVP; use Asia/Manila as the business timezone in application config.
 - Use MariaDB 10.11 LTS-compatible column types and index names no longer than 64 characters.
-- Treat 1:00 PM to 12:00 midnight as the hard booking boundary and generate appointment starts at 30-minute intervals.
+- Treat 1:00 PM to 11:00 PM as the hard booking boundary (the whole treatment must fit) and generate appointment starts at 30-minute intervals. Dates in `closed_dates` have no bookable time.
 
 ## Status Values
 
@@ -156,6 +156,7 @@ Initial active services should mirror the current package menu:
 - TETHYS FLOW, 60 minutes, PHP 649.00.
 - HESTIA WARMTH, 90 minutes, PHP 749.00.
 - AURORA BREEZE, 120 minutes, PHP 849.00.
+- 30-Minute Back Massage (`back-massage`), 30 minutes, PHP 299.00. Added on 2026-11-01 because the client sells it on its own. Data migration `2026_11_02_000000` adds it to installed catalogs (those with GAIA TOUCH) and assigns every GAIA TOUCH therapist; fresh databases get it from the seeder. The add-on of the same name stays.
 
 Add-ons are managed as standalone shared catalog records. The initial catalog contains Ventosa, Hot Compress, Hot Stone, 30-Minute Back Massage, and VIP Room. Admins may edit name, description, price, duration, and active state; codes remain stable and add-ons are deactivated rather than deleted. Active records may be selected with any active service. A separate RFM voucher may grant one complimentary add-on; it never discounts a paid selection. Add-on duration extends the scheduled duration.
 
@@ -473,6 +474,24 @@ Rules:
 - Admin-managed company-profile content is escaped when rendered publicly; an entirely blank history and chart keep the landing-page About section hidden.
 - The public team chart reads only presentation columns (`name`, `role`, `photo_path`, `public_title`, `public_bio`, tier and order) of published staff accounts; email, phone and sign-in fields are never exposed.
 - Booking hours, intervals, timezone, commission rate, and security controls remain configuration-controlled.
+
+### `closed_dates`
+
+Whole business days the spa is closed, such as holidays (since 2026-11-01, migration `2026_11_02_010000`).
+
+Key columns:
+
+- `id`
+- `closed_on` date, unique
+- `reason` (shown in the booking calendar label)
+- `created_by` nullable foreign key to `users.id`, null on delete
+- `created_at`, `updated_at`
+
+Rules:
+
+- `ScheduleWindowResolver::effectiveWindows()` returns no windows on a closed date, so slot lists, every booking and reschedule check, and calendar availability all treat it as closed. Closed dates are read with shared locks inside booking transactions.
+- Saving a closed date locks every therapist row first, then refuses the date while confirmed appointments start on it. Bookings lock therapist rows before reading the schedule, so the two cannot interleave.
+- Removing a row reopens the date. Past rows are kept for history.
 
 ## RFM Promotions
 

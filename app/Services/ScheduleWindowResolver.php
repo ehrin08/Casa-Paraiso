@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ClosedDate;
 use App\Models\StaffProfile;
 use App\Models\StaffScheduleException;
 use App\Models\StaffScheduleShift;
@@ -18,12 +19,51 @@ class ScheduleWindowResolver
     /** @var array<int, Collection<string, Collection<int, StaffScheduleShift>>> */
     private array $publishedRosterShifts = [];
 
+    /** @var array<string, string|null> Closing reason per business date, or null when open. */
+    private array $closedDates = [];
+
     private bool $lockingReads = false;
 
     public function clearCache(): void
     {
         $this->publishedWeeks = [];
         $this->publishedRosterShifts = [];
+        $this->closedDates = [];
+    }
+
+    /** The reason the spa is closed on this business date, or null when it is open. */
+    public function closedReason(CarbonInterface $day): ?string
+    {
+        $date = Carbon::parse($day, (string) config('casa.business_hours.timezone', config('app.timezone')))->toDateString();
+
+        if (! array_key_exists($date, $this->closedDates)) {
+            $this->closedDates[$date] = ClosedDate::query()
+                ->whereDate('closed_on', $date)
+                ->when($this->lockingReads, fn ($query) => $query->sharedLock())
+                ->value('reason');
+        }
+
+        return $this->closedDates[$date];
+    }
+
+    /**
+     * Closing reasons for every closed date in a range, keyed by date, with the cache primed.
+     *
+     * @return array<string, string>
+     */
+    public function closedReasonsBetween(CarbonInterface $from, CarbonInterface $to): array
+    {
+        $closed = ClosedDate::query()
+            ->whereBetween('closed_on', [$from->toDateString(), $to->toDateString()])
+            ->pluck('reason', 'closed_on')
+            ->mapWithKeys(fn (string $reason, $date) => [Carbon::parse($date)->toDateString() => $reason])
+            ->all();
+
+        for ($day = Carbon::parse($from->toDateString()); $day->lte($to); $day->addDay()) {
+            $this->closedDates[$day->toDateString()] = $closed[$day->toDateString()] ?? null;
+        }
+
+        return $closed;
     }
 
     /** Use a fresh, current database view after the caller acquires therapist locks. */
@@ -61,6 +101,12 @@ class ScheduleWindowResolver
     public function effectiveWindows(StaffProfile $staffProfile, CarbonInterface $day, ?Collection $rosterShifts = null): Collection
     {
         $date = Carbon::parse($day)->startOfDay();
+
+        // A closed date has no bookable time for anyone, whatever the therapist schedules say.
+        if ($this->closedReason($date) !== null) {
+            return collect();
+        }
+
         $business = $this->businessWindow($date);
 
         $exceptions = $staffProfile->relationLoaded('scheduleExceptions')

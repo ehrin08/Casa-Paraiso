@@ -6,6 +6,8 @@
         'appointment-booked' => __('Appointment confirmed and added to the schedule.'),
         'appointment-completed' => __('Service finished and transaction recorded.'),
         'appointment-cancelled' => __('Appointment cancelled.'),
+        'closed-date-created' => __('Closed date saved. No one can book on it.'),
+        'closed-date-deleted' => __('Closed date removed. Booking is open again.'),
         'service-created' => __('Service created.'),
         'service-updated' => __('Service updated.'),
         'service-activated' => __('Service activated.'),

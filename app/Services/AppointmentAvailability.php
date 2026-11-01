@@ -69,8 +69,11 @@ class AppointmentAvailability
             ->get()
             ->groupBy('staff_profile_id');
 
+        $closedDates = $this->scheduleWindows->closedReasonsBetween($monthStart, $monthEnd);
+
         for ($day = $monthStart->copy(); $day->lte($monthEnd); $day->addDay()) {
-            if ($day->lt($today)) {
+            // Closed dates are not store dates at all, so the calendar shows them as closed, not empty.
+            if ($day->lt($today) || array_key_exists($day->toDateString(), $closedDates)) {
                 continue;
             }
 
@@ -94,6 +97,7 @@ class AppointmentAvailability
             'preferred_staff_profile_id' => $preferredStaffProfileId,
             'dates' => $dates,
             'store_dates' => $storeDates,
+            'closed_dates' => array_filter($closedDates, fn (string $date) => $date >= $today->toDateString(), ARRAY_FILTER_USE_KEY),
         ];
     }
 
