@@ -124,6 +124,44 @@ class CustomerBookingSafeguardsTest extends TestCase
             ->assertSee('name="requested_start_at"', false);
     }
 
+    public function test_rejected_dialog_submit_reopens_the_booking_dialog_with_the_message(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        $index = route('customer.appointments.index', absolute: false);
+        $create = route('customer.appointments.create', absolute: false);
+
+        $this->actingAs($customer->user)
+            ->withHeader('X-Casa-Panel', '1')
+            ->get($create)
+            ->assertOk()
+            ->assertSee('name="_panel" value="'.$create.'"', false);
+
+        $this->flushHeaders()->actingAs($customer->user)
+            ->get($create)
+            ->assertOk()
+            ->assertDontSee('name="_panel"', false);
+
+        $this->selfBooking($customer, now()->addDays(2));
+        $this->selfBooking($customer, now()->addDays(3));
+
+        $this->actingAs($customer->user)
+            ->from($index)
+            ->post(route('customer.appointments.store', absolute: false), [...$this->payload($service, $therapist, $start), '_panel' => $create])
+            ->assertRedirect($index)
+            ->assertSessionHasErrors('booking');
+
+        $this->actingAs($customer->user)
+            ->get($index)
+            ->assertOk()
+            ->assertSee('data-panel-restore="'.$create.'"', false);
+
+        $this->actingAs($customer->user)
+            ->withHeader('X-Casa-Panel', '1')
+            ->get($create)
+            ->assertOk()
+            ->assertSee('You already have 2 upcoming online bookings.');
+    }
+
     private function payload(Service $service, StaffProfile $therapist, Carbon $start): array
     {
         return [

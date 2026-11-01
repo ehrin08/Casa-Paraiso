@@ -16,6 +16,8 @@
     })" x-bind:novalidate="true" x-on:submit="submitBooking($event)" x-on:booking-date-selected.window="preselectDate($event.detail.date)">
     @csrf
     @if ($bookingContext ?? null)<input type="hidden" name="_booking_context" value="{{ $bookingContext }}">@endif
+    {{-- In the dialog, a rejected submit reopens it on the page behind so the error is shown. --}}
+    @if (request()->header('X-Casa-Panel') === '1')<input type="hidden" name="_panel" value="{{ route('customer.appointments.create', absolute: false) }}">@endif
     <input type="hidden" name="service_id" value="{{ old('service_id', $preselectedServiceId ?? '') }}" x-bind:value="serviceId">
     <input type="hidden" name="requested_start_at" value="{{ $initialRequestedAt }}" x-bind:value="selectedSlot">
     <x-booking-stepper />

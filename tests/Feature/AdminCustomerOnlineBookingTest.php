@@ -100,6 +100,42 @@ class AdminCustomerOnlineBookingTest extends TestCase
             ->assertSee('Allowed');
     }
 
+    public function test_detail_page_shows_upcoming_limit_reached(): void
+    {
+        $customer = CustomerProfile::factory()->create();
+        foreach ([2, 3] as $days) {
+            Appointment::factory()->for($customer)->create([
+                'scheduled_start_at' => now()->addDays($days),
+                'scheduled_end_at' => now()->addDays($days)->addHour(),
+                'created_by' => $customer->user_id,
+            ]);
+        }
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.customers.show', $customer, false))
+            ->assertOk()
+            ->assertSee('Upcoming booking limit reached')
+            ->assertDontSee('can book online within the normal limits');
+    }
+
+    public function test_list_recovery_modal_reports_no_show_pause(): void
+    {
+        $customer = CustomerProfile::factory()->create();
+        foreach ([5, 20] as $daysAgo) {
+            Appointment::factory()->for($customer)->create([
+                'status' => Appointment::STATUS_NO_SHOW,
+                'scheduled_start_at' => now()->subDays($daysAgo),
+                'scheduled_end_at' => now()->subDays($daysAgo)->addHour(),
+            ]);
+        }
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->withSession(['customer_modal_id' => $customer->id])
+            ->get(route('admin.customers.index', absolute: false))
+            ->assertOk()
+            ->assertSee('Paused by no-shows');
+    }
+
     public function test_modal_detail_shows_card(): void
     {
         $customer = $this->blockedCustomer();
