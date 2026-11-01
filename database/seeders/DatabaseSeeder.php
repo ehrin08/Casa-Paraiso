@@ -192,7 +192,7 @@ class DatabaseSeeder extends Seeder
         });
 
         $staffProfile->services()->syncWithoutDetaching(
-            $services->whereIn('slug', ['gaia-touch', 'tethys-flow', 'hestia-warmth'])->pluck('id')->all()
+            $services->whereIn('slug', ['gaia-touch', 'tethys-flow', 'hestia-warmth', 'back-massage'])->pluck('id')->all()
         );
 
         $secondStaffProfile->services()->syncWithoutDetaching(
