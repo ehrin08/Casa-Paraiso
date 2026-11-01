@@ -38,12 +38,13 @@ Planned task T5 from [PLANNED_TASKS.md](../../PLANNED_TASKS.md): prevent troll a
   - customer booking, appointments and calendar scheduling;
   - guest booking and rewards;
   - the admin customer modal, role workspace and reception.
-- Full Laravel suite passed: 558 tests, 5,856 assertions.
+- Full Laravel suite passed: 558 tests before the review fixes, then 561 tests and 5,864 assertions after them.
 - JavaScript tests passed: 92 of 92.
 - `npm run build` passed.
 - `casa-docker.ps1 start` passed with healthy services. The retained `mysql` orphan container was left alone.
 - The new migration was applied to the local database with `php artisan migrate` (additive only).
 - `git diff --check` passed.
+- A fresh reviewer read the whole branch. It found no critical problems and confirmed the five review-focus cases. The fixes for its findings are below.
 - Not done: an interactive browser check. The local database has no seeded test accounts, and none were created.
 
 ## Decisions
@@ -53,8 +54,21 @@ Planned task T5 from [PLANNED_TASKS.md](../../PLANNED_TASKS.md): prevent troll a
 - Block uses an inline form with a required reason in the card rather than a dialog, so it works the same on the full page and in the customer panel. Unblock is one button.
 - Block and unblock redirect to the full customer page, including when used from the list panel.
 
+### Review fixes
+
+- The booking form carries `_panel=/customer/appointments/create` when it is rendered in the dialog. A refused submit now reopens the dialog with the message, where before it closed silently. Test: `test_rejected_dialog_submit_reopens_the_booking_dialog_with_the_message`.
+- The admin card shows "Upcoming booking limit reached" for capped customers instead of "Allowed" (`test_detail_page_shows_upcoming_limit_reached`).
+- The details partial now computes the restriction itself, so the list's recovery modal also shows the no-show pause (`test_list_recovery_modal_reports_no_show_pause`).
+- The booking-limits notes in `DATABASE_DESIGN.md` were moved below the guest rules.
+
 ## Follow-ups
 
 - Browser-check as a local customer (the notice in the booking dialog) and as an admin (block and unblock), with local test accounts.
 - Deploy with the next release. It includes one additive migration, so take a private dump before migrating the live database.
+- Deferred minor review points:
+  - Lock order: self-booking locks the customer then the therapists. That could rarely deadlock with a staff booking for the same customer at the same moment; InnoDB resolves it, and staff would see a one-off error.
+  - Submissions that fail form validation do not count toward the rate limit.
+  - A whitespace-only block reason from the customer panel fails without reopening the panel.
+  - The wait message says "1 minutes".
+  - The spec names `RateLimiter::attempt`, but the code uses `tooManyAttempts` and `hit`.
 - Set T5 to Done in the `Tasks` tab of the "Casa Paraiso Tracker" Google Sheet.

@@ -275,7 +275,7 @@ Primary actions:
 - View customer history.
 - Update customer notes.
 - Review promotion suggestions.
-- Block or allow online booking from the Online booking card (reason required). The card shows Allowed, Blocked by admin (reason, admin, date) or Paused by no-shows.
+- Block or allow online booking from the Online booking card (reason required). The card shows Allowed, Blocked by admin (reason, admin, date), Paused by no-shows or Upcoming booking limit reached.
 
 ### Weekly Therapist Roster
 

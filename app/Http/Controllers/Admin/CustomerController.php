@@ -6,7 +6,6 @@ use App\Http\Controllers\Concerns\HandlesIndexSorting;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CustomerNoteRequest;
 use App\Models\CustomerProfile;
-use App\Services\CustomerBookingGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -62,16 +61,13 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function show(Request $request, CustomerProfile $customer, CustomerBookingGuard $bookingGuard): View
+    public function show(Request $request, CustomerProfile $customer): View
     {
         $this->loadDetails($customer);
-        $customer->loadMissing('onlineBookingBlockedBy');
         $isModal = $request->header('X-Casa-Panel') === '1' && $request->query('modal') === '1';
 
         return view($isModal ? 'admin.customers.modal' : 'admin.customers.show', [
             'customer' => $customer,
-            'bookingRestriction' => $bookingGuard->restriction($customer),
-            'noShowCount' => $bookingGuard->noShowCount($customer),
             'returnFilters' => $request->query('return_filters', []),
         ]);
     }
@@ -80,6 +76,7 @@ class CustomerController extends Controller
     {
         $customer->load([
             'user',
+            'onlineBookingBlockedBy',
             'appointments' => fn ($query) => $query
                 ->with(['service', 'staffProfile.user'])
                 ->latest('requested_start_at')

@@ -1,5 +1,7 @@
+@inject('bookingGuard', 'App\Services\CustomerBookingGuard')
 @php
     $isModal = $isModal ?? false;
+    $bookingRestriction = $bookingGuard->restriction($customer);
     $customerNotesModal = 'admin-customer-notes-'.$customer->id;
     $notesInvalid = old('_modal') === $customerNotesModal && $errors->any();
     $noteValue = $notesInvalid ? (is_string(old('notes')) ? old('notes') : '') : $customer->notes;
@@ -94,9 +96,12 @@
                         <button type="submit" class="casa-button-secondary w-full">{{ __('Allow online booking') }}</button>
                     </form>
                 @else
-                    @if (($bookingRestriction ?? null) === \App\Services\CustomerBookingGuard::RESTRICTION_NO_SHOWS)
+                    @if ($bookingRestriction === \App\Services\CustomerBookingGuard::RESTRICTION_NO_SHOWS)
                         <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Paused by no-shows') }}</h2>
-                        <p class="mt-3 text-sm leading-6 text-casa-muted">{{ trans_choice(':count no-show in the last :days days. Online booking resumes when older no-shows leave that window; staff can still book this customer.|:count no-shows in the last :days days. Online booking resumes when older no-shows leave that window; staff can still book this customer.', $noShowCount ?? 0, ['days' => config('casa.customer_booking_limits.no_show_lookback_days', 90)]) }}</p>
+                        <p class="mt-3 text-sm leading-6 text-casa-muted">{{ trans_choice(':count no-show in the last :days days. Online booking resumes when older no-shows leave that window; staff can still book this customer.|:count no-shows in the last :days days. Online booking resumes when older no-shows leave that window; staff can still book this customer.', $bookingGuard->noShowCount($customer), ['days' => config('casa.customer_booking_limits.no_show_lookback_days', 90)]) }}</p>
+                    @elseif ($bookingRestriction === \App\Services\CustomerBookingGuard::RESTRICTION_UPCOMING_CAP)
+                        <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Upcoming booking limit reached') }}</h2>
+                        <p class="mt-3 text-sm leading-6 text-casa-muted">{{ __('This customer already has :max upcoming online bookings. They can book again online once one is completed or cancelled; staff can still book for them.', ['max' => config('casa.customer_booking_limits.max_upcoming', 2)]) }}</p>
                     @else
                         <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Allowed') }}</h2>
                         <p class="mt-3 text-sm leading-6 text-casa-muted">{{ __('This customer can book online within the normal limits.') }}</p>
