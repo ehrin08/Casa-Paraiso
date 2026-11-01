@@ -59,9 +59,9 @@ class AdminRewardsLayoutTest extends TestCase
             $this->get(route('admin.promotions.settings.edit', absolute: false))
                 ->assertOk()->assertViewIs('admin.promotions.settings')
                 ->assertSee('data-rewards-settings-editor', false)
-                ->assertSee('Save customer rewards')->assertSee('Cancel')
-                ->assertSee('groups[high_value][addon_code]', false)
-                ->assertSee('groups[new_customer][is_active]', false)
+                ->assertSee('Save customer rewards')->assertSee('Segment rules')
+                ->assertSee('name="promotion_voucher_validity_days"', false)
+                ->assertSee(route('admin.promotions.segments.edit', RfmSegment::query()->where('preset_key', 'high_value')->value('id')), false)
                 ->assertSee(route('admin.promotions.settings.update'), false);
         }
     }
@@ -191,35 +191,29 @@ class AdminRewardsLayoutTest extends TestCase
             $this->actingAs($user)->from(route('admin.promotions.settings.edit'))
                 ->patch(route('admin.promotions.settings.update', absolute: false), [
                     'promotion_voucher_validity_days' => null,
-                    'groups' => $this->rewardGroups('vip-room', false),
-                ])->assertRedirect(route('admin.promotions.index'))->assertSessionHas('status', 'customer-rewards-updated');
+                ])->assertRedirect(route('admin.promotions.settings.edit'))->assertSessionHas('status', 'customer-rewards-updated');
         }
+        RfmSegment::query()->update(['is_active' => false]);
 
         $this->assertEquals($before, $reward->fresh()->only(['addon_code', 'expires_at']));
         $this->assertDatabaseHas('application_settings', ['business_name' => 'Saved business', 'company_history' => 'Saved history', 'contact_phone' => '09179999999', 'promotion_voucher_validity_days' => null]);
-        $this->assertDatabaseHas('rfm_segments', ['preset_key' => 'loyal', 'addon_code' => 'vip-room', 'is_active' => false]);
         $this->get(route('admin.promotions.index', absolute: false))->assertOk()
             ->assertSee('data-rewards-enabled="false"', false)->assertSee('No groups enabled')->assertSee('No expiration');
     }
 
     public function test_settings_validation_returns_to_editor_with_values_and_errors(): void
     {
-        $groups = $this->rewardGroups('vip-room', false);
-        $groups['high_value']['addon_code'] = 'invalid-addon';
         $url = route('admin.promotions.settings.edit');
 
         $this->actingAs($this->admin)->from($url)
-            ->patch(route('admin.promotions.settings.update', absolute: false), ['promotion_voucher_validity_days' => 60, 'groups' => $groups])
-            ->assertRedirect($url)->assertSessionHasErrors('groups.high_value.addon_code')
-            ->assertSessionHasInput('promotion_voucher_validity_days', 60)
-            ->assertSessionHasInput('groups.loyal.is_active', 0);
-        $message = session('errors')->first('groups.high_value.addon_code');
-        $this->get($url)->assertOk()->assertSee('<option value="60" selected>', false)
-            ->assertSee('<option value="vip-room" selected>', false)
-            ->assertSee($message);
+            ->patch(route('admin.promotions.settings.update', absolute: false), ['promotion_voucher_validity_days' => 42])
+            ->assertRedirect($url)->assertSessionHasErrors('promotion_voucher_validity_days')
+            ->assertSessionHasInput('promotion_voucher_validity_days', 42);
+        $message = session('errors')->first('promotion_voucher_validity_days');
+        $this->get($url)->assertOk()->assertSee($message);
 
-        $this->patchJson(route('admin.promotions.settings.update', absolute: false), ['promotion_voucher_validity_days' => 42, 'groups' => []])
-            ->assertUnprocessable()->assertJsonValidationErrors(['promotion_voucher_validity_days', 'groups']);
+        $this->patchJson(route('admin.promotions.settings.update', absolute: false), ['promotion_voucher_validity_days' => 'soon'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['promotion_voucher_validity_days']);
     }
 
     public function test_dismissal_control_is_on_available_reward_detail_and_rejects_other_states(): void
@@ -274,12 +268,5 @@ class AdminRewardsLayoutTest extends TestCase
             'promotion_rule_id' => null,
             'created_at' => '2026-09-30 12:00:00',
         ], $attributes));
-    }
-
-    private function rewardGroups(string $addon, bool $active): array
-    {
-        return collect(config('casa.customer_rewards.presets'))->mapWithKeys(fn ($preset) => [
-            $preset['key'] => ['addon_code' => $addon, 'is_active' => (int) $active],
-        ])->all();
     }
 }

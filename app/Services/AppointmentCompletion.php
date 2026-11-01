@@ -15,6 +15,7 @@ class AppointmentCompletion
         private readonly TransactionNumber $transactionNumbers,
         private readonly TherapistCommissionSynchronizer $commissions,
         private readonly RfmPromotionGenerator $promotions,
+        private readonly PaymentPricing $pricing,
     ) {}
 
     /** @param array<string, mixed> $payment */
@@ -48,6 +49,7 @@ class AppointmentCompletion
                 'notes' => $payment['notes'] ?? null,
             ]);
 
+            $this->pricing->settle($transaction, (float) $payment['amount'], $transaction->payment_status === Transaction::PAYMENT_PAID, $payment['gift_voucher_code'] ?? null);
             $this->workflow->changeStatus($locked, Appointment::STATUS_COMPLETED, $adminId, __('Service finished and transaction recorded'));
 
             $this->commissions->synchronize($transaction);

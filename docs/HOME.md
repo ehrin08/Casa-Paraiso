@@ -7,6 +7,8 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [MVP Scope](MVP_SCOPE.md)
 - [Tech Stack](TECH_STACK.md)
 - [Project Memory](PROJECT_MEMORY.md)
+- [RFM Engine](RFM_ENGINE.md): quintile RFM scoring and the admin-configurable segment rules.
+- [Memberships and Gift Vouchers](MEMBERSHIPS_AND_VOUCHERS.md): Gold and Platinum cards, payment pricing, and gift voucher rules.
 
 ## Data
 

@@ -26,5 +26,6 @@
                 <dd class="mt-2 font-semibold text-casa-text">{{ $transaction->service?->name }}</dd>
             </div>
         </dl>
+        @include('admin.transactions.partials.breakdown', ['transaction' => $transaction])
     </x-app-card>
 </x-app-layout>
