@@ -57,15 +57,15 @@ Done 2026-11-01 ([session note](notes/sessions/2026-11-01-booking-safeguards.md)
 
 ## Task 6: Animations Throughout the Project
 
-Added 2026-10-30. Planned, not started. Tracker ID T8.
+Added 2026-10-30. Done 2026-11-01 ([session note](notes/sessions/2026-11-01-subtle-animations.md)). Tracker ID T8.
 
-Motion today is limited to a few places: the drawer slide and fade and the loading sweep and pulse (keyframes in `resources/css/app.css`), the centered panel (`appointment-form.css`), the landing team-chart rise (`landing.css`), Alpine `x-transition` in the `modal`, `dropdown` and `toast-stack` components, and the scroll-hiding top bar (`resources/js/scroll-header.js`). The [Brand UI Guide](BRAND_UI_GUIDE.md#accessibility-and-motion) keeps motion between 160–220ms, uses it only to explain navigation or state changes, and requires honoring `prefers-reduced-motion`.
+Before this, motion was limited to a few places: the drawer slide and fade and the loading sweep and pulse (keyframes in `resources/css/app.css`), the centered panel (`appointment-form.css`), the landing team-chart rise (`landing.css`), Alpine `x-transition` in the `modal`, `dropdown` and `toast-stack` components, and the scroll-hiding top bar (`resources/js/scroll-header.js`). The [Brand UI Guide](BRAND_UI_GUIDE.md#accessibility-and-motion) keeps motion between 160–220ms, uses it only to explain navigation or state changes, and requires honoring `prefers-reduced-motion`.
 
-- [ ] Agree the scope with the user: the public landing page only, or every workspace, and which moments.
-- [ ] Add shared motion tokens (durations within 160–220ms, easing) to the `@theme` block in `resources/css/app.css`, and reuse the existing keyframes rather than adding per-page ones.
-- [ ] Candidates: content fade-in on Turbo navigation, staggered `stat-strip` and card entry, landing section reveal on scroll, table-row and list hover and press feedback, `x-section-tabs` and status-chip transitions, and consistent toast, modal and dropdown timing.
-- [ ] One global `prefers-reduced-motion: reduce` override. No content may depend on animation to be read, and nothing may cause layout shift or delay interaction.
-- [ ] Keep it presentation-only: server-rendered forms, Turbo and Alpine behavior stay unchanged. Verify with the full gate plus desktop, mobile and reduced-motion browser checks.
+- [x] Agree the scope with the user. (Chosen: everywhere, the landing page and every workspace, kept subtle.)
+- [x] Add shared motion tokens. (`--ease-casa` is in `@theme`. The duration, rise and stagger tokens are on `:root`. There are two shared keyframes, `casa-enter` and `casa-fade-in`.)
+- [x] Done: page fade-in, staggered `stat-strip`, appointment-stat and metric-card entry, landing hero entry and section reveal on scroll, table-row hover and button and tab press feedback, and consistent toast, modal and dropdown timing. Status chips stay static, because they do not change state in place.
+- [x] One global `prefers-reduced-motion: reduce` override. (It was already at the end of `resources/css/app.css` and covers every new rule. The scroll reveal is also gated on `no-preference`.)
+- [x] Keep it presentation-only. (Full gate run. Desktop and mobile were checked in the browser. Reduced motion could not be emulated in the browser pane, so it was checked by reading the CSS.)
 
 ## Task 7: Make the RFM Rules Friendly for Non-Technical Users
 

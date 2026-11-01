@@ -251,4 +251,10 @@ Preserve established service names, prices, business hours, statuses, and the li
 - Meet WCAG AA: 4.5:1 for normal text and 3:1 for large text and interface boundaries.
 - Every control needs a visible label or accessible name and a visible keyboard focus state.
 - Keep motion between 160–220ms and use it only to explain navigation or state changes.
+- Use the shared motion tokens in `resources/css/app.css`: `--casa-motion-fast` (160ms), `--casa-motion` (200ms), `--casa-motion-slow` (220ms), `--casa-rise` (6px), `--casa-stagger` (30ms), and the `--ease-casa` easing (Tailwind `ease-casa`).
+  - Reuse the `casa-enter` (fade and small rise) and `casa-fade-in` keyframes; do not add per-page keyframes.
+  - Animate only `opacity` and `transform`/`translate`, so nothing shifts layout. Content must end fully visible, and nothing may wait for an animation before it can be used.
+  - Workspace pages fade in with opacity only, without fill, so fixed dialogs inside `<main>` keep their positioning. Summary figures (`stat-strip`, appointment stats, dashboard metric cards) rise in with a stagger capped at the fourth item.
+  - Modals enter in 200ms and leave in 160ms with a 0.5rem rise. Dropdowns and toasts use the same timing. Buttons and section tabs move down 1px on press.
+  - The landing hero copy rises in on load. Later landing sections reveal with a scroll-driven `animation-timeline: view()` inside `@supports` and `prefers-reduced-motion: no-preference`, so browsers without support simply show the content. The reveal animates `translate` rather than `transform`, which keeps hover lifts working.
 - Honor `prefers-reduced-motion` and never make animation necessary to understand content.

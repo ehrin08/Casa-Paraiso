@@ -187,6 +187,26 @@
     .landing-footer-inner { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.8rem 2rem; }
     .landing-footer-nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.2rem 1.5rem; }
     .landing-copyright { grid-column: 1 / -1; text-align: right; font-size: 0.875rem; color: var(--landing-muted); }
+
+    /* Hero copy rises in on load; the shared casa-enter keyframe and tokens live in app.css. */
+    .landing-hero-copy > * { animation: casa-enter var(--casa-motion-slow) var(--ease-casa) backwards; }
+    .landing-hero-copy > :nth-child(2) { animation-delay: calc(var(--casa-stagger) * 2); }
+    .landing-hero-copy > :nth-child(3) { animation-delay: calc(var(--casa-stagger) * 4); }
+    .landing-hero-copy > :nth-child(n + 4) { animation-delay: calc(var(--casa-stagger) * 6); }
+
+    /* Later sections reveal as they scroll into view. Unsupported browsers simply show them.
+       `translate` (not `transform`) keeps the treatment-card hover lift working. */
+    @supports (animation-timeline: view()) {
+        @media (prefers-reduced-motion: no-preference) {
+            .landing-section h2,
+            .landing-visit h2,
+            .landing-treatment-card,
+            .landing-addon,
+            .landing-steps > li,
+            .landing-how-image { animation: landing-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
+        }
+    }
+    @keyframes landing-reveal { from { opacity: 0; translate: 0 14px; } }
 }
 
 @media (min-width: 768px) {
