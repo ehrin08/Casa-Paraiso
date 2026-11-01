@@ -84,7 +84,7 @@ The RFM rule engine (see [RFM Engine](RFM_ENGINE.md)) works, but the client foun
 
 The user chose to keep how it works and change only how it looks: the same engine (`RfmScorer`, `RfmRuleEngine`), fields, validation and routes. The five seeded groups stay.
 
-- [ ] Ask the client which customer groups and rewards they actually think in. (Kept the five seeded groups; the client can rename them in the UI.)
+- [ ] Ask the client which customer groups and rewards they actually think in. (Kept the five seeded groups; the client can rename them in the UI. Questions to ask: [Customer Groups and Rewards](client/RFM_GROUPS_CLIENT_QUESTIONS.md).)
 - [x] Replace the 1 to 5 options with plain level names. (Five named levels per measure, one per score, e.g. "Very recent", "Recent", …, so existing rules round-trip unchanged.)
 - [x] Show each rule as a sentence, for example "Customers who last visited recently or very recently … get a free VIP Room."
 - [x] Rename R, F and M in the UI to "Last visit", "How often" and "Total spent". Keep the RFM terms only in a collapsible "How it works" panel, for the defense.

@@ -43,6 +43,7 @@ Index of the project documentation. Links are relative Markdown links so they wo
 
 Notes about the client kept apart from project scope. They are not requirements until moved into Planned Tasks.
 
+- [Customer Groups and Rewards: Questions for the Client](client/RFM_GROUPS_CLIENT_QUESTIONS.md): a plain-language question sheet for Task 7's open client item (2026-11-01).
 - [Facebook Photo Library](client/FACEBOOK_PHOTO_LIBRARY.md): eight selected business images, source links, dimensions, and a visual contact sheet (2026-11-01).
 - [Client Facebook Page Review](client/FACEBOOK_PAGE_REVIEW.md): the client's public page checked against the app (2026-11-01).
 
