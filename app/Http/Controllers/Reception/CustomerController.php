@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reception;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reception\CustomerUpdateRequest;
 use App\Models\CustomerProfile;
+use App\Services\CustomerBookingGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,11 +24,14 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function show(CustomerProfile $customer): View
+    public function show(CustomerProfile $customer, CustomerBookingGuard $bookingGuard): View
     {
         $customer->load(['user', 'appointments' => fn ($query) => $query->with(['service', 'staffProfile.user'])->latest('scheduled_start_at')->limit(12), 'transactions' => fn ($query) => $query->with(['service', 'appointment'])->latest()->limit(12)]);
 
-        return view('reception.customers.show', ['customer' => $customer]);
+        return view('reception.customers.show', [
+            'customer' => $customer,
+            'onlineBookingPaused' => in_array($bookingGuard->restriction($customer), [CustomerBookingGuard::RESTRICTION_ADMIN_BLOCK, CustomerBookingGuard::RESTRICTION_NO_SHOWS], true),
+        ]);
     }
 
     public function update(CustomerUpdateRequest $request, CustomerProfile $customer): RedirectResponse

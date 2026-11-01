@@ -18,6 +18,8 @@
         'customer-rewards-updated' => __('Customer reward settings updated.'),
         'customer-reward-dismissed' => __('Customer reward dismissed.'),
         'customer-updated' => __('Customer notes updated.'),
+        'customer-online-booking-blocked' => __('Online booking blocked for this customer.'),
+        'customer-online-booking-unblocked' => __('Online booking allowed again for this customer.'),
         'profile-updated' => __('Profile updated.'),
         'password-updated' => __('Password updated.'),
         'password-set' => __('Password created. You can now sign in with your email and password.'),

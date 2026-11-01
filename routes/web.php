@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AppointmentCalendarController as AdminAppointment
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
+use App\Http\Controllers\Admin\CustomerOnlineBookingController as AdminCustomerOnlineBookingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
@@ -123,6 +124,8 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::patch('/appointments/{appointment}/outcome', [AdminAppointmentController::class, 'outcome'])->name('appointments.outcome');
         Route::resource('appointments', AdminAppointmentController::class)->except('destroy');
         Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
+        Route::patch('customers/{customer}/online-booking/block', [AdminCustomerOnlineBookingController::class, 'block'])->name('customers.online-booking.block');
+        Route::patch('customers/{customer}/online-booking/unblock', [AdminCustomerOnlineBookingController::class, 'unblock'])->name('customers.online-booking.unblock');
         Route::resource('customers', AdminCustomerController::class)->only(['index', 'show', 'update']);
         Route::get('/staff/{staff}/weekly-schedules/create', [AdminStaffWeeklyScheduleController::class, 'create'])->name('staff.weekly-schedules.create');
         Route::post('/staff/{staff}/weekly-schedules', [AdminStaffWeeklyScheduleController::class, 'store'])->name('staff.weekly-schedules.store');
