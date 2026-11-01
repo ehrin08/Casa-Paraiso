@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\MembershipTierController as AdminMembershipTierController;
+use App\Http\Controllers\GiftVoucherController;
+use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\TransactionQuoteController;
 use App\Http\Controllers\Admin\AddonController as AdminAddonController;
 use App\Http\Controllers\Admin\AppointmentCalendarController as AdminAppointmentCalendarController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
@@ -9,6 +13,7 @@ use App\Http\Controllers\Admin\CustomerOnlineBookingController as AdminCustomerO
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
+use App\Http\Controllers\Admin\RfmSegmentController as AdminRfmSegmentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
@@ -143,13 +148,27 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin', Measu
         Route::patch('/addons/{addon}/toggle', [AdminAddonController::class, 'toggle'])->name('addons.toggle');
         Route::resource('addons', AdminAddonController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         Route::get('/transactions/export', [AdminTransactionController::class, 'export'])->name('transactions.export');
+        Route::get('/transactions/quote', TransactionQuoteController::class)->name('transactions.quote');
         Route::resource('transactions', AdminTransactionController::class)->except('destroy');
         Route::get('/commissions', [AdminCommissionController::class, 'index'])->name('commissions.index');
         Route::get('/commissions/export', [AdminCommissionController::class, 'export'])->name('commissions.export');
         Route::get('/commissions/{commission}', [AdminCommissionController::class, 'show'])->name('commissions.show');
         Route::patch('/commissions/{commission}/pay', [AdminCommissionController::class, 'pay'])->name('commissions.pay');
+        Route::patch('/gift-vouchers/settings', [GiftVoucherController::class, 'updateSettings'])->name('gift-vouchers.settings.update');
+        Route::patch('/gift-vouchers/{gift_voucher}/void', [GiftVoucherController::class, 'void'])->name('gift-vouchers.void');
+        Route::resource('gift-vouchers', GiftVoucherController::class)->only(['index', 'create', 'store', 'show']);
+        Route::resource('membership-tiers', AdminMembershipTierController::class)->except(['show', 'destroy']);
+        Route::patch('/memberships/{membership}/renew', [MembershipController::class, 'renew'])->name('memberships.renew');
+        Route::patch('/memberships/{membership}/cancel', [MembershipController::class, 'cancel'])->name('memberships.cancel');
+        Route::resource('memberships', MembershipController::class)->only(['index', 'create', 'store', 'show']);
         Route::get('/promotions/settings', [AdminPromotionController::class, 'editSettings'])->name('promotions.settings.edit');
         Route::patch('/promotions/settings', [AdminPromotionController::class, 'updateSettings'])->name('promotions.settings.update');
+        Route::get('/promotions/segments/create', [AdminRfmSegmentController::class, 'create'])->name('promotions.segments.create');
+        Route::post('/promotions/segments', [AdminRfmSegmentController::class, 'store'])->name('promotions.segments.store');
+        Route::get('/promotions/segments/{segment}/edit', [AdminRfmSegmentController::class, 'edit'])->name('promotions.segments.edit');
+        Route::patch('/promotions/segments/{segment}', [AdminRfmSegmentController::class, 'update'])->name('promotions.segments.update');
+        Route::patch('/promotions/segments/{segment}/move', [AdminRfmSegmentController::class, 'move'])->name('promotions.segments.move');
+        Route::delete('/promotions/segments/{segment}', [AdminRfmSegmentController::class, 'destroy'])->name('promotions.segments.destroy');
         Route::patch('/promotions/{promotion}/dismiss', [AdminPromotionController::class, 'dismiss'])->name('promotions.dismiss');
         Route::resource('promotions', AdminPromotionController::class)->only(['index', 'show']);
         Route::resource('feedback', AdminFeedbackController::class)->only(['index', 'show']);
@@ -204,7 +223,11 @@ Route::middleware(['auth', 'active', 'verified', 'role:receptionist', MeasureApp
         Route::resource('appointments', ReceptionAppointmentController::class)->except('destroy');
         Route::get('customers/lookup', OperationalCustomerLookupController::class)->name('customers.lookup');
         Route::resource('customers', ReceptionCustomerController::class)->only(['index', 'show', 'update']);
+        Route::get('/transactions/quote', TransactionQuoteController::class)->name('transactions.quote');
         Route::resource('transactions', ReceptionTransactionController::class)->except('destroy');
+        Route::patch('/memberships/{membership}/renew', [MembershipController::class, 'renew'])->name('memberships.renew');
+        Route::resource('memberships', MembershipController::class)->only(['index', 'create', 'store', 'show']);
+        Route::resource('gift-vouchers', GiftVoucherController::class)->only(['index', 'create', 'store', 'show']);
     });
 
 Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,receptionist'])

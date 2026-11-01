@@ -423,6 +423,16 @@ class PhaseFiveToTenWorkflowTest extends TestCase
                 'completed_at' => now()->subDays(5),
             ]);
 
+        // RFM scores rank customers against each other, so give the new customer a customer base to rank against.
+        foreach (CustomerProfile::factory()->count(4)->create() as $regular) {
+            foreach ([1, 2] as $visit) {
+                $regularVisit = Appointment::factory()->for($regular)->for($service)->create(['status' => Appointment::STATUS_COMPLETED]);
+                Transaction::factory()->for($regular)->for($regularVisit)->for($service)->create([
+                    'amount' => 2000, 'payment_status' => Transaction::PAYMENT_PAID, 'paid_at' => now()->subDays(60),
+                ]);
+            }
+        }
+
         app(TransactionWorkflow::class)->persist(new Transaction, [
             'appointment_id' => $appointment->id,
             'customer_profile_id' => $customerProfile->id,

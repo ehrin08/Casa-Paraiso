@@ -5,6 +5,10 @@
     $customerNotesModal = 'admin-customer-notes-'.$customer->id;
     $notesInvalid = old('_modal') === $customerNotesModal && $errors->any();
     $noteValue = $notesInvalid ? (is_string(old('notes')) ? old('notes') : '') : $customer->notes;
+    $rfmProfile = app(\App\Services\RfmRuleEngine::class)->profileFor($customer);
+    $membership = $customer->activeMembership();
+    $recommendedTier = ($rfmProfile['segment'] ?? null)?->recommendedMembershipTier;
+    $recommendTier = $recommendedTier?->is_active && (! $membership || $membership->tier->rank < $recommendedTier->rank);
 @endphp
 
 <div class="space-y-6">
@@ -53,6 +57,40 @@
         </div>
 
         <aside class="min-w-0 space-y-4">
+            <x-app-card data-customer-rfm-profile>
+                <p class="casa-section-label">{{ __('RFM profile') }}</p>
+                <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ $rfmProfile['segment']?->name ?? __('Unassigned') }}</h2>
+                @if ($rfmProfile)
+                    <dl class="mt-4 grid grid-cols-3 gap-2 text-center">
+                        @foreach (['r' => __('Recency'), 'f' => __('Frequency'), 'm' => __('Monetary')] as $metric => $label)
+                            <div class="rounded-2xl bg-casa-bg p-3">
+                                <dt class="text-xs font-black uppercase tracking-[0.12em] text-casa-muted">{{ $label }}</dt>
+                                <dd class="mt-1 font-display text-2xl font-black text-casa-text">{{ $rfmProfile['scores'][$metric] }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                    <p class="mt-3 text-sm leading-6 text-casa-muted">
+                        {{ trans_choice('Last paid visit :count day ago|Last paid visit :count days ago', $rfmProfile['metrics']['recency_days']) }} ·
+                        {{ trans_choice(':count paid visit|:count paid visits', $rfmProfile['metrics']['frequency_count']) }} ·
+                        ₱{{ number_format($rfmProfile['metrics']['monetary_total'], 2) }}
+                    </p>
+                @else
+                    <p class="mt-3 text-sm leading-6 text-casa-muted">{{ __('No paid, completed visits yet, so this customer is not scored.') }}</p>
+                @endif
+            </x-app-card>
+            <x-app-card data-customer-membership>
+                <p class="casa-section-label">{{ __('Membership') }}</p>
+                @if ($membership)
+                    <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ $membership->tier->name }} <span class="text-casa-gold" aria-hidden="true">{{ str_repeat('★', $membership->tier->stars) }}</span></h2>
+                    <p class="mt-2 text-sm text-casa-muted">{{ $membership->card_number }} · {{ __('Valid until :date', ['date' => $membership->valid_until->format('M d, Y')]) }}</p>
+                    <a class="mt-3 inline-block font-bold text-casa-primary" href="{{ route('admin.memberships.show', $membership) }}">{{ __('View card') }}</a>
+                @else
+                    <p class="mt-2 text-sm text-casa-muted">{{ __('No active membership card.') }}</p>
+                @endif
+                @if ($recommendTier)
+                    <div class="rewards-info"><p>{{ __('RFM recommends a :tier card for this customer.', ['tier' => $recommendedTier->name]) }} <a class="font-bold underline" href="{{ route('admin.memberships.create', ['customer' => $customer->id, 'tier' => $recommendedTier->id]) }}">{{ __('Issue card') }}</a></p></div>
+                @endif
+            </x-app-card>
             <x-app-card>
                 <div @if ($isModal) x-data="{ editing: @js($notesInvalid) }" @endif>
                     <p class="casa-section-label">{{ __('Care notes') }}</p>
