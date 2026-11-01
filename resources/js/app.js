@@ -9,6 +9,7 @@ import { isCustomerModalUrl, restoreCustomerDetail, clearCustomerDetailRecovery 
 import { isFormPanelUrl, attachPanelReturn, takePanelRestore } from './panel-form';
 import { initializeScheduleDialog } from './schedule-dialog';
 import { createCustomerAppointmentCalendar } from './customer-appointment-calendar';
+import { createRfmSegmentPreview } from './rfm-segment-preview';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -554,6 +555,7 @@ window.operationalCalendar = (config) => ({
 });
 
 window.customerAppointmentCalendar = createCustomerAppointmentCalendar;
+window.rfmSegmentPreview = createRfmSegmentPreview;
 
 window.adminAppointmentForm = createOperationsBooking;
 window.customerCalendarBooking = createCustomerBooking;

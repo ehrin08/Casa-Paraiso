@@ -381,7 +381,7 @@ Screens:
   - the groups in priority order, each as one sentence ("Customers who last visited recently or very recently … get a free VIP Room"), with matching-customer counts;
   - a collapsed "How it works (RFM scoring)" panel with the score table, the current value range for each score and each group's R/F/M ranges;
   - the reward-validity form.
-- Group create and edit forms at `/admin/promotions/segments/create` and `/admin/promotions/segments/{segment}/edit`. Each group has a name, a description, From/To choices (Any or a named level such as "Recent (4 – 12 days)") for Last visit, How often and Total spent, a free add-on, a recommended membership card, and an Active switch. The choices still submit 1–5 scores.
+- Group create and edit forms at `/admin/promotions/segments/create` and `/admin/promotions/segments/{segment}/edit`. Each group has a name, a description, From/To choices (Any or a named level such as "Recent (4 – 12 days)") for Last visit, How often and Total spent, a free add-on, a recommended membership card, and an Active switch. The choices still submit 1–5 scores. Below the choices, a live preview shows how many customers fit right now and how many would join, given the groups above. Add group also offers "Start from a template" links (Reward loyal regulars, Win back lost customers, Welcome new customers, Start blank), which only fill the form.
 - Customer reward detail with confirmed dismissal for available vouchers.
 
 Main data:

@@ -79,6 +79,9 @@ body[data-workspace-role] .rewards-workspace .rewards-table th { padding: 0 0.5r
 .rewards-group-chips > p { color: var(--color-casa-muted); }
 .rewards-info { display: flex; gap: 0.65rem; margin-top: 1rem; padding: 1rem; border-radius: var(--radius-casa-control); background: var(--color-casa-info-bg); color: var(--color-casa-info); font-size: 0.875rem; line-height: 1.5; }
 .rewards-info svg { margin-top: 0.15rem; }
+.rewards-preview { display: flex; gap: 0.65rem; padding: 1rem; border-radius: var(--radius-casa-control); background: var(--color-casa-info-bg); color: var(--color-casa-info); font-size: 0.875rem; line-height: 1.6; }
+.rewards-preview svg { margin-top: 0.2rem; flex-shrink: 0; }
+.rewards-preview strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
 .rewards-workspace a:focus-visible, .rewards-workspace button:focus-visible, .rewards-header-actions a:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; border-radius: var(--radius-casa-control); }
 .rewards-report-link:hover, .rewards-clear:hover { text-decoration: underline; text-underline-offset: 4px; }
 .rewards-editor { max-width: 68rem; }

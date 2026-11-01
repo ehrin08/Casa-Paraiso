@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [RFM group preview and templates (Task 7)](sessions/2026-11-01-rfm-preview-templates.md)
 - 2026-11-01: [Uncommitted docs tidy-up](sessions/2026-11-01-uncommitted-docs-tidy.md)
 - 2026-11-01: [Curated Facebook photo library](sessions/2026-11-01-facebook-photo-library.md)
 - 2026-11-01: [Client Facebook page review](sessions/2026-11-01-client-facebook-review.md)
