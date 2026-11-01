@@ -66,3 +66,24 @@ Motion today is limited to a few places: the drawer slide and fade and the loadi
 - [ ] Candidates: content fade-in on Turbo navigation, staggered `stat-strip` and card entry, landing section reveal on scroll, table-row and list hover and press feedback, `x-section-tabs` and status-chip transitions, and consistent toast, modal and dropdown timing.
 - [ ] One global `prefers-reduced-motion: reduce` override. No content may depend on animation to be read, and nothing may cause layout shift or delay interaction.
 - [ ] Keep it presentation-only: server-rendered forms, Turbo and Alpine behavior stay unchanged. Verify with the full gate plus desktop, mobile and reduced-motion browser checks.
+
+## Task 7: Make the RFM Rules Friendly for Non-Technical Users
+
+Added 2026-11-01. Planned, not started. Not yet in the tracker sheet.
+
+The RFM rule engine (see [RFM Engine](RFM_ENGINE.md)) works, but the client finds it too technical.
+- On **RFM rules and settings** (`admin.promotions.settings.edit`) and the rule form (`resources/views/admin/promotions/segment-form.blade.php`), admins set Min/Max scores of 1 to 5 for Recency, Frequency and Monetary.
+- The page explains those scores with a percent-rank table.
+
+Keep the feature and the engine underneath (`RfmScorer`, `RfmRuleEngine`). Change only what the admin sees and types.
+
+- [ ] Ask the client which customer groups and rewards they actually think in.
+- [ ] Replace the 1 to 5 selects with plain choices mapped to score ranges. For example:
+  - "Last visit": very recent, recent, a while ago, or long ago.
+  - "Visits": first-timer, occasional, regular, or frequent.
+- [ ] Show each rule as a sentence, for example "Customers who visited recently, come often, and spend the most get a free VIP Room."
+- [ ] Rename R, F and M in the UI to "Last visit", "How often" and "Total spent". Keep the RFM terms only in a collapsible "How it works" panel, for the defense.
+- [ ] Show real peso and day values, and a few example customers, for each group instead of score numbers.
+- [ ] Offer ready-made templates (Reward loyal regulars, Win back lost customers, Welcome new customers), so admins rarely build rules from scratch.
+- [ ] Show a plain-language preview before saving, for example "This rule would include 12 customers right now".
+- [ ] Update [RFM Engine](RFM_ENGINE.md), [Screen Flow](SCREEN_FLOW.md), and the tests (`AdminRfmSegmentTest`, `AdminRewardsLayoutTest`) for the new wording, then run the full gate.
