@@ -4,6 +4,7 @@
             <p class="casa-section-label">{{ __('Customer detail') }}</p>
             <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $customer->display_name }}</h1>
             <p class="mt-2 text-sm text-casa-muted">{{ $customer->customer_code }} &middot; {{ $customer->display_email }}</p>
+            @if ($onlineBookingPaused)<x-status-badge class="mt-2" title="{{ __('This customer cannot book online. Staff can still book for them.') }}">{{ __('Online booking paused') }}</x-status-badge>@endif
         </div>
         <a href="{{ route('reception.customers.index') }}" class="casa-button-secondary">{{ __('Customers') }}</a>
     </x-slot>

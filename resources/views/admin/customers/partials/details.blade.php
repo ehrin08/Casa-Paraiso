@@ -81,6 +81,36 @@
                     @endif
                 </div>
             </x-app-card>
+
+            <x-app-card data-online-booking-card>
+                <p class="casa-section-label">{{ __('Online booking') }}</p>
+                @if ($customer->isOnlineBookingBlocked())
+                    <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Blocked by admin') }}</h2>
+                    <p class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-casa-text">{{ $customer->online_booking_block_reason }}</p>
+                    <p class="mt-2 text-xs leading-5 text-casa-muted">{{ __(':name · :date', ['name' => $customer->onlineBookingBlockedBy?->name ?? __('Former staff member'), 'date' => $customer->online_booking_blocked_at->timezone('Asia/Manila')->format('M d, Y g:i A')]) }}</p>
+                    <form method="POST" action="{{ route('admin.customers.online-booking.unblock', $customer) }}" class="mt-5">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="casa-button-secondary w-full">{{ __('Allow online booking') }}</button>
+                    </form>
+                @else
+                    @if (($bookingRestriction ?? null) === \App\Services\CustomerBookingGuard::RESTRICTION_NO_SHOWS)
+                        <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Paused by no-shows') }}</h2>
+                        <p class="mt-3 text-sm leading-6 text-casa-muted">{{ trans_choice(':count no-show in the last :days days. Online booking resumes when older no-shows leave that window; staff can still book this customer.|:count no-shows in the last :days days. Online booking resumes when older no-shows leave that window; staff can still book this customer.', $noShowCount ?? 0, ['days' => config('casa.customer_booking_limits.no_show_lookback_days', 90)]) }}</p>
+                    @else
+                        <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Allowed') }}</h2>
+                        <p class="mt-3 text-sm leading-6 text-casa-muted">{{ __('This customer can book online within the normal limits.') }}</p>
+                    @endif
+                    <form method="POST" action="{{ route('admin.customers.online-booking.block', $customer) }}" class="mt-5">
+                        @csrf
+                        @method('PATCH')
+                        <x-input-label :for="'online-booking-reason-'.$customer->id" :value="__('Reason for blocking (staff only)')" />
+                        <textarea id="online-booking-reason-{{ $customer->id }}" name="reason" rows="3" maxlength="500" required class="casa-input mt-2">{{ old('reason') }}</textarea>
+                        <x-input-error class="mt-2" :messages="$errors->get('reason')" />
+                        <button type="submit" class="mt-3 casa-button-secondary w-full">{{ __('Block online booking') }}</button>
+                    </form>
+                @endif
+            </x-app-card>
         </aside>
     </section>
 </div>
