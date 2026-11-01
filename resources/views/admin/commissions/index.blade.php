@@ -4,10 +4,7 @@
             <h1 class="font-display text-3xl font-black text-casa-text">{{ __('Commissions') }}</h1>
             <p>{{ __('Track and manage therapist commissions for services rendered.') }}</p>
         </div>
-        <a href="{{ route('admin.commissions.export', $filters) }}" class="casa-button-primary commissions-export">
-            <x-payment-icon name="download" />
-            {{ __('Export commissions') }}
-        </a>
+        <x-export-menu route="admin.commissions.export" :query="$filters" :label="__('Export commissions')" button-class="casa-button-primary" class="commissions-export" />
     </x-slot>
 
     @php
