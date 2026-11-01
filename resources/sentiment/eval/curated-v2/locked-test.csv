@@ -1,0 +1,151 @@
+text_id,text,rating,label,language,topics,tags,split
+c2-001,Everything from check-in to the final cup of tea felt thoughtful.,5,positive,en,care_quality,,test
+c2-002,My therapist remembered my sore shoulder from last visit.,5,positive,en,therapist_service,,test
+c2-003,I slept so well the night after my session.,4,positive,en,pain_comfort,,test
+c2-004,"No more knots in my lower back, finally.",5,positive,en,pain_comfort,negation,test
+c2-005,"There was zero waiting, they took us right in.",5,positive,en,scheduling_wait,negation,test
+c2-006,"A little costly, but honestly worth every peso.",4,positive,en,value_pricing,mixed,test
+c2-007,The lobby is tiny but the therapists are top tier.,5,positive,en,therapist_service,mixed,test
+c2-008,"Oops, meant to give five stars. Fantastic service!",1,positive,en,care_quality,rating_conflict,test
+c2-009,"Wrong star count, sorry. Our therapist was brilliant.",2,positive,en,therapist_service,rating_conflict,test
+c2-010,Spotless rooms and a really soothing atmosphere.,5,positive,en,cleanliness_ambience,,test
+c2-011,Already booked my next appointment.,5,positive,en,care_quality,,test
+c2-012,The staff made my mom feel very welcome.,4,positive,en,therapist_service,,test
+c2-013,"Sooo good, defintely coming again!!",5,positive,en,care_quality,misspelling,test
+c2-014,I couldn't stop smiling after the massage.,5,positive,en,pain_comfort,negation,test
+c2-015,"Parking was tricky, yet the massage itself was heavenly.",4,positive,en,scheduling_wait,mixed,test
+c2-016,Great value for a two-hour package.,5,positive,en,value_pricing,,test
+c2-017,My headache was completely gone afterwards.,5,positive,en,pain_comfort,,test
+c2-018,It was alright.,3,neutral,en,care_quality,,test
+c2-019,We arrived around 3 PM on a Friday.,4,neutral,en,scheduling_wait,,test
+c2-020,Do you offer gift certificates?,4,neutral,en,,,test
+c2-021,"Some things were good, some weren't.",3,neutral,en,care_quality,mixed,test
+c2-022,"Nice ambience, though the shower was lukewarm.",3,neutral,en,cleanliness_ambience,mixed,test
+c2-023,"Good massage, a bit overpriced.",3,neutral,en,value_pricing,mixed,test
+c2-024,I asked for medium pressure.,4,neutral,en,therapist_service,,test
+c2-025,"Not amazing, not awful.",3,neutral,en,care_quality,negation,test
+c2-026,"Five stars I guess, it was a normal massage.",5,neutral,en,care_quality,rating_conflict,test
+c2-027,Standard spa experience.,3,neutral,en,care_quality,,test
+c2-028,Please add more evening slots.,2,neutral,en,,,test
+c2-029,its ok i guess,3,neutral,en,care_quality,misspelling,test
+c2-030,"Friendly therapist, but the session felt short.",4,neutral,en,therapist_service,mixed,test
+c2-031,First time trying a Swedish massage.,3,neutral,en,pain_comfort,,test
+c2-032,"One star was a misclick, it was an average visit.",1,neutral,en,care_quality,rating_conflict,test
+c2-033,"Quick check-in, slow checkout.",3,neutral,en,scheduling_wait,mixed,test
+c2-034,The therapist was chatting on the phone the whole time.,1,negative,en,therapist_service,,test
+c2-035,Hair on the pillow and a sticky floor.,1,negative,en,cleanliness_ambience,,test
+c2-036,We waited almost an hour past our booking time.,2,negative,en,scheduling_wait,,test
+c2-037,I will not be returning.,1,negative,en,care_quality,negation,test
+c2-038,Didn't help my back pain at all.,2,negative,en,pain_comfort,negation,test
+c2-039,Loved waiting fifty minutes for a thirty-minute massage.,1,negative,en,scheduling_wait,sarcasm,test
+c2-040,"Fantastic, a cockroach in the shower.",2,negative,en,cleanliness_ambience,sarcasm,test
+c2-041,The receptionist was sweet but the massage was awful.,1,negative,en,care_quality,mixed,test
+c2-042,"Pretty room, but I left with bruises.",2,negative,en,pain_comfort,mixed,test
+c2-043,"Gave four stars to be nice, but the therapist was rude.",4,negative,en,therapist_service,rating_conflict,test
+c2-044,They charged me for an add-on I never asked for.,1,negative,en,value_pricing,,test
+c2-045,"Massge was way too rough, my neck hurts now",2,negative,en,pain_comfort,misspelling,test
+c2-046,Worst spa visit of my life.,1,negative,en,care_quality,,test
+c2-047,The room smelled like cigarettes.,2,negative,en,cleanliness_ambience,,test
+c2-048,Nobody greeted us when we walked in.,1,negative,en,therapist_service,negation,test
+c2-049,"Decent therapist, but a total rip-off for the price.",2,negative,en,value_pricing,mixed,test
+c2-050,They cancelled my booking without telling me.,1,negative,en,scheduling_wait,,test
+c2-051,Napakaganda ng karanasan namin dito.,5,positive,tl,care_quality,,test
+c2-052,"Magaling humilot si kuya, tamang-tama ang diin.",5,positive,tl,therapist_service,,test
+c2-053,Nakatulog ako nang mahimbing pagkatapos.,5,positive,tl,pain_comfort,,test
+c2-054,Wala nang kirot sa likod ko.,5,positive,tl,pain_comfort,negation,test
+c2-055,"Hindi na kami pinaghintay, agad kaming inasikaso.",5,positive,tl,scheduling_wait,negation,test
+c2-056,"Medyo mahal, pero sulit na sulit talaga.",4,positive,tl,value_pricing,mixed,test
+c2-057,Maliit ang lobby pero napakalinis ng mga kwarto.,5,positive,tl,cleanliness_ambience,mixed,test
+c2-058,"Mali ang pindot ko ng bituin, ang ganda ng serbisyo!",1,positive,tl,care_quality,rating_conflict,test
+c2-059,"Nagkamali ako sa rating, napakabait ng therapist namin.",2,positive,tl,therapist_service,rating_conflict,test
+c2-060,Ang bango at ang linis ng buong lugar.,5,positive,tl,cleanliness_ambience,,test
+c2-061,Nagpa-book na ulit ako para sa susunod na linggo.,5,positive,tl,care_quality,,test
+c2-062,Magiliw ang mga staff sa nanay ko.,4,positive,tl,therapist_service,,test
+c2-063,"Ang gandaaa, babalik tlga kami!",5,positive,tl,care_quality,misspelling,test
+c2-064,Gumaan talaga ang pakiramdam ko.,5,positive,tl,pain_comfort,,test
+c2-065,"Medyo natagalan sa pagpasok, pero napakasarap ng masahe.",4,positive,tl,scheduling_wait,mixed,test
+c2-066,Sulit ang dalawang oras na package.,5,positive,tl,value_pricing,,test
+c2-067,Nawala ang sakit ng ulo ko pagkatapos.,5,positive,tl,pain_comfort,negation,test
+c2-068,Puwede na.,3,neutral,tl,care_quality,,test
+c2-069,Dumating kami bandang alas-tres ng hapon.,4,neutral,tl,scheduling_wait,,test
+c2-070,May gift certificate ba kayo?,4,neutral,tl,,,test
+c2-071,"May maganda, may hindi rin.",3,neutral,tl,care_quality,mixed,test
+c2-072,Maganda ang ambiance pero maligamgam lang ang tubig sa shower.,3,neutral,tl,cleanliness_ambience,mixed,test
+c2-073,"Magaling ang masahe, medyo mahal lang.",3,neutral,tl,value_pricing,mixed,test
+c2-074,Katamtamang diin ang hiniling ko.,4,neutral,tl,therapist_service,,test
+c2-075,"Hindi naman ganoon kaganda, hindi rin naman pangit.",3,neutral,tl,care_quality,negation,test
+c2-076,"Limang bituin na lang, karaniwang masahe naman.",5,neutral,tl,care_quality,rating_conflict,test
+c2-077,Gaya lang ng ibang spa.,3,neutral,tl,care_quality,,test
+c2-078,Sana dagdagan ninyo ang oras sa gabi.,2,neutral,tl,,,test
+c2-079,ok nmn cguro,3,neutral,tl,care_quality,misspelling,test
+c2-080,"Mabait ang therapist, pero parang ang ikli ng session.",4,neutral,tl,therapist_service,mixed,test
+c2-081,Unang beses kong subukan ang Swedish massage.,3,neutral,tl,pain_comfort,,test
+c2-082,"Napindot ko ang isang bituin, karaniwan lang naman ang pagbisita.",1,neutral,tl,care_quality,rating_conflict,test
+c2-083,"Mabilis ang check-in, mabagal ang pagbabayad.",3,neutral,tl,scheduling_wait,mixed,test
+c2-084,Puro cellphone ang therapist habang nagmamasahe.,1,negative,tl,therapist_service,,test
+c2-085,May buhok sa unan at malagkit ang sahig.,1,negative,tl,cleanliness_ambience,,test
+c2-086,Halos isang oras kaming naghintay lampas sa oras ng booking.,2,negative,tl,scheduling_wait,,test
+c2-087,Hindi na ako babalik dito.,1,negative,tl,care_quality,negation,test
+c2-088,Hindi nakatulong sa sakit ng likod ko.,2,negative,tl,pain_comfort,negation,test
+c2-089,Ang saya maghintay ng limampung minuto para sa tatlumpung minutong masahe.,1,negative,tl,scheduling_wait,sarcasm,test
+c2-090,"Ayos talaga, may ipis pa sa banyo.",2,negative,tl,cleanliness_ambience,sarcasm,test
+c2-091,Mabait ang receptionist pero napakapangit ng masahe.,1,negative,tl,care_quality,mixed,test
+c2-092,Maganda ang kwarto pero nagkapasa ako.,2,negative,tl,pain_comfort,mixed,test
+c2-093,"Apat na bituin para maging mabait, pero bastos ang therapist.",4,negative,tl,therapist_service,rating_conflict,test
+c2-094,Siningil ako sa add-on na hindi ko naman hiningi.,1,negative,tl,value_pricing,,test
+c2-095,"Sobrng diin ng hilot, masakit leeg ko ngaun",2,negative,tl,pain_comfort,misspelling,test
+c2-096,Pinakamasamang spa na napuntahan ko.,1,negative,tl,care_quality,,test
+c2-097,Amoy sigarilyo ang kwarto.,2,negative,tl,cleanliness_ambience,,test
+c2-098,Walang bumati sa amin pagpasok.,1,negative,tl,therapist_service,negation,test
+c2-099,Ayos ang therapist pero sobrang mahal para sa ganoong serbisyo.,2,negative,tl,value_pricing,mixed,test
+c2-100,Kinansela nila ang booking ko nang hindi nagsasabi.,1,negative,tl,scheduling_wait,,test
+c2-101,Super thoughtful nila from check-in hanggang sa tea after.,5,positive,taglish,care_quality,,test
+c2-102,Naalala pa ni therapist yung masakit kong shoulder last time.,5,positive,taglish,therapist_service,,test
+c2-103,Ang sarap ng tulog ko after ng session.,4,positive,taglish,pain_comfort,,test
+c2-104,"Wala na yung knots sa lower back ko, finally.",5,positive,taglish,pain_comfort,negation,test
+c2-105,"Walang waiting, pinapasok agad kami.",5,positive,taglish,scheduling_wait,negation,test
+c2-106,"Medyo pricey, pero worth it talaga.",4,positive,taglish,value_pricing,mixed,test
+c2-107,Maliit yung lobby pero top tier yung therapists.,5,positive,taglish,therapist_service,mixed,test
+c2-108,"Oops, 5 stars dapat yun. Ang galing ng service!",1,positive,taglish,care_quality,rating_conflict,test
+c2-109,"Mali yung stars ko, sorry. Ang galing ng therapist namin.",2,positive,taglish,therapist_service,rating_conflict,test
+c2-110,Super linis ng rooms and very soothing yung vibe.,5,positive,taglish,cleanliness_ambience,,test
+c2-111,Naka-book na ako ulit for next week.,5,positive,taglish,care_quality,,test
+c2-112,Very welcoming yung staff sa mama ko.,4,positive,taglish,therapist_service,,test
+c2-113,"Grabe sobrng sarap, balik kme for sure",5,positive,taglish,care_quality,misspelling,test
+c2-114,Nawala yung headache ko after.,5,positive,taglish,pain_comfort,,test
+c2-115,"Hirap mag-park, pero heavenly yung massage.",4,positive,taglish,scheduling_wait,mixed,test
+c2-116,Sulit yung two-hour package.,5,positive,taglish,value_pricing,,test
+c2-117,"Ang gaan ng kamay ni ate, super relaxing.",5,positive,taglish,therapist_service,,test
+c2-118,Pwede na rin.,3,neutral,taglish,care_quality,,test
+c2-119,Dumating kami around 3 PM nung Friday.,4,neutral,taglish,scheduling_wait,,test
+c2-120,May gift certificates ba kayo?,4,neutral,taglish,,,test
+c2-121,"May okay, may hindi rin.",3,neutral,taglish,care_quality,mixed,test
+c2-122,Nice yung ambience pero lukewarm lang yung shower.,3,neutral,taglish,cleanliness_ambience,mixed,test
+c2-123,"Good yung massage, medyo overpriced lang.",3,neutral,taglish,value_pricing,mixed,test
+c2-124,Medium pressure yung ni-request ko.,4,neutral,taglish,therapist_service,,test
+c2-125,"Hindi naman amazing, hindi rin naman awful.",3,neutral,taglish,care_quality,negation,test
+c2-126,"5 stars na lang, normal na massage lang naman.",5,neutral,taglish,care_quality,rating_conflict,test
+c2-127,Standard spa experience lang.,3,neutral,taglish,care_quality,,test
+c2-128,Sana dagdagan nyo yung evening slots.,2,neutral,taglish,,,test
+c2-129,ok lng siguro,3,neutral,taglish,care_quality,misspelling,test
+c2-130,"Friendly si therapist, pero parang ang ikli ng session.",4,neutral,taglish,therapist_service,mixed,test
+c2-131,First time ko mag-try ng Swedish massage.,3,neutral,taglish,pain_comfort,,test
+c2-132,"Misclick yung 1 star, average lang naman yung visit.",1,neutral,taglish,care_quality,rating_conflict,test
+c2-133,"Mabilis yung check-in, mabagal yung checkout.",3,neutral,taglish,scheduling_wait,mixed,test
+c2-134,Naka-phone si therapist the whole time.,1,negative,taglish,therapist_service,,test
+c2-135,May buhok sa pillow tapos sticky yung floor.,1,negative,taglish,cleanliness_ambience,,test
+c2-136,Almost one hour kami naghintay lampas sa booking time.,2,negative,taglish,scheduling_wait,,test
+c2-137,"Hindi na ako babalik, promise.",1,negative,taglish,care_quality,negation,test
+c2-138,Hindi nakatulong sa back pain ko.,2,negative,taglish,pain_comfort,negation,test
+c2-139,Ang saya mag-wait ng fifty minutes for a thirty-minute massage.,1,negative,taglish,scheduling_wait,sarcasm,test
+c2-140,"Fantastic, may ipis sa shower.",2,negative,taglish,cleanliness_ambience,sarcasm,test
+c2-141,Sweet yung receptionist pero ang pangit ng massage.,1,negative,taglish,care_quality,mixed,test
+c2-142,"Pretty yung room, pero nagka-bruises ako.",2,negative,taglish,pain_comfort,mixed,test
+c2-143,"4 stars para mabait lang, pero rude yung therapist.",4,negative,taglish,therapist_service,rating_conflict,test
+c2-144,Chinarge ako sa add-on na hindi ko naman ni-request.,1,negative,taglish,value_pricing,,test
+c2-145,"Sobrng rough ng massge, masakit na leeg ko",2,negative,taglish,pain_comfort,misspelling,test
+c2-146,Worst spa experience ko ever.,1,negative,taglish,care_quality,,test
+c2-147,Amoy cigarette yung room.,2,negative,taglish,cleanliness_ambience,,test
+c2-148,Walang nag-greet sa amin pagpasok.,1,negative,taglish,therapist_service,negation,test
+c2-149,"Okay yung therapist, pero rip-off talaga for the price.",2,negative,taglish,value_pricing,mixed,test
+c2-150,Kinancel nila yung booking ko nang walang pasabi.,1,negative,taglish,scheduling_wait,,test

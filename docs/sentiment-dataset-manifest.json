@@ -16,10 +16,44 @@
       "design": "80 rows per language (30 positive, 25 neutral, 25 negative by draft label); 97 rows tagged mixed, negation, sarcasm, misspelling or rating_conflict",
       "label_provenance": "AI-drafted labels (suggested.csv, written by the same AI assistant that authored the comments) used as final labels on 2026-11-01 because no human labellers were available; not independently human-labelled or verified, no inter-annotator agreement (kappa) measured; adjudication.csv marks every row source=ai-draft; labels-a.csv and labels-b.csv were left blank",
       "split": "test",
-      "permitted_use": "locked evaluation only; never used for training or tuning rules or models",
+      "permitted_use": "locked evaluation only; never used for training. Note: its errors were inspected and used to tune the reverted rules v3 experiment on 2026-11-01, so it is no longer a clean held-out set; use curated-v2 for future gates",
       "locked_sha256": "b61daedfd07ac9e2b8abdb8803e59b1ddafce01d22b102570cedbfc4b0ee8753",
       "locked_on": "2026-11-01",
       "evaluation": "provisional, 2026-11-01: rules macro-F1 0.839, local 0.827 (gate failed), xlmr 0.694 (gate failed); see docs/SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md"
+    },
+    {
+      "id": "curated-v1-dev",
+      "path": "resources/sentiment/eval/curated-v1-dev/",
+      "origin": "fictional comments authored for rule tuning on 2026-11-01; not customer data and contains no personal information",
+      "license": "project-internal",
+      "languages": [
+        "en",
+        "tl",
+        "taglish"
+      ],
+      "rows": 90,
+      "label_provenance": "AI-drafted labels in items.csv, written by the same AI assistant that wrote the comments; not human-verified",
+      "split": "dev",
+      "permitted_use": "tuning and development only; never used as a gate"
+    },
+    {
+      "id": "curated-v2",
+      "path": "resources/sentiment/eval/curated-v2/",
+      "origin": "fictional comments authored for held-out evaluation on 2026-11-01, written and locked before the v3 bug fixes; not customer data and contains no personal information",
+      "license": "project-internal",
+      "languages": [
+        "en",
+        "tl",
+        "taglish"
+      ],
+      "rows": 150,
+      "design": "50 rows per language (17 positive, 16 neutral, 17 negative); hard cases tagged mixed, negation, sarcasm, misspelling or rating_conflict",
+      "label_provenance": "AI-drafted labels (adjudication.csv, source=ai-draft) written by the same AI assistant that wrote the comments and the rules; not human-verified, no kappa",
+      "split": "test",
+      "permitted_use": "locked evaluation only; never used for training or tuning rules or models",
+      "locked_sha256": "1070af4eaa35a66eaea2f2587acc5787df2531da061961217fbe36298018bcb9",
+      "locked_on": "2026-11-01",
+      "evaluation": "provisional, 2026-11-01: rules v2 macro-F1 0.714 (baseline), rules v3 0.710 (reverted), local 0.725, xlmr 0.536; every candidate failed the gate; see docs/SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md"
     }
   ],
   "required_fields": [
