@@ -29,6 +29,7 @@ The local `redesign` branch carries the presentation-only Modern Resort redesign
 - `SystemErrorResponseFinalizer`, `SystemErrorRecorder`, and `SystemErrorRetention` centralize request references, safe 4xx/5xx rendering, super-admin error reporting, and bounded retention. Successfully rendered error responses are retained when middleware revisits the same response, preserving feature-specific 503 messages; verify with `SystemErrorReportingTest`.
 - Role controllers are under `app/Http/Controllers/{Admin,Reception,Staff,Customer}`.
 - Business invariants are implemented in services including `AppointmentWorkflow`, `AppointmentAvailability`, `AppointmentCompletion`, `TransactionWorkflow`, `AttendanceWorkflow`, `RfmPromotionGenerator`, `RfmScorer`, `RfmRuleEngine`, `PaymentPricing`, `MembershipRecommendations`, and `SentimentClassifier`.
+- Motion: shared tokens (`--ease-casa`, `--casa-motion*`, `--casa-rise`, `--casa-stagger`) and the `casa-enter` / `casa-fade-in` keyframes live in `resources/css/app.css`. The Brand UI Guide's Accessibility and Motion section has the rules.
 - `config/casa.php` owns business hours, pagination, the default RFM segment seeds, the membership card prefix, and security switches. Live RFM rules, membership tiers, and voucher rules are database records the admin edits.
 - RFM (see `docs/RFM_ENGINE.md`):
   - `RfmScorer` gives 1–5 percent-rank quintile scores over customers with paid, completed visits.

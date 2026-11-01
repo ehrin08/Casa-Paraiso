@@ -57,7 +57,12 @@
                 x-data="{ show: true }"
                 x-init="setTimeout(() => show = false, 4200)"
                 x-show="show"
-                x-transition
+                x-transition:enter="transition ease-casa duration-200"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-160"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
                 role="status"
                 class="pointer-events-auto rounded-[20px] border border-casa-success/15 bg-casa-success-bg px-5 py-4 text-sm font-semibold text-casa-success shadow-casa-card"
             >
@@ -70,7 +75,12 @@
                 x-data="{ show: true }"
                 x-init="setTimeout(() => show = false, 5600)"
                 x-show="show"
-                x-transition
+                x-transition:enter="transition ease-casa duration-200"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-160"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
                 role="alert"
                 class="pointer-events-auto rounded-[20px] border border-casa-danger/15 bg-casa-danger-bg px-5 py-4 text-sm font-semibold text-casa-danger-text shadow-casa-card"
             >
