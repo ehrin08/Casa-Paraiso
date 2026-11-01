@@ -10,6 +10,7 @@ use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Services\AppointmentAvailability;
 use App\Services\AppointmentWorkflow;
+use App\Services\CustomerBookingGuard;
 use App\Services\CustomerBookingNotifier;
 use App\Services\RfmAddonVoucher;
 use Illuminate\Http\RedirectResponse;
@@ -93,14 +94,18 @@ class AppointmentController extends Controller
     public function create(
         Request $request,
         RfmAddonVoucher $addonVouchers,
+        CustomerBookingGuard $bookingGuard,
     ): View {
         $data = $request->validate([
             'service_id' => ['nullable', 'integer', 'exists:services,id'],
             'requested_start_at' => ['nullable', 'date'],
         ]);
         $customerProfile = $request->user()->customerProfile;
+        $bookingRestriction = $customerProfile ? $bookingGuard->restriction($customerProfile) : null;
 
         return view('customer.appointments.create', [
+            'bookingRestriction' => $bookingRestriction,
+            'bookingRestrictionMessage' => $bookingRestriction ? $bookingGuard->message($bookingRestriction) : null,
             'services' => Service::query()->with('staffProfiles.user')->where('is_active', true)->orderBy('name')->get(),
             'staffProfiles' => StaffProfile::query()
                 ->with(['user', 'services'])

@@ -11,5 +11,14 @@
         <a href="{{ route('customer.appointments.index') }}" class="casa-button-secondary">{{ __('Back to appointments') }}</a>
     </x-slot>
 
-    @include('customer.appointments.partials.form')
+    @if ($bookingRestrictionMessage)
+        <x-app-card data-booking-restricted>
+            <p class="casa-section-label">{{ __('Online booking') }}</p>
+            <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Booking is not available right now') }}</h2>
+            <p class="mt-3 text-sm leading-6 text-casa-muted" role="status">{{ $bookingRestrictionMessage }}</p>
+            <a href="{{ route('customer.appointments.index') }}" class="mt-5 casa-button-secondary">{{ __('Back to appointments') }}</a>
+        </x-app-card>
+    @else
+        @include('customer.appointments.partials.form')
+    @endif
 </x-app-layout>
