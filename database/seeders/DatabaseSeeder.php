@@ -229,6 +229,13 @@ class DatabaseSeeder extends Seeder
                     'frequency_max' => $preset['frequency_max'],
                     'monetary_min' => $preset['monetary_min'],
                     'monetary_max' => $preset['monetary_max'],
+                    'priority' => $preset['priority'],
+                    'r_score_min' => $preset['r_score_min'],
+                    'r_score_max' => $preset['r_score_max'],
+                    'f_score_min' => $preset['f_score_min'],
+                    'f_score_max' => $preset['f_score_max'],
+                    'm_score_min' => $preset['m_score_min'],
+                    'm_score_max' => $preset['m_score_max'],
                     'is_active' => true,
                 ],
             );

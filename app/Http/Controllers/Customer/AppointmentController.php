@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerAppointmentStoreRequest;
 use App\Models\Addon;
 use App\Models\Appointment;
+use App\Models\MembershipReferralCredit;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Services\AppointmentAvailability;
@@ -57,6 +58,8 @@ class AppointmentController extends Controller
             'initialMonth' => now()->format('Y-m'),
             'nextVisit' => $nextVisit,
             'feedbackVisit' => $feedbackVisit,
+            'membership' => $request->user()->customerProfile?->activeMembership(),
+            'referralCredit' => (float) MembershipReferralCredit::query()->where('customer_profile_id', $customerProfileId)->whereNull('used_at')->sum('amount'),
         ]);
     }
 
