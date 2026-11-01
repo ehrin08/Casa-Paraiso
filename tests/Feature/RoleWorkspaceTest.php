@@ -300,7 +300,7 @@ class RoleWorkspaceTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/reports')
             ->assertOk()
-            ->assertSee('href="'.e(route('admin.reports.export', ['range' => 'this_month', 'type' => 'appointments', 'category' => 'all'])).'" class="casa-button-primary reports-export" data-turbo="false"', false);
+            ->assertSee('href="'.e(route('admin.reports.export', ['range' => 'this_month', 'type' => 'appointments', 'category' => 'all', 'format' => 'csv'])).'" data-turbo="false"', false);
     }
 
     public function test_authenticated_landing_page_links_directly_to_role_home(): void

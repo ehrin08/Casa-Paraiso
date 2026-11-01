@@ -10,11 +10,14 @@ use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Service;
 use App\Models\Transaction;
+use App\Services\TabularExporter;
 use App\Services\TransactionWorkflow;
+use App\Support\TabularExport;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -59,32 +62,40 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request, TabularExporter $exporter): Response|StreamedResponse
     {
-        $records = $this->transactionQuery($this->filters($request))->lazy(500);
-        $filename = 'casa-paraiso-payments-'.now('Asia/Manila')->format('Ymd-His').'.csv';
+        $format = $exporter->format($request);
+        $filters = $this->filters($request);
+        $context = array_filter([
+            $filters['q'] !== '' ? __('Search: :q', ['q' => $filters['q']]) : null,
+            $filters['payment_status'] !== '' ? __('Status: :status', ['status' => $filters['payment_status']]) : null,
+            $filters['visit_month'] !== '' ? __('Visit month: :month', ['month' => CarbonImmutable::createFromFormat('!Y-m', $filters['visit_month'])->format('F Y')]) : __('All visit dates'),
+        ]);
 
-        return response()->streamDownload(function () use ($records): void {
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, ['ID', 'Customer', 'Email', 'Visit date', 'Amount', 'Payment method', 'Status']);
-
-            foreach ($records as $transaction) {
-                $row = [
-                    $transaction->transaction_number,
-                    $transaction->customerProfile?->display_name,
-                    $transaction->customerProfile?->display_email,
-                    $transaction->appointment?->scheduled_start_at?->timezone('Asia/Manila')->format('Y-m-d H:i:s'),
-                    $transaction->amount,
-                    $transaction->payment_method,
-                    $transaction->payment_status,
-                ];
-
-                fputcsv($handle, array_map($this->csvSafeValue(...), $row));
-            }
-
-            fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv']);
+        return $exporter->download(new TabularExport(
+            filename: 'casa-paraiso-payments',
+            title: __('Payments'),
+            columns: [
+                'ID' => TabularExport::TEXT,
+                'Customer' => TabularExport::TEXT,
+                'Email' => TabularExport::TEXT,
+                'Visit date' => TabularExport::DATETIME,
+                'Amount' => TabularExport::MONEY,
+                'Payment method' => TabularExport::TEXT,
+                'Status' => TabularExport::TEXT,
+            ],
+            query: $this->transactionQuery($filters),
+            row: fn (Transaction $transaction) => [
+                $transaction->transaction_number,
+                $transaction->customerProfile?->display_name,
+                $transaction->customerProfile?->display_email,
+                $transaction->appointment?->scheduled_start_at,
+                $transaction->amount,
+                $transaction->payment_method,
+                $transaction->payment_status,
+            ],
+            context: [implode(' · ', $context)],
+        ), $format);
     }
 
     /** @return array{q: string, payment_status: string, visit_month: string, sort: string, direction: string} */
@@ -138,11 +149,6 @@ class TransactionController extends Controller
             ->orderBy(self::SORTS[$filters['sort']], $filters['direction'])
             ->orderByDesc('transactions.created_at')
             ->orderByDesc('transactions.id');
-    }
-
-    private function csvSafeValue(?string $value): ?string
-    {
-        return $value !== null && preg_match('/^[\s]*[=+\-@]/u', $value) === 1 ? "'".$value : $value;
     }
 
     public function create(Request $request): View

@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CommissionPayoutRequest;
 use App\Models\StaffProfile;
 use App\Models\TherapistCommission;
+use App\Services\TabularExporter;
+use App\Support\TabularExport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -44,38 +47,61 @@ class CommissionController extends Controller
         ]);
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request, TabularExporter $exporter): Response|StreamedResponse
     {
-        $records = $this->commissionQuery($this->filters($request))->lazy(500);
-        $filename = 'casa-paraiso-commissions-'.now('Asia/Manila')->format('Ymd-His').'.csv';
+        $format = $exporter->format($request);
+        $filters = $this->filters($request);
+        $therapist = $filters['staff_profile_id'] ? StaffProfile::withTrashed()->with('user')->find($filters['staff_profile_id'])?->user?->name : null;
+        $context = array_filter([
+            $therapist ? __('Therapist: :name', ['name' => $therapist]) : __('All therapists'),
+            $filters['status'] !== '' ? __('Status: :status', ['status' => $filters['status']]) : null,
+            $filters['date_from'] !== '' || $filters['date_to'] !== ''
+                ? __('Earned: :from – :to', ['from' => $filters['date_from'] ?: __('Beginning'), 'to' => $filters['date_to'] ?: __('Present')])
+                : __('All earned dates'),
+        ]);
 
-        return response()->streamDownload(function () use ($records): void {
-            $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['ID', 'Therapist', 'Email', 'Earned date', 'Service', 'Appointment', 'Transaction', 'Type', 'Basis amount', 'Rate (%)', 'Commission', 'Status', 'Payout date', 'Recorded by', 'Notes', 'Adjusts commission ID']);
-
-            foreach ($records as $commission) {
-                fputcsv($handle, [
-                    $commission->id,
-                    $this->csvSafeValue($commission->staffProfile?->user?->name),
-                    $this->csvSafeValue($commission->staffProfile?->user?->email),
-                    $commission->earned_at?->timezone('Asia/Manila')->format('Y-m-d H:i:s'),
-                    $this->csvSafeValue($commission->appointment?->service?->name),
-                    $this->csvSafeValue($commission->appointment?->appointment_number),
-                    $this->csvSafeValue($commission->transaction?->transaction_number),
-                    $commission->commission_type,
-                    $commission->basis_amount,
-                    number_format((float) $commission->commission_rate * 100, 2, '.', ''),
-                    $commission->commission_amount,
-                    $commission->status,
-                    $commission->paid_at?->timezone('Asia/Manila')->format('Y-m-d'),
-                    $this->csvSafeValue($commission->paidBy?->name),
-                    $this->csvSafeValue($commission->notes),
-                    $commission->adjusts_commission_id,
-                ]);
-            }
-
-            fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv']);
+        return $exporter->download(new TabularExport(
+            filename: 'casa-paraiso-commissions',
+            title: __('Therapist commissions'),
+            columns: [
+                'ID' => TabularExport::NUMBER,
+                'Therapist' => TabularExport::TEXT,
+                'Email' => TabularExport::TEXT,
+                'Earned date' => TabularExport::DATETIME,
+                'Service' => TabularExport::TEXT,
+                'Appointment' => TabularExport::TEXT,
+                'Transaction' => TabularExport::TEXT,
+                'Type' => TabularExport::TEXT,
+                'Basis amount' => TabularExport::MONEY,
+                'Rate (%)' => TabularExport::NUMBER,
+                'Commission' => TabularExport::MONEY,
+                'Status' => TabularExport::TEXT,
+                'Payout date' => TabularExport::DATE,
+                'Recorded by' => TabularExport::TEXT,
+                'Notes' => TabularExport::TEXT,
+                'Adjusts commission ID' => TabularExport::NUMBER,
+            ],
+            query: $this->commissionQuery($filters),
+            row: fn (TherapistCommission $commission) => [
+                $commission->id,
+                $commission->staffProfile?->user?->name,
+                $commission->staffProfile?->user?->email,
+                $commission->earned_at,
+                $commission->appointment?->service?->name,
+                $commission->appointment?->appointment_number,
+                $commission->transaction?->transaction_number,
+                $commission->commission_type,
+                $commission->basis_amount,
+                number_format((float) $commission->commission_rate * 100, 2, '.', ''),
+                $commission->commission_amount,
+                $commission->status,
+                $commission->paid_at,
+                $commission->paidBy?->name,
+                $commission->notes,
+                $commission->adjusts_commission_id,
+            ],
+            context: [implode(' · ', $context)],
+        ), $format);
     }
 
     public function show(TherapistCommission $commission): View
@@ -148,11 +174,6 @@ class CommissionController extends Controller
             ->when($filters['date_to'] ?? '', fn ($query, $date) => $query->whereDate('earned_at', '<=', $date))
             ->orderByDesc('earned_at')
             ->orderByDesc('id');
-    }
-
-    private function csvSafeValue(?string $value): ?string
-    {
-        return $value !== null && preg_match('/^[\s]*[=+\-@]/u', $value) === 1 ? "'".$value : $value;
     }
 
     private function totals(Builder $query): array

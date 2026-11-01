@@ -11,6 +11,10 @@ return [
     'pagination' => [
         'per_page' => 15,
     ],
+    'exports' => [
+        // PDF and print views stop here; CSV and Excel always include every matching record.
+        'document_row_limit' => 1000,
+    ],
     'commissions' => [
         'therapist_rate' => 0.22,
     ],

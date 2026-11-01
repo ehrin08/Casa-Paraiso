@@ -7,6 +7,7 @@
 - Authentication: Laravel Breeze email/password authentication, verification, password recovery, and Laravel Socialite Google OAuth.
 - Local runtime: Docker Desktop Compose project `casa-paraiso-web` with Apache/PHP, MariaDB, and Mailpit.
 - Package management: Composer for PHP and npm for compiled web assets. Node is a build dependency, not a production service requirement.
+- Exports: `openspout/openspout` 4.x writes streamed Excel workbooks (v5 needs PHP 8.4) and `dompdf/dompdf` 3.x renders PDF reports. Both are pure PHP and need the `zip`, `dom` and `mbstring` extensions.
 
 ## Web Boundaries
 

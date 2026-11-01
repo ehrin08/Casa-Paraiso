@@ -57,7 +57,7 @@
                 <select id="reports-category" name="category" class="casa-input" x-on:change="$el.form.requestSubmit()"><option value="all" @selected($category === 'all')>{{ __('All reports') }}</option>@foreach ($labels as $value => $label)<option value="{{ $value }}" @selected($category === $value)>{{ $label }}</option>@endforeach</select>
                 <noscript><button type="submit" class="casa-button-secondary">{{ __('Apply category') }}</button></noscript><x-input-error :messages="$errors->get('category')" />
             </form>
-            <a href="{{ route('admin.reports.export', $filterQuery) }}" class="casa-button-primary reports-export" data-turbo="false" aria-label="{{ __('Export :report CSV', ['report' => $labels[$type]]) }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4" /></svg>{{ __('Export CSV') }}</a>
+            <x-export-menu route="admin.reports.export" :query="$filterQuery" :subject="__(':report report', ['report' => $labels[$type]])" button-class="casa-button-primary" class="reports-export" />
         </section>
         @if (array_intersect(['revenue', 'completed', 'customers'], $visible))
             <section class="reports-metrics" data-metric-grid aria-label="{{ __('Selected-period metrics') }}" style="--report-metrics: {{ count(array_intersect(['revenue', 'completed', 'customers'], $visible)) }}">
@@ -127,7 +127,7 @@
                     <button type="submit" class="casa-button-secondary">{{ __('Apply filters') }}</button>
                 </form>
             </x-list-toolbar>
-            <p class="reports-help reports-record-help">{{ __(':dates · Asia/Manila. Search and status filter these records and their CSV; dashboard panels use the date range.', ['dates' => $dateContext]) }}</p>
+            <p class="reports-help reports-record-help">{{ __(':dates · Asia/Manila. Search and status filter these records and their exports; dashboard panels use the date range.', ['dates' => $dateContext]) }}</p>
             <noscript><style>.reports-record-toolbar [data-filter-panel] { display: block; } .reports-record-toolbar [data-filter-toggle] { display: none; }</style></noscript>
             @if ($records->isEmpty())<x-empty-state title="No report rows" description="Try adjusting the date range or record filters." />@else<x-report-records :type="$type" :records="$records" :reward-names="$rewardNames" /><div class="reports-pagination">{{ $records->links('pagination.compact') }}</div>@endif
         </section>

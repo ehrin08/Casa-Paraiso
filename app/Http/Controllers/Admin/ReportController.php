@@ -13,9 +13,12 @@ use App\Models\PromotionSuggestion;
 use App\Models\Transaction;
 use App\Services\ReportDashboard;
 use App\Services\ReportDateRange;
+use App\Services\TabularExporter;
+use App\Support\TabularExport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -26,6 +29,8 @@ class ReportController extends Controller
     use HandlesIndexSorting;
 
     public const TYPES = ['appointments', 'transactions', 'customers', 'promotions', 'feedback'];
+
+    private const TITLES = ['appointments' => 'Appointments', 'transactions' => 'Transactions', 'customers' => 'Customers', 'promotions' => 'Rewards', 'feedback' => 'Feedback'];
 
     public function __construct(private readonly ReportDashboard $dashboard) {}
 
@@ -53,24 +58,26 @@ class ReportController extends Controller
         ]);
     }
 
-    public function export(ReportIndexRequest $request): StreamedResponse
+    public function export(ReportIndexRequest $request, TabularExporter $exporter): Response|StreamedResponse
     {
+        $format = $exporter->format($request);
         $range = ReportDateRange::fromFilters($request->validated());
         $type = $this->type($request);
-        $records = $this->query($type, $request, $range)->lazy(500);
-        $filename = 'casa-paraiso-'.$type.'-'.now()->format('Ymd-His').'.csv';
+        $filters = array_filter([
+            filled($request->query('q')) ? __('Search: :q', ['q' => $request->query('q')]) : null,
+            filled($request->query('status')) ? __('Status: :status', ['status' => $request->query('status')]) : null,
+            filled($request->query('payment_status')) ? __('Payment status: :status', ['status' => $request->query('payment_status')]) : null,
+            filled($request->query('sentiment_label')) ? __('Sentiment: :label', ['label' => $request->query('sentiment_label')]) : null,
+        ]);
 
-        return response()->streamDownload(function () use ($type, $records): void {
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, $this->csvHeader($type));
-
-            foreach ($records as $record) {
-                fputcsv($handle, $this->csvRow($type, $record));
-            }
-
-            fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv']);
+        return $exporter->download(new TabularExport(
+            filename: 'casa-paraiso-'.$type,
+            title: __(':report report', ['report' => self::TITLES[$type]]),
+            columns: $this->exportColumns($type),
+            query: $this->query($type, $request, $range),
+            row: fn ($record) => $this->exportRow($type, $record),
+            context: [$range->label(), ...($filters ? [implode(' · ', $filters)] : [])],
+        ), $format);
     }
 
     protected function type(Request $request): string
@@ -289,42 +296,36 @@ class ReportController extends Controller
     }
 
     /**
-     * @return array<int, string>
+     * @return array<string, string>
      */
-    protected function csvHeader(string $type): array
+    protected function exportColumns(string $type): array
     {
+        $text = TabularExport::TEXT;
+        $number = TabularExport::NUMBER;
+        $money = TabularExport::MONEY;
+        $datetime = TabularExport::DATETIME;
+
         return match ($type) {
-            'transactions' => ['Number', 'Customer', 'Service', 'Amount', 'Status', 'Method', 'Paid At'],
-            'customers' => ['Code', 'Name', 'Email', 'Phone', 'Joined At', 'Status', 'Appointments', 'Transactions', 'Feedback', 'Rewards'],
-            'promotions' => ['Customer', 'Customer Group', 'Days Since Last Paid Visit', 'Paid Visits', 'Paid Total', 'Reward', 'Status', 'Expires At'],
-            'feedback' => ['Customer', 'Service', 'Rating', 'Sentiment', 'Submitted At', 'Comment', 'Hidden From Therapist'],
-            default => ['Number', 'Customer', 'Service', 'Staff', 'Appointment Date', 'Status'],
+            'transactions' => ['Number' => $text, 'Customer' => $text, 'Service' => $text, 'Amount' => $money, 'Status' => $text, 'Method' => $text, 'Paid At' => $datetime],
+            'customers' => ['Code' => $text, 'Name' => $text, 'Email' => $text, 'Phone' => $text, 'Joined At' => $datetime, 'Status' => $text, 'Appointments' => $number, 'Transactions' => $number, 'Feedback' => $number, 'Rewards' => $number],
+            'promotions' => ['Customer' => $text, 'Customer Group' => $text, 'Days Since Last Paid Visit' => $number, 'Paid Visits' => $number, 'Paid Total' => $money, 'Reward' => $text, 'Status' => $text, 'Expires At' => $datetime],
+            'feedback' => ['Customer' => $text, 'Service' => $text, 'Rating' => $number, 'Sentiment' => $text, 'Submitted At' => $datetime, 'Comment' => $text, 'Hidden From Therapist' => $text],
+            default => ['Number' => $text, 'Customer' => $text, 'Service' => $text, 'Staff' => $text, 'Appointment Date' => $datetime, 'Status' => $text],
         };
     }
 
     /**
-     * @return array<int, string|int|float|null>
+     * @return array<int, mixed>
      */
-    protected function csvRow(string $type, mixed $record): array
+    protected function exportRow(string $type, mixed $record): array
     {
-        $row = match ($type) {
-            'transactions' => [$record->transaction_number, $record->customerProfile?->display_name, $record->service?->name, $record->amount, $record->payment_status, $record->payment_method, $record->paid_at?->toDateTimeString()],
-            'customers' => [$record->customer_code, $record->display_name, $record->display_email, $record->display_phone, $record->created_at?->toDateTimeString(), $record->is_guest ? 'guest' : ($record->user?->is_active ? 'active' : 'inactive'), $record->appointments_count, $record->transactions_count, $record->feedback_count, $record->promotion_suggestions_count],
-            'promotions' => [$record->customerProfile?->display_name, $record->rfmSegment?->name, $record->recency_days, $record->frequency_count, $record->monetary_total, $record->addonName() ?: $record->suggested_offer, $record->lifecycle(), $record->expires_at?->toDateTimeString()],
-            'feedback' => [$record->customerProfile?->display_name, $record->service?->name, $record->rating, $record->sentiment_label, $record->submitted_at?->toDateTimeString(), $record->comment, $record->is_anonymous ? 'yes' : 'no'],
-            default => [$record->appointment_number, $record->customerProfile?->display_name, $record->service?->name, $record->staffProfile?->user?->name, ($record->scheduled_start_at ?? $record->requested_start_at)?->toDateTimeString(), $record->status],
+        return match ($type) {
+            'transactions' => [$record->transaction_number, $record->customerProfile?->display_name, $record->service?->name, $record->amount, $record->payment_status, $record->payment_method, $record->paid_at],
+            'customers' => [$record->customer_code, $record->display_name, $record->display_email, $record->display_phone, $record->created_at, $record->is_guest ? 'guest' : ($record->user?->is_active ? 'active' : 'inactive'), $record->appointments_count, $record->transactions_count, $record->feedback_count, $record->promotion_suggestions_count],
+            'promotions' => [$record->customerProfile?->display_name, $record->rfmSegment?->name, $record->recency_days, $record->frequency_count, $record->monetary_total, $record->addonName() ?: $record->suggested_offer, $record->lifecycle(), $record->expires_at],
+            'feedback' => [$record->customerProfile?->display_name, $record->service?->name, $record->rating, $record->sentiment_label, $record->submitted_at, $record->comment, $record->is_anonymous ? 'yes' : 'no'],
+            default => [$record->appointment_number, $record->customerProfile?->display_name, $record->service?->name, $record->staffProfile?->user?->name, $record->scheduled_start_at ?? $record->requested_start_at, $record->status],
         };
-
-        return array_map($this->csvSafeValue(...), $row);
-    }
-
-    private function csvSafeValue(string|int|float|null $value): string|int|float|null
-    {
-        if (is_string($value) && preg_match('/^[\s]*[=+\-@]/u', $value) === 1) {
-            return "'".$value;
-        }
-
-        return $value;
     }
 
     public function insights(Request $request): JsonResponse
