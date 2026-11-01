@@ -15,6 +15,7 @@ use App\Services\RfmAddonVoucher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -161,6 +162,16 @@ class AppointmentController extends Controller
         $customerProfile = $request->user()->customerProfile;
 
         abort_unless($customerProfile, 403);
+
+        $rateLimitKey = 'customer-booking:'.$request->user()->id;
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, (int) config('casa.customer_booking_limits.submissions_per_window', 3))) {
+            return back()->withInput()->withErrors(['booking' => __('Too many booking attempts. Please wait :minutes minutes and try again.', [
+                'minutes' => (int) ceil(RateLimiter::availableIn($rateLimitKey) / 60),
+            ])]);
+        }
+
+        RateLimiter::hit($rateLimitKey, (int) config('casa.customer_booking_limits.submission_window_minutes', 10) * 60);
 
         $data = $request->validated();
         $service = Service::query()->findOrFail($data['service_id']);

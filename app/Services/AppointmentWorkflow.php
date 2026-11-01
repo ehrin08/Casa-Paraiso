@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Appointment;
 use App\Models\AppointmentStatusLog;
+use App\Models\CustomerProfile;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use Carbon\CarbonInterface;
@@ -22,6 +23,7 @@ class AppointmentWorkflow
         private readonly AppointmentNumberGenerator $numberGenerator,
         private readonly RfmAddonVoucher $addonVouchers,
         private readonly AppointmentAddons $addons,
+        private readonly CustomerBookingGuard $bookingGuard,
     ) {}
 
     public function nextAppointmentNumber(): string
@@ -143,6 +145,11 @@ class AppointmentWorkflow
 
         return $this->withAppointmentNumberRetry(function (string $number) use ($attributes, $service, $start, $preferredStaffProfileId, $changedBy, $addonCodes, $paidAddons, $minimumLeadTimeMinutes): Appointment {
             return DB::transaction(function () use ($attributes, $service, $start, $preferredStaffProfileId, $changedBy, $number, $addonCodes, $paidAddons, $minimumLeadTimeMinutes): Appointment {
+                // Self-booking only: the profile lock serializes concurrent submissions so the cap cannot be raced.
+                $this->bookingGuard->assertCanBook(
+                    CustomerProfile::query()->lockForUpdate()->findOrFail((int) $attributes['customer_profile_id']),
+                );
+
                 $promotionSuggestionId = isset($attributes['promotion_suggestion_id'])
                     ? (int) $attributes['promotion_suggestion_id']
                     : null;

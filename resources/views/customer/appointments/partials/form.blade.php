@@ -21,6 +21,7 @@
     <x-booking-stepper />
     <div class="booking-wizard-body">
         <p class="booking-step-error" x-show="stepError" x-cloak role="alert" x-text="stepError"></p>
+        @if ($errors->has('booking'))<p class="booking-step-error" role="alert" data-booking-limit-error>{{ $errors->first('booking') }}</p>@endif
         <section data-booking-step="1" x-show="step === 1">
             <div class="booking-step-heading"><h2 data-step-heading tabindex="-1">{{ __('Treatment details') }}</h2><p>{{ __('Choose your treatment and any extra care for your visit.') }}</p></div>
             <fieldset><legend class="casa-label">{{ __('Choose a treatment') }}</legend><div class="booking-service-grid">
