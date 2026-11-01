@@ -162,19 +162,19 @@ The apply command must only be run after reviewing the dry-run transitions and c
 
 The local-model foundation is implemented: native PHP JSON-artifact inference, `rules`/`shadow`/`model` mode configuration, append-only sentiment runs, private annotations, admin review endpoints, and a development-only scikit-learn export script. The default remains `shadow`; promotion requires the evaluation gate above and can be rolled back with `SENTIMENT_CLASSIFIER_MODE=rules`.
 
-Since 2026-10-30 the hybrid adapter can use a pretrained multilingual XLM-RoBERTa checkpoint (`cardiffnlp/twitter-xlm-roberta-base-sentiment`) instead of the local artifact. `SENTIMENT_MODEL_DRIVER=xlmr` selects `App\Services\XlmRobertaSentimentModel`, which posts the comment to `SENTIMENT_XLMR_URL` in the Hugging Face text-classification format and records the result as the `model` candidate (version `xlmr-twitter-base-v1`). Blank comments, a missing URL, timeouts, errors and unexpected payloads all leave the rules in charge. The optional Docker `sentiment` profile serves the same API locally. `casa:sentiment-predictions {dataset} {output} --driver=rules|local|xlmr` writes predictions for `scripts/evaluate_sentiment_model.py`, so the checkpoint can be compared on the locked test set once that set exists. Until it passes the gate, production stays on `rules` with the `local` driver.
+From 2026-10-30 to 2026-11-01 the hybrid adapter also had an optional XLM-RoBERTa driver (`cardiffnlp/twitter-xlm-roberta-base-sentiment`, served by a Docker `sentiment` profile). It failed both gates below and was **removed on 2026-11-01**: its driver, service and tests are gone, and its results stay here as the record of why. `casa:sentiment-predictions {dataset} {output} --driver=rules|local|gemini` writes predictions for `scripts/evaluate_sentiment_model.py`.
 
 Since 2026-11-01 there's a curated test set, because real feedback is still too sparse for Phase 2. `resources/sentiment/eval/curated-v1/` holds 240 fictional English, Tagalog and Taglish comments (`items.csv`), the author's draft labels for the adjudicator (`suggested.csv`), and two blank sheets for independent labellers. The [Labelling Guide](sentiment/LABELING_GUIDE.md) defines the labels. The workflow runs from the repository root:
 
 ```text
 python scripts/sentiment_agreement.py resources/sentiment/eval/curated-v1
 python scripts/lock_sentiment_testset.py resources/sentiment/eval/curated-v1
-.\scripts\casa-docker.ps1 compose exec -T app php artisan casa:sentiment-predictions resources/sentiment/eval/curated-v1/locked-test.csv storage/app/private/c1-rules.csv --driver=rules
-.\scripts\casa-docker.ps1 compose exec -T app php artisan casa:sentiment-predictions resources/sentiment/eval/curated-v1/locked-test.csv storage/app/private/c1-xlmr.csv --driver=xlmr
-python scripts/evaluate_sentiment_model.py resources/sentiment/eval/curated-v1/locked-test.csv storage/app/private/c1-xlmr.csv storage/app/private/c1-xlmr.json --baseline storage/app/private/c1-rules.csv
+.\scripts\casa-docker.ps1 compose exec -T app php artisan casa:sentiment-predictions resources/sentiment/eval/curated-v2/locked-test.csv storage/app/private/c2-rules.csv --driver=rules
+.\scripts\casa-docker.ps1 compose exec -T app php artisan casa:sentiment-predictions resources/sentiment/eval/curated-v2/locked-test.csv storage/app/private/c2-gemini.csv --driver=gemini --sleep=4
+python scripts/evaluate_sentiment_model.py resources/sentiment/eval/curated-v2/locked-test.csv storage/app/private/c2-gemini.csv storage/app/private/c2-gemini.json --baseline storage/app/private/c2-rules.csv
 ```
 
-The agreement script reports Cohen's kappa and pre-fills `final` wherever the two labellers agree. The lock script refuses blank finals and never overwrites `locked-test.csv`. Record its SHA-256 in the manifest. The evaluator uses only the standard library and reports per-language and per-tag results. With `--baseline` it applies the governance gate and exits 2 on failure. The xlmr run needs the `sentiment` profile running and `SENTIMENT_XLMR_URL` set. Curated results show how the model handles representative cases, but they are not evidence from real customers. Repeat the gate on redacted real feedback once enough has accumulated.
+The agreement script reports Cohen's kappa and pre-fills `final` wherever the two labellers agree. The lock script refuses blank finals and never overwrites `locked-test.csv`. Record its SHA-256 in the manifest. The evaluator uses only the standard library and reports per-language and per-tag results. With `--baseline` it applies the governance gate and exits 2 on failure. The gemini run needs `GEMINI_API_KEY` set; `--sleep` keeps it under the free-tier rate limit. Curated results show how the model handles representative cases, but they are not evidence from real customers. Repeat the gate on redacted real feedback once enough has accumulated.
 
 ### Gate result, 2026-11-01 (provisional)
 
@@ -213,7 +213,7 @@ The v2 baseline came from the committed v2 classifier and config, run outside th
 **What the results suggest:**
 - On new text, keyword rules level off around macro-F1 0.71, and most of their accuracy comes from the stars.
 - Many of the remaining misses need world knowledge ("on the phone the whole time", "hair on the pillow").
-- Getting past that level needs a model trained on labelled Filipino review text, for example XLM-RoBERTa fine-tuned on Tagalog and Taglish, rather than more rules. That needs a training set, an inference host and privacy wording first.
+- Getting past that level needs a model that understands Filipino review text, rather than more rules. The Gemini section below is the approach that was chosen.
 - `curated-v1` was seen during v3 tuning, so it no longer gives a clean measurement. Use `curated-v2` for future gates.
 
 ### Gemini driver, 2026-11-01 (passed, chosen for production)

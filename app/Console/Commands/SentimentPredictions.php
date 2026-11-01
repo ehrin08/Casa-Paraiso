@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Services\GeminiSentimentModel;
 use App\Services\LocalSentimentModel;
 use App\Services\SentimentClassifier;
-use App\Services\XlmRobertaSentimentModel;
 use Illuminate\Console\Command;
 
 class SentimentPredictions extends Command
@@ -13,16 +12,16 @@ class SentimentPredictions extends Command
     protected $signature = 'casa:sentiment-predictions
         {dataset : CSV with text, rating and label columns}
         {output : Predictions CSV for scripts/evaluate_sentiment_model.py}
-        {--driver=rules : rules, local, xlmr or gemini}
+        {--driver=rules : rules, local or gemini}
         {--sleep=0 : Seconds to wait between rows, to stay under a free-tier rate limit}';
 
     protected $description = 'Run one sentiment classifier over a labelled dataset and write its predictions for offline evaluation.';
 
-    public function handle(SentimentClassifier $rules, LocalSentimentModel $local, XlmRobertaSentimentModel $xlmr, GeminiSentimentModel $gemini): int
+    public function handle(SentimentClassifier $rules, LocalSentimentModel $local, GeminiSentimentModel $gemini): int
     {
         $driver = (string) $this->option('driver');
-        if (! in_array($driver, ['rules', 'local', 'xlmr', 'gemini'], true)) {
-            $this->error('The driver must be rules, local, xlmr or gemini.');
+        if (! in_array($driver, ['rules', 'local', 'gemini'], true)) {
+            $this->error('The driver must be rules, local or gemini.');
 
             return self::FAILURE;
         }
@@ -53,7 +52,6 @@ class SentimentPredictions extends Command
             $prediction = match ($driver) {
                 'rules' => $rules->classify($rating, $text),
                 'local' => $local->classify($rating, $text),
-                'xlmr' => $xlmr->classify($rating, $text),
                 'gemini' => $gemini->classify($rating, $text),
             };
             if ($prediction === null) {

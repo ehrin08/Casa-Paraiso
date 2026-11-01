@@ -29,23 +29,23 @@ class HybridSentimentClassifierTest extends TestCase
         $this->assertSame($result['rules_candidate']['label'], $result['label']);
     }
 
-    public function test_xlmr_driver_in_shadow_mode_records_the_candidate_without_changing_the_label(): void
+    public function test_gemini_driver_in_shadow_mode_records_the_candidate_without_changing_the_label(): void
     {
-        $this->fakeXlmr('negative', 0.95);
+        $this->fakeGemini('negative', 0.95);
         Config::set('sentiment.mode', 'shadow');
 
         $result = app(HybridSentimentClassifier::class)->classify(5, 'Napakaganda at mabait ang therapist.');
 
         $this->assertSame('rules', $result['source']);
         $this->assertSame('positive', $result['label']);
-        $this->assertSame('xlmr-twitter-base-v1', $result['model_candidate']['version']);
+        $this->assertSame('gemini-v1', $result['model_candidate']['version']);
         $this->assertTrue($result['disagreement']);
         $this->assertSame('needs_review', $result['review_state']);
     }
 
-    public function test_xlmr_driver_in_model_mode_selects_a_confident_prediction(): void
+    public function test_gemini_driver_in_model_mode_selects_a_confident_prediction(): void
     {
-        $this->fakeXlmr('negative', 0.95);
+        $this->fakeGemini('negative', 0.95);
         Config::set('sentiment.mode', 'model');
 
         $result = app(HybridSentimentClassifier::class)->classify(4, 'The room was clean but the wait was long.');
@@ -53,15 +53,15 @@ class HybridSentimentClassifierTest extends TestCase
         $this->assertSame('model', $result['source']);
         $this->assertSame('negative', $result['label']);
         $this->assertSame(0.95, $result['confidence']);
-        $this->assertSame('xlmr-twitter-base-v1', $result['version']);
+        $this->assertSame('gemini-v1', $result['version']);
     }
 
-    public function test_xlmr_endpoint_failure_falls_back_to_the_rules(): void
+    public function test_gemini_endpoint_failure_falls_back_to_the_rules(): void
     {
         Http::preventStrayRequests();
-        Http::fake(['inference.test/*' => Http::response([], 500)]);
-        Config::set('sentiment.model_driver', 'xlmr');
-        Config::set('sentiment.xlmr.url', 'https://inference.test/sentiment');
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response([], 500)]);
+        Config::set('sentiment.model_driver', 'gemini');
+        Config::set('sentiment.gemini.key', 'test-gemini-key');
         Config::set('sentiment.mode', 'model');
 
         $result = app(HybridSentimentClassifier::class)->classify(5, 'Napakaganda at mabait ang therapist.');
@@ -97,15 +97,13 @@ class HybridSentimentClassifierTest extends TestCase
         $this->assertNull($result['model_candidate']);
     }
 
-    private function fakeXlmr(string $label, float $score): void
+    private function fakeGemini(string $label, float $confidence): void
     {
         Http::preventStrayRequests();
-        $rest = (1 - $score) / 2;
-        Http::fake(['inference.test/*' => Http::response([array_map(
-            fn (string $name): array => ['label' => $name, 'score' => $name === $label ? $score : $rest],
-            ['positive', 'neutral', 'negative'],
-        )])]);
-        Config::set('sentiment.model_driver', 'xlmr');
-        Config::set('sentiment.xlmr.url', 'https://inference.test/sentiment');
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['candidates' => [['content' => ['parts' => [
+            ['text' => json_encode(['label' => $label, 'confidence' => $confidence])],
+        ]]]]])]);
+        Config::set('sentiment.model_driver', 'gemini');
+        Config::set('sentiment.gemini.key', 'test-gemini-key');
     }
 }

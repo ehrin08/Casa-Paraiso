@@ -7,7 +7,6 @@ The Docker Desktop `desktop-linux` Compose project is `casa-paraiso-web`.
 - `app`: Apache/PHP 8.2 with Composer, Node 24, and required Laravel extensions at `http://localhost:18001`. Booking badges poll the authenticated count endpoint every 30 seconds while the page is visible; no WebSocket service is required.
 - `mariadb`: MariaDB 10.11 LTS at `127.0.0.1:13306`; database `casa_paraiso`.
 - `mailpit`: SMTP at `127.0.0.1:11026`; dashboard at `http://localhost:18025`.
-- `sentiment` (optional, `sentiment` profile): a CPU-only XLM-RoBERTa endpoint (`docker/sentiment/`) that the app reaches at `http://sentiment:8000`. It is not started by `setup`/`start`, publishes no host port, and caches the downloaded checkpoint in the `sentiment-models` volume. See [Sentiment model endpoint](#sentiment-model-endpoint).
 
 All ports bind to loopback. Named volumes preserve MariaDB data, container-side dependencies,
 and Laravel logs. The application source is a Windows bind mount, so `storage/logs` uses its
@@ -43,23 +42,9 @@ For commands with Compose options, use an explicit argument array: PowerShell ca
 .\scripts\casa-docker.ps1 -Action compose -ComposeArguments @('up', '-d', 'mariadb')
 ```
 
-### Sentiment Model Endpoint
+### Sentiment Model
 
-The XLM-RoBERTa feedback classifier runs outside PHP. To try it locally, build and start the profile service (the first start downloads about 1 GB), then point the app at it in the ignored `.env`:
-
-```powershell
-.\scripts\casa-docker.ps1 -Action compose -ComposeArguments @('--profile', 'sentiment', 'up', '-d', 'sentiment')
-```
-
-```text
-SENTIMENT_MODEL_DRIVER=xlmr
-SENTIMENT_XLMR_URL=http://sentiment:8000/
-SENTIMENT_CLASSIFIER_MODE=shadow
-```
-
-Clear the configuration cache after changing `.env`. If the service is stopped, feedback keeps working on the rules. Tests fake the endpoint and never need this service.
-
-The Gemini classifier needs no container, only a Google AI Studio key in the ignored `.env`. Never put the key in an example file:
+The Gemini feedback classifier needs no container, only a Google AI Studio key in the ignored `.env`. Never put the key in an example file:
 
 ```text
 GEMINI_API_KEY=<your key>
@@ -67,7 +52,7 @@ SENTIMENT_MODEL_DRIVER=gemini
 SENTIMENT_CLASSIFIER_MODE=model
 ```
 
-`SENTIMENT_GEMINI_MODEL` defaults to `gemini-3.5-flash-lite`. `SENTIMENT_GEMINI_TIMEOUT` defaults to 5 seconds. Tests fake the Gemini API and never call it.
+`SENTIMENT_GEMINI_MODEL` defaults to `gemini-3.5-flash-lite`. `SENTIMENT_GEMINI_TIMEOUT` defaults to 5 seconds. Clear the configuration cache after changing `.env`. If the API fails, feedback keeps working on the rules. Tests fake the Gemini API and never call it.
 
 ### Test Speed
 

@@ -50,16 +50,6 @@ services:
     networks:
       - casa
 
-  # Optional XLM-RoBERTa endpoint; start with `--profile sentiment` (downloads ~1 GB once).
-  sentiment:
-    build:
-      context: ./docker/sentiment
-    profiles: ['sentiment']
-    volumes:
-      - 'sentiment-models:/models'
-    networks:
-      - casa
-
 networks:
   casa:
     driver: bridge
@@ -73,6 +63,4 @@ volumes:
   node_modules:
     driver: local
   storage-logs:
-    driver: local
-  sentiment-models:
     driver: local
