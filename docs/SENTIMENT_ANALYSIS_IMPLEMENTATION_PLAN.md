@@ -216,6 +216,30 @@ The v2 baseline came from the committed v2 classifier and config, run outside th
 - Getting past that level needs a model trained on labelled Filipino review text, for example XLM-RoBERTa fine-tuned on Tagalog and Taglish, rather than more rules. That needs a training set, an inference host and privacy wording first.
 - `curated-v1` was seen during v3 tuning, so it no longer gives a clean measurement. Use `curated-v2` for future gates.
 
+### Gemini driver, 2026-11-01 (passed, chosen for production)
+
+There was no labelled data for fine-tuning, so the owner chose a hosted LLM. `SENTIMENT_MODEL_DRIVER=gemini` selects `App\Services\GeminiSentimentModel`, which works like this:
+- It sends the star rating and the comment, redacted by `App\Support\SentimentRedactor`, to the Gemini `generateContent` API. The model defaults to `gemini-3.5-flash-lite` (`SENTIMENT_GEMINI_MODEL`).
+- The instructions are a condensed Labelling Guide plus the blend rule: a clear opinion in the text decides, and the stars decide only when the comment states none.
+- Structured JSON output returns a `label` (one of three values) and a `confidence`. Version `gemini-v1`.
+- Errors, rate limits, timeouts and malformed answers return null, so the rules decide.
+
+One run on the locked `curated-v2` set, at 4 seconds per row on the free tier:
+
+| Classifier (curated-v2) | Macro-F1 | Negative recall | Taglish errors | Mixed errors | Gate |
+|---|---|---|---|---|---|
+| rules v2 (baseline) | 0.714 | 0.961 | 12 | 10 | — |
+| gemini (`gemini-3.5-flash-lite`) | 0.993 | 1.000 | 1 | 0 | **Passed** (all four checks) |
+
+The one error was a factual request ("Medium pressure yung ni-request ko") labelled positive. Three of the 150 answers had confidence below 0.80, so in `model` mode the rules would decide those.
+
+**Read with caution:**
+- The comments and labels were written by an AI assistant, and an LLM is likely to agree with them more than with real customers or human labellers.
+- Treat 0.993 as an upper bound, not the accuracy to expect on real feedback.
+- Check real feedback periodically against the stored rules candidates in `feedback_sentiment_runs`, and re-run the gate whenever the model changes.
+
+**Decision:** production moves to `SENTIMENT_CLASSIFIER_MODE=model` with `SENTIMENT_MODEL_DRIVER=gemini`, as the owner chose (no shadow period). Data handling is covered in [SENTIMENT_DATA_GOVERNANCE.md](SENTIMENT_DATA_GOVERNANCE.md).
+
 ## Recommended first implementation slice
 
 Start with Phases 1–3: dataset governance, a small manually verified Casa Paraiso set, and a baseline evaluation of the existing classifier. This produces evidence about whether a trained model is worth the additional deployment and maintenance cost before changing production classification behavior.

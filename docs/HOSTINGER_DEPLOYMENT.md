@@ -65,6 +65,8 @@ https://YOUR_DOMAIN/profile/password/google/callback
 
 Sentiment stays on `SENTIMENT_CLASSIFIER_MODE=rules` and `SENTIMENT_MODEL_DRIVER=local` until the evaluation gate in [SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md](SENTIMENT_ANALYSIS_IMPLEMENTATION_PLAN.md) passes. Hostinger cannot run the XLM-RoBERTa model itself. Enabling `SENTIMENT_MODEL_DRIVER=xlmr` needs an approved HTTPS inference endpoint in `SENTIMENT_XLMR_URL` (a Hugging Face Inference Endpoint or a separate self-hosted server) and, if it requires one, `SENTIMENT_XLMR_TOKEN`. Comments are then sent off the server, so the privacy policy must say so before it is enabled. Keep `SENTIMENT_XLMR_TIMEOUT` short (default 3 seconds): feedback is classified while the customer waits, and a slow or failed call falls back to the rules.
 
+Since 2026-11-01 the chosen production classifier is Google Gemini, which passed the gate. It is a plain HTTPS call, so Hostinger runs it with no extra server. Set `GEMINI_API_KEY` in the Hostinger environment (never in a committed file), then `SENTIMENT_MODEL_DRIVER=gemini` and `SENTIMENT_CLASSIFIER_MODE=model`. The privacy policy already describes this. Free-tier rate limits or outages fall back to the rules. See [SENTIMENT_DATA_GOVERNANCE.md](SENTIMENT_DATA_GOVERNANCE.md) for the free-tier data terms.
+
 The second URI supports Google-linked users confirming identity before setting a password. Set `GOOGLE_REDIRECT_URI` to the first URI. Test the real provider and authorized domain; automated tests mock it. Enable HSTS only after validating HTTPS for the domain and its subdomains.
 
 ## Confirm the hosting environment

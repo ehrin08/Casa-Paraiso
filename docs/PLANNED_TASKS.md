@@ -22,7 +22,8 @@ Started 2026-10-30 ([session note](notes/sessions/2026-10-30-xlm-roberta-sentime
   - [x] Lock the set and record its SHA-256 in the manifest. (No agreement script or kappa, since there was only one source of labels.)
   - [x] Run rules, local and xlmr predictions and the gate. (Provisional result: xlmr macro-F1 0.694 against rules 0.839, failed all four checks, so it stays out of `shadow`. Production stays on `rules` with the `local` driver.)
 - [x] Try an improved rules v3 and gate it on a fresh held-out set ([session note](notes/sessions/2026-11-01-sentiment-rules-v3-reverted.md)). The AI-labelled `curated-v2` set (150 rows) was locked before tuning. Every classifier failed: v2 0.714, v3 0.710, local 0.725, xlmr 0.536. v3 was reverted and production stays on the v2 rules.
-- [ ] Later, optional: build a labelled Tagalog and Taglish training set and fine-tune XLM-RoBERTa, the remaining realistic way past about 0.71. Gate it on `curated-v2`, or on human-labelled or redacted real feedback.
+- [x] Add a Google Gemini driver and gate it on `curated-v2` ([session note](notes/sessions/2026-11-01-gemini-sentiment-driver.md)). It passed with macro-F1 0.993, and the owner chose it for production in `model` mode on the free tier.
+- [ ] Later, optional: build a labelled Tagalog and Taglish training set and fine-tune XLM-RoBERTa, or move the Gemini project to paid billing so Google stops using the comments.
 
 ## Task 2: Star Rating Instead of a Dropdown
 

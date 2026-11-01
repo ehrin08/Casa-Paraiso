@@ -6,7 +6,7 @@ return [
     'model_path' => env('SENTIMENT_MODEL_PATH', base_path('resources/sentiment/model-v1.json')),
     'model_threshold' => (float) env('SENTIMENT_MODEL_THRESHOLD', 0.80),
     'model_version' => 'model-v1.0.0',
-    // local: PHP JSON artifact; xlmr: XLM-RoBERTa behind an HTTP inference endpoint.
+    // local: PHP JSON artifact; xlmr: XLM-RoBERTa behind an HTTP inference endpoint; gemini: Google Gemini API.
     'model_driver' => env('SENTIMENT_MODEL_DRIVER', 'local'),
     'xlmr' => [
         'url' => env('SENTIMENT_XLMR_URL'),
@@ -14,6 +14,14 @@ return [
         'timeout' => (float) env('SENTIMENT_XLMR_TIMEOUT', 3),
         'checkpoint' => 'cardiffnlp/twitter-xlm-roberta-base-sentiment',
         'version' => 'xlmr-twitter-base-v1',
+        'max_chars' => 1000,
+    ],
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('SENTIMENT_GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+        'timeout' => (float) env('SENTIMENT_GEMINI_TIMEOUT', 5),
+        'version' => 'gemini-v1',
         'max_chars' => 1000,
     ],
     'terms' => [

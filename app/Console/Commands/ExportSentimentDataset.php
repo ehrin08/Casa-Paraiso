@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Feedback;
+use App\Support\SentimentRedactor;
 use Illuminate\Console\Command;
 
 class ExportSentimentDataset extends Command
@@ -16,7 +17,7 @@ class ExportSentimentDataset extends Command
         $rows = Feedback::query()->with('topics')->orderBy('id')->get()->map(function (Feedback $feedback): array {
             return [
                 hash_hmac('sha256', (string) $feedback->id, (string) config('app.key')),
-                $this->redact((string) $feedback->comment),
+                SentimentRedactor::redact((string) $feedback->comment),
                 $feedback->rating,
                 $feedback->sentiment_label,
                 'unknown',
@@ -48,13 +49,4 @@ class ExportSentimentDataset extends Command
         return self::SUCCESS;
     }
 
-    private function redact(string $comment): string
-    {
-        $comment = preg_replace('/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/u', '[email]', $comment) ?? $comment;
-        $comment = preg_replace('/https?:\/\/\S+/iu', '[url]', $comment) ?? $comment;
-        $comment = preg_replace('/\b(?:APT|TRX)[-\s]?\w+\b/iu', '[booking]', $comment) ?? $comment;
-        $comment = preg_replace('/(?<!\w)(?:\+?63|0)9\d{9}(?!\w)/', '[phone]', $comment) ?? $comment;
-
-        return trim($comment);
-    }
 }
