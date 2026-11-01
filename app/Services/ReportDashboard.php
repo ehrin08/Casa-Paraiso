@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class ReportDashboard
 {
+    public function __construct(
+        private readonly RfmScorer $scorer,
+        private readonly RfmRuleEngine $rules,
+    ) {}
+
     public function forRange(ReportDateRange $range): array
     {
         $metrics = $this->metrics($range);
@@ -128,41 +133,23 @@ class ReportDashboard
                 ->whereRaw('COALESCE(scheduled_start_at, requested_start_at) <= ?', [$cutoff]))
             ->selectRaw('customer_profile_id, MAX(paid_at) as last_paid, COUNT(*) as frequency, SUM(amount) as monetary')
             ->groupBy('customer_profile_id');
-        $periodRevenue = $this->paid($range)->selectRaw('customer_profile_id, SUM(amount) as period_revenue')->groupBy('customer_profile_id');
-        $presets = config('casa.customer_rewards.presets', []);
-        $cases = [];
-        $bindings = [];
-        foreach ($presets as $preset) {
-            $conditions = [];
-            foreach (['recency' => 'TIMESTAMPDIFF(DAY, report_history.last_paid, ?)', 'frequency' => 'report_history.frequency', 'monetary' => 'report_history.monetary'] as $metric => $expression) {
-                foreach (['min' => '>=', 'max' => '<='] as $bound => $operator) {
-                    $key = $metric.'_'.$bound.($metric === 'recency' ? '_days' : '');
-                    if ($preset[$key] !== null) {
-                        $conditions[] = $expression.' '.$operator.' ?';
-                        if ($metric === 'recency') {
-                            $bindings[] = $cutoff->toDateTimeString();
-                        }
-                        $bindings[] = $preset[$key];
-                    }
-                }
-            }
-            $cases[] = 'WHEN '.implode(' AND ', $conditions).' THEN ?';
-            $bindings[] = $preset['key'];
+        $periodRevenue = $this->paid($range)->selectRaw('customer_profile_id, SUM(amount) as period_revenue')->groupBy('customer_profile_id')->pluck('period_revenue', 'customer_profile_id');
+        $population = $history->get()->mapWithKeys(fn ($row) => [(int) $row->customer_profile_id => $this->scorer->metrics($row->last_paid, (int) $row->frequency, (float) $row->monetary, $cutoff)]);
+        $scores = $this->scorer->scoreAll($population);
+        $segments = $this->rules->rules();
+        $customerIds = CustomerProfile::withTrashed()->where('customer_profiles.created_at', '<=', $cutoff)->pluck('id');
+        $groups = [];
+        foreach ($customerIds as $customerId) {
+            $key = isset($scores[$customerId]) ? ($this->rules->match($scores[$customerId], $segments)?->id ?? 'unassigned') : 'unassigned';
+            $groups[$key]['customers'] = ($groups[$key]['customers'] ?? 0) + 1;
+            $groups[$key]['revenue'] = ($groups[$key]['revenue'] ?? 0) + (float) ($periodRevenue[$customerId] ?? 0);
         }
-        $classification = $cases ? "CASE WHEN report_history.last_paid IS NULL THEN 'unassigned' ".implode(' ', $cases)." ELSE 'unassigned' END" : "'unassigned'";
-        $customers = CustomerProfile::withTrashed()->where('customer_profiles.created_at', '<=', $cutoff)
-            ->leftJoinSub($history, 'report_history', 'report_history.customer_profile_id', '=', 'customer_profiles.id')
-            ->leftJoinSub($periodRevenue, 'report_period', 'report_period.customer_profile_id', '=', 'customer_profiles.id')
-            ->selectRaw($classification.' as group_key', $bindings)
-            ->selectRaw('COALESCE(report_period.period_revenue, 0) as period_revenue');
-        $groups = DB::query()->fromSub($customers->toBase(), 'classified')
-            ->selectRaw('group_key, COUNT(*) as customers, SUM(period_revenue) as revenue')->groupBy('group_key')->get()->keyBy('group_key');
-        $total = (int) $groups->sum('customers');
+        $total = $customerIds->count();
         $rows = [];
-        foreach ([...$presets, ['key' => 'unassigned', 'name' => 'Unassigned']] as $preset) {
-            $group = $groups->get($preset['key']);
-            $count = (int) ($group?->customers ?? 0);
-            $rows[] = ['key' => $preset['key'], 'name' => $preset['name'], 'customers' => $count, 'percentage' => $total ? $count / $total * 100 : 0, 'average' => $count ? (float) $group->revenue / $count : 0];
+        foreach ([...$segments->map(fn ($segment) => ['id' => $segment->id, 'key' => $segment->preset_key ?? 'segment-'.$segment->id, 'name' => $segment->name])->all(), ['id' => 'unassigned', 'key' => 'unassigned', 'name' => 'Unassigned']] as $segment) {
+            $group = $groups[$segment['id']] ?? ['customers' => 0, 'revenue' => 0];
+            $count = (int) $group['customers'];
+            $rows[] = ['key' => $segment['key'], 'name' => $segment['name'], 'customers' => $count, 'percentage' => $total ? $count / $total * 100 : 0, 'average' => $count ? (float) $group['revenue'] / $count : 0];
         }
 
         return ['total' => $total, 'rows' => $rows];

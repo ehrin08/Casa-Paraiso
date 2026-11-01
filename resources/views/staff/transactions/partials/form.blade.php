@@ -29,7 +29,7 @@
             <div class="grid gap-5 sm:grid-cols-2">
                 <div>
                     <x-input-label for="amount" :value="__('Amount')" />
-                    <x-text-input id="amount" name="amount" type="number" step="0.01" min="0" class="mt-2" :value="old('amount', $transaction->amount)" required />
+                    <x-text-input id="amount" name="amount" type="number" step="0.01" min="0" class="mt-2" :value="old('amount', $transaction->gross_amount ?? $transaction->amount)" required />
                     <x-input-error class="mt-2" :messages="$errors->get('amount')" />
                 </div>
 

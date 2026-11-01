@@ -117,6 +117,22 @@
                     @endif
                 </section>
 
+                @if ($membership)
+                    <section class="customer-appointments-card" data-customer-membership-card>
+                        <div class="customer-appointments-card-heading">
+                            <h2>{{ __(':tier membership', ['tier' => $membership->tier->name]) }}</h2>
+                            <span class="customer-appointments-badge" aria-label="{{ trans_choice(':count star|:count stars', $membership->tier->stars) }}">{{ str_repeat('★', $membership->tier->stars) }}</span>
+                        </div>
+                        <p class="customer-appointments-muted">{{ $membership->card_number }} · {{ __('Valid until :date', ['date' => $membership->valid_until->format('F j, Y')]) }}</p>
+                        <ul class="mt-3 space-y-1 text-sm leading-6">
+                            @foreach ($membership->tier->benefitLines() as $line)<li>✓ {{ $line }}</li>@endforeach
+                        </ul>
+                        @if ($referralCredit > 0)
+                            <p class="mt-3 text-sm font-semibold">{{ __('Referral credit ready: PHP :amount off your next service', ['amount' => number_format($referralCredit, 2)]) }}</p>
+                        @endif
+                    </section>
+                @endif
+
                 <section class="customer-appointments-card customer-appointments-feedback" data-feedback-visit>
                     <h2>{{ __('How was your last visit?') }}</h2>
                     @if ($feedbackVisit)

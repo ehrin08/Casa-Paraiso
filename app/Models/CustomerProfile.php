@@ -157,4 +157,19 @@ class CustomerProfile extends Model
     {
         return $this->hasMany(PromotionSuggestion::class);
     }
+
+    public function memberships()
+    {
+        return $this->hasMany(CustomerMembership::class);
+    }
+
+    public function referralCredits()
+    {
+        return $this->hasMany(MembershipReferralCredit::class);
+    }
+
+    public function activeMembership(): ?CustomerMembership
+    {
+        return $this->memberships()->activeOn()->with('tier')->latest('valid_until')->first();
+    }
 }

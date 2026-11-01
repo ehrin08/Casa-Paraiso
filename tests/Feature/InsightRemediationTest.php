@@ -116,12 +116,21 @@ class InsightRemediationTest extends TestCase
             ->get(route('admin.promotions.index', absolute: false))
             ->assertForbidden();
 
-        $groups = RfmSegment::query()->whereNotNull('preset_key')->get()->mapWithKeys(fn ($segment) => [$segment->preset_key => ['addon_code' => 'hot-compress', 'is_active' => 1]])->all();
+        $highValue = RfmSegment::query()->where('preset_key', 'high_value')->firstOrFail();
 
         $this->actingAs($admin)
             ->patch(route('admin.promotions.settings.update', absolute: false), [
                 'promotion_voucher_validity_days' => 60,
-                'groups' => $groups,
+            ])
+            ->assertRedirect();
+        $this->actingAs($admin)
+            ->patch(route('admin.promotions.segments.update', $highValue, false), [
+                'name' => $highValue->name,
+                'r_score_min' => 4, 'r_score_max' => 5,
+                'f_score_min' => 4, 'f_score_max' => 5,
+                'm_score_min' => 4, 'm_score_max' => 5,
+                'addon_code' => 'hot-compress',
+                'is_active' => 1,
             ])
             ->assertRedirect();
 

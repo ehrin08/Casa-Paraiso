@@ -57,8 +57,8 @@
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <div>
-                    <x-input-label for="amount" :value="__('Amount')" />
-                    <x-text-input id="amount" name="amount" type="number" step="0.01" min="0" class="mt-2" :value="old('amount', $transaction->amount)" required />
+                    <x-input-label for="amount" :value="__('Amount before member benefits')" />
+                    <x-text-input id="amount" name="amount" type="number" step="0.01" min="0" class="mt-2" :value="old('amount', $transaction->gross_amount ?? $transaction->amount)" required />
                     <x-input-error class="mt-2" :messages="$errors->get('amount')" />
                 </div>
 
@@ -91,6 +91,20 @@
                     <x-input-error class="mt-2" :messages="$errors->get('payment_method')" />
                 </div>
             </div>
+
+            @if ($transaction->exists && ($transaction->gift_voucher_id || $transaction->adjustments()->exists()))
+                @include('admin.transactions.partials.breakdown', ['transaction' => $transaction])
+            @else
+                @unless ($transaction->exists && $transaction->payment_status === \App\Models\Transaction::PAYMENT_PAID)
+                    <div>
+                        <x-input-label for="gift_voucher_code" :value="__('Gift voucher code (optional)')" />
+                        <x-text-input id="gift_voucher_code" name="gift_voucher_code" class="mt-2 uppercase" :value="old('gift_voucher_code')" maxlength="60" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('gift_voucher_code')" />
+                    </div>
+                @endunless
+                <x-payment-benefits appointment-field="appointment_id" customer-field="customer_profile_id" paid-at-field="paid_at" voucher-field="gift_voucher_code"
+                    :quote-url="request()->user()?->isReceptionist() ? route('reception.transactions.quote') : route('admin.transactions.quote')" />
+            @endif
 
             <div>
                 <x-input-label for="notes" :value="__('Notes')" />

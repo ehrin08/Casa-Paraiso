@@ -371,12 +371,13 @@ Route group: `/admin/promotions`
 
 Purpose:
 
-- Configure fixed customer reward groups and view issued reward activity without technical RFM controls.
+- Manage the RFM segment rules and view issued reward activity.
 
 Screens:
 
 - Customer rewards workspace.
-- Automatic reward settings form at `/admin/promotions/settings` (`admin.promotions.settings.edit`).
+- RFM rules and settings page at `/admin/promotions/settings` (`admin.promotions.settings.edit`). It shows the segment rules in priority order with matching-customer counts, a "How scoring works" table of the current value range for each score, and the reward-validity form.
+- Rule create and edit forms at `/admin/promotions/segments/create` and `/admin/promotions/segments/{segment}/edit`. Each rule has a name, a description, Min/Max (Any or 1–5) for R, F and M, a complimentary add-on, a recommended membership tier, and an Active switch.
 - Customer reward detail with confirmed dismissal for available vouchers.
 
 Main data:
@@ -386,11 +387,45 @@ Main data:
 
 Primary actions:
 
-- Activate/deactivate a fixed group.
-- Choose its future complimentary add-on and the global reward validity.
+- Add, edit, activate or deactivate a rule.
+- Move a rule up or down (`admin.promotions.segments.move`).
+- Delete a rule that has issued no rewards. A rule with rewards is kept for history.
+- Set the global reward validity. The PATCH returns to the rules page and preserves other settings and issued rewards.
 - View reward usage and dismiss an available reward.
-- Open the dedicated settings form from Automatic reward settings or Edit. Save future configuration through the existing PATCH route and return to history; validation keeps form values and existing rewards are preserved.
 - View opens the existing detail page; its confirmed Dismiss reward action appears only for an available, usable voucher.
+
+### Memberships
+
+Routes:
+- `admin.memberships.*` and `reception.memberships.*`: index, create, store, show, and renew. `admin.memberships.cancel` is admin only.
+- `admin.membership-tiers.*`: tier index, create, and edit.
+
+Screens and actions:
+
+- The Customers section tabs (Customers | Memberships | Membership tiers) appear for admins. Receptionists see Customers | Memberships.
+- The memberships index has:
+  - Stats: active, expiring within 30 days, expired, and unused referral credits.
+  - A **Recommended for membership** table driven by RFM, with an Issue card shortcut.
+  - A filterable card list.
+- The issue form selects the customer and tier and pre-fills the next `CPBWS-0001` card number. The valid-until date and referrer are optional.
+- The card detail shows benefits and referral credits, with Renew and admin-only Cancel actions.
+- The admin customer detail shows the RFM profile, the active card, and any tier recommendation. The customer home page shows the active card and any unused referral credit.
+
+### Gift Vouchers
+
+Routes:
+- `admin.gift-vouchers.*` and `reception.gift-vouchers.*`: index, create, store, and show.
+- `admin.gift-vouchers.void` and `admin.gift-vouchers.settings.update` are admin only.
+
+Screens and actions:
+
+- The Payments section tabs gain **Gift vouchers**.
+- The index has:
+  - Stats: outstanding, redeemed, forfeited, and expired values.
+  - A searchable list.
+  - The admin-only voucher rules: denominations, default validity, and the combine switch.
+- The sell form has denomination buttons or a custom amount, a scanned or typed printed code (blank generates `CPGV-XXXXXX`), the valid-until date, the purchaser, and the sale method.
+- Payment and finish-service forms take an optional gift voucher code. Their preview shows member benefits, the voucher applied, any forfeited balance, and the amount still to pay. Transaction detail pages show the stored breakdown.
 
 ### Feedback
 
