@@ -1,17 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="rewards-heading">
-            <h1>{{ $segment->exists ? __('Edit :name', ['name' => $segment->name]) : __('Add RFM rule') }}</h1>
-            <p>{{ __('Choose the score range a customer must fall in. Leave a range on "Any" to ignore that measure.') }}</p>
+            <h1>{{ $segment->exists ? __('Edit :name', ['name' => $segment->name]) : __('Add customer group') }}</h1>
+            <p>{{ __('Describe which customers belong to this group. Leave a question on "Any" if it does not matter.') }}</p>
         </div>
-        <a href="{{ route('admin.promotions.settings.edit') }}" class="casa-button-secondary">{{ __('Back to RFM rules') }}</a>
+        <a href="{{ route('admin.promotions.settings.edit') }}" class="casa-button-secondary">{{ __('Back to customer groups') }}</a>
     </x-slot>
 
+    @inject('rfmWords', 'App\Services\RfmVocabulary')
     @php
         $metrics = [
-            'r' => ['label' => __('Recency'), 'help' => __('5 = visited most recently, 1 = longest since the last visit.')],
-            'f' => ['label' => __('Frequency'), 'help' => __('5 = most paid visits, 1 = fewest.')],
-            'm' => ['label' => __('Monetary'), 'help' => __('5 = spent the most, 1 = spent the least.')],
+            'r' => __('How long ago was their last visit?'),
+            'f' => __('How often do they visit?'),
+            'm' => __('How much have they spent in total?'),
         ];
     @endphp
 
@@ -24,7 +25,7 @@
             <x-app-card>
                 <div class="space-y-5">
                     <div>
-                        <x-input-label for="name" :value="__('Segment name')" />
+                        <x-input-label for="name" :value="__('Group name')" />
                         <x-text-input id="name" name="name" class="mt-2 block w-full" value="{{ old('name', $segment->name) }}" required maxlength="255" />
                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
                     </div>
@@ -35,22 +36,23 @@
                     </div>
 
                     <fieldset>
-                        <legend class="text-sm font-bold">{{ __('Score conditions') }}</legend>
-                        <p class="mt-1 text-sm text-casa-muted">{{ __('A rule with every measure on "Any" matches all scored customers, so keep it last.') }}</p>
+                        <legend class="text-sm font-bold">{{ __('Who belongs in this group') }}</legend>
+                        <p class="mt-1 text-sm text-casa-muted">{{ __('The amounts in brackets are what each choice means with today\'s customers. A group with every question on "Any" includes everyone, so keep it last.') }}</p>
                         <div class="rewards-editor-groups">
-                            @foreach ($metrics as $metric => $meta)
+                            @foreach ($metrics as $metric => $question)
                                 <section class="rewards-editor-group">
-                                    <h3>{{ $meta['label'] }}</h3>
-                                    <p>{{ $meta['help'] }}</p>
+                                    <h3>{{ $rfmWords->metric($metric) }}</h3>
+                                    <p>{{ $question }}</p>
                                     <div class="mt-3 grid grid-cols-2 gap-3">
-                                        @foreach (['min' => __('Lowest'), 'max' => __('Highest')] as $bound => $boundLabel)
+                                        @foreach (['min' => __('From'), 'max' => __('To')] as $bound => $boundLabel)
                                             @php $field = "{$metric}_score_{$bound}"; @endphp
                                             <div class="rewards-filter-field">
                                                 <x-input-label :for="$field" :value="$boundLabel" />
                                                 <select id="{{ $field }}" name="{{ $field }}" class="casa-input">
                                                     <option value="">{{ __('Any') }}</option>
-                                                    @foreach ([1, 2, 3, 4, 5] as $score)
-                                                        <option value="{{ $score }}" @selected((string) old($field, $segment->{$field}) === (string) $score)>{{ $score }}</option>
+                                                    @foreach ($rfmWords->levels($metric) as $score => $levelName)
+                                                        @php $hint = $rfmWords->valueHint($metric, $score, $cutoffs); @endphp
+                                                        <option value="{{ $score }}" @selected((string) old($field, $segment->{$field}) === (string) $score)>{{ $hint ? "{$levelName} ({$hint})" : $levelName }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -63,9 +65,9 @@
                     </fieldset>
 
                     <div class="rewards-filter-field">
-                        <x-input-label for="addon_code" :value="__('Complimentary add-on reward')" />
+                        <x-input-label for="addon_code" :value="__('Free add-on reward')" />
                         <select id="addon_code" name="addon_code" class="casa-input">
-                            <option value="">{{ __('No add-on (classify only)') }}</option>
+                            <option value="">{{ __('No reward (just group them)') }}</option>
                             @foreach ($addons as $addon)
                                 <option value="{{ $addon->code }}" @selected(old('addon_code', $segment->addon_code) === $addon->code)>{{ $addon->name }}</option>
                             @endforeach
@@ -74,14 +76,14 @@
                     </div>
 
                     <div class="rewards-filter-field">
-                        <x-input-label for="recommended_membership_tier_id" :value="__('Recommend membership tier')" />
+                        <x-input-label for="recommended_membership_tier_id" :value="__('Recommend a membership card')" />
                         <select id="recommended_membership_tier_id" name="recommended_membership_tier_id" class="casa-input">
                             <option value="">{{ __('No recommendation') }}</option>
                             @foreach ($tiers as $tier)
                                 <option value="{{ $tier->id }}" @selected((int) old('recommended_membership_tier_id', $segment->recommended_membership_tier_id) === $tier->id)>{{ $tier->name }}</option>
                             @endforeach
                         </select>
-                        <p class="text-xs text-casa-muted">{{ __('Customers in this segment without this card or better are listed on the Memberships page.') }}</p>
+                        <p class="text-xs text-casa-muted">{{ __('Customers in this group without this card or better are listed on the Memberships page.') }}</p>
                         <x-input-error :messages="$errors->get('recommended_membership_tier_id')" />
                     </div>
 
@@ -93,7 +95,7 @@
                 </div>
                 <div class="rewards-editor-actions">
                     <a href="{{ route('admin.promotions.settings.edit') }}" class="casa-button-secondary">{{ __('Cancel') }}</a>
-                    <button type="submit" class="casa-button-primary">{{ __('Save rule') }}</button>
+                    <button type="submit" class="casa-button-primary">{{ __('Save group') }}</button>
                 </div>
             </x-app-card>
         </form>

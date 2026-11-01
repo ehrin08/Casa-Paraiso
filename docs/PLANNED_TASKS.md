@@ -69,21 +69,20 @@ Motion today is limited to a few places: the drawer slide and fade and the loadi
 
 ## Task 7: Make the RFM Rules Friendly for Non-Technical Users
 
-Added 2026-11-01. Planned, not started. Not yet in the tracker sheet.
+Added 2026-11-01. Wording done 2026-11-01 ([session note](notes/sessions/2026-11-01-rfm-friendly-rules.md)). Not yet in the tracker sheet.
 
-The RFM rule engine (see [RFM Engine](RFM_ENGINE.md)) works, but the client finds it too technical.
+The RFM rule engine (see [RFM Engine](RFM_ENGINE.md)) works, but the client found it too technical.
 - On **RFM rules and settings** (`admin.promotions.settings.edit`) and the rule form (`resources/views/admin/promotions/segment-form.blade.php`), admins set Min/Max scores of 1 to 5 for Recency, Frequency and Monetary.
 - The page explains those scores with a percent-rank table.
 
-Keep the feature and the engine underneath (`RfmScorer`, `RfmRuleEngine`). Change only what the admin sees and types.
+The user chose to keep how it works and change only how it looks: the same engine (`RfmScorer`, `RfmRuleEngine`), fields, validation and routes. The five seeded groups stay.
 
-- [ ] Ask the client which customer groups and rewards they actually think in.
-- [ ] Replace the 1 to 5 selects with plain choices mapped to score ranges. For example:
-  - "Last visit": very recent, recent, a while ago, or long ago.
-  - "Visits": first-timer, occasional, regular, or frequent.
-- [ ] Show each rule as a sentence, for example "Customers who visited recently, come often, and spend the most get a free VIP Room."
-- [ ] Rename R, F and M in the UI to "Last visit", "How often" and "Total spent". Keep the RFM terms only in a collapsible "How it works" panel, for the defense.
-- [ ] Show real peso and day values, and a few example customers, for each group instead of score numbers.
-- [ ] Offer ready-made templates (Reward loyal regulars, Win back lost customers, Welcome new customers), so admins rarely build rules from scratch.
-- [ ] Show a plain-language preview before saving, for example "This rule would include 12 customers right now".
-- [ ] Update [RFM Engine](RFM_ENGINE.md), [Screen Flow](SCREEN_FLOW.md), and the tests (`AdminRfmSegmentTest`, `AdminRewardsLayoutTest`) for the new wording, then run the full gate.
+- [ ] Ask the client which customer groups and rewards they actually think in. (Kept the five seeded groups; the client can rename them in the UI.)
+- [x] Replace the 1 to 5 options with plain level names. (Five named levels per measure, one per score, e.g. "Very recent", "Recent", …, so existing rules round-trip unchanged.)
+- [x] Show each rule as a sentence, for example "Customers who last visited recently or very recently … get a free VIP Room."
+- [x] Rename R, F and M in the UI to "Last visit", "How often" and "Total spent". Keep the RFM terms only in a collapsible "How it works" panel, for the defense.
+- [x] Show real peso and day values for each level instead of score numbers. (In the form's options and the How it works table.)
+- [ ] Later, optional (adds behavior): a few example customers per group.
+- [ ] Later, optional (adds behavior): ready-made templates (Reward loyal regulars, Win back lost customers, Welcome new customers).
+- [ ] Later, optional (adds behavior): a plain-language "This rule would include 12 customers right now" preview before saving.
+- [x] Update [RFM Engine](RFM_ENGINE.md), [Screen Flow](SCREEN_FLOW.md), and the tests (`AdminRfmSegmentTest`, `AdminRewardsLayoutTest`, new `RfmVocabularyTest`), then run the full gate.

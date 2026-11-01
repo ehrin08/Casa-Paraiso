@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Addon;
+use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\PromotionSuggestion;
 use App\Models\RfmSegment;
+use App\Models\Service;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -27,8 +30,9 @@ class AdminRfmSegmentTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->get(route('admin.promotions.settings.edit'))
             ->assertOk()
-            ->assertSee('Segment rules')->assertSee('How scoring works')
+            ->assertSee('Customer groups')->assertSee('How it works (RFM scoring)')
             ->assertSee('data-rfm-cutoffs', false)
+            ->assertSee('Customers who last visited recently or very recently, come often or very often and spend a lot or the most get a free VIP Room')
             ->assertSee('R 4–5 · F 4–5 · M 4–5')
             ->assertSee(route('admin.promotions.segments.create'), false);
 
@@ -40,7 +44,9 @@ class AdminRfmSegmentTest extends TestCase
 
     public function test_admin_can_create_and_edit_a_rule_that_is_placed_last(): void
     {
-        $this->actingAs($this->admin)->get(route('admin.promotions.segments.create'))->assertOk()->assertSee('Score conditions');
+        $this->actingAs($this->admin)->get(route('admin.promotions.segments.create'))->assertOk()
+            ->assertSee('Who belongs in this group')->assertSee('Last visit')->assertSee('Very recent')->assertSee('Top spenders')
+            ->assertSee('name="r_score_min"', false);
 
         $this->post(route('admin.promotions.segments.store'), [
             'name' => 'Champions',
@@ -118,6 +124,20 @@ class AdminRfmSegmentTest extends TestCase
 
         $this->delete(route('admin.promotions.segments.destroy', $unused))->assertSessionHas('status', 'rfm-segment-deleted');
         $this->assertModelMissing($unused);
+    }
+
+    public function test_customer_detail_shows_plain_level_names_with_the_score(): void
+    {
+        $customer = CustomerProfile::factory()->create();
+        $service = Service::factory()->create();
+        $appointment = Appointment::factory()->for($customer)->for($service)->create(['status' => Appointment::STATUS_COMPLETED]);
+        Transaction::factory()->for($customer)->for($appointment)->for($service)->create(['amount' => 1500, 'payment_status' => Transaction::PAYMENT_PAID, 'paid_at' => now()->subDays(3)]);
+
+        // A lone scored customer gets the neutral 3 on every measure.
+        $this->actingAs($this->admin)->get(route('admin.customers.show', $customer))
+            ->assertOk()
+            ->assertSee('Customer group')
+            ->assertSeeInOrder(['Last visit', 'A while ago', 'Score 3', 'How often', 'Regularly', 'Total spent', 'Average']);
     }
 
     public function test_only_admins_manage_rules(): void

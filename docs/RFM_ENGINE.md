@@ -67,12 +67,28 @@ Default rules, seeded by `2026_11_01_000000_add_rfm_scoring_rules`:
 | 4 | Inactive customer | R 1 | Hot Stone | — |
 | 5 | New customer | R 5 · F 1 | Hot Compress | — |
 
-Admins manage the rules at **Customer rewards → RFM rules and settings** (`admin.promotions.settings.edit`). From there they can:
+Admins manage the rules at **Customer rewards → Customer groups and rewards** (`admin.promotions.settings.edit`). From there they can:
 - Add, edit, activate, deactivate and delete rules.
 - Move rules up or down to change their priority.
 - See how many customers each rule matches right now.
 
 A rule that has already issued rewards cannot be deleted, because that would lose history. It can be deactivated instead.
+
+## Admin wording
+
+Admins never have to read score numbers. `app/Services/RfmVocabulary.php` (display only) renames the measures and gives each score a plain name:
+
+| Score | Last visit (R) | How often (F) | Total spent (M) |
+|---|---|---|---|
+| 5 | Very recent | Very often | Top spenders |
+| 4 | Recent | Often | High |
+| 3 | A while ago | Regularly | Average |
+| 2 | Long ago | Occasionally | Low |
+| 1 | Very long ago | Rarely | Lowest |
+
+- The groups page lists each rule as a sentence, for example "Customers who last visited recently or very recently, come often or very often and spend a lot or the most get a free VIP Room and are recommended the Platinum card."
+- The form's From/To choices show the named level with today's real values, for example "Recent (4 days – 12 days)". They still submit the same 1–5 scores, so the engine, validation and stored rules are unchanged.
+- The technical view (scores, percent rank, R/F/M ranges per group) stays in a collapsed "How it works (RFM scoring)" panel, for the defense.
 
 ## When a reward is issued
 

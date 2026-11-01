@@ -58,14 +58,16 @@
 
         <aside class="min-w-0 space-y-4">
             <x-app-card data-customer-rfm-profile>
-                <p class="casa-section-label">{{ __('RFM profile') }}</p>
+                <p class="casa-section-label">{{ __('Customer group') }}</p>
                 <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ $rfmProfile['segment']?->name ?? __('Unassigned') }}</h2>
                 @if ($rfmProfile)
+                    @inject('rfmWords', 'App\Services\RfmVocabulary')
                     <dl class="mt-4 grid grid-cols-3 gap-2 text-center">
-                        @foreach (['r' => __('Recency'), 'f' => __('Frequency'), 'm' => __('Monetary')] as $metric => $label)
+                        @foreach ($rfmWords->metrics() as $metric => $label)
                             <div class="rounded-2xl bg-casa-bg p-3">
                                 <dt class="text-xs font-black uppercase tracking-[0.12em] text-casa-muted">{{ $label }}</dt>
-                                <dd class="mt-1 font-display text-2xl font-black text-casa-text">{{ $rfmProfile['scores'][$metric] }}</dd>
+                                <dd class="mt-1 font-bold leading-5 text-casa-text">{{ $rfmWords->level($metric, $rfmProfile['scores'][$metric]) }}</dd>
+                                <dd class="mt-1 text-xs text-casa-muted">{{ __('Score :score', ['score' => $rfmProfile['scores'][$metric]]) }}</dd>
                             </div>
                         @endforeach
                     </dl>

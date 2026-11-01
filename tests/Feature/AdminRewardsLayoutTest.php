@@ -59,7 +59,7 @@ class AdminRewardsLayoutTest extends TestCase
             $this->get(route('admin.promotions.settings.edit', absolute: false))
                 ->assertOk()->assertViewIs('admin.promotions.settings')
                 ->assertSee('data-rewards-settings-editor', false)
-                ->assertSee('Save customer rewards')->assertSee('Segment rules')
+                ->assertSee('Save customer rewards')->assertSee('Customer groups')
                 ->assertSee('name="promotion_voucher_validity_days"', false)
                 ->assertSee(route('admin.promotions.segments.edit', RfmSegment::query()->where('preset_key', 'high_value')->value('id')), false)
                 ->assertSee(route('admin.promotions.settings.update'), false);
