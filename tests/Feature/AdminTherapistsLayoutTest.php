@@ -199,14 +199,14 @@ class AdminTherapistsLayoutTest extends TestCase
         StaffWeeklySchedule::factory()->for($profile)->create(['day_of_week' => StaffWeeklySchedule::TUESDAY, 'is_available' => false]);
 
         $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.staff.index', ['tab' => 'schedule']))
-            ->assertOk()->assertSee('1:00 PM')->assertSee('12:00 midnight')
+            ->assertOk()->assertSee('1:00 PM')->assertSee('11:00 PM')
             ->assertViewHas('scheduleWeekStart', fn ($date) => $date->toDateString() === '2026-09-27' && $date->timezoneName === 'Asia/Manila')
             ->assertViewHas('scheduleWeekEnd', fn ($date) => $date->toDateString() === '2026-10-03');
         $summary = $response->viewData('scheduleSummaries')[$profile->id];
         $this->assertSame('Mon, Fri', $summary['daysLabel']);
-        $this->assertSame('1:00 PM – 12:00 midnight', $summary['hoursLabel']);
+        $this->assertSame('1:00 PM – 11:00 PM', $summary['hoursLabel']);
         $this->assertCount(7, $summary['days']);
-        $this->assertSame(['start' => '1:00 PM', 'end' => '12:00 midnight'], $summary['days'][1]['windows'][0]);
+        $this->assertSame(['start' => '1:00 PM', 'end' => '11:00 PM'], $summary['days'][1]['windows'][0]);
         $this->assertSame([], $summary['days'][2]['windows']);
     }
 
@@ -258,7 +258,7 @@ class AdminTherapistsLayoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.staff.index'))->assertOk();
         $summary = $response->viewData('scheduleSummaries')[$profile->id];
         $this->assertSame('Tue', $summary['daysLabel']);
-        $this->assertSame('4:00 PM – 12:00 midnight', $summary['hoursLabel']);
+        $this->assertSame('4:00 PM – 11:00 PM', $summary['hoursLabel']);
         $this->assertSame([], $summary['days'][0]['windows']);
         $this->assertSame([], $summary['days'][5]['windows']);
     }

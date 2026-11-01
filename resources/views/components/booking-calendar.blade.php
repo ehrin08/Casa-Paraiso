@@ -44,6 +44,6 @@
         <p class="booking-calendar-message" x-show="selectedDate && !hasAvailableTimes && !loading && !error">{{ __('The store is open, but no start times are available for this treatment. Choose another date or change the treatment.') }}</p>
         {{ $assignment ?? '' }}
         @unless ($showStaffCount)<p class="booking-calendar-message">{{ __('An available therapist will be assigned when you confirm.') }}</p>@endunless
-        <p class="booking-hours">{{ __('Asia/Manila · 1:00 PM–midnight') }}<br>{{ __('The full treatment must fit within available hours.') }}</p>
+        <p class="booking-hours">{{ __('Asia/Manila · 1:00 PM–11:00 PM') }}<br>{{ __('The full treatment must fit within available hours.') }}</p>
     </section>
 </div>

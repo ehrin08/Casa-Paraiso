@@ -64,14 +64,14 @@ class CalendarSchedulingTest extends TestCase
         ], false))->assertForbidden();
     }
 
-    public function test_customer_slots_can_end_exactly_at_midnight(): void
+    public function test_customer_slots_end_exactly_at_eleven_pm_closing_even_for_midnight_shifts(): void
     {
         $customer = User::factory()->customer()->create();
         $staffUser = User::factory()->staff()->create();
         $staff = StaffProfile::factory()->for($staffUser)->create();
         $service = Service::factory()->create(['duration_minutes' => 60, 'is_active' => true]);
         $staff->services()->attach($service);
-        $start = now()->addWeek()->setTime(23, 0, 0);
+        $start = now()->addWeek()->setTime(22, 0, 0);
 
         StaffWeeklySchedule::factory()->for($staff)->create([
             'day_of_week' => $start->dayOfWeek,
@@ -87,10 +87,14 @@ class CalendarSchedulingTest extends TestCase
         ], false));
 
         $response->assertOk();
-        $slot = collect($response->json('dates.'.$start->toDateString()))->firstWhere('time', '23:00');
+        $slots = collect($response->json('dates.'.$start->toDateString()));
+        $slot = $slots->firstWhere('time', '22:00');
 
+        // The therapist works until midnight, but the treatment must finish by the 11:00 PM close.
         $this->assertNotNull($slot);
         $this->assertSame($start->copy()->addHour()->toDateTimeString(), $slot['ends_at']);
+        $this->assertSame('22:00', $slots->last()['time']);
+        $this->assertNull($slots->firstWhere('time', '22:30'));
     }
 
     public function test_month_availability_resolves_therapist_schedules_with_bounded_queries(): void

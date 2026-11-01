@@ -46,7 +46,7 @@ class ExampleTest extends TestCase
             ->assertSee('data-turbo-track="reload"', false)
             ->assertDontSee('data-prefetch', false)
             ->assertSee('Find your moment of rest.')
-            ->assertSee('1:00 PM to 12:00 MN')
+            ->assertSee('1:00 PM to 11:00 PM')
             ->assertSee('Reserve your spot. You deserve this.');
     }
 

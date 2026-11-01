@@ -2,7 +2,7 @@
     <div class="casa-week-toolbar">
         <div>
             <h2 id="weekly-schedule-title" class="text-xl font-extrabold text-casa-text">{{ __('Weekly therapist schedule') }}</h2>
-            <p class="mt-1 text-sm text-casa-muted"><span x-text="weekLabel"></span> · {{ __('1:00 PM–midnight · Asia/Manila') }}</p>
+            <p class="mt-1 text-sm text-casa-muted"><span x-text="weekLabel"></span> · {{ __('1:00 PM–11:00 PM · Asia/Manila') }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <label class="casa-week-therapist"><span class="sr-only">{{ __('Therapist') }}</span><select class="casa-input" x-model="staffFilter" x-on:change="load()">
