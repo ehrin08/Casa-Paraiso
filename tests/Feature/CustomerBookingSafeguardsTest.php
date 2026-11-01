@@ -106,6 +106,24 @@ class CustomerBookingSafeguardsTest extends TestCase
         $this->assertTrue(Appointment::query()->where('staff_profile_id', $therapist->id)->exists());
     }
 
+    public function test_booking_page_shows_notice_instead_of_form_when_restricted(): void
+    {
+        $blocked = CustomerProfile::factory()->create(['online_booking_blocked_at' => now(), 'online_booking_block_reason' => 'Private spam reason']);
+
+        $this->actingAs($blocked->user)
+            ->get(route('customer.appointments.create', absolute: false))
+            ->assertOk()
+            ->assertSee('Online booking is paused for your account.')
+            ->assertDontSee('Private spam reason')
+            ->assertDontSee('name="requested_start_at"', false);
+
+        $this->actingAs(CustomerProfile::factory()->create()->user)
+            ->get(route('customer.appointments.create', absolute: false))
+            ->assertOk()
+            ->assertDontSee('Online booking is paused for your account.')
+            ->assertSee('name="requested_start_at"', false);
+    }
+
     private function payload(Service $service, StaffProfile $therapist, Carbon $start): array
     {
         return [
