@@ -10,6 +10,7 @@ class HybridSentimentClassifier
         private readonly SentimentClassifier $rules,
         private readonly LocalSentimentModel $model,
         private readonly XlmRobertaSentimentModel $xlmr,
+        private readonly GeminiSentimentModel $gemini,
     ) {
     }
 
@@ -20,9 +21,11 @@ class HybridSentimentClassifier
         $model = null;
 
         try {
-            $model = config('sentiment.model_driver') === 'xlmr'
-                ? $this->xlmr->classify($rating, $comment)
-                : $this->model->classify($rating, $comment);
+            $model = match (config('sentiment.model_driver')) {
+                'xlmr' => $this->xlmr->classify($rating, $comment),
+                'gemini' => $this->gemini->classify($rating, $comment),
+                default => $this->model->classify($rating, $comment),
+            };
         } catch (\Throwable) {
             $model = null;
         }

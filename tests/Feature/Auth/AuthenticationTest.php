@@ -41,6 +41,7 @@ class AuthenticationTest extends TestCase
             ->assertSee('How we use information')
             ->assertSee('Who can access it')
             ->assertSee('Security and your choices')
+            ->assertSee('sent to Google’s Gemini API')
             ->assertSee('Questions');
     }
 

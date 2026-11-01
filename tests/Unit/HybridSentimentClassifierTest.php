@@ -71,6 +71,32 @@ class HybridSentimentClassifierTest extends TestCase
         $this->assertFalse($result['disagreement']);
     }
 
+    public function test_gemini_driver_in_model_mode_selects_a_confident_answer_and_falls_back_otherwise(): void
+    {
+        Http::preventStrayRequests();
+        Config::set('sentiment.model_driver', 'gemini');
+        Config::set('sentiment.gemini.key', 'test-gemini-key');
+        Config::set('sentiment.mode', 'model');
+
+        $answer = fn (float $confidence): array => ['candidates' => [['content' => ['parts' => [['text' => '{"label":"positive","confidence":'.$confidence.'}']]]]]];
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::sequence()
+            ->push($answer(0.95))
+            ->push($answer(0.4))
+            ->push([], 429)]);
+
+        foreach ([['model', 'positive'], ['rules', 'negative']] as [$source, $label]) {
+            $result = app(HybridSentimentClassifier::class)->classify(1, 'Gave 1 star by mistake, the massage was great!');
+
+            $this->assertSame($source, $result['source']);
+            $this->assertSame($label, $result['label']);
+            $this->assertSame('gemini-v1', $result['model_candidate']['version']);
+        }
+
+        $result = app(HybridSentimentClassifier::class)->classify(1, 'Gave 1 star by mistake, the massage was great!');
+        $this->assertSame('rules', $result['source']);
+        $this->assertNull($result['model_candidate']);
+    }
+
     private function fakeXlmr(string $label, float $score): void
     {
         Http::preventStrayRequests();

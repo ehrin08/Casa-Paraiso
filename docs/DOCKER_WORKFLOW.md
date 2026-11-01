@@ -59,6 +59,16 @@ SENTIMENT_CLASSIFIER_MODE=shadow
 
 Clear the configuration cache after changing `.env`. If the service is stopped, feedback keeps working on the rules. Tests fake the endpoint and never need this service.
 
+The Gemini classifier needs no container, only a Google AI Studio key in the ignored `.env`. Never put the key in an example file:
+
+```text
+GEMINI_API_KEY=<your key>
+SENTIMENT_MODEL_DRIVER=gemini
+SENTIMENT_CLASSIFIER_MODE=model
+```
+
+`SENTIMENT_GEMINI_MODEL` defaults to `gemini-3.5-flash-lite`. `SENTIMENT_GEMINI_TIMEOUT` defaults to 5 seconds. Tests fake the Gemini API and never call it.
+
 ### Test Speed
 
 The project folder is bind-mounted from Windows, and each file read through that share takes milliseconds (about 1,000 times slower than a Docker volume). Every test boots Laravel again, so file reads, not the database, set the pace of `php artisan test`. Two settings keep that down:

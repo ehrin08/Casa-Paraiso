@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\GeminiSentimentModel;
 use App\Services\LocalSentimentModel;
 use App\Services\SentimentClassifier;
 use App\Services\XlmRobertaSentimentModel;
@@ -12,15 +13,16 @@ class SentimentPredictions extends Command
     protected $signature = 'casa:sentiment-predictions
         {dataset : CSV with text, rating and label columns}
         {output : Predictions CSV for scripts/evaluate_sentiment_model.py}
-        {--driver=rules : rules, local or xlmr}';
+        {--driver=rules : rules, local, xlmr or gemini}
+        {--sleep=0 : Seconds to wait between rows, to stay under a free-tier rate limit}';
 
     protected $description = 'Run one sentiment classifier over a labelled dataset and write its predictions for offline evaluation.';
 
-    public function handle(SentimentClassifier $rules, LocalSentimentModel $local, XlmRobertaSentimentModel $xlmr): int
+    public function handle(SentimentClassifier $rules, LocalSentimentModel $local, XlmRobertaSentimentModel $xlmr, GeminiSentimentModel $gemini): int
     {
         $driver = (string) $this->option('driver');
-        if (! in_array($driver, ['rules', 'local', 'xlmr'], true)) {
-            $this->error('The driver must be rules, local or xlmr.');
+        if (! in_array($driver, ['rules', 'local', 'xlmr', 'gemini'], true)) {
+            $this->error('The driver must be rules, local, xlmr or gemini.');
 
             return self::FAILURE;
         }
@@ -52,6 +54,7 @@ class SentimentPredictions extends Command
                 'rules' => $rules->classify($rating, $text),
                 'local' => $local->classify($rating, $text),
                 'xlmr' => $xlmr->classify($rating, $text),
+                'gemini' => $gemini->classify($rating, $text),
             };
             if ($prediction === null) {
                 // Rows the model cannot score fall back to the rules, as in production.
@@ -60,6 +63,9 @@ class SentimentPredictions extends Command
             }
             fputcsv($output, [$prediction['label'], $prediction['confidence'] ?? ''], escape: '');
             $rows++;
+            if ((float) $this->option('sleep') > 0) {
+                usleep((int) ((float) $this->option('sleep') * 1_000_000));
+            }
         }
         fclose($input);
         fclose($output);

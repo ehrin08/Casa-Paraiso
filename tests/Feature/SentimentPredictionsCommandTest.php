@@ -37,6 +37,27 @@ class SentimentPredictionsCommandTest extends TestCase
         unlink($output);
     }
 
+    public function test_it_writes_gemini_predictions(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => '{"label":"neutral","confidence":0.7}']]]]]])]);
+        Config::set('sentiment.gemini.key', 'test-gemini-key');
+
+        $dataset = tempnam(sys_get_temp_dir(), 'casa-dataset');
+        $output = tempnam(sys_get_temp_dir(), 'casa-predictions');
+        file_put_contents($dataset, "text,rating,label\n\"Okay lang.\",3,neutral\n");
+
+        $this->artisan('casa:sentiment-predictions', ['dataset' => $dataset, 'output' => $output, '--driver' => 'gemini'])
+            ->expectsOutput('Rows predicted with gemini: 1')
+            ->assertSuccessful();
+
+        $this->assertSame(['neutral', '0.7'], str_getcsv(file($output, FILE_IGNORE_NEW_LINES)[1]));
+        Http::assertSentCount(1);
+
+        unlink($dataset);
+        unlink($output);
+    }
+
     public function test_it_rejects_an_unknown_driver(): void
     {
         $this->artisan('casa:sentiment-predictions', ['dataset' => 'missing.csv', 'output' => 'out.csv', '--driver' => 'gpt'])
