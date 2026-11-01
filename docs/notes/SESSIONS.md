@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-01: [RFM friendliness task recorded](sessions/2026-11-01-rfm-friendly-task.md)
 - 2026-11-01: [RFM rule engine, memberships, and gift vouchers](sessions/2026-11-01-rfm-rules-memberships-vouchers.md)
 - 2026-11-01: [Customer booking safeguards (T5)](sessions/2026-11-01-booking-safeguards.md)
 - 2026-10-30: [Animation task recorded (T8)](sessions/2026-10-30-animation-task.md)
