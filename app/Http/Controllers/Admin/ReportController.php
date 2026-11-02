@@ -203,7 +203,7 @@ class ReportController extends Controller
         return CustomerProfile::query()
             ->select('customer_profiles.*')
             ->with('user')
-            ->withCount(['appointments', 'transactions', 'feedback', 'promotionSuggestions'])
+            ->withCount(['appointments', 'transactions', 'feedback' => fn ($query) => $query->identified(), 'promotionSuggestions'])
             ->leftJoin('users', 'users.id', '=', 'customer_profiles.user_id')
             ->selectRaw(CustomerProfile::displayNameSql().' as customer_display_name')
             ->when($search !== '', fn ($query) => $query->search($search))
@@ -280,13 +280,13 @@ class ReportController extends Controller
             ->leftJoin('users as report_feedback_customers', 'report_feedback_customers.id', '=', 'report_feedback_customer_profiles.user_id')
             ->leftJoin('services as report_feedback_services', 'report_feedback_services.id', '=', 'feedback.service_id')
             ->select('feedback.*')
-            ->selectRaw(CustomerProfile::displayNameSql('report_feedback_customers', 'report_feedback_customer_profiles').' as customer_display_name')
+            ->selectRaw('CASE WHEN feedback.is_anonymous = 1 THEN NULL ELSE '.CustomerProfile::displayNameSql('report_feedback_customers', 'report_feedback_customer_profiles').' END as customer_display_name')
             ->when(
                 in_array((string) $request->query('sentiment_label'), Feedback::SENTIMENT_LABELS, true),
                 fn ($query) => $query->where('feedback.sentiment_label', $request->query('sentiment_label')),
             )
             ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
-                $query->whereHas('customerProfile', fn ($customer) => $customer->search($search))
+                $query->where(fn ($query) => $query->identified()->whereHas('customerProfile', fn ($customer) => $customer->search($search)))
                     ->orWhere('report_feedback_services.name', 'like', "%{$search}%")
                     ->orWhere('feedback.comment', 'like', "%{$search}%");
             }))
@@ -309,7 +309,7 @@ class ReportController extends Controller
             'transactions' => ['Number' => $text, 'Customer' => $text, 'Service' => $text, 'Amount' => $money, 'Status' => $text, 'Method' => $text, 'Paid At' => $datetime],
             'customers' => ['Code' => $text, 'Name' => $text, 'Email' => $text, 'Phone' => $text, 'Joined At' => $datetime, 'Status' => $text, 'Appointments' => $number, 'Transactions' => $number, 'Feedback' => $number, 'Rewards' => $number],
             'promotions' => ['Customer' => $text, 'Customer Group' => $text, 'Days Since Last Paid Visit' => $number, 'Paid Visits' => $number, 'Paid Total' => $money, 'Reward' => $text, 'Status' => $text, 'Expires At' => $datetime],
-            'feedback' => ['Customer' => $text, 'Service' => $text, 'Rating' => $number, 'Sentiment' => $text, 'Submitted At' => $datetime, 'Comment' => $text, 'Hidden From Therapist' => $text],
+            'feedback' => ['Customer' => $text, 'Service' => $text, 'Rating' => $number, 'Sentiment' => $text, 'Submitted At' => $datetime, 'Comment' => $text, 'Anonymous' => $text],
             default => ['Number' => $text, 'Customer' => $text, 'Service' => $text, 'Staff' => $text, 'Appointment Date' => $datetime, 'Status' => $text],
         };
     }
@@ -323,7 +323,7 @@ class ReportController extends Controller
             'transactions' => [$record->transaction_number, $record->customerProfile?->display_name, $record->service?->name, $record->amount, $record->payment_status, $record->payment_method, $record->paid_at],
             'customers' => [$record->customer_code, $record->display_name, $record->display_email, $record->display_phone, $record->created_at, $record->is_guest ? 'guest' : ($record->user?->is_active ? 'active' : 'inactive'), $record->appointments_count, $record->transactions_count, $record->feedback_count, $record->promotion_suggestions_count],
             'promotions' => [$record->customerProfile?->display_name, $record->rfmSegment?->name, $record->recency_days, $record->frequency_count, $record->monetary_total, $record->addonName() ?: $record->suggested_offer, $record->lifecycle(), $record->expires_at],
-            'feedback' => [$record->customerProfile?->display_name, $record->service?->name, $record->rating, $record->sentiment_label, $record->submitted_at, $record->comment, $record->is_anonymous ? 'yes' : 'no'],
+            'feedback' => [$record->displayName(), $record->service?->name, $record->rating, $record->sentiment_label, $record->submitted_at, $record->comment, $record->is_anonymous ? 'yes' : 'no'],
             default => [$record->appointment_number, $record->customerProfile?->display_name, $record->service?->name, $record->staffProfile?->user?->name, $record->scheduled_start_at ?? $record->requested_start_at, $record->status],
         };
     }

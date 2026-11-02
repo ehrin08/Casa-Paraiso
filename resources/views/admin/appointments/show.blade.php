@@ -184,7 +184,9 @@
                     @if ($appointment->transactions->isNotEmpty())
                         <ul>@foreach ($appointment->transactions->sortByDesc('id') as $record)<li><a href="{{ route('admin.transactions.show', $record) }}" class="appointment-detail-link">{{ $record->transaction_number }} <span aria-hidden="true">→</span></a></li>@endforeach</ul>
                     @endif
-                    @if ($appointment->feedback)
+                    @if ($appointment->feedback?->is_anonymous)
+                        <p>{{ __('Anonymous feedback submitted') }}</p>
+                    @elseif ($appointment->feedback)
                         <a href="{{ route('admin.feedback.show', $appointment->feedback) }}" class="appointment-detail-link">{{ __('Feedback submitted') }} <span aria-hidden="true">→</span></a>
                     @else
                         <p>{{ __('No feedback yet') }}</p>

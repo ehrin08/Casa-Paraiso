@@ -36,7 +36,7 @@ class CustomerController extends Controller
             ->leftJoin('users', 'users.id', '=', 'customer_profiles.user_id')
             ->select('customer_profiles.*')
             ->selectRaw(CustomerProfile::displayNameSql().' as customer_display_name')
-            ->withCount(['appointments', 'transactions', 'feedback', 'promotionSuggestions'])
+            ->withCount(['appointments', 'transactions', 'feedback' => fn ($query) => $query->identified(), 'promotionSuggestions'])
             ->when($status === 'active', fn ($query) => $query->where('users.is_active', true))
             ->when($status === 'inactive', fn ($query) => $query->where('users.is_active', false))
             ->orderBy($sorts[$sort], $direction)
@@ -86,6 +86,7 @@ class CustomerController extends Controller
                 ->latest()
                 ->limit(8),
             'feedback' => fn ($query) => $query
+                ->identified()
                 ->with(['service', 'appointment'])
                 ->latest('submitted_at')
                 ->limit(8),
@@ -93,7 +94,7 @@ class CustomerController extends Controller
                 ->with(['rfmSegment', 'promotionRule'])
                 ->latest()
                 ->limit(8),
-        ])->loadCount(['appointments', 'transactions', 'feedback', 'promotionSuggestions']);
+        ])->loadCount(['appointments', 'transactions', 'feedback' => fn ($query) => $query->identified(), 'promotionSuggestions']);
     }
 
     public function update(CustomerNoteRequest $request, CustomerProfile $customer): RedirectResponse

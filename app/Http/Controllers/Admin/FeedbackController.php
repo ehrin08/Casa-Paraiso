@@ -30,7 +30,8 @@ class FeedbackController extends Controller
         $serviceId = (int) ($validated['service_id'] ?? 0) ?: null;
         $topic = (string) ($validated['topic'] ?? '');
         $sorts = [
-            'customer' => CustomerProfile::displayNameSql('feedback_customers', 'feedback_customer_profiles'),
+            // Anonymous rows sort as blank so the order cannot reveal a hidden name.
+            'customer' => 'CASE WHEN feedback.is_anonymous = 1 THEN NULL ELSE '.CustomerProfile::displayNameSql('feedback_customers', 'feedback_customer_profiles').' END',
             'service' => 'feedback_services.name',
             'rating' => 'feedback.rating',
             'sentiment' => 'feedback.sentiment_label',
@@ -48,7 +49,7 @@ class FeedbackController extends Controller
             ->when($serviceId, fn (Builder $query) => $query->where('feedback.service_id', $serviceId))
             ->when($topic !== '', fn (Builder $query) => $query->whereHas('topics', fn (Builder $topics) => $topics->where('topic_key', $topic)))
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($search): void {
-                $query->whereHas('customerProfile', fn (Builder $customers) => $customers->search($search))
+                $query->where(fn (Builder $query) => $query->identified()->whereHas('customerProfile', fn (Builder $customers) => $customers->search($search)))
                     ->orWhere('feedback_services.name', 'like', "%{$search}%")
                     ->orWhere('feedback.comment', 'like', "%{$search}%");
             }));

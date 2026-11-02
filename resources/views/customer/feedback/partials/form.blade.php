@@ -40,9 +40,9 @@
             <div>
                 <label for="is_anonymous" class="flex items-start gap-3 text-sm text-casa-text">
                     <input id="is_anonymous" type="checkbox" name="is_anonymous" value="1" class="mt-1 size-4 rounded border-casa-border text-casa-primary focus:ring-casa-primary" aria-describedby="is_anonymous-help" @checked(old('is_anonymous'))>
-                    <span class="font-bold">{{ __('Hide my name from my therapist') }}</span>
+                    <span class="font-bold">{{ __('Submit anonymously') }}</span>
                 </label>
-                <p id="is_anonymous-help" class="mt-1 ps-7 text-xs leading-5 text-casa-muted">{{ __('Your therapist sees "Anonymous customer". Casa Paraiso managers can still see who sent it so they can follow up.') }}</p>
+                <p id="is_anonymous-help" class="mt-1 ps-7 text-xs leading-5 text-casa-muted">{{ __('Your name is hidden from everyone at Casa Paraiso, including managers. We cannot follow up with you about this review.') }}</p>
                 <x-input-error class="mt-2" :messages="$errors->get('is_anonymous')" />
             </div>
         </div>

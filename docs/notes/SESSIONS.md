@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-02: [Fully anonymous feedback](sessions/2026-11-02-fully-anonymous-feedback.md)
 - 2026-11-02: [Operating hours replace closed dates](sessions/2026-11-02-operating-hours.md)
 - 2026-11-02: [Short task report rule](sessions/2026-11-02-task-report-rule.md)
 - 2026-11-02: [Manuscript alignment with the latest local implementation](sessions/2026-11-02-manuscript-latest-alignment.md)

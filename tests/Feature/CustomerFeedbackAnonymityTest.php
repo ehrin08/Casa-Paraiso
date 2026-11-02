@@ -40,13 +40,13 @@ class CustomerFeedbackAnonymityTest extends TestCase
             ]);
     }
 
-    public function test_customer_can_submit_feedback_hidden_from_the_therapist(): void
+    public function test_customer_can_submit_anonymous_feedback(): void
     {
         $this->actingAs($this->customerUser)
             ->get(route('customer.feedback.create', absolute: false))
             ->assertOk()
             ->assertSee('name="is_anonymous"', false)
-            ->assertSee('Hide my name from my therapist');
+            ->assertSee('Submit anonymously');
 
         $this->actingAs($this->customerUser)
             ->post(route('customer.feedback.store', absolute: false), [
@@ -65,7 +65,7 @@ class CustomerFeedbackAnonymityTest extends TestCase
 
         $this->actingAs($this->customerUser)
             ->get(route('customer.feedback.index', absolute: false))
-            ->assertSee('Hidden from therapist');
+            ->assertSee('Anonymous');
     }
 
     public function test_feedback_is_named_by_default(): void
@@ -126,31 +126,69 @@ class CustomerFeedbackAnonymityTest extends TestCase
             ->assertViewHas('customers', fn ($customers) => $customers->firstWhere('id', $this->customer->id)?->feedback_count === 0);
     }
 
-    public function test_admins_still_see_the_name_with_an_anonymous_badge(): void
+    public function test_admin_pages_hide_the_name_of_anonymous_feedback(): void
     {
         $feedback = $this->anonymousFeedback();
         $admin = User::factory()->admin()->create();
+        $email = $this->customerUser->email;
 
         $this->actingAs($admin)
             ->get(route('admin.feedback.index', absolute: false))
             ->assertOk()
-            ->assertSee('Marisol Hidden')
-            ->assertSee('Anonymous');
+            ->assertSee('Anonymous customer')
+            ->assertDontSee('Marisol Hidden')
+            ->assertDontSee($email);
+
+        $this->actingAs($admin)
+            ->get(route('admin.feedback.index', ['sort' => 'customer', 'direction' => 'asc'], false))
+            ->assertOk()
+            ->assertDontSee('Marisol Hidden');
+
+        $this->actingAs($admin)
+            ->get(route('admin.feedback.index', ['q' => 'Marisol'], false))
+            ->assertOk()
+            ->assertViewHas('feedback', fn ($items) => $items->total() === 0);
 
         $this->actingAs($admin)
             ->get(route('admin.feedback.show', $feedback, false))
             ->assertOk()
-            ->assertSee('Marisol Hidden')
-            ->assertSee('Hidden from the therapist.');
+            ->assertSee('Anonymous customer')
+            ->assertDontSee('Marisol Hidden');
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard', absolute: false))
+            ->assertOk()
+            ->assertSee('Anonymous customer');
+
+        $this->actingAs($admin)
+            ->get(route('admin.appointments.show', $this->appointment, false))
+            ->assertOk()
+            ->assertSee('Anonymous feedback submitted')
+            ->assertDontSee(route('admin.feedback.show', $feedback, false));
+
+        $this->actingAs($admin)
+            ->get(route('admin.customers.show', $this->customer, false))
+            ->assertOk()
+            ->assertViewHas('customer', fn ($customer) => $customer->feedback_count === 0 && $customer->feedback->isEmpty())
+            ->assertDontSee('Anonymous thoughts.');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.index', ['type' => 'feedback', 'range' => 'all'], false))
+            ->assertOk()
+            ->assertSee('Anonymous customer')
+            ->assertDontSee('Marisol Hidden');
 
         $csv = $this->actingAs($admin)
             ->get(route('admin.reports.export', ['type' => 'feedback', 'range' => 'all'], false))
             ->assertOk()
             ->streamedContent();
-        $rows = array_map('str_getcsv', explode("\n", trim($csv)));
+        $rows = array_map('str_getcsv', explode("
+", trim($csv)));
 
-        $this->assertSame('Hidden From Therapist', end($rows[0]));
+        $this->assertSame('Anonymous', end($rows[0]));
+        $this->assertSame('Anonymous customer', $rows[1][0]);
         $this->assertSame('yes', end($rows[1]));
+        $this->assertStringNotContainsString('Marisol Hidden', $csv);
     }
 
     private function anonymousFeedback(): Feedback

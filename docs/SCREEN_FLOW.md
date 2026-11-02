@@ -622,7 +622,7 @@ Screens:
 Rules:
 
 - Staff can view feedback but should not edit submitted customer feedback.
-- Feedback the customer hid from the therapist shows "Anonymous customer". Searching or sorting by customer name never matches or orders those rows, and therapist customer pages leave them out of the feedback list and count.
+- Anonymous feedback shows "Anonymous customer" to every role. Searching or sorting by customer name never matches or orders those rows, and therapist customer pages leave them out of the feedback list and count.
 
 ## Customer Screens
 
@@ -729,7 +729,7 @@ Rules:
 
 - One feedback record per completed appointment in the MVP.
 - Customers can view their own feedback only.
-- The form has an optional "Hide my name from my therapist" checkbox. Admins still see the name, with an Anonymous badge.
+- The form has an optional "Submit anonymously" checkbox. Nobody at Casa Paraiso sees the name, admins included. Admin feedback pages, the dashboard, reports and the CSV show "Anonymous customer" with an Anonymous badge and no contact details. Name search skips those rows, and the admin customer page and appointment page do not link to them.
 - Feedback pop-up: while a completed visit awaits feedback, every customer page except the feedback pages and the booking page opens the feedback form in a modal, with the most recent visit preselected. Later (a normal POST to `customer.feedback.prompt.dismiss`) stops it for the rest of the session. Escape closes it for the current page only.
 
 ### Profile

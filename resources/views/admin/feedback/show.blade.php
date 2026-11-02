@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div>
             <p class="casa-section-label">{{ __('Feedback detail') }}</p>
-            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $feedback->customerProfile?->display_name }}</h1>
+            <h1 class="mt-2 font-display text-3xl font-black text-casa-text">{{ $feedback->displayName() }}</h1>
             <p class="mt-2 text-sm text-casa-muted">{{ $feedback->service?->name }}</p>
             @if ($feedback->is_anonymous)
-                <p class="mt-2"><x-status-badge>{{ __('Anonymous') }}</x-status-badge> <span class="text-xs text-casa-muted">{{ __('Hidden from the therapist.') }}</span></p>
+                <p class="mt-2"><x-status-badge>{{ __('Anonymous') }}</x-status-badge> <span class="text-xs text-casa-muted">{{ __('The customer chose to stay anonymous.') }}</span></p>
             @endif
         </div>
 
