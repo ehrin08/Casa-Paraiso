@@ -24,6 +24,7 @@
             <x-nav-icon name="add" />{{ __('Attendance station') }}
         </a>
     </x-slot>
+    <x-slot name="head"><x-live-saves /></x-slot>
 
     <div class="attendance-workspace" data-attendance-workspace>
         <x-list-toolbar :active-filters="$activeFilters" :collapsible="true" class="attendance-toolbar casa-list-toolbar--filters">
@@ -69,7 +70,7 @@
         <noscript><style>.attendance-toolbar [data-filter-panel] { display: block; } .attendance-toolbar [data-filter-toggle] { display: none; }</style></noscript>
 
         <div @class(['attendance-grid', 'attendance-grid--single' => ! $selectedRecord])>
-            <section class="attendance-records" aria-labelledby="attendance-records-heading">
+            <section class="attendance-records" aria-labelledby="attendance-records-heading" data-live-region="attendance-records" data-live-scope="attendance">
                 <div class="attendance-records-heading"><h2 id="attendance-records-heading">{{ __('Attendance records') }}</h2><p>{{ trans_choice(':count record|:count records', $records->total()) }}</p></div>
                 @if ($records->isEmpty())
                     <x-empty-state title="{{ __('No attendance records') }}" description="{{ __('Try another date or therapist, or wait for the first verified scan.') }}">
@@ -138,7 +139,7 @@
                         <dt>{{ __('Status') }}</dt><dd><span class="attendance-status attendance-status--{{ $tone }}"><span aria-hidden="true"></span>{{ $statusLabel }}</span></dd>
                         <dt>{{ __('Recorded by') }}</dt><dd>{{ $latestEvent?->recorder?->name ?: __('Unavailable') }}@if ($latestEvent)<span class="attendance-source">{{ $sourceLabel($latestEvent->source) }}</span>@endif</dd>
                     </dl>
-                    <form id="attendance-correction" method="POST" action="{{ route('admin.attendance.correct', $selectedRecord) }}" class="attendance-correction" x-data="{{ \Illuminate\Support\Js::from($formState) }}">
+                    <form id="attendance-correction" method="POST" action="{{ route('admin.attendance.correct', $selectedRecord) }}" data-turbo="true" class="attendance-correction" x-data="{{ \Illuminate\Support\Js::from($formState) }}">
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="_attendance_id" value="{{ $selectedRecord->id }}">

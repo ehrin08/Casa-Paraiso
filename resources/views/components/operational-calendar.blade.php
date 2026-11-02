@@ -33,6 +33,7 @@
     x-init="init()"
     class="space-y-5"
     data-operational-calendar
+    x-bind:data-calendar-mode="mode"
     id="booking-calendar"
 >
     @if ($presentation === 'week')

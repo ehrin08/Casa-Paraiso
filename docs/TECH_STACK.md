@@ -2,7 +2,7 @@
 
 ## Approved Stack
 
-- Backend and web UI: Laravel 12, PHP 8.2, Blade, Tailwind CSS v4, Alpine.js, Turbo Drive, Vite, and authenticated HTTP polling for booking-count updates.
+- Backend and web UI: Laravel 12, PHP 8.2, Blade, Tailwind CSS v4, Alpine.js, Turbo Drive, Vite, and authenticated visible-page HTTP polling (about every 15 seconds) for the booking count and live page regions. Hostinger shared hosting cannot run a WebSocket server, so there is no broadcasting.
 - Database: MariaDB 10.11 LTS with `utf8mb4_unicode_ci` collation.
 - Authentication: Laravel Breeze email/password authentication, verification, password recovery, and Laravel Socialite Google OAuth.
 - Local runtime: Docker Desktop Compose project `casa-paraiso-web` with Apache/PHP, MariaDB, and Mailpit.

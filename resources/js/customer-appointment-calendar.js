@@ -4,9 +4,18 @@ const dayMilliseconds = 86400000;
 const addDays = (key, amount) => new Date(Date.parse(`${key}T00:00:00Z`) + amount * dayMilliseconds).toISOString().slice(0, 10);
 const dateLabel = (key, options) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', ...options }).format(new Date(`${key}T00:00:00Z`));
 
-export function createCustomerAppointmentCalendar(config, get = (url, options) => window.axios.get(url, options), now = () => new Date()) {
+const LIVE_CALENDAR_MAX_AGE_MS = 60_000;
+
+export function createCustomerAppointmentCalendar(
+    config,
+    get = (url, options) => window.axios.get(url, options),
+    now = () => new Date(),
+    liveState = typeof window === 'undefined' ? null : window.casaLiveState,
+) {
     let requestVersion = 0;
     let controller = null;
+    let lastRefreshAt = 0;
+    let stopLiveUpdates = null;
 
     return {
         month: config.initialMonth,
@@ -20,12 +29,19 @@ export function createCustomerAppointmentCalendar(config, get = (url, options) =
         init() {
             const today = manilaDateKey(now());
             this.selectedDate = today.slice(0, 7) === this.month ? today : `${this.month}-01`;
+            stopLiveUpdates?.();
+            stopLiveUpdates = liveState?.subscribe((changed) => {
+                if (changed.includes('appointments') || now().getTime() - lastRefreshAt >= LIVE_CALENDAR_MAX_AGE_MS) {
+                    this.refresh();
+                }
+            }) ?? null;
             return this.load();
         },
 
         destroy() {
             requestVersion++;
             controller?.abort();
+            stopLiveUpdates?.();
         },
 
         get monthLabel() {
@@ -125,7 +141,31 @@ export function createCustomerAppointmentCalendar(config, get = (url, options) =
             return `${config.historyUrl}?${params}`;
         },
 
+        // Background refresh: keeps the grid on failure and never shows the loading state.
+        async refresh() {
+            if (this.loading) return;
+            const version = requestVersion;
+            controller?.abort();
+            const current = new AbortController();
+            controller = current;
+            lastRefreshAt = now().getTime();
+
+            try {
+                const response = await get(config.feedUrl, {
+                    params: { month: this.month, status: this.statusFilter || null },
+                    signal: current.signal,
+                });
+                if (version === requestVersion && !current.signal.aborted) {
+                    this.events = response.data.events || [];
+                    this.error = '';
+                }
+            } catch {
+                // Keep the current grid; the next poll tries again.
+            }
+        },
+
         async load() {
+            lastRefreshAt = now().getTime();
             const version = ++requestVersion;
             controller?.abort();
             controller = new AbortController();

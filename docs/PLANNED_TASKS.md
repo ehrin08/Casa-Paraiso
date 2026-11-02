@@ -110,13 +110,13 @@ Source: [Client Facebook Page Review](client/FACEBOOK_PAGE_REVIEW.md), which com
 
 ## Task 9: Apply Changes in Real Time Instead of Reloading
 
-Added 2026-11-01. Not started. Not yet in the tracker sheet.
+Added 2026-11-01. Done 2026-11-02 ([session note](notes/sessions/2026-11-02-live-updates.md), [design](superpowers/specs/2026-11-02-live-updates-design.md)). Not yet in the tracker sheet.
 
 Today most changes only show after a full page reload or a fresh navigation. Turbo Drive is opt-in (`turboSession.drive = false` in `resources/js/app.js`), and state-changing forms submit normally and redirect. The only live update is the booking-count badge, which uses authenticated HTTP polling every 30 seconds (`resources/js/booking-notifications.js`). The attendance scanner calls `window.location.reload()` after a scan. Hostinger shared hosting cannot run a WebSocket server, and no broadcast credentials or broadcast routes exist ([Project Memory](PROJECT_MEMORY.md)).
 
-- [ ] Agree the scope with the user: which screens should update without a reload (for example the appointments queue, calendars, reception and therapist views, attendance and notifications), and whether that means other users' changes appearing live, the user's own saves updating in place, or both.
-- [ ] Choose the transport that fits Hostinger shared hosting: extend the existing visible-page polling, Turbo Frames or Turbo Streams over normal HTTP responses, or a hosted broadcast service. A self-hosted WebSocket server is not possible there.
-- [ ] Keep state-changing actions as normal Laravel requests with validation, CSRF and a no-JavaScript fallback, as `AGENTS.md` requires. Live updates only refresh what is shown.
-- [ ] Keep therapist capacity safe: a live calendar or slot view must still be re-checked inside the booking transaction.
-- [ ] Replace the attendance scanner's page reload with an in-place update.
-- [ ] Update [Project Memory](PROJECT_MEMORY.md), [Tech Stack](TECH_STACK.md) and the tests, then run the full gate.
+- [x] Agree the scope with the user: which screens should update without a reload (for example the appointments queue, calendars, reception and therapist views, attendance and notifications), and whether that means other users' changes appearing live, the user's own saves updating in place, or both. (Chosen: both, on the appointment queues, calendars, attendance and notifications.)
+- [x] Choose the transport that fits Hostinger shared hosting: extend the existing visible-page polling, Turbo Frames or Turbo Streams over normal HTTP responses, or a hosted broadcast service. A self-hosted WebSocket server is not possible there. (Chosen: visible-page polling about every 15 seconds against `GET /live/state` fingerprints, with region swaps from the current URL.)
+- [x] Keep state-changing actions as normal Laravel requests with validation, CSRF and a no-JavaScript fallback, as `AGENTS.md` requires. Live updates only refresh what is shown. (Saves opt into Turbo form submission; without JavaScript they are plain forms.)
+- [x] Keep therapist capacity safe: a live calendar or slot view must still be re-checked inside the booking transaction. (Unchanged: booking still checks capacity in `AppointmentWorkflow`.)
+- [x] Replace the attendance scanner's page reload with an in-place update.
+- [x] Update [Project Memory](PROJECT_MEMORY.md), [Tech Stack](TECH_STACK.md) and the tests, then run the full gate.

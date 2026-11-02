@@ -4,11 +4,11 @@
     $completionValue = fn ($key, $default = null) => $isActiveCompletion ? old($key, $default) : $default;
     $completionErrors = fn ($key) => $isActiveCompletion ? $errors->get($key) : [];
 @endphp
-<form method="POST" action="{{ $completeAction ?? route('admin.appointments.complete', $appointment) }}" class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+<form method="POST" action="{{ $completeAction ?? route('admin.appointments.complete', $appointment) }}" data-turbo="{{ ($turbo ?? false) ? 'true' : 'false' }}" class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
     @csrf
     <input type="hidden" name="_modal" value="{{ $modalName }}">
     @foreach ($queueContext ?? [] as $key => $value)
-        <input type="hidden" name="{{ $key }}" value="{{ $value }}" @if($key === 'mode') x-data="" x-on:appointment-calendar-mode-changed.window="$el.value = $event.detail.mode" @endif>
+        <input type="hidden" name="{{ $key }}" value="{{ $value }}" @if($key === 'mode') x-data="" x-init="$el.value = document.querySelector('[data-operational-calendar]')?.dataset.calendarMode || $el.value" x-on:appointment-calendar-mode-changed.window="$el.value = $event.detail.mode" @endif>
     @endforeach
     <x-app-card>
         <div class="border-b border-casa-border pb-5">

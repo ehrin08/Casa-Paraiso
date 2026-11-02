@@ -10,6 +10,7 @@ import { isFormPanelUrl, attachPanelReturn, takePanelRestore } from './panel-for
 import { initializeScheduleDialog } from './schedule-dialog';
 import { createCustomerAppointmentCalendar } from './customer-appointment-calendar';
 import { createRfmSegmentPreview } from './rfm-segment-preview';
+import { createLiveState } from './live-regions';
 
 import { session as turboSession } from '@hotwired/turbo';
 import Alpine from 'alpinejs';
@@ -17,6 +18,9 @@ import QRCode from 'qrcode';
 import { Html5Qrcode } from 'html5-qrcode';
 
 turboSession.drive = false;
+
+const liveState = createLiveState();
+window.casaLiveState = liveState;
 
 window.Alpine = Alpine;
 initializeWorkspaceDrawer(Alpine);
@@ -163,6 +167,8 @@ const calendarMinutes = (value, selectedDate) => {
     return (hour * 60) + minute + dayOffset;
 };
 
+const LIVE_CALENDAR_MAX_AGE_MS = 60_000;
+
 window.operationalCalendar = (config) => ({
     feedUrl: config.feedUrl,
     createUrl: config.createUrl || '',
@@ -187,6 +193,9 @@ window.operationalCalendar = (config) => ({
     slotHeight: config.presentation === 'week' ? 44 : 32,
     openingMinutes: 13 * 60,
     closingMinutes: 24 * 60,
+    lastRefreshAt: 0,
+    refreshController: null,
+    stopLiveUpdates: null,
 
     init() {
         const today = this.weeklyPresentation ? manilaDateKey() : dateKey(new Date());
@@ -197,6 +206,17 @@ window.operationalCalendar = (config) => ({
         }
 
         this.load();
+        this.stopLiveUpdates?.();
+        this.stopLiveUpdates = window.casaLiveState?.subscribe((changed) => {
+            if (changed.includes('appointments') || Date.now() - this.lastRefreshAt >= LIVE_CALENDAR_MAX_AGE_MS) {
+                this.refresh();
+            }
+        }) ?? null;
+    },
+
+    destroy() {
+        this.stopLiveUpdates?.();
+        this.refreshController?.abort();
     },
 
     get weekEnd() {
@@ -340,20 +360,46 @@ window.operationalCalendar = (config) => ({
         window.requestAnimationFrame(() => document.querySelector(`[data-operational-day="${date}"]`)?.focus());
     },
 
+    feedParams() {
+        return {
+            mode: this.mode,
+            start: this.weekStart,
+            end: this.weekEnd,
+            staff_profile_id: this.staffFilter || null,
+            service_id: this.serviceFilter || null,
+            status: this.statusFilter || null,
+        };
+    },
+
+    // Background refresh: keeps what is shown on failure and never shows the loading state.
+    refresh() {
+        if (this.loading) {
+            return Promise.resolve();
+        }
+
+        const version = this.requestVersion;
+        this.refreshController?.abort();
+        const controller = new AbortController();
+        this.refreshController = controller;
+        this.lastRefreshAt = Date.now();
+
+        return window.axios.get(this.feedUrl, { params: this.feedParams(), signal: controller.signal }).then((response) => {
+            if (version !== this.requestVersion || controller.signal.aborted) return;
+            this.resources = response.data.resources || [];
+            this.events = response.data.events || [];
+            this.error = '';
+        }).catch(() => {});
+    },
+
     load() {
         const version = ++this.requestVersion;
         this.loading = true;
         this.error = '';
+        this.refreshController?.abort();
+        this.lastRefreshAt = Date.now();
 
         return window.axios.get(this.feedUrl, {
-            params: {
-                mode: this.mode,
-                start: this.weekStart,
-                end: this.weekEnd,
-                staff_profile_id: this.staffFilter || null,
-                service_id: this.serviceFilter || null,
-                status: this.statusFilter || null,
-            },
+            params: this.feedParams(),
         }).then((response) => {
             if (version !== this.requestVersion) return;
             this.resources = response.data.resources || [];
@@ -575,7 +621,7 @@ window.attendanceScanner = ({ scanUrl }) => ({
                 await this.scanner.stop();
                 const response = await window.axios.post(scanUrl, { payload });
                 this.notice = response.data.message; this.working = false;
-                window.setTimeout(() => window.location.reload(), 900);
+                liveState.refreshRegions(['attendance-status']).catch(() => {});
             }, () => {});
         } catch (error) {
             this.working = false;
@@ -1083,6 +1129,10 @@ if (document.readyState !== 'loading') restorePanelForm();
 
 prepareFastNavigation();
 
+document.addEventListener('casa:live-region-updated', (event) => {
+    prepareFastNavigation(event.target);
+});
+
 document.addEventListener('turbo:before-render', (event) => {
     prepareFastNavigation(event.detail.newBody);
 });
@@ -1096,6 +1146,7 @@ document.addEventListener('turbo:load', () => {
     restoreCustomerModal();
     restorePanelForm();
     initializeBookingNotifications();
+    liveState.start();
     prepareFastNavigation();
     hidePageLoading();
     if (performance.getEntriesByName('casa-web-navigation-start').length) {

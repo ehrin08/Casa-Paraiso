@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../../resources/js/booking-notifications.js', import.meta.url), 'utf8')
+const pollerSource = readFileSync(new URL('../../resources/js/live-poller.js', import.meta.url), 'utf8')
+    .replace('export const createPoller', 'const createPoller');
+const source = pollerSource + readFileSync(new URL('../../resources/js/booking-notifications.js', import.meta.url), 'utf8')
+    .replace("import { createPoller } from './live-poller';", '')
     .replace('export const initializeBookingNotifications', 'globalThis.initializeBookingNotifications');
 const flush = () => new Promise(setImmediate);
 
@@ -14,7 +17,7 @@ function harness({ schedule = false, root = true } = {}) {
     const value = { textContent: '4' };
     const badge = { querySelector: () => value, classList: { toggle() {} }, setAttribute() {} };
     const state = { schedule, root: root ? { dataset: { bookingNotificationsCountUrl: '/count', bookingNotificationsReadUrl: '/read' } } : null };
-    const addEventListener = (name, callback) => listeners.set(name, callback);
+    const addEventListener = (name, callback) => listeners.set(name, [...(listeners.get(name) ?? []), callback]);
     const document = {
         hidden: false,
         addEventListener,
@@ -44,10 +47,10 @@ function harness({ schedule = false, root = true } = {}) {
     return {
         document, window, state, timers, requests, value,
         start: context.initializeBookingNotifications,
-        emit: (name) => listeners.get(name)?.(),
+        emit: (name) => (listeners.get(name) ?? []).forEach((callback) => callback()),
         tick() {
             const [id, timer] = timers.entries().next().value;
-            assert.equal(timer.delay, 30_000);
+            assert.equal(timer.delay, 15_000);
             timers.delete(id);
             timer.callback();
         },

@@ -15,6 +15,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        @auth<meta name="casa-live-state-url" content="{{ route('live.state', [], false) }}">@endauth
 
         <title>{{ $documentTitle ? $documentTitle.' · '.$applicationName : $applicationName }}</title>
 
@@ -24,6 +25,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        {{ $head ?? '' }}
     </head>
     <body class="font-sans antialiased" data-workspace-role="{{ Auth::user()?->role }}">
         <a href="#main-content" class="sr-only rounded-lg bg-casa-paper px-4 py-3 font-bold text-casa-cacao focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100]">Skip to main content</a>
