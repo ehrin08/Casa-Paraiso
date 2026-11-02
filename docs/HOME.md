@@ -51,6 +51,9 @@ Notes about the client kept apart from project scope. They are not requirements 
 ## Session Notes
 
 - [Session Index](notes/SESSIONS.md): per-task logs, newest first. Read the latest entries before starting a task.
+- [Legacy manuscript comment cleanup](notes/sessions/2026-11-02-legacy-comment-cleanup.md): removed 37 approved threads, preserved 25 threads and all seven tabs (2026-11-02).
+- [Latest implementation manuscript alignment](notes/sessions/2026-11-02-manuscript-latest-alignment.md): Gemini-only editable text, configurable hours, background updates, and evidence alignment checklist (2026-11-02).
+- [Gemini and current-system manuscript revision](notes/sessions/2026-11-02-gemini-manuscript-revision.md): approved updates to the manuscript's Temporary Revisions tab (2026-11-02).
 
 ## Archive (historical)
 
