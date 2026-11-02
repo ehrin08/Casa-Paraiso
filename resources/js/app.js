@@ -607,7 +607,33 @@ window.adminAppointmentForm = createOperationsBooking;
 window.customerCalendarBooking = createCustomerBooking;
 
 window.attendanceScanner = ({ scanUrl }) => ({
-    working: false, error: '', notice: '', scanner: null,
+    working: false, error: '', notice: '', scanner: null, permission: 'unknown',
+    async init() {
+        if (!navigator.mediaDevices?.getUserMedia) { this.permission = 'unsupported'; this.error = 'This browser cannot access a camera. Ask an administrator to record a correction.'; return; }
+        await this.queryPermission();
+        if (this.permission === 'prompt' || this.permission === 'unknown') this.$dispatch('open-modal', 'attendance-camera-permission');
+    },
+    async queryPermission() {
+        try {
+            const status = await navigator.permissions?.query({ name: 'camera' });
+            if (!status) return;
+            this.permission = status.state;
+            status.onchange = () => { this.permission = status.state; };
+        } catch { this.permission = 'unknown'; }
+    },
+    openScanner() {
+        if (this.permission === 'granted') { this.start(); return; }
+        if (this.permission === 'denied') { this.error = ''; return; }
+        this.$dispatch('open-modal', 'attendance-camera-permission');
+    },
+    allowCamera() {
+        this.$dispatch('close-modal', 'attendance-camera-permission');
+        this.start();
+    },
+    async retry() {
+        await this.queryPermission();
+        this.start();
+    },
     async start() {
         this.error = ''; this.notice = '';
         if (!navigator.mediaDevices?.getUserMedia) { this.error = 'This browser cannot access a camera. Ask an administrator to record a correction.'; return; }
@@ -615,6 +641,7 @@ window.attendanceScanner = ({ scanUrl }) => ({
         try {
             const permissionStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             permissionStream.getTracks().forEach((track) => track.stop());
+            this.permission = 'granted';
             this.scanner?.clear().catch(() => {});
             this.scanner = new Html5Qrcode('attendance-camera');
             await this.scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 220, height: 220 } }, async (payload) => {
@@ -625,6 +652,7 @@ window.attendanceScanner = ({ scanUrl }) => ({
             }, () => {});
         } catch (error) {
             this.working = false;
+            if (error?.name === 'NotAllowedError') { this.permission = 'denied'; return; }
             this.error = error?.response?.data?.message || 'Camera access was not available. Check permission and try again.';
         }
     },
