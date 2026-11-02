@@ -28,7 +28,7 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 - Keep generated output, dependencies, logs, and archived material out of ordinary discovery unless the task concerns them.
 - After a permanent tool failure, use an available supported alternative rather than retrying an unchanged call.
 - Stop exploration once implementation and verification needs are established; investigate further when new evidence warrants it.
-- Keep progress updates concise. Report the outcome, verification, and remaining limitations at delivery.
+- Keep progress updates concise and finish with the Task Report below.
 
 ## Local Runtime
 
@@ -62,3 +62,13 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 - Reuse successful checks within the same task while their relevant code and environment remain unchanged. Rerun checks when subsequent changes or failures invalidate their evidence. Investigate a failed targeted test and rerun it after correction before proceeding to the full verification gate; report unresolved failures.
 - Do not expose secrets in source, logs, documentation, commits, or the browser.
 - Commit only scoped changes. The fresh web-only history is published to `ehrin08/Casa-Paraiso`; the prior remote remains an archive.
+
+## Task Report
+
+End every task with a short report, using only these parts:
+
+- **Result:** Success, Partial, or Failed, plus one line on what was done.
+- **Errors:** failures, skipped checks, or unresolved problems, each on one line, or "None".
+- **Suggestions:** at most three short next steps, or "None".
+
+Keep each part to a sentence or a short list. Leave out long explanations unless the user asks for them.
