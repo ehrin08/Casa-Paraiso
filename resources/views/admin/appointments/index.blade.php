@@ -8,12 +8,16 @@
             <x-nav-icon name="plus" class="size-5" />{{ __('Add appointment') }}
         </a>
     </x-slot>
+    <x-slot name="head"><x-live-saves /></x-slot>
     <div class="casa-appointments space-y-4">
+        <div data-live-region="appointments-summary" data-live-scope="appointments">
         <x-stat-strip presentation="cards" aria-label="{{ __('Appointments scheduled today') }}" :items="[
             ['label' => __('Confirmed'), 'value' => $summary['confirmed'], 'icon' => 'calendar', 'tone' => 'green'],
             ['label' => __('Completed'), 'value' => $summary['completed'], 'icon' => 'check', 'tone' => 'green'],
             ['label' => __('Cancelled'), 'value' => $summary['cancelled'], 'icon' => 'cancel', 'tone' => 'red'],
         ]" />
+        </div>
+        <div data-live-region="service-queue" data-live-scope="appointments">
         <section class="casa-card p-4" id="service-queue" aria-labelledby="service-queue-title">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <h2 id="service-queue-title" class="text-xl font-extrabold text-casa-text">{{ __('Next visits to serve') }}</h2>
@@ -48,11 +52,11 @@
                                         <a href="{{ route('admin.appointments.show', ['appointment' => $appointment, 'preview' => 1]) }}" class="casa-button-secondary" data-panel-link data-turbo="false" aria-label="{{ __('View visit :number', ['number' => $appointment->appointment_number]) }}">{{ __('View') }}</a>
                                         @if ($hasStarted)
                                             <button type="button" class="casa-button-primary" x-data="" x-on:click="$dispatch('open-modal', '{{ $completionModal }}')" aria-label="{{ __('Finish visit :number', ['number' => $appointment->appointment_number]) }}">{{ __('Finish') }}</button>
-                                            <x-confirm-action :action="route('admin.appointments.outcome', $appointment)" method="PATCH" label="{{ __('No-show') }}" confirm-title="{{ __('Mark this visit as no-show?') }}" confirm-message="{{ __('The visit will leave the active queue and no transaction will be created.') }}" confirm-button="{{ __('Mark no-show') }}" button-class="casa-button-secondary" tone="danger">
+                                            <x-confirm-action :action="route('admin.appointments.outcome', $appointment)" method="PATCH" label="{{ __('No-show') }}" confirm-title="{{ __('Mark this visit as no-show?') }}" confirm-message="{{ __('The visit will leave the active queue and no transaction will be created.') }}" confirm-button="{{ __('Mark no-show') }}" button-class="casa-button-secondary" tone="danger" turbo>
                                                 <input type="hidden" name="status" value="no_show">
                                                 <input type="hidden" name="return_to" value="index">
                                                 <input type="hidden" name="queue_page" value="{{ $serviceQueue->currentPage() }}">
-                                                <input type="hidden" name="mode" value="{{ $mode }}" x-data="" x-on:appointment-calendar-mode-changed.window="$el.value = $event.detail.mode">
+                                                <input type="hidden" name="mode" value="{{ $mode }}" x-data="" x-init="$el.value = document.querySelector('[data-operational-calendar]')?.dataset.calendarMode || $el.value" x-on:appointment-calendar-mode-changed.window="$el.value = $event.detail.mode">
                                             </x-confirm-action>
                                         @else
                                             <button type="button" class="casa-button-primary" disabled aria-describedby="visit-start-{{ $appointment->id }}">{{ __('Finish') }}</button>
@@ -68,14 +72,15 @@
                 <div class="mt-3">{{ $serviceQueue->links() }}</div>
             @endif
         </section>
+        @foreach ($completionAppointments as $appointment)
+                @php $completionModal = 'admin-appointment-completion-'.$appointment->id; @endphp
+                <x-modal :name="$completionModal" :show="old('_modal') === $completionModal" maxWidth="5xl" focusable>
+                    <div class="p-5">@include('admin.appointments.partials.completion-form', ['appointment' => $appointment, 'modalName' => $completionModal, 'queueContext' => ['return_to' => 'index', 'queue_page' => $serviceQueue->currentPage(), 'mode' => $mode], 'turbo' => true])</div>
+                </x-modal>
+        @endforeach
+        </div>
         <x-operational-calendar :feed-url="route('admin.appointments.calendar')" :initial-week="$initialWeek" :initial-date="$initialDate" :initial-mode="$mode" role="admin" presentation="week" :services="$services" :staff-profiles="$staffProfiles" :create-url="route('admin.appointments.create')" />
     </div>
-    @foreach ($completionAppointments as $appointment)
-            @php $completionModal = 'admin-appointment-completion-'.$appointment->id; @endphp
-            <x-modal :name="$completionModal" :show="old('_modal') === $completionModal" maxWidth="5xl" focusable>
-                <div class="p-5">@include('admin.appointments.partials.completion-form', ['appointment' => $appointment, 'modalName' => $completionModal, 'queueContext' => ['return_to' => 'index', 'queue_page' => $serviceQueue->currentPage(), 'mode' => $mode]])</div>
-            </x-modal>
-    @endforeach
     @if ($completedTransaction)
         <x-appointment-completed :transaction="$completedTransaction" :voucher-name="$completedVoucherName" role="admin" />
     @endif

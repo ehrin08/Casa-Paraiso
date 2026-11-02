@@ -1,10 +1,11 @@
 <x-app-layout>
     <x-slot name="header"><div class="notifications-heading"><h1 class="font-display text-3xl font-black text-casa-text">{{ __('Notifications') }}</h1><p>{{ __('Customer booking alerts') }}</p></div></x-slot>
+    <x-slot name="head"><x-live-saves /></x-slot>
     <div class="notifications-workspace" data-notifications-workspace>
         <section class="notifications-inbox" aria-label="{{ __('Booking alerts') }}">
             <x-list-toolbar class="notifications-toolbar">
                 <div class="notifications-controls">
-                    <nav class="notifications-tabs" aria-label="{{ __('Notification filters') }}">
+                    <nav class="notifications-tabs" aria-label="{{ __('Notification filters') }}" data-live-region="notifications-tabs" data-live-scope="notifications">
                         @foreach (['all' => __('All'), 'unread' => __('Unread')] as $status => $label)
                             <a href="{{ route('notifications.index', ['q' => $filters['q'], 'status' => $status]) }}" @class(['notifications-tab', 'is-active' => $filters['status'] === $status]) @if ($filters['status'] === $status) aria-current="page" @endif>{{ $label }} ({{ $counts[$status] }})</a>
                         @endforeach
@@ -17,10 +18,11 @@
                     </form>
                 </div>
             </x-list-toolbar>
+            <div data-live-region="notifications-list" data-live-scope="notifications">
             @if ($filters['q'] !== '' || $counts['unread'] > 0)
                 <div class="notifications-tools">
                     @if ($filters['q'] !== '')<a href="{{ route('notifications.index', ['status' => $filters['status']]) }}">{{ __('Clear search') }}</a>@endif
-                    @if ($counts['unread'] > 0)<form method="POST" action="{{ route('notifications.read-all') }}">@csrf @method('PATCH')<button type="submit">{{ __('Mark all as read') }}</button></form>@endif
+                    @if ($counts['unread'] > 0)<form method="POST" action="{{ route('notifications.read-all') }}" data-turbo="true">@csrf @method('PATCH')<button type="submit">{{ __('Mark all as read') }}</button></form>@endif
                 </div>
             @endif
             @if ($notifications->isEmpty())
@@ -55,6 +57,7 @@
                 </x-table-shell>
                 <div class="notifications-pagination">{{ $notifications->links() }}</div>
             @endif
+            </div>
         </section>
         <section class="notifications-detail" id="notification-detail" aria-labelledby="notification-detail-title" data-selected-notification="{{ $selectedNotification?->id }}">
             @if ($selectedNotification)

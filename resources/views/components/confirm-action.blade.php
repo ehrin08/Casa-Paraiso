@@ -9,6 +9,7 @@
     'modalWidth' => 'md',
     'tone' => 'default',
     'dismissLabel' => null,
+    'turbo' => false,
 ])
 
 @php
@@ -22,7 +23,7 @@
     </button>
 
     <x-modal :name="$modalName" :maxWidth="$modalWidth" :labelled-by="$modalName.'-title'" centered focusable>
-        <form method="POST" action="{{ $action }}" data-turbo="false">
+        <form method="POST" action="{{ $action }}" data-turbo="{{ $turbo ? 'true' : 'false' }}">
             @csrf
             @if ($spoofMethod !== 'POST')
                 @method($spoofMethod)

@@ -1,9 +1,7 @@
-const POLL_INTERVAL_MS = 30_000;
-let pollTimer = null;
-let activeRequest = null;
-let generation = 0;
+import { createPoller } from './live-poller';
+
+const POLL_INTERVAL_MS = 15_000;
 let lastAcknowledgedLocation = null;
-let navigating = false;
 
 const notificationRoot = () => document.querySelector('[data-booking-notifications]');
 
@@ -23,27 +21,11 @@ const applyCount = (count) => {
     });
 };
 
-const stopPolling = () => {
-    generation += 1;
-    window.clearTimeout(pollTimer);
-    pollTimer = null;
-    activeRequest?.abort();
-    activeRequest = null;
-};
-
-const refreshCount = async () => {
+const refreshCount = async (signal) => {
     const root = notificationRoot();
-    const countUrl = root?.dataset.bookingNotificationsCountUrl;
-
-    if (!countUrl || document.hidden || navigating || activeRequest) {
-        return;
-    }
-
-    const requestGeneration = generation;
-    const controller = new AbortController();
-    activeRequest = controller;
+    const countUrl = root.dataset.bookingNotificationsCountUrl;
     const options = {
-        signal: controller.signal,
+        signal,
         timeout: 10_000,
         headers: { Accept: 'application/json' },
     };
@@ -51,69 +33,50 @@ const refreshCount = async () => {
     const readUrl = root.dataset.bookingNotificationsReadUrl;
     const isSchedule = document.querySelector('[data-booking-schedule-link][aria-current="page"]');
     const shouldAcknowledge = readUrl && isSchedule && lastAcknowledgedLocation !== locationKey;
-    let shouldContinue = true;
 
-    try {
-        // Acknowledge on entering a schedule; subsequent polls only read the count.
-        // Serializing these requests prevents a stale count overwriting the acknowledgement.
-        const response = shouldAcknowledge
-            ? await window.axios.patch(readUrl, {}, {
-                ...options,
-                headers: {
-                    ...options.headers,
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            })
-            : await window.axios.get(countUrl, options);
+    // Acknowledge on entering a schedule; subsequent polls only read the count.
+    // Serializing these requests prevents a stale count overwriting the acknowledgement.
+    const response = shouldAcknowledge
+        ? await window.axios.patch(readUrl, {}, {
+            ...options,
+            headers: {
+                ...options.headers,
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+        })
+        : await window.axios.get(countUrl, options);
 
-        if (requestGeneration !== generation || root !== notificationRoot()) {
-            return;
-        }
-
-        // An expired session may redirect to HTML. Preserve the last known badge.
-        if (!Number.isInteger(response.data?.count) || response.data.count < 0) {
-            shouldContinue = false;
-            return;
-        }
-
-        if (shouldAcknowledge) {
-            lastAcknowledgedLocation = locationKey;
-        }
-
-        applyCount(response.data.count);
-    } catch (error) {
-        shouldContinue = ![401, 403, 419].includes(error.response?.status);
-    } finally {
-        if (requestGeneration === generation) {
-            activeRequest = null;
-
-            if (shouldContinue && !document.hidden && !navigating && root === notificationRoot()) {
-                pollTimer = window.setTimeout(refreshCount, POLL_INTERVAL_MS);
-            }
-        }
+    if (signal.aborted || root !== notificationRoot()) {
+        return true;
     }
+
+    // An expired session may redirect to HTML. Preserve the last known badge.
+    if (!Number.isInteger(response.data?.count) || response.data.count < 0) {
+        return false;
+    }
+
+    if (shouldAcknowledge) {
+        lastAcknowledgedLocation = locationKey;
+    }
+
+    applyCount(response.data.count);
+
+    return true;
 };
 
-const restartPolling = () => {
-    stopPolling();
-    void refreshCount();
-};
+const poller = createPoller({
+    interval: POLL_INTERVAL_MS,
+    run: refreshCount,
+    canRun: () => Boolean(notificationRoot()?.dataset.bookingNotificationsCountUrl),
+});
 
 export const initializeBookingNotifications = () => {
-    navigating = false;
-    restartPolling();
+    poller.start();
 };
 
-document.addEventListener('visibilitychange', restartPolling);
-window.addEventListener('online', restartPolling);
-window.addEventListener('pageshow', restartPolling);
-window.addEventListener('pagehide', stopPolling);
-
-const pauseForNavigation = () => {
-    navigating = true;
+const forgetAcknowledgement = () => {
     lastAcknowledgedLocation = null;
-    stopPolling();
 };
 
-document.addEventListener('turbo:before-visit', pauseForNavigation);
-document.addEventListener('turbo:before-cache', pauseForNavigation);
+document.addEventListener('turbo:before-visit', forgetAcknowledgement);
+document.addEventListener('turbo:before-cache', forgetAcknowledgement);

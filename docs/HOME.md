@@ -10,6 +10,7 @@ Index of the project documentation. Links are relative Markdown links so they wo
 - [Planned Tasks](PLANNED_TASKS.md) (recorded, not started)
 - [Customer Booking Safeguards Design](superpowers/specs/2026-11-01-booking-safeguards-design.md) (T5, implemented)
 - [Customer Booking Safeguards Plan](superpowers/plans/2026-11-01-booking-safeguards.md) (T5)
+- [Live Updates Design](superpowers/specs/2026-11-02-live-updates-design.md) (Task 9, implemented)
 - [RFM Engine](RFM_ENGINE.md): quintile RFM scoring and the admin-configurable segment rules.
 - [Memberships and Gift Vouchers](MEMBERSHIPS_AND_VOUCHERS.md): Gold and Platinum cards, payment pricing, and gift voucher rules.
 

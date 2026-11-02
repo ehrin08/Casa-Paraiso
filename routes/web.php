@@ -31,6 +31,7 @@ use App\Http\Controllers\Auth\GooglePasswordSetupController;
 use App\Http\Controllers\Customer\AppointmentCalendarController as CustomerAppointmentCalendarController;
 use App\Http\Controllers\Customer\AppointmentController as CustomerAppointmentController;
 use App\Http\Controllers\Customer\FeedbackController as CustomerFeedbackController;
+use App\Http\Controllers\LiveStateController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OperationalAppointmentAvailabilityController;
 use App\Http\Controllers\OperationalCustomerLookupController;
@@ -250,6 +251,9 @@ Route::middleware(['auth', 'active', 'verified', 'role:super_admin,admin,recepti
         Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
         Route::patch('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     });
+
+Route::middleware(['auth', 'active', 'verified', MeasureApplicationRequest::class])
+    ->get('/live/state', LiveStateController::class)->name('live.state');
 
 Route::middleware(['auth', 'active', 'verified', 'role:customer', MeasureApplicationRequest::class])
     ->prefix('customer')

@@ -135,3 +135,34 @@ test('failed loads can retry and destroyed calendars ignore pending requests', a
     await last;
     assert.deepEqual(state.events, []);
 });
+
+test('live refresh keeps the month grid on failure and never blanks it', async () => {
+    const requests = [];
+    const subscribers = [];
+    const liveState = { subscribe: (callback) => { subscribers.push(callback); return () => subscribers.splice(subscribers.indexOf(callback), 1); } };
+    const state = createCustomerAppointmentCalendar(
+        { initialMonth: '2026-10', feedUrl: '/calendar', historyUrl: '/history' },
+        (url, options) => new Promise((resolve, reject) => requests.push({ url, ...options, resolve, reject })),
+        () => new Date('2026-10-11T00:00:00+08:00'),
+        liveState,
+    );
+    const loading = state.init();
+    requests[0].resolve({ data: { events: [event(1, '2026-10-12T05:00:00Z')] } });
+    await loading;
+
+    subscribers[0](['appointments']);
+    assert.equal(state.loading, false);
+    assert.equal(state.events.length, 1, 'the grid stays while refreshing');
+    requests[1].reject(new Error('offline'));
+    await new Promise(setImmediate);
+    assert.equal(state.events.length, 1);
+    assert.equal(state.error, '');
+
+    subscribers[0](['appointments']);
+    requests[2].resolve({ data: { events: [event(1, '2026-10-12T05:00:00Z', 'cancelled'), event(2, '2026-10-14T05:00:00Z')] } });
+    await new Promise(setImmediate);
+    assert.deepEqual(state.events.map((item) => item.status), ['cancelled', 'confirmed']);
+
+    state.destroy();
+    assert.equal(subscribers.length, 0);
+});

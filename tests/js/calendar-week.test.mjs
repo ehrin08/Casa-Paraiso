@@ -62,13 +62,17 @@ function harness(config = {}) {
     const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
     const calendar = source.slice(source.indexOf('const dateFromIso'), source.indexOf('window.customerAppointmentCalendar'));
     const requests = [];
-    const window = { axios: { get: (url, options) => new Promise((resolve, reject) => requests.push({ url, options, resolve, reject })) } };
+    const subscribers = [];
+    const window = {
+        axios: { get: (url, options) => new Promise((resolve, reject) => requests.push({ url, options, resolve, reject })) },
+        casaLiveState: { subscribe: (callback) => { subscribers.push(callback); return () => subscribers.splice(subscribers.indexOf(callback), 1); } },
+    };
     const context = vm.createContext({
-        window, Intl, Date, manilaDateKey: (value) => manilaDateKey(value || '2026-10-04T23:00:00+08:00'),
+        window, Intl, Date, AbortController, manilaDateKey: (value) => manilaDateKey(value || '2026-10-04T23:00:00+08:00'),
         mondayOf, manilaTime, positionWeekEvents, therapistColor, weekEventSize,
     });
     vm.runInContext(calendar, context);
-    return { state: window.operationalCalendar({ presentation: 'week', initialWeek: '2026-09-28', feedUrl: '/feed', role: 'admin', ...config }), requests };
+    return { state: window.operationalCalendar({ presentation: 'week', initialWeek: '2026-09-28', feedUrl: '/feed', role: 'admin', ...config }), requests, subscribers };
 }
 const flush = () => new Promise(setImmediate);
 
@@ -151,4 +155,34 @@ test('availability mode keeps therapist coverage and mobile agenda excludes avai
     state.setMode('availability');
     assert.equal(requests[0].options.params.mode, 'availability');
     assert.equal(state.backgroundEvents('coverage').length, 1);
+});
+
+test('live refresh replaces events quietly, keeps them on failure, and yields to a newer load', async () => {
+    const { state, requests, subscribers } = harness();
+    state.init();
+    requests[0].resolve({ data: { resources: [], events: [{ id: 'first' }] } });
+    await flush();
+    assert.equal(subscribers.length, 1);
+
+    subscribers[0](['appointments']);
+    assert.equal(state.loading, false, 'a background refresh never shows the loading state');
+    assert.equal(requests[1].options.params.start, '2026-09-28');
+    requests[1].reject(new Error('offline'));
+    await flush();
+    assert.deepEqual(state.events.map((event) => event.id), ['first']);
+    assert.equal(state.error, '');
+
+    subscribers[0](['notifications']);
+    assert.equal(requests.length, 2, 'unrelated changes do not refetch a fresh calendar');
+
+    subscribers[0](['appointments']);
+    state.nextWeek();
+    assert.equal(requests[2].options.signal.aborted, true);
+    requests[2].resolve({ data: { resources: [], events: [{ id: 'stale' }] } });
+    requests[3].resolve({ data: { resources: [], events: [{ id: 'next-week' }] } });
+    await flush();
+    assert.deepEqual(state.events.map((event) => event.id), ['next-week']);
+
+    state.destroy();
+    assert.equal(subscribers.length, 0);
 });
