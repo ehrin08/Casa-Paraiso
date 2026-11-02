@@ -18,8 +18,10 @@ Check the manuscript's Temporary Revisions tab and list what needs revising or c
 
 - Read the tab's text and 11 open comment threads from a Drive export. Counted the result labels in Tables 8–10 (all Passed) and searched for the old 24/8/3 summary, which still appears in six places.
 - Checked the NLP passages against the Gemini configuration recorded in project memory.
-- Reused the earlier reference comparison instead of re-reading `Reference.pdf`; no local PDF text tool was available.
+- First pass: the Read tool could not render `Reference.pdf` (no poppler). Follow-up: extracted its text with the Git Bash `pdftotext` and compared its contents, Chapter 3 testing sections, Chapter 4 evaluation sections, Chapter 5 evaluation results and appendices with Casa. These are recorded as checklist section E.
 - Checked the relative links and ran `git diff --check`. Application tests, the asset build and Docker were skipped for this documentation-only work.
+
+- Follow-up: listed the tab's 23 figure captions and their notes about being out of date, compared them with the reference's List of Figures, and checked commits since 29 October for UI changes. The results are checklist section F.
 
 ## Decisions
 

@@ -51,12 +51,14 @@ Notes about the client kept apart from project scope. They are not requirements 
 ## Manuscript
 
 - [Temporary Revisions checklist](manuscript/2026-11-02-temporary-revisions-checklist.md): what still needs revising in the tab, including test-label contradictions, NLP figure and table, pending UAT wording, and comment follow-ups; doc unchanged (2026-11-02).
+- [Chapter III diagrams](manuscript/2026-11-02-chapter3-diagrams.md): 11 redrawn or new Chapter III figures (architecture, RFM flow, three-part ERD, context, use case, DFD 0/1, booking and sentiment flows), with images, captions, text and renumbering applied in the Doc, Figure 1 redrawn and the three front-matter lists refreshed; [diagram sources](manuscript/diagrams/README.md) (2026-11-02).
 - [Chapter-only manuscript revision](manuscript/2026-11-02-chapter-revision-summary.md): delivered Chapter I–V changes, preservation checks and remaining issues (2026-11-02).
 - [Manuscript finished-paper comparison](manuscript/2026-11-02-reference-review.md): separate structure, presentation and evidence review against the supplied reference; neither manuscript changed (2026-11-02).
 
 ## Session Notes
 
 - [Session Index](notes/SESSIONS.md): per-task logs, newest first. Read the latest entries before starting a task.
+- [Chapter III diagrams](notes/sessions/2026-11-02-chapter3-diagrams.md): outdated Figures 4–6 redrawn and six missing diagrams drawn from code; images, text, renumbering, Figure 1 and refreshed lists applied in the Doc (2026-11-02).
 - [UAT form formal wording](notes/sessions/2026-11-02-uat-form-formal-wording.md): plain, formal participant wording, §3.6.4 rating scale, participant code removed; form still unpublished (2026-11-02).
 - [Chapter-only manuscript revision](notes/sessions/2026-11-02-chapter-only-manuscript-revision.md): Chapters I–V restructured in Temporary Revisions with excluded content preserved (2026-11-02).
 - [Manuscript reference comparison](notes/sessions/2026-11-02-manuscript-reference-review.md): finished-paper review against the supplied reference (2026-11-02).
