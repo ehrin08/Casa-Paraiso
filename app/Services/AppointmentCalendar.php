@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ApplicationSetting;
 use App\Models\Appointment;
 use App\Models\StaffProfile;
 use Illuminate\Database\Eloquent\Builder;
@@ -247,6 +248,8 @@ class AppointmentCalendar
      */
     private function payload(Carbon $start, Carbon $end, Collection $resources, Collection $events, string $mode): array
     {
+        $settings = ApplicationSetting::current();
+
         return [
             'range' => [
                 'start' => $start->toDateString(),
@@ -255,9 +258,9 @@ class AppointmentCalendar
             ],
             'mode' => $mode,
             'business_hours' => [
-                'opens_at' => config('casa.business_hours.opens_at', '13:00'),
-                'closes_at' => config('casa.business_hours.closes_at', '00:00'),
-                'closes_next_day' => (bool) config('casa.business_hours.closes_next_day', true),
+                'opens_at' => $settings->opensAt(),
+                'closes_at' => $settings->closesAt(),
+                'closes_next_day' => $settings->closesAt() <= $settings->opensAt(),
                 'slot_interval_minutes' => (int) config('casa.business_hours.slot_interval_minutes', 30),
             ],
             'resources' => $resources->values()->all(),

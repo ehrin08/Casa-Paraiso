@@ -18,7 +18,7 @@
         FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
         @inject('servicePhotos', 'App\Services\ServicePhotoService')
         @php
-            $businessHours = config('casa.business_hours', []);
+            $businessHours = [...config('casa.business_hours', []), 'window' => $applicationSettings->hoursLabel()];
             $homeUrl = auth()->check() ? route(auth()->user()->homeRouteName()) : null;
             $accountUrl = $homeUrl ?? route('login');
             $bookingLabel = $homeUrl ? __('Open workspace') : __('Book an appointment');

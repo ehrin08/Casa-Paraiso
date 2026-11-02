@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\ApplicationSetting;
 use App\Models\StaffScheduleException;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -65,10 +66,11 @@ class StaffScheduleExceptionRequest extends FormRequest
 
                 $startMinutes = $this->minutes((string) $startTime);
                 $endMinutes = $endsNextDay ? 1440 : $this->minutes((string) $endTime);
-                $openingMinutes = $this->minutes((string) config('casa.business_hours.opens_at', '13:00'));
+                $opensAt = ApplicationSetting::current()->opensAt();
+                $openingMinutes = $this->minutes($opensAt);
 
                 if ($startMinutes < $openingMinutes) {
-                    $validator->errors()->add('start_time', 'Schedule exceptions must begin within business hours at 1:00 PM or later.');
+                    $validator->errors()->add('start_time', __(':subject must begin within business hours at :time or later.', ['subject' => __('Schedule exceptions'), 'time' => ApplicationSetting::timeLabel($opensAt)]));
 
                     return;
                 }

@@ -67,7 +67,7 @@ class AppointmentWorkflow
         }
 
         if (! $this->scheduleWindows->withinBusinessHours($candidate, $this->scheduledEnd($candidate, $service, $addonCodes))) {
-            $messages[] = __('The full service must fit inside business hours (1:00 PM to 11:00 PM).');
+            $messages[] = __('The full service must fit inside business hours (:hours).', ['hours' => $this->scheduleWindows->hoursSummary($candidate)]);
         }
 
         if ($messages !== []) {

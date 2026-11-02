@@ -15,7 +15,7 @@ This design supports customer login, therapist scheduling, immediately confirmed
 - Store money as `decimal(10,2)`.
 - Store dates and times in server time for MVP; use Asia/Manila as the business timezone in application config.
 - Use MariaDB 10.11 LTS-compatible column types and index names no longer than 64 characters.
-- Treat 1:00 PM to 11:00 PM as the hard booking boundary (the whole treatment must fit) and generate appointment starts at 30-minute intervals. Dates in `closed_dates` have no bookable time.
+- Treat the resolved operating hours for each date as the hard booking boundary (the whole treatment must fit) and generate appointment starts at 30-minute intervals. The default is 1:00 PM to 11:00 PM; `operating_hour_rules` close dates, replace the hours, or block part of a day.
 
 ## Status Values
 
@@ -473,25 +473,33 @@ Rules:
 - The payment default only prefills forms and never marks a transaction paid or initiates a transfer.
 - Admin-managed company-profile content is escaped when rendered publicly; an entirely blank history and chart keep the landing-page About section hidden.
 - The public team chart reads only presentation columns (`name`, `role`, `photo_path`, `public_title`, `public_bio`, tier and order) of published staff accounts; email, phone and sign-in fields are never exposed.
-- Booking hours, intervals, timezone, commission rate, and security controls remain configuration-controlled.
+- `opens_at`, `closes_at` nullable times: the default operating hours (since 2026-11-02; null falls back to `config/casa.php`). A closing time of 00:00 means midnight.
+- Booking intervals, timezone, commission rate, and security controls remain configuration-controlled.
 
-### `closed_dates`
+### `operating_hour_rules`
 
-Whole business days the spa is closed, such as holidays (since 2026-11-01, migration `2026_11_02_010000`).
+Dated changes to the default hours (since 2026-11-02, migration `2026_11_03_010000`).
 
 Key columns:
 
 - `id`
-- `closed_on` date, unique
-- `reason` (shown in the booking calendar label)
+- `type`: `closed`, `special_hours` or `partial_closure`
+- `starts_on` date; `ends_on` nullable date (null means until further notice)
+- `start_time`, `end_time` nullable times: the opening window for special hours, the blocked window for a partial closure, null for a closure. An end of 00:00 means midnight.
+- `reason` (shown in the booking calendar for closed dates)
 - `created_by` nullable foreign key to `users.id`, null on delete
-- `created_at`, `updated_at`
+- `created_at`, `updated_at`; index on (`starts_on`, `ends_on`)
 
 Rules:
 
-- `ScheduleWindowResolver::effectiveWindows()` returns no windows on a closed date, so slot lists, every booking and reschedule check, and calendar availability all treat it as closed. Closed dates are read with shared locks inside booking transactions.
-- Saving a closed date locks every therapist row first, then refuses the date while confirmed appointments start on it. Bookings lock therapist rows before reading the schedule, so the two cannot interleave.
-- Removing a row reopens the date. Past rows are kept for history.
+- `ScheduleWindowResolver` resolves each date: any covering closure makes it closed; otherwise a special-hours rule replaces the default window; partial closures are subtracted from whichever window applies. Slot lists, every booking and reschedule check, and calendar availability all use it. Rules are read with shared locks inside booking transactions.
+- Special-hours rules cannot overlap each other. Closures may overlap anything and win.
+- Saving, ending or removing a rule, or changing the default hours, locks every therapist row first, applies the change, and rolls it back if any confirmed appointment in the affected range would fall outside the new hours. Bookings lock therapist rows before reading the schedule, so the two cannot interleave.
+- Ending a started rule sets `ends_on` to yesterday so past days stay on record; future rules are deleted.
+
+### `closed_dates` (retired)
+
+Whole closed days from 2026-11-01 (migration `2026_11_02_010000`). The `2026_11_03_010000` migration copied every row into `operating_hour_rules` as a one-day `closed` rule. The table is no longer read or written and stays only as rollback evidence.
 
 ## RFM Promotions
 

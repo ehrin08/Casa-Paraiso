@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\ClosedDate;
+use App\Models\ApplicationSetting;
+use App\Models\OperatingHourRule;
 use App\Models\StaffProfile;
 use App\Models\StaffScheduleException;
 use App\Models\StaffScheduleShift;
@@ -19,8 +20,11 @@ class ScheduleWindowResolver
     /** @var array<int, Collection<string, Collection<int, StaffScheduleShift>>> */
     private array $publishedRosterShifts = [];
 
-    /** @var array<string, string|null> Closing reason per business date, or null when open. */
-    private array $closedDates = [];
+    /** @var array<string, array{closed: string|null, window: array{start: Carbon, end: Carbon}|null, blocked: list<array{start: Carbon, end: Carbon, reason: string}>, special: string|null}> */
+    private array $days = [];
+
+    /** @var array{opens_at: string, closes_at: string}|null */
+    private ?array $defaultHours = null;
 
     private bool $lockingReads = false;
 
@@ -28,22 +32,55 @@ class ScheduleWindowResolver
     {
         $this->publishedWeeks = [];
         $this->publishedRosterShifts = [];
-        $this->closedDates = [];
+        $this->days = [];
+        $this->defaultHours = null;
     }
 
     /** The reason the spa is closed on this business date, or null when it is open. */
     public function closedReason(CarbonInterface $day): ?string
     {
-        $date = Carbon::parse($day, (string) config('casa.business_hours.timezone', config('app.timezone')))->toDateString();
+        return $this->dayHours($day)['closed'];
+    }
 
-        if (! array_key_exists($date, $this->closedDates)) {
-            $this->closedDates[$date] = ClosedDate::query()
-                ->whereDate('closed_on', $date)
+    /**
+     * How one business date resolves: a closure wins, special hours replace the default window,
+     * and partial closures block intervals inside whichever window applies.
+     *
+     * @return array{closed: string|null, window: array{start: Carbon, end: Carbon}|null, blocked: list<array{start: Carbon, end: Carbon, reason: string}>, special: string|null}
+     */
+    public function dayHours(CarbonInterface $day): array
+    {
+        $date = $this->businessDate($day);
+
+        if (! array_key_exists($date, $this->days)) {
+            $rules = OperatingHourRule::query()
+                ->covering($date, $date)
+                ->orderBy('id')
                 ->when($this->lockingReads, fn ($query) => $query->sharedLock())
-                ->value('reason');
+                ->get();
+
+            $this->days[$date] = $this->resolveDay($date, $rules);
         }
 
-        return $this->closedDates[$date];
+        return $this->days[$date];
+    }
+
+    /**
+     * Resolve every date in a range with one query and prime the cache.
+     *
+     * @return array<string, array{closed: string|null, window: array{start: Carbon, end: Carbon}|null, blocked: list<array{start: Carbon, end: Carbon, reason: string}>, special: string|null}>
+     */
+    public function hoursBetween(CarbonInterface $from, CarbonInterface $to): array
+    {
+        $rules = OperatingHourRule::query()->covering($from, $to)->orderBy('id')->get();
+        $days = [];
+
+        for ($day = Carbon::parse($from->toDateString()); $day->lte($to); $day->addDay()) {
+            $date = $day->toDateString();
+            $days[$date] = $this->days[$date] = $this->resolveDay($date, $rules->filter(fn (OperatingHourRule $rule) => $rule->covers($date)));
+        }
+
+        return $days;
     }
 
     /**
@@ -53,17 +90,10 @@ class ScheduleWindowResolver
      */
     public function closedReasonsBetween(CarbonInterface $from, CarbonInterface $to): array
     {
-        $closed = ClosedDate::query()
-            ->whereBetween('closed_on', [$from->toDateString(), $to->toDateString()])
-            ->pluck('reason', 'closed_on')
-            ->mapWithKeys(fn (string $reason, $date) => [Carbon::parse($date)->toDateString() => $reason])
+        return collect($this->hoursBetween($from, $to))
+            ->filter(fn (array $hours) => $hours['closed'] !== null)
+            ->map(fn (array $hours) => $hours['closed'])
             ->all();
-
-        for ($day = Carbon::parse($from->toDateString()); $day->lte($to); $day->addDay()) {
-            $this->closedDates[$day->toDateString()] = $closed[$day->toDateString()] ?? null;
-        }
-
-        return $closed;
     }
 
     /** Use a fresh, current database view after the caller acquires therapist locks. */
@@ -77,20 +107,27 @@ class ScheduleWindowResolver
     }
 
     /**
+     * The opening window that applies on this date, or null when the spa is closed.
+     *
+     * @return array{start: Carbon, end: Carbon}|null
+     */
+    public function businessWindow(CarbonInterface $day): ?array
+    {
+        $window = $this->dayHours($day)['window'];
+
+        return $window ? ['start' => $window['start']->copy(), 'end' => $window['end']->copy()] : null;
+    }
+
+    /**
+     * The default hours on this date, ignoring dated rules. Schedule templates are built against it.
+     *
      * @return array{start: Carbon, end: Carbon}
      */
-    public function businessWindow(CarbonInterface $day): array
+    public function defaultBusinessWindow(CarbonInterface $day): array
     {
-        $timezone = (string) config('casa.business_hours.timezone', config('app.timezone'));
-        $date = Carbon::parse($day, $timezone)->toDateString();
-        $start = Carbon::createFromFormat('Y-m-d H:i', $date.' '.config('casa.business_hours.opens_at', '13:00'), $timezone);
-        $end = Carbon::createFromFormat('Y-m-d H:i', $date.' '.config('casa.business_hours.closes_at', '00:00'), $timezone);
+        $hours = $this->defaultHours();
 
-        if (config('casa.business_hours.closes_next_day', true) || $end->lte($start)) {
-            $end->addDay();
-        }
-
-        return ['start' => $start, 'end' => $end];
+        return $this->openWindow($this->businessDate($day), $hours['opens_at'], $hours['closes_at']);
     }
 
     /**
@@ -102,12 +139,13 @@ class ScheduleWindowResolver
     {
         $date = Carbon::parse($day)->startOfDay();
 
+        $hours = $this->dayHours($date);
+        $business = $hours['window'];
+
         // A closed date has no bookable time for anyone, whatever the therapist schedules say.
-        if ($this->closedReason($date) !== null) {
+        if ($business === null) {
             return collect();
         }
-
-        $business = $this->businessWindow($date);
 
         $exceptions = $staffProfile->relationLoaded('scheduleExceptions')
             ? $staffProfile->scheduleExceptions->filter(fn (StaffScheduleException $exception) => $exception->exception_date?->isSameDay($date))
@@ -177,6 +215,10 @@ class ScheduleWindowResolver
             $windows = $this->subtract($windows, $blocked);
         }
 
+        foreach ($hours['blocked'] as $blocked) {
+            $windows = $this->subtract($windows, $blocked);
+        }
+
         return $this->merge($windows)->values();
     }
 
@@ -192,9 +234,38 @@ class ScheduleWindowResolver
 
     public function withinBusinessHours(CarbonInterface $start, CarbonInterface $end): bool
     {
-        $business = $this->businessWindow($start);
+        $hours = $this->dayHours($start);
+        $business = $hours['window'];
 
-        return $start->gte($business['start']) && $end->lte($business['end']);
+        if ($business === null || $start->lt($business['start']) || $end->gt($business['end'])) {
+            return false;
+        }
+
+        foreach ($hours['blocked'] as $blocked) {
+            if ($start->lt($blocked['end']) && $end->gt($blocked['start'])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** A short description of the hours on a date, for validation messages. */
+    public function hoursSummary(CarbonInterface $day): string
+    {
+        $hours = $this->dayHours($day);
+
+        if ($hours['closed'] !== null) {
+            return __('closed: :reason', ['reason' => $hours['closed']]);
+        }
+
+        $summary = ApplicationSetting::hoursRangeLabel($hours['window']['start']->format('H:i'), $hours['window']['end']->format('H:i'));
+
+        foreach ($hours['blocked'] as $blocked) {
+            $summary .= ', '.__('closed :range', ['range' => ApplicationSetting::hoursRangeLabel($blocked['start']->format('H:i'), $blocked['end']->format('H:i'))]);
+        }
+
+        return $summary;
     }
 
     /**
@@ -212,6 +283,67 @@ class ScheduleWindowResolver
         }
 
         return ['start' => $start, 'end' => $end];
+    }
+
+    /**
+     * @param  Collection<int, OperatingHourRule>  $rules  Rules covering this date.
+     * @return array{closed: string|null, window: array{start: Carbon, end: Carbon}|null, blocked: list<array{start: Carbon, end: Carbon, reason: string}>, special: string|null}
+     */
+    private function resolveDay(string $date, Collection $rules): array
+    {
+        $closed = $rules->firstWhere('type', OperatingHourRule::TYPE_CLOSED);
+
+        if ($closed) {
+            return ['closed' => $closed->reason, 'window' => null, 'blocked' => [], 'special' => null];
+        }
+
+        $special = $rules->where('type', OperatingHourRule::TYPE_SPECIAL_HOURS)->last();
+        $defaults = $this->defaultHours();
+        $window = $special
+            ? $this->openWindow($date, (string) $special->start_time, (string) $special->end_time)
+            : $this->openWindow($date, $defaults['opens_at'], $defaults['closes_at']);
+
+        $blocked = $rules->where('type', OperatingHourRule::TYPE_PARTIAL_CLOSURE)
+            ->map(fn (OperatingHourRule $rule) => [...$this->openWindow($date, (string) $rule->start_time, (string) $rule->end_time), 'reason' => $rule->reason])
+            ->sortBy(fn (array $interval) => $interval['start']->getTimestamp())
+            ->values()
+            ->all();
+
+        return ['closed' => null, 'window' => $window, 'blocked' => $blocked, 'special' => $special?->reason];
+    }
+
+    /**
+     * An interval on one business date; a closing time at or before the opening time (such as 00:00) ends the next day.
+     *
+     * @return array{start: Carbon, end: Carbon}
+     */
+    private function openWindow(string $date, string $opensAt, string $closesAt): array
+    {
+        $timezone = (string) config('casa.business_hours.timezone', config('app.timezone'));
+        $start = Carbon::createFromFormat('!Y-m-d H:i', $date.' '.substr($opensAt, 0, 5), $timezone);
+        $end = Carbon::createFromFormat('!Y-m-d H:i', $date.' '.substr($closesAt, 0, 5), $timezone);
+
+        if ($end->lte($start)) {
+            $end->addDay();
+        }
+
+        return ['start' => $start, 'end' => $end];
+    }
+
+    /** @return array{opens_at: string, closes_at: string} */
+    private function defaultHours(): array
+    {
+        if ($this->defaultHours === null) {
+            $settings = ApplicationSetting::current();
+            $this->defaultHours = ['opens_at' => $settings->opensAt(), 'closes_at' => $settings->closesAt()];
+        }
+
+        return $this->defaultHours;
+    }
+
+    private function businessDate(CarbonInterface $day): string
+    {
+        return Carbon::parse($day, (string) config('casa.business_hours.timezone', config('app.timezone')))->toDateString();
     }
 
     /**
