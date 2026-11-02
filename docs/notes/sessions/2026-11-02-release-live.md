@@ -46,6 +46,6 @@ Deploy everything built since the 20261101 release (`fc8ec25`) to https://casapa
 
 - [ ] Repoint the hPanel cron to `casa-paraiso-redesign-20261102/artisan schedule:run` and remove the 20261101 job.
 - [ ] Check the attendance camera prompt on a phone as a therapist (allow, block, Retry).
-- [ ] Delete the uploaded ZIP and checksum in `.casa-deploy-20261102/` and the old `casa-paraiso-hostinger-20261026-044221-be8a29.zip`.
+- [x] Delete the uploaded ZIP and checksum in `.casa-deploy-20261102/` and the old `casa-paraiso-hostinger-20261026-044221-be8a29.zip`. Done with the owner's approval; `RELEASE.json` is kept beside the dump as `RELEASE-20261102.json`, and the domain directory has no ZIPs left.
 - [ ] Revoke the `casa-paraiso-deploy-20261026` and `casa-paraiso-deploy-20261101` SSH keys in hPanel once host work is finished.
 - Rollback if needed: from the domain directory, `ln -s "$PWD/casa-paraiso-redesign-20261101/public" public_html.new && mv -T public_html.new public_html`, then repoint the cron.
