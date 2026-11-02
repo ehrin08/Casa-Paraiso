@@ -17,7 +17,11 @@ class WebAttendanceTest extends TestCase
         $this->actingAs($staff->user)
             ->get(route('staff.attendance.show'))
             ->assertOk()
-            ->assertHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+            ->assertHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()')
+            ->assertSee('data-modal-name="attendance-camera-permission"', false)
+            ->assertSee('Allow camera access')
+            ->assertSee('Camera is blocked for Casa Paraiso')
+            ->assertSee('x-on:click="openScanner"', false);
         $this->actingAs($staff->user)->get(route('admin.attendance.index'))->assertForbidden();
         $this->actingAs($receptionist)->get(route('reception.attendance.station'))->assertOk();
         $this->actingAs($receptionist)->getJson('/attendance-station/pending')->assertNotFound();
