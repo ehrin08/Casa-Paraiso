@@ -43,6 +43,6 @@ Put the customer double-booking fix (`c34ec53`) live on https://casaparaiso.site
 ## Follow-ups
 
 - [ ] Repoint the hPanel cron to `casa-paraiso-redesign-20261102b/artisan schedule:run` and remove the older jobs.
-- [ ] Delete the uploaded ZIP and checksum in `.casa-deploy-20261102b/` (needs the owner's approval).
+- [x] Delete the uploaded ZIP and checksum in `.casa-deploy-20261102b/`. Done with the owner's approval; `RELEASE-20261102b.json` is kept, and the domain directory has no ZIPs left.
 - [ ] Revoke the deploy SSH keys in hPanel once host work is finished.
 - Rollback if needed: from the domain directory, `ln -s "$PWD/casa-paraiso-redesign-20261102/public" public_html.new && mv -T public_html.new public_html`, then repoint the cron.
