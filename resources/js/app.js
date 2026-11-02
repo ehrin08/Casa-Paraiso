@@ -2,7 +2,7 @@ import './bootstrap';
 import { initializeBookingNotifications } from './booking-notifications';
 import { initializeWorkspaceDrawer } from './workspace-drawer';
 import { initializeScrollHeaders } from './scroll-header';
-import { manilaDateKey, mondayOf, manilaTime, positionWeekEvents, therapistColor } from './calendar-week';
+import { manilaDateKey, mondayOf, manilaTime, positionWeekEvents, therapistColor, weekEventSize } from './calendar-week';
 import { createOperationsBooking, createCustomerBooking } from './appointment-booking';
 import { isBookingPanelUrl, isAppointmentPreviewUrl, visibleDialogControls, trapBookingFocus } from './booking-dialog';
 import { isCustomerModalUrl, restoreCustomerDetail, clearCustomerDetailRecovery } from './customer-dialog';
@@ -377,7 +377,7 @@ window.operationalCalendar = (config) => ({
     },
 
     weekEventClass(event) {
-        return `casa-week-event-tone-${therapistColor(event.resource_id)}`;
+        return `casa-week-event-tone-${therapistColor(event.resource_id)} ${weekEventSize(event)}`.trim();
     },
 
     weekEventTime(event) {
