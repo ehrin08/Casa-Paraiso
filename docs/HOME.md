@@ -50,6 +50,7 @@ Notes about the client kept apart from project scope. They are not requirements 
 
 ## Manuscript
 
+- [Temporary Revisions checklist](manuscript/2026-11-02-temporary-revisions-checklist.md): what still needs revising in the tab, including test-label contradictions, NLP figure and table, pending UAT wording, and comment follow-ups; doc unchanged (2026-11-02).
 - [Chapter-only manuscript revision](manuscript/2026-11-02-chapter-revision-summary.md): delivered Chapter I–V changes, preservation checks and remaining issues (2026-11-02).
 - [Manuscript finished-paper comparison](manuscript/2026-11-02-reference-review.md): separate structure, presentation and evidence review against the supplied reference; neither manuscript changed (2026-11-02).
 
