@@ -2,6 +2,11 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-02: [Short task report rule](sessions/2026-11-02-task-report-rule.md)
+- 2026-11-02: [Manuscript alignment with the latest local implementation](sessions/2026-11-02-manuscript-latest-alignment.md)
+- 2026-11-02: [Weekly schedule booking text overlap](sessions/2026-11-02-week-event-overlap.md)
+- 2026-11-02: [Gemini and current-system manuscript revision](sessions/2026-11-02-gemini-manuscript-revision.md)
+- 2026-11-02: [Live updates without reloading (Task 9)](sessions/2026-11-02-live-updates.md)
 - 2026-11-02: [Pending tasks check](sessions/2026-11-02-pending-tasks-check.md)
 - 2026-11-01: [Realtime updates task recorded (Task 9)](sessions/2026-11-01-realtime-updates-task.md)
 - 2026-11-01: [Tracker update after the 20261101 release](sessions/2026-11-01-tracker-update.md)
