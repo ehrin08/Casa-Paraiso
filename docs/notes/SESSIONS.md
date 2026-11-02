@@ -2,6 +2,8 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-02: [Manuscript reference comparison](sessions/2026-11-02-manuscript-reference-review.md)
+- 2026-11-02: [20261102 release live](sessions/2026-11-02-release-live.md)
 - 2026-11-02: [Production readiness check](sessions/2026-11-02-production-readiness-check.md)
 - 2026-11-02: [Pending tasks list](sessions/2026-11-02-pending-tasks-list.md)
 - 2026-11-02: [Attendance camera permission prompt](sessions/2026-11-02-attendance-camera-permission-prompt.md)
