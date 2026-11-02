@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-02: [Pending tasks check](sessions/2026-11-02-pending-tasks-check.md)
 - 2026-11-01: [Realtime updates task recorded (Task 9)](sessions/2026-11-01-realtime-updates-task.md)
 - 2026-11-01: [Tracker update after the 20261101 release](sessions/2026-11-01-tracker-update.md)
 - 2026-11-01: [20261101 release live](sessions/2026-11-01-release-live.md)
