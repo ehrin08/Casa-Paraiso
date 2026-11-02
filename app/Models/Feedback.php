@@ -54,15 +54,23 @@ class Feedback extends Model
     }
 
     /**
-     * The name a therapist may see; anonymous feedback hides the customer from staff only.
+     * The name any staff member may see; anonymous feedback hides the customer from everyone.
      */
-    public function staffDisplayName(): string
+    public function displayName(): string
     {
         if ($this->is_anonymous) {
             return __('Anonymous customer');
         }
 
         return $this->customerProfile?->display_name ?? __('Customer');
+    }
+
+    /**
+     * Feedback that may be shown against the customer who wrote it.
+     */
+    public function scopeIdentified($query)
+    {
+        return $query->where('feedback.is_anonymous', false);
     }
 
     public function customerProfile()

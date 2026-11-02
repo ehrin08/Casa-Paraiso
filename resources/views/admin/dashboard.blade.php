@@ -104,7 +104,7 @@
                             <x-status-badge :tone="$sentimentTone">{{ $latestFeedback->sentiment_label ? __(ucfirst($latestFeedback->sentiment_label)) : __('Not classified') }}</x-status-badge>
                             <p class="casa-dashboard-quote">{{ filled($latestFeedback->comment) ? \Illuminate\Support\Str::limit($latestFeedback->comment, 220) : __('No written comment provided.') }}</p>
                             <div class="flex flex-wrap items-center justify-between gap-x-3">
-                                <p class="min-w-0 break-words text-sm text-casa-muted">{{ $latestFeedback->customerProfile?->display_name ?? __('Customer') }}</p>
+                                <p class="min-w-0 break-words text-sm text-casa-muted">{{ $latestFeedback->displayName() }}</p>
                                 <a href="{{ route('admin.feedback.show', $latestFeedback) }}" class="casa-dashboard-link">{{ __('Read feedback') }} <span aria-hidden="true">→</span></a>
                             </div>
                         </div>

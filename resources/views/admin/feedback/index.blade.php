@@ -178,14 +178,15 @@
                         @foreach ($feedback as $item)
                             @php
                                 $customer = $item->customerProfile;
-                                $contact = $customer?->display_email ?: ($customer?->is_guest ? $customer->display_phone : null);
+                                $contact = $item->is_anonymous ? null : ($customer?->display_email ?: ($customer?->is_guest ? $customer->display_phone : null));
+                                $customerName = $item->is_anonymous ? $item->displayName() : ($customer?->display_name ?: __('Customer unavailable'));
                                 $submitted = $item->submitted_at?->timezone('Asia/Manila');
                                 $comment = trim((string) $item->comment);
                             @endphp
                             <tr>
                                 <td class="feedback-customer">
-                                    <a href="{{ route('admin.feedback.show', $item) }}" aria-label="{{ __('View feedback from :customer', ['customer' => $customer?->display_name ?: __('Customer unavailable')]) }}">{{ $customer?->display_name ?: __('Customer unavailable') }}</a>
-                                    @if ($item->is_anonymous)<x-status-badge class="mt-1" title="{{ __('The customer hid their name from the therapist.') }}">{{ __('Anonymous') }}</x-status-badge>@endif
+                                    <a href="{{ route('admin.feedback.show', $item) }}" aria-label="{{ __('View feedback from :customer', ['customer' => $customerName]) }}">{{ $customerName }}</a>
+                                    @if ($item->is_anonymous)<x-status-badge class="mt-1" title="{{ __('The customer chose to stay anonymous.') }}">{{ __('Anonymous') }}</x-status-badge>@endif
                                     @if (filled($contact))<p>{{ $contact }}</p>@endif
                                 </td>
                                 <td class="feedback-service">{{ $item->service?->name ?: __('Unassigned service') }}</td>
