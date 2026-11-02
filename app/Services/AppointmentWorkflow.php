@@ -127,6 +127,26 @@ class AppointmentWorkflow
     }
 
     /**
+     * A customer can attend only one confirmed treatment at a time, whichever therapist is assigned.
+     */
+    public function hasCustomerOverlap(
+        int $customerProfileId,
+        CarbonInterface $start,
+        CarbonInterface $end,
+        ?Appointment $ignoreAppointment = null,
+        bool $lock = false,
+    ): bool {
+        $query = Appointment::query()
+            ->where('customer_profile_id', $customerProfileId)
+            ->where('status', Appointment::STATUS_CONFIRMED)
+            ->when($ignoreAppointment, fn ($query) => $query->whereKeyNot($ignoreAppointment->getKey()))
+            ->where('scheduled_start_at', '<', $end)
+            ->where('scheduled_end_at', '>', $start);
+
+        return $lock ? $query->lockForUpdate()->first(['id']) !== null : $query->exists();
+    }
+
+    /**
      * Atomically assign and confirm a customer-selected slot.
      *
      * @param  array<string, mixed>  $attributes
@@ -160,6 +180,13 @@ class AppointmentWorkflow
                 $this->addons->assertDoesNotDuplicateVoucher($paidAddons, $voucher);
                 $scheduleAddonCodes = [...$addonCodes, ...($voucher?->addon_code ? [$voucher->addon_code] : [])];
                 $this->assertBookableStart($start, $service, 'requested_start_at', true, $scheduleAddonCodes, $minimumLeadTimeMinutes);
+                $end = $this->scheduledEnd($start, $service, $scheduleAddonCodes);
+
+                if ($this->hasCustomerOverlap((int) $attributes['customer_profile_id'], $start, $end, null, true)) {
+                    throw ValidationException::withMessages([
+                        'requested_start_at' => __('You already have an appointment that overlaps this time. Choose another time.'),
+                    ]);
+                }
 
                 $candidateIds = StaffProfile::query()
                     ->where('is_bookable', true)
@@ -204,7 +231,6 @@ class AppointmentWorkflow
                     ]);
                 }
 
-                $end = $this->scheduledEnd($start, $service, $scheduleAddonCodes);
                 $appointment = new Appointment;
                 $appointment->fill([
                     ...$attributes,
@@ -333,6 +359,17 @@ class AppointmentWorkflow
             $scheduleAddonCodes = [...$addonCodes, ...($voucherCode ? [$voucherCode] : [])];
             $this->assertBookableStart($start, $service, 'scheduled_start_at', true, $scheduleAddonCodes);
             $end = $this->scheduledEnd($start, $service, $scheduleAddonCodes);
+
+            if ($target->customer_profile_id) {
+                // Serializes concurrent staff bookings for the same customer before the overlap check.
+                CustomerProfile::query()->lockForUpdate()->findOrFail((int) $target->customer_profile_id);
+
+                if ($this->hasCustomerOverlap((int) $target->customer_profile_id, $start, $end, $target->exists ? $target : null, true)) {
+                    throw ValidationException::withMessages([
+                        'scheduled_start_at' => __('This customer already has an appointment that overlaps this time.'),
+                    ]);
+                }
+            }
 
             if (! $this->isStaffAvailable($lockedStaff, $service, $start, $end, $target->exists ? $target : null, [], $this->scheduleWindows->freshForTransaction())) {
                 throw ValidationException::withMessages([

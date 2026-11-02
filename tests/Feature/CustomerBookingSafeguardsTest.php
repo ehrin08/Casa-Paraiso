@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\StaffWeeklySchedule;
 use App\Models\User;
+use App\Services\AppointmentWorkflow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
@@ -104,6 +105,69 @@ class CustomerBookingSafeguardsTest extends TestCase
             ->assertSessionDoesntHaveErrors();
 
         $this->assertTrue(Appointment::query()->where('staff_profile_id', $therapist->id)->exists());
+    }
+
+    public function test_customer_cannot_book_an_overlapping_slot_with_another_therapist(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        $existing = $this->selfBooking($customer, $start->copy()->subMinutes(30));
+
+        $this->actingAs($customer->user)
+            ->post(route('customer.appointments.store', absolute: false), $this->payload($service, $therapist, $start))
+            ->assertSessionHasErrors('requested_start_at');
+
+        $this->assertSame(1, Appointment::query()->count());
+        $this->assertNotSame($therapist->id, $existing->staff_profile_id);
+        $this->assertStringContainsString('overlaps this time', session('errors')->first('requested_start_at'));
+    }
+
+    public function test_back_to_back_and_cancelled_bookings_do_not_block_the_customer(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        $this->selfBooking($customer, $start->copy()->subHour());
+        $this->selfBooking($customer, $start->copy())->update(['status' => Appointment::STATUS_CANCELLED]);
+
+        $this->actingAs($customer->user)
+            ->post(route('customer.appointments.store', absolute: false), $this->payload($service, $therapist, $start))
+            ->assertSessionDoesntHaveErrors();
+
+        $this->assertTrue(Appointment::query()->where('staff_profile_id', $therapist->id)->exists());
+    }
+
+    public function test_staff_cannot_book_an_overlapping_appointment_for_the_same_customer(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        Appointment::factory()->for($customer)->create([
+            'scheduled_start_at' => $start,
+            'requested_start_at' => $start,
+            'scheduled_end_at' => $start->copy()->addHour(),
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.appointments.store', absolute: false), [
+                'customer_profile_id' => $customer->id,
+                'service_id' => $service->id,
+                'staff_profile_id' => $therapist->id,
+                'scheduled_start_at' => $start->copy()->addMinutes(30)->toDateTimeString(),
+                'status' => Appointment::STATUS_CONFIRMED,
+            ])
+            ->assertSessionHasErrors('scheduled_start_at');
+
+        $this->assertFalse(Appointment::query()->where('staff_profile_id', $therapist->id)->exists());
+    }
+
+    public function test_rescheduling_does_not_conflict_with_the_appointment_itself(): void
+    {
+        [$customer, $service, $therapist, $start] = $this->bookingFixture();
+        $appointment = Appointment::factory()->for($customer)->for($service)->for($therapist)->create([
+            'scheduled_start_at' => $start,
+            'requested_start_at' => $start,
+            'scheduled_end_at' => $start->copy()->addHour(),
+        ]);
+
+        app(AppointmentWorkflow::class)->schedule($appointment, $therapist, $service, $start->copy()->addMinutes(30));
+
+        $this->assertTrue($appointment->fresh()->scheduled_start_at->equalTo($start->copy()->addMinutes(30)));
     }
 
     public function test_booking_page_shows_notice_instead_of_form_when_restricted(): void
