@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-02: [Customer double-booking guard](sessions/2026-11-02-customer-overlap-guard.md)
 - 2026-11-02: [Temporary Revisions checklist](sessions/2026-11-02-temporary-revisions-checklist.md)
 - 2026-11-02: [Uncommitted docs tidy-up](sessions/2026-11-02-uncommitted-docs-tidy.md)
 - 2026-11-02: [UAT form formal wording](sessions/2026-11-02-uat-form-formal-wording.md)
