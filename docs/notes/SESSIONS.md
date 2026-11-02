@@ -2,6 +2,9 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-02: [Uncommitted docs tidy-up](sessions/2026-11-02-uncommitted-docs-tidy.md)
+- 2026-11-02: [UAT form formal wording](sessions/2026-11-02-uat-form-formal-wording.md)
+- 2026-11-02: [Chapter-only manuscript revision](sessions/2026-11-02-chapter-only-manuscript-revision.md)
 - 2026-11-02: [Manuscript reference comparison](sessions/2026-11-02-manuscript-reference-review.md)
 - 2026-11-02: [20261102 release live](sessions/2026-11-02-release-live.md)
 - 2026-11-02: [Production readiness check](sessions/2026-11-02-production-readiness-check.md)

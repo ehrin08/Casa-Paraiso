@@ -48,9 +48,17 @@ Notes about the client kept apart from project scope. They are not requirements 
 - [Facebook Photo Library](client/FACEBOOK_PHOTO_LIBRARY.md): eight selected business images, source links, dimensions, and a visual contact sheet (2026-11-01).
 - [Client Facebook Page Review](client/FACEBOOK_PAGE_REVIEW.md): the client's public page checked against the app (2026-11-01).
 
+## Manuscript
+
+- [Chapter-only manuscript revision](manuscript/2026-11-02-chapter-revision-summary.md): delivered Chapter I–V changes, preservation checks and remaining issues (2026-11-02).
+- [Manuscript finished-paper comparison](manuscript/2026-11-02-reference-review.md): separate structure, presentation and evidence review against the supplied reference; neither manuscript changed (2026-11-02).
+
 ## Session Notes
 
 - [Session Index](notes/SESSIONS.md): per-task logs, newest first. Read the latest entries before starting a task.
+- [UAT form formal wording](notes/sessions/2026-11-02-uat-form-formal-wording.md): plain, formal participant wording, §3.6.4 rating scale, participant code removed; form still unpublished (2026-11-02).
+- [Chapter-only manuscript revision](notes/sessions/2026-11-02-chapter-only-manuscript-revision.md): Chapters I–V restructured in Temporary Revisions with excluded content preserved (2026-11-02).
+- [Manuscript reference comparison](notes/sessions/2026-11-02-manuscript-reference-review.md): finished-paper review against the supplied reference (2026-11-02).
 - [Legacy manuscript comment cleanup](notes/sessions/2026-11-02-legacy-comment-cleanup.md): removed 37 approved threads, preserved 25 threads and all seven tabs (2026-11-02).
 - [Latest implementation manuscript alignment](notes/sessions/2026-11-02-manuscript-latest-alignment.md): Gemini-only editable text, configurable hours, background updates, and evidence alignment checklist (2026-11-02).
 - [Gemini and current-system manuscript revision](notes/sessions/2026-11-02-gemini-manuscript-revision.md): approved updates to the manuscript's Temporary Revisions tab (2026-11-02).
