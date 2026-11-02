@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-import { manilaDateKey, mondayOf, manilaTime, minutesInManila, positionWeekEvents, therapistColor } from '../../resources/js/calendar-week.js';
+import { manilaDateKey, mondayOf, manilaTime, minutesInManila, positionWeekEvents, therapistColor, weekEventSize } from '../../resources/js/calendar-week.js';
 
 const day = '2026-10-01';
 const event = (id, start, end, extra = {}) => ({
@@ -48,6 +48,16 @@ test('half-hour visits and midnight endings retain actual durations and exclude 
     assert.equal(therapistColor('17'), therapistColor(17));
 });
 
+test('half-hour blocks render compact so their lines never overlap', () => {
+    const [short, hour] = positionWeekEvents([
+        event('short', '14:00', '14:30'),
+        event('hour', '16:00', '17:00'),
+    ], day);
+    assert.equal(weekEventSize(short), 'is-compact');
+    assert.equal(weekEventSize(hour), '');
+    assert.match(harness().state.weekEventClass(short), /^casa-week-event-tone-\d is-compact$/);
+});
+
 function harness(config = {}) {
     const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8');
     const calendar = source.slice(source.indexOf('const dateFromIso'), source.indexOf('window.customerAppointmentCalendar'));
@@ -55,7 +65,7 @@ function harness(config = {}) {
     const window = { axios: { get: (url, options) => new Promise((resolve, reject) => requests.push({ url, options, resolve, reject })) } };
     const context = vm.createContext({
         window, Intl, Date, manilaDateKey: (value) => manilaDateKey(value || '2026-10-04T23:00:00+08:00'),
-        mondayOf, manilaTime, positionWeekEvents, therapistColor,
+        mondayOf, manilaTime, positionWeekEvents, therapistColor, weekEventSize,
     });
     vm.runInContext(calendar, context);
     return { state: window.operationalCalendar({ presentation: 'week', initialWeek: '2026-09-28', feedUrl: '/feed', role: 'admin', ...config }), requests };

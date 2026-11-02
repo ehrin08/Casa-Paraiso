@@ -54,11 +54,10 @@
                             <template x-for="slot in timeSlots" x-bind:key="slot.time"><div class="casa-week-slot" x-bind:style="`height:${slotHeight}px`"></div></template>
                             <template x-for="event in weekEvents(day.date)" x-bind:key="event.id">
                                 <a class="casa-week-event" x-bind:class="weekEventClass(event)" x-bind:href="event.detail_url" x-bind:style="eventStyle(event)" x-bind:aria-label="weekEventDescription(event)" x-bind:title="weekEventDescription(event)">
-                                    <span class="block font-semibold" x-text="weekEventTime(event)"></span>
+                                    <span class="casa-week-event-head"><span x-text="weekEventTime(event)"></span><span class="casa-week-event-status" x-text="statusLabel(event.status)"></span></span>
                                     <span class="block font-bold" x-text="event.customer_name || event.title"></span>
-                                    <span class="block" x-text="event.service_name || event.subtitle"></span>
-                                    <span class="block" x-text="event.staff_name || resourceName(event.resource_id)"></span>
-                                    <span class="casa-week-event-status" x-text="statusLabel(event.status)"></span>
+                                    <span class="casa-week-event-detail" x-text="event.service_name || event.subtitle"></span>
+                                    <span class="casa-week-event-detail" x-text="event.staff_name || resourceName(event.resource_id)"></span>
                                 </a>
                             </template>
                         </div>

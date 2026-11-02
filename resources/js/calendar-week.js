@@ -29,6 +29,11 @@ export function minutesInManila(value, day) {
     return offset * 1440 + part('hour') * 60 + part('minute');
 }
 
+export function weekEventSize(event) {
+    // A half-hour block is two lines tall: keep the time, status and customer only.
+    return event.endMinutes - event.startMinutes <= 30 ? 'is-compact' : '';
+}
+
 export function therapistColor(id) {
     // Stable even when the therapist filter changes the resource collection.
     return [...String(id)].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 0) % 5;
