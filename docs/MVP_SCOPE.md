@@ -38,7 +38,7 @@ Users authenticate with either a verified Google account or a verified email and
   - AURORA BREEZE: PHP 849.00, 2 hours.
 - Add-ons are shared, admin-editable catalog records. Customers, Admins, and Receptionists may select multiple active add-ons during booking; duration-bearing add-ons extend the reservation.
 - An eligible RFM voucher grants one separate complimentary add-on. It does not discount or replace paid add-ons, and the same add-on cannot be selected both as paid and voucher-based.
-- Business hours are shown as open every day from 1:00 PM to 11:00 PM (changed from midnight on 2026-11-01 to match the client). The full treatment must finish by 11:00 PM. Admins can close whole dates, such as holidays.
+- Default business hours are 1:00 PM to 11:00 PM every day (changed from midnight on 2026-11-01 to match the client). Since 2026-11-02 admins change them on the Operating hours page and add dated changes: close a day or a date range, set special hours, or close part of a day, each for one day, until a date, or until further notice. The full treatment must finish by closing time.
 - Admin can manage therapist profiles and therapist availability. Therapist profiles retain the internal `staff` role and use `staff_type = therapist`.
 - Therapist availability should be simple enough for non-technical staff to maintain.
 

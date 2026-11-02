@@ -69,7 +69,8 @@ class AppointmentAvailability
             ->get()
             ->groupBy('staff_profile_id');
 
-        $closedDates = $this->scheduleWindows->closedReasonsBetween($monthStart, $monthEnd);
+        $hours = $this->scheduleWindows->hoursBetween($monthStart, $monthEnd);
+        $closedDates = array_map(fn (array $day) => $day['closed'], array_filter($hours, fn (array $day) => $day['closed'] !== null));
 
         for ($day = $monthStart->copy(); $day->lte($monthEnd); $day->addDay()) {
             // Closed dates are not store dates at all, so the calendar shows them as closed, not empty.
@@ -77,7 +78,7 @@ class AppointmentAvailability
                 continue;
             }
 
-            $business = $this->scheduleWindows->businessWindow($day);
+            $business = $hours[$day->toDateString()]['window'];
             $storeSlots = $this->slotsForDate($staffProfiles, $confirmedByStaff, $day, $durationMinutes, $bookingCutoff);
             $storeDates[$day->toDateString()] = [
                 'opens_at' => $business['start']->toDateTimeString(),
@@ -140,6 +141,10 @@ class AppointmentAvailability
     ): array {
         $slots = [];
         $business = $this->scheduleWindows->businessWindow($day);
+
+        if ($business === null) {
+            return [];
+        }
 
         // Resolve each therapist's windows once per date. Previously this happened
         // for every 30-minute slot, repeatedly querying dated roster coverage.

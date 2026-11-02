@@ -126,13 +126,13 @@
             </div>
         </div>
 
-        <section class="settings-card settings-team-card" aria-labelledby="closed-dates-heading" data-settings-closed-dates-link>
+        <section class="settings-card settings-team-card" aria-labelledby="operating-hours-heading" data-settings-operating-hours-link>
             <span class="settings-icon-circle"><x-nav-icon name="calendar" /></span>
             <div>
-                <h2 id="closed-dates-heading">{{ __('Closed dates') }}</h2>
-                <p class="settings-description">{{ __('Close the spa for holidays or other whole days. No one can book on a closed date.') }}</p>
+                <h2 id="operating-hours-heading">{{ __('Operating hours') }}</h2>
+                <p class="settings-description">{{ __('Set the default hours (now :hours), close dates or date ranges, set special hours, or close part of a day, with or without an end date.', ['hours' => $settings->hoursLabel()]) }}</p>
             </div>
-            <a href="{{ route('admin.closed-dates.index') }}" class="casa-button-secondary">{{ __('Manage closed dates') }}</a>
+            <a href="{{ route('admin.operating-hours.index') }}" class="casa-button-secondary">{{ __('Manage operating hours') }}</a>
         </section>
 
         <section class="settings-card settings-team-card" aria-labelledby="organization-chart-heading" data-settings-team-link>
@@ -147,7 +147,7 @@
         <details class="settings-card settings-disclosure settings-operating-details">
             <summary>{{ __('Operating rules and user access') }}</summary>
             <x-stat-strip :items="[
-                ['label' => __('Hours'), 'value' => config('casa.business_hours.window'), 'meta' => config('casa.business_hours.summary'), 'tone' => 'brown'],
+                ['label' => __('Hours'), 'value' => $settings->hoursLabel(), 'meta' => __('Default hours'), 'tone' => 'brown'],
                 ['label' => __('Timezone'), 'value' => config('casa.business_hours.timezone'), 'meta' => __('Calendar authority'), 'tone' => 'dark'],
                 ['label' => __('Booking intervals'), 'value' => config('casa.business_hours.slot_interval_minutes').' '.__('minutes'), 'meta' => __('Confirmed immediately'), 'tone' => 'green'],
                 ['label' => __('Therapist rate'), 'value' => number_format((float) config('casa.commissions.therapist_rate') * 100, 0).'%', 'meta' => __('Snapshotted per earning'), 'tone' => 'gold'],

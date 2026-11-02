@@ -88,7 +88,7 @@ class RosterShiftRules
      */
     private function withinShiftHours(array $interval): bool
     {
-        $opening = $this->windows->businessWindow($interval['start'])['start'];
+        $opening = $this->windows->defaultBusinessWindow($interval['start'])['start'];
 
         return $interval['start']->gte($opening) && $interval['end']->lte($opening->copy()->startOfDay()->addDay());
     }

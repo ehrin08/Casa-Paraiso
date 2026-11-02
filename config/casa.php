@@ -30,11 +30,10 @@ return [
     ],
     'business_hours' => [
         'summary' => 'Open every day',
-        'window' => '1:00 PM to 11:00 PM',
         'timezone' => 'Asia/Manila',
+        // Fallback defaults only; admins change the hours and dated rules on the Operating hours page.
         'opens_at' => '13:00',
         'closes_at' => '23:00',
-        'closes_next_day' => false,
         'slot_interval_minutes' => 30,
         'customer_booking_lead_time_minutes' => 30,
     ],

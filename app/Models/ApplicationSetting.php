@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\ApplicationSettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 
 class ApplicationSetting extends Model
@@ -29,6 +30,9 @@ class ApplicationSetting extends Model
         'gift_voucher_denominations',
         'gift_voucher_default_expiry_months',
         'gift_voucher_combinable',
+        // Default opening and closing times; dated changes live in operating_hour_rules.
+        'opens_at',
+        'closes_at',
         'updated_by',
     ];
 
@@ -44,7 +48,8 @@ class ApplicationSetting extends Model
     /** @param array<string, mixed> $attributes */
     public static function updateCurrent(array $attributes): self
     {
-        $settings = self::query()->first() ?? new self;
+        // A first save from a single form (such as the default hours) still needs the other required columns.
+        $settings = self::query()->first() ?? new self(self::defaults());
 
         if (! $settings->exists) {
             $settings->setAttribute($settings->getKeyName(), 1);
@@ -80,6 +85,8 @@ class ApplicationSetting extends Model
             'gift_voucher_denominations' => [300, 500, 1000],
             'gift_voucher_default_expiry_months' => 6,
             'gift_voucher_combinable' => false,
+            'opens_at' => config('casa.business_hours.opens_at', '13:00'),
+            'closes_at' => config('casa.business_hours.closes_at', '23:00'),
             'updated_by' => null,
         ];
     }
@@ -102,6 +109,33 @@ class ApplicationSetting extends Model
         sort($values);
 
         return array_values(array_map('intval', $values));
+    }
+
+    /** Default opening time as H:i. */
+    public function opensAt(): string
+    {
+        return substr((string) ($this->opens_at ?: config('casa.business_hours.opens_at', '13:00')), 0, 5);
+    }
+
+    /** Default closing time as H:i; 00:00 means midnight. */
+    public function closesAt(): string
+    {
+        return substr((string) ($this->closes_at ?: config('casa.business_hours.closes_at', '23:00')), 0, 5);
+    }
+
+    public function hoursLabel(): string
+    {
+        return self::hoursRangeLabel($this->opensAt(), $this->closesAt());
+    }
+
+    public static function timeLabel(string $time): string
+    {
+        return substr($time, 0, 5) === '00:00' ? __('12:00 midnight') : Carbon::createFromFormat('H:i', substr($time, 0, 5))->format('g:i A');
+    }
+
+    public static function hoursRangeLabel(string $opensAt, string $closesAt): string
+    {
+        return __(':opens to :closes', ['opens' => self::timeLabel($opensAt), 'closes' => self::timeLabel($closesAt)]);
     }
 
     public function updatedBy()
