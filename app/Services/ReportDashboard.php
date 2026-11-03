@@ -127,7 +127,7 @@ class ReportDashboard
     private function rfm(ReportDateRange $range): array
     {
         $cutoff = $range->cutoff();
-        $history = Transaction::query()->where('payment_status', Transaction::PAYMENT_PAID)->whereNotNull('paid_at')
+        $history = Transaction::query()->excludingImportWalkIn()->where('payment_status', Transaction::PAYMENT_PAID)->whereNotNull('paid_at')
             ->where('paid_at', '<=', $cutoff)
             ->whereHas('appointment', fn (Builder $query) => $query->where('status', Appointment::STATUS_COMPLETED)
                 ->whereRaw('COALESCE(scheduled_start_at, requested_start_at) <= ?', [$cutoff]))
@@ -137,7 +137,7 @@ class ReportDashboard
         $population = $history->get()->mapWithKeys(fn ($row) => [(int) $row->customer_profile_id => $this->scorer->metrics($row->last_paid, (int) $row->frequency, (float) $row->monetary, $cutoff)]);
         $scores = $this->scorer->scoreAll($population);
         $segments = $this->rules->rules();
-        $customerIds = CustomerProfile::withTrashed()->where('customer_profiles.created_at', '<=', $cutoff)->pluck('id');
+        $customerIds = CustomerProfile::withTrashed()->excludingImportWalkIn()->where('customer_profiles.created_at', '<=', $cutoff)->pluck('id');
         $groups = [];
         foreach ($customerIds as $customerId) {
             $key = isset($scores[$customerId]) ? ($this->rules->match($scores[$customerId], $segments)?->id ?? 'unassigned') : 'unassigned';

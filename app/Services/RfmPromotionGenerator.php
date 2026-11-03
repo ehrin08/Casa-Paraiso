@@ -42,7 +42,7 @@ class RfmPromotionGenerator
                 return $existing;
             }
 
-            if ($this->hasActiveEntitlement($customer)) {
+            if ($customer->is_import_walk_in || $this->hasActiveEntitlement($customer)) {
                 return null;
             }
 

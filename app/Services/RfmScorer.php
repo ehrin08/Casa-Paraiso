@@ -28,6 +28,7 @@ class RfmScorer
         $asOf ??= now();
 
         return Transaction::query()
+            ->excludingImportWalkIn()
             ->where('payment_status', Transaction::PAYMENT_PAID)
             ->whereNotNull('paid_at')
             ->where('paid_at', '<=', $asOf)

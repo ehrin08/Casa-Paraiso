@@ -10,6 +10,7 @@
                 <x-payment-icon name="plus" />
                 {{ __('Record payment') }}
             </a>
+            <a href="{{ route('admin.transactions.import.create') }}" class="casa-button-secondary">{{ __('Import CSV') }}</a>
             <x-export-menu route="admin.transactions.export" :query="$exportFilters" :subject="__('payments')" />
         </div>
     </x-slot>
