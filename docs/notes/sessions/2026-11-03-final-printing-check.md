@@ -42,6 +42,8 @@ Edits made, all through the Docs connector with the revision locked, except the 
 
 Text was extracted from the snapshot with a scratch script. The counts covered the old "24 Passed / Partially verified / Not executed" wording (0), "Abstract" (0), figure captions (1–29), table captions (1–25) and comment and suggestion status.
 
+Print-readiness re-read (after the push): no text changed since the refresh, no pending suggestions, and no placeholders. The §1.2 "allows" fix and the full Ziuziun DOI are already in. 25 comments remain open, 12 of them Jericho's "draft", "for review" and "need i update" flags. The Figure 24 text still notes that its screenshot shows the old 1 PM–midnight label.
+
 ## Decisions
 
 None. The user had already chosen to leave the SUS selection wording and the "Copy of Temporary Revisions" tab as they are.
