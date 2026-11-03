@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
 use App\Models\Feedback;
+use App\Models\TherapistCommission;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -70,8 +71,22 @@ class ReportDashboard
         $visits = $this->appointments($range)->where('status', Appointment::STATUS_COMPLETED)
             ->selectRaw('COUNT(*) as completed, COUNT(DISTINCT customer_profile_id) as customers')->first();
 
+        // Commission (earnings plus adjustments) is attributed to the paid transactions in range,
+        // so net after commission always describes the same set of payments as revenue.
+        $commissions = TherapistCommission::query()
+            ->selectRaw('transaction_id, SUM(commission_amount) as commission_total')
+            ->groupBy('transaction_id');
+        $money = $this->paid($range)
+            ->leftJoinSub($commissions, 'commission_totals', 'commission_totals.transaction_id', '=', 'transactions.id')
+            ->selectRaw('COALESCE(SUM(transactions.amount), 0) as revenue, COALESCE(SUM(commission_totals.commission_total), 0) as commission')
+            ->first();
+        $revenue = round((float) $money->revenue, 2);
+        $commission = round((float) $money->commission, 2);
+
         return [
-            'revenue' => (float) $this->paid($range)->sum('amount'),
+            'revenue' => $revenue,
+            'commission' => $commission,
+            'net' => round($revenue - $commission, 2),
             'completed' => (int) $visits->completed,
             'customers' => (int) $visits->customers,
         ];

@@ -8,6 +8,7 @@ use App\Models\Feedback;
 use App\Models\PromotionSuggestion;
 use App\Models\Service;
 use App\Models\StaffProfile;
+use App\Models\TherapistCommission;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\ReportDashboard;
@@ -211,6 +212,28 @@ class AdminReportsLayoutTest extends TestCase
         $this->assertSame($before, [CustomerProfile::count(), Transaction::count(), PromotionSuggestion::count()]);
     }
 
+    public function test_commission_and_net_cover_the_same_paid_transactions_as_revenue(): void
+    {
+        $earning = $this->commission($this->payment('2026-10-05 14:00:00', 1000), 220, TherapistCommission::STATUS_PAID);
+        $this->commission($earning->transaction, -22, adjusts: $earning);
+        $this->commission($this->payment('2026-10-06 14:00:00', 500), 110);
+        $this->payment('2026-10-07 14:00:00', 300);
+        $this->commission($this->payment('2026-09-30 23:59:59', 2000), 440);
+        $this->commission($this->payment('2026-10-08 14:00:00', 900, Transaction::PAYMENT_REFUNDED), 198);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.reports.index'))->assertOk()
+            ->assertSee('Therapist commission')->assertSee('Net after commission')
+            ->assertSee('data-report-metric="net"', false)->assertSee('₱1,492');
+        $metrics = $response->viewData('dashboard')['metrics'];
+        $this->assertSame(1800.0, $metrics['revenue']['value']);
+        $this->assertSame(308.0, $metrics['commission']['value']);
+        $this->assertSame(1492.0, $metrics['net']['value']);
+        $this->assertSame((1492.0 - 1560.0) / 1560.0 * 100, $metrics['net']['change']);
+
+        $this->get(route('admin.reports.index', ['category' => 'transactions']))->assertOk()->assertSee('data-report-metric="commission"', false);
+        $this->get(route('admin.reports.index', ['category' => 'feedback']))->assertOk()->assertDontSee('data-report-metric="net"', false);
+    }
+
     public function test_long_history_uses_monthly_zero_filled_revenue_buckets(): void
     {
         $this->payment('2026-01-15 14:00:00', 100);
@@ -243,6 +266,20 @@ class AdminReportsLayoutTest extends TestCase
                 $this->get(route('admin.reports.'.$action))->assertForbidden();
             }
         }
+    }
+
+    private function commission(Transaction $transaction, float $amount, string $status = TherapistCommission::STATUS_PENDING, ?TherapistCommission $adjusts = null): TherapistCommission
+    {
+        return TherapistCommission::factory()->create([
+            'staff_profile_id' => $this->staff->id,
+            'appointment_id' => $transaction->appointment_id,
+            'transaction_id' => $transaction->id,
+            'adjusts_commission_id' => $adjusts?->id,
+            'commission_type' => $adjusts ? TherapistCommission::TYPE_ADJUSTMENT : TherapistCommission::TYPE_EARNING,
+            'status' => $status,
+            'basis_amount' => $transaction->amount,
+            'commission_amount' => $amount,
+        ]);
     }
 
     private function customer(string $name): CustomerProfile

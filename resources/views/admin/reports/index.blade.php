@@ -6,11 +6,11 @@
         $labels = ['appointments' => __('Appointments'), 'transactions' => __('Transactions'), 'customers' => __('Customers'), 'promotions' => __('Rewards'), 'feedback' => __('Feedback')];
         $visible = match ($category) {
             'appointments' => ['completed', 'customers', 'appointments'],
-            'transactions' => ['revenue', 'services'],
+            'transactions' => ['revenue', 'commission', 'net', 'services'],
             'customers' => ['customers', 'rfm'],
             'promotions' => ['rfm'],
             'feedback' => ['sentiment'],
-            default => ['revenue', 'completed', 'customers', 'appointments', 'sentiment', 'services', 'rfm'],
+            default => ['revenue', 'commission', 'net', 'completed', 'customers', 'appointments', 'sentiment', 'services', 'rfm'],
         };
         $context = [...$range->query(), 'category' => $category, 'type' => $type];
         $recordFilters = collect($filters)->only(['q', 'status', 'payment_status', 'sentiment_label'])->filter(fn ($value) => filled($value))->count();
@@ -59,14 +59,16 @@
             </form>
             <x-export-menu route="admin.reports.export" :query="$filterQuery" :subject="__(':report report', ['report' => $labels[$type]])" button-class="casa-button-primary" class="reports-export" />
         </section>
-        @if (array_intersect(['revenue', 'completed', 'customers'], $visible))
-            <section class="reports-metrics" data-metric-grid aria-label="{{ __('Selected-period metrics') }}" style="--report-metrics: {{ count(array_intersect(['revenue', 'completed', 'customers'], $visible)) }}">
-                @foreach (['revenue' => ['Total revenue', 'payments'], 'completed' => ['Completed appointments', 'calendar'], 'customers' => ['Unique customers', 'customers']] as $key => [$label, $icon])
+        @php($metricCards = ['revenue' => ['Total revenue', 'payments'], 'commission' => ['Therapist commission', 'team'], 'net' => ['Net after commission', 'insights'], 'completed' => ['Completed appointments', 'calendar'], 'customers' => ['Unique customers', 'customers']])
+        @php($metricCount = count(array_intersect(array_keys($metricCards), $visible)))
+        @if ($metricCount > 0)
+            <section class="reports-metrics {{ $metricCount > 3 ? 'reports-metrics--wide' : '' }}" data-metric-grid aria-label="{{ __('Selected-period metrics') }}" style="--report-metrics: {{ $metricCount }}">
+                @foreach ($metricCards as $key => [$label, $icon])
                     @continue(! in_array($key, $visible, true))
                     @php($metric = $dashboard['metrics'][$key])
                     <article class="reports-metric" data-metric-card data-report-metric="{{ $key }}">
                         <span class="reports-metric-icon"><x-nav-icon :name="$icon" /></span>
-                        <div><h2>{{ __($label) }}</h2><p class="reports-metric-value">{{ $key === 'revenue' ? '₱'.number_format($metric['value'], fmod($metric['value'], 1) === 0.0 ? 0 : 2) : number_format($metric['value']) }}</p>
+                        <div><h2>{{ __($label) }}</h2><p class="reports-metric-value">{{ in_array($key, ['revenue', 'commission', 'net'], true) ? '₱'.number_format($metric['value'], fmod($metric['value'], 1) === 0.0 ? 0 : 2) : number_format($metric['value']) }}</p>
                             @if ($metric['has_previous'])<p class="reports-comparison" data-metric-meta>
                                 @if ($metric['change'] !== null)<span class="reports-change {{ $metric['change'] < 0 ? 'reports-change--down' : '' }}">{{ $metric['change'] > 0 ? '↑ +' : ($metric['change'] < 0 ? '↓ ' : '') }}{{ number_format($metric['change'], 1) }}%</span>@else<span>{{ __('No prior activity') }}</span>@endif
                                 <span>{{ __('vs :period', ['period' => $dashboard['comparison_label']]) }}</span>
