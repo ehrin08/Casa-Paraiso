@@ -2,6 +2,18 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-04: [Commission and net revenue on Reports](sessions/2026-11-04-insights-revenue-commission.md)
+- 2026-11-04: [Demo booking from yesterday](sessions/2026-11-04-demo-yesterday-booking.md)
+- 2026-11-04: [Payments showing on Insights](sessions/2026-11-04-payments-on-insights.md)
+- 2026-11-04: [Employee pay in the manuscript](sessions/2026-11-04-paper-employee-pay.md)
+- 2026-11-04: [Sentiment computation walkthrough](sessions/2026-11-04-sentiment-computation.md)
+- 2026-11-04: [Gemini primary-role confirmation](sessions/2026-11-04-gemini-primary-confirmation.md)
+- 2026-11-04: [Gemini purpose explanation](sessions/2026-11-04-gemini-purpose.md)
+- 2026-11-04: [Gemini usage check](sessions/2026-11-04-gemini-usage-check.md)
+- 2026-11-04: [AI activation conditions review](sessions/2026-11-04-ai-activation-conditions.md)
+- 2026-11-04: [Sentiment classification logic explanation](sessions/2026-11-04-sentiment-classification-logic.md)
+- 2026-11-04: [Sentiment analysis architecture review](sessions/2026-11-04-sentiment-analysis-overview.md)
+- 2026-11-04: [Obsidian vault access check](sessions/2026-11-04-obsidian-vault-access.md)
 - 2026-11-04: [Live data reset and timed import](sessions/2026-11-04-live-data-reset.md)
 - 2026-11-04: [Service-history import release](sessions/2026-11-04-import-release.md)
 - 2026-11-04: [Service-history CSV import](sessions/2026-11-04-service-history-import.md)
