@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-04: [Service-history import release](sessions/2026-11-04-import-release.md)
 - 2026-11-04: [Service-history CSV import](sessions/2026-11-04-service-history-import.md)
 - 2026-11-03: [Final printing check](sessions/2026-11-03-final-printing-check.md)
 - 2026-11-03: [SUS follow-ups](sessions/2026-11-03-sus-followups.md)
