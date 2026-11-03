@@ -51,7 +51,15 @@ Abstract format against `Reference.pdf` (PDF pages 11–12; the reference is a f
   - The reference places the abstract after the Table of Contents and both lists, directly before Chapter 1. Casa places it before the Table of Contents.
   - The reference abstract is one paragraph of about 250 words with no keywords line. Casa's has three paragraphs (312 words) and a Keywords line.
   - The reference's contents also list the front matter (Approval Sheet through Abstract) and put the List of Tables before the List of Figures.
-- No change was made.
+- First pass: no change was made.
+
+Abstract restructured to follow the reference, at the user's request. A collaborator had already removed the Keywords line, and the text was kept word for word:
+
+- Moved the abstract from the front matter (after the Dedication) to just after the section break that restarts page numbering before Chapter I. It is now page 1, and INTRODUCTION is page 3, as in the reference.
+- Merged its three paragraphs into one justified, double-spaced paragraph of 292 words, in Times New Roman 13 pt with a 0.5-inch first-line indent. The centered bold ABSTRACT heading was kept, and the paragraph ends with a page break.
+- Did this as one revision-locked batch: insert before CHAPTER I, then delete the old block.
+- Refreshed the three lists again in the editor. Every page number moved by 2, and References is now page 152. The lists were restyled as before.
+- Checked: only the abstract paragraphs changed in the text diff, and the abstract page shows page number 1.
 
 ## Decisions
 
