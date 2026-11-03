@@ -19,6 +19,7 @@
 .reports-custom-dates p { grid-column: 1 / -1; font-size: 14px; color: var(--color-casa-muted); }
 .reports-custom-dates button { grid-column: 1 / -1; }
 .reports-metrics { display: grid; grid-template-columns: repeat(var(--report-metrics, 3), minmax(0, 1fr)); gap: 12px; }
+.reports-metrics--wide { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 .reports-metric { display: flex; align-items: center; gap: 18px; padding: 16px; }
 .reports-metric-icon { display: grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; background: var(--color-casa-palm-tint); color: var(--color-casa-palm); }
 .reports-metric-icon svg { width: 28px; height: 28px; }
