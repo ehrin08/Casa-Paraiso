@@ -44,6 +44,15 @@ Text was extracted from the snapshot with a scratch script. The counts covered t
 
 Print-readiness re-read (after the push): no text changed since the refresh, no pending suggestions, and no placeholders. The §1.2 "allows" fix and the full Ziuziun DOI are already in. 25 comments remain open, 12 of them Jericho's "draft", "for review" and "need i update" flags. The Figure 24 text still notes that its screenshot shows the old 1 PM–midnight label.
 
+Abstract format against `Reference.pdf` (PDF pages 11–12; the reference is a format guide only):
+
+- **Same as the reference:** a centered bold "ABSTRACT" heading, justified Times New Roman, double spacing, a 0.5-inch first-line indent and the university header.
+- **Different:**
+  - The reference places the abstract after the Table of Contents and both lists, directly before Chapter 1. Casa places it before the Table of Contents.
+  - The reference abstract is one paragraph of about 250 words with no keywords line. Casa's has three paragraphs (312 words) and a Keywords line.
+  - The reference's contents also list the front matter (Approval Sheet through Abstract) and put the List of Tables before the List of Figures.
+- No change was made.
+
 ## Decisions
 
 None. The user had already chosen to leave the SUS selection wording and the "Copy of Temporary Revisions" tab as they are.
