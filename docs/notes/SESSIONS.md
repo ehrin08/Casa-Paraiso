@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-03: [SUS score with the top 10 customers](sessions/2026-11-03-sus-score-top-customers.md)
 - 2026-11-02: [Chapter III diagrams](sessions/2026-11-02-chapter3-diagrams.md)
 - 2026-11-02: [Customer double-booking guard release](sessions/2026-11-02-overlap-guard-release.md)
 - 2026-11-02: [Customer double-booking guard](sessions/2026-11-02-customer-overlap-guard.md)
