@@ -18,6 +18,14 @@ return [
     'commissions' => [
         'therapist_rate' => 0.22,
     ],
+    'imports' => [
+        // Service-history CSV rows without a customer share this guest profile. It is left out of
+        // RFM scoring and rewards so the pooled walk-in visits never rank as one customer.
+        'walk_in_customer_code' => 'IMPORT-WALKIN',
+        'walk_in_customer_name' => 'Walk-in (imported history)',
+        'max_rows' => 2000,
+        'max_kilobytes' => 2048,
+    ],
     'security' => [
         'force_https' => (bool) env('FORCE_HTTPS', false),
         'hsts' => (bool) env('HSTS_ENABLED', false),

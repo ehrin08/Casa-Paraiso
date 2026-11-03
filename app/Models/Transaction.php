@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\TransactionFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -67,6 +68,7 @@ class Transaction extends Model
         'paid_at',
         'recorded_by',
         'notes',
+        'import_reference',
     ];
 
     protected function casts(): array
@@ -79,6 +81,14 @@ class Transaction extends Model
             'amount_due' => 'decimal:2',
             'paid_at' => 'datetime',
         ];
+    }
+
+    /** Leaves out the pooled walk-in profile that imported service history uses. */
+    public function scopeExcludingImportWalkIn(Builder $query): Builder
+    {
+        return $query->whereNotIn($query->qualifyColumn('customer_profile_id'), CustomerProfile::withTrashed()
+            ->select('id')
+            ->where('customer_code', config('casa.imports.walk_in_customer_code')));
     }
 
     public function customerProfile()

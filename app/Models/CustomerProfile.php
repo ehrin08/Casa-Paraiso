@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\CustomerProfileFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -100,6 +100,23 @@ class CustomerProfile extends Model
         return $this->user?->email;
     }
 
+    /** The shared guest profile for imported service history without a named customer. */
+    public static function importWalkIn(): self
+    {
+        $code = (string) config('casa.imports.walk_in_customer_code');
+
+        return self::withTrashed()->firstWhere('customer_code', $code)
+            ?? self::create([
+                'guest_name' => (string) config('casa.imports.walk_in_customer_name'),
+                'customer_code' => $code,
+            ]);
+    }
+
+    public function getIsImportWalkInAttribute(): bool
+    {
+        return $this->customer_code === config('casa.imports.walk_in_customer_code');
+    }
+
     public function getIsGuestAttribute(): bool
     {
         return $this->user_id === null;
@@ -115,6 +132,11 @@ class CustomerProfile extends Model
                 ->where('name', 'like', '%'.$search.'%')
                 ->orWhere('email', 'like', '%'.$search.'%')
                 ->orWhere('phone', 'like', '%'.$search.'%')));
+    }
+
+    public function scopeExcludingImportWalkIn(Builder $query): Builder
+    {
+        return $query->where($query->qualifyColumn('customer_code'), '!=', config('casa.imports.walk_in_customer_code'));
     }
 
     /** Internal, fixed SQL aliases only. */

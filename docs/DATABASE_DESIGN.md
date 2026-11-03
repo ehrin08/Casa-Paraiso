@@ -403,11 +403,13 @@ Key columns:
 - `paid_at` nullable
 - `recorded_by` foreign key to `users.id`
 - `notes` nullable
+- `import_reference` nullable, string(64), unique (since 2026-11-04): the row reference from a service-history CSV import, so a repeated import skips rows already loaded
 - `created_at`, `updated_at`
 
 Indexes:
 
 - Unique index on `transaction_number`
+- Unique index on `import_reference`
 - Index on `customer_profile_id`, `created_at`
 - Index on `appointment_id`
 - Index on `service_id`
