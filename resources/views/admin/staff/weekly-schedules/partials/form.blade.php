@@ -64,7 +64,7 @@
             <p class="casa-section-label">{{ __('Overlap rule') }}</p>
             <h2 class="mt-2 font-display text-xl font-black text-casa-text">{{ __('Split shifts are allowed') }}</h2>
             <p class="mt-3 text-sm leading-6 text-casa-muted">
-                {{ __('Create multiple rows for the same day when shifts do not overlap. Bookable shifts stay within 1:00 PM to 12:00 midnight.') }}
+                {{ __('Create multiple rows for the same day when shifts do not overlap. Shifts may run from 12:00 AM to 12:00 midnight; only time inside operating hours is bookable.') }}
             </p>
         </x-app-card>
 

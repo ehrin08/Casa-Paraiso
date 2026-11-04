@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\ApplicationSetting;
 use App\Models\StaffProfile;
 use App\Models\StaffWeeklySchedule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -44,14 +43,6 @@ class StaffWeeklyScheduleRequest extends FormRequest
                 $startMinutes = $this->minutes((string) $this->input('start_time'));
                 $endsNextDay = $this->boolean('ends_next_day');
                 $endMinutes = $endsNextDay ? 1440 : $this->minutes((string) $this->input('end_time'));
-                $opensAt = ApplicationSetting::current()->opensAt();
-                $openingMinutes = $this->minutes($opensAt);
-
-                if ($startMinutes < $openingMinutes) {
-                    $validator->errors()->add('start_time', __(':subject must begin within business hours at :time or later.', ['subject' => __('Therapist availability'), 'time' => ApplicationSetting::timeLabel($opensAt)]));
-
-                    return;
-                }
 
                 if ($endsNextDay && $this->input('end_time') !== '00:00') {
                     $validator->errors()->add('end_time', 'A next-day shift must end at 12:00 midnight.');

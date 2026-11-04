@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\CustomerProfile;
+use App\Models\OperatingHourRule;
 use App\Models\Service;
 use App\Models\StaffProfile;
 use App\Models\StaffScheduleException;
@@ -11,6 +12,7 @@ use App\Models\StaffScheduleShift;
 use App\Models\StaffScheduleWeek;
 use App\Models\StaffWeeklySchedule;
 use App\Models\User;
+use App\Services\ScheduleWindowResolver;
 use App\Services\WeeklyRoster;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -297,7 +299,7 @@ class WeeklyRosterTest extends TestCase
     {
         $staff = $this->therapist();
         $week = $this->draft();
-        foreach ([['12:30', '15:00', false], ['13:15', '15:00', false], ['14:00', '14:00', false], ['14:00', '15:00', true], ['14:00', '00:00', false]] as [$start, $end, $nextDay]) {
+        foreach ([['09:15', '15:00', false], ['13:15', '15:00', false], ['14:00', '14:00', false], ['14:00', '15:00', true], ['14:00', '00:00', false]] as [$start, $end, $nextDay]) {
             $this->postJson(route('admin.staff-roster.shifts.store', $week), [...$this->shift($staff, $start, $end), 'ends_next_day' => $nextDay, 'expected_revision' => 1])
                 ->assertUnprocessable()->assertJsonValidationErrors('start_time');
         }
@@ -305,6 +307,29 @@ class WeeklyRosterTest extends TestCase
         $this->postJson(route('admin.staff-roster.shifts.store', $week), [...$this->shift($staff), 'expected_revision' => 1])
             ->assertUnprocessable()->assertJsonValidationErrors('staff_ids');
         $this->assertSame(0, $week->shifts()->count());
+    }
+
+    public function test_shifts_may_start_at_any_half_hour_and_only_operating_hours_are_bookable(): void
+    {
+        $staff = $this->therapist();
+        $week = $this->draft();
+        $this->postJson(route('admin.staff-roster.shifts.store', $week), [...$this->shift($staff, '00:00', '15:00'), 'expected_revision' => 1])->assertOk();
+        $this->postJson(route('admin.staff-roster.shifts.store', $week), [...$this->shift($staff, '16:00', '00:00'), 'schedule_date' => '2026-10-19', 'expected_revision' => 2])->assertOk();
+        $this->assertSame(['00:00:00', '16:00:00'], $week->shifts()->orderBy('schedule_date')->pluck('start_time')->all());
+
+        $page = $this->get(route('admin.staff-roster.index', ['week' => $this->week, 'view' => 'draft']))->assertOk();
+        $this->assertSame(['00:00', '09:00', '23:30'], [$page->viewData('times')->keys()->first(), $page->viewData('times')->keys()[18], $page->viewData('times')->keys()->last()]);
+        $this->assertSame(['00:30', '00:00'], [$page->viewData('endTimes')->keys()->first(), $page->viewData('endTimes')->keys()->last()]);
+
+        $resolver = app(ScheduleWindowResolver::class);
+        $shift = new StaffScheduleShift(['start_time' => '09:00', 'end_time' => '15:00', 'ends_next_day' => false]);
+        $default = $resolver->effectiveWindows($staff, Carbon::parse('2026-10-20', 'Asia/Manila'), collect([$shift]));
+        $this->assertSame([['13:00', '15:00']], $default->map(fn ($w) => [$w['start']->format('H:i'), $w['end']->format('H:i')])->all());
+
+        OperatingHourRule::query()->create(['type' => 'special_hours', 'starts_on' => '2026-10-21', 'ends_on' => '2026-10-21', 'start_time' => '10:00', 'end_time' => '23:00', 'reason' => 'Early opening']);
+        $resolver->clearCache();
+        $early = $resolver->effectiveWindows($staff, Carbon::parse('2026-10-21', 'Asia/Manila'), collect([$shift]));
+        $this->assertSame([['10:00', '15:00']], $early->map(fn ($w) => [$w['start']->format('H:i'), $w['end']->format('H:i')])->all());
     }
 
     public function test_existing_published_hours_seed_a_draft_and_copy_uses_the_last_earlier_publication(): void

@@ -56,13 +56,13 @@ class TherapistSchedulePage
         $conflictPaginator = new LengthAwarePaginator(array_slice($conflicts, ($conflictPage - 1) * $perPage, $perPage),
             count($conflicts), $perPage, $conflictPage, ['path' => route('admin.staff-roster.index'), 'pageName' => 'conflicts_page']);
         $conflictPaginator->appends($filters);
-        $times = collect(range(780, 1410, 30))->mapWithKeys(fn ($minutes) => [
+        $times = collect(range(0, 1410, 30))->mapWithKeys(fn ($minutes) => [
             sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60) => date('g:i A', mktime(intdiv($minutes, 60), $minutes % 60, 0)),
         ]);
 
         return [...$state, 'filters' => $filters, 'staffProfiles' => $staff, 'days' => $days, 'cells' => $cells,
             'conflictPaginator' => $conflictPaginator, 'conflictCount' => count($conflicts), 'times' => $times,
-            'endTimes' => $times->except('13:00')->put('00:00', __('12:00 midnight')),
+            'endTimes' => $times->except('00:00')->put('00:00', __('12:00 midnight')),
             'indexUrl' => route('admin.staff-roster.index', $filters),
         ];
     }

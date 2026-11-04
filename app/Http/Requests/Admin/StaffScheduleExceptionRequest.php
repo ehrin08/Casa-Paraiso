@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\ApplicationSetting;
 use App\Models\StaffScheduleException;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -66,14 +65,6 @@ class StaffScheduleExceptionRequest extends FormRequest
 
                 $startMinutes = $this->minutes((string) $startTime);
                 $endMinutes = $endsNextDay ? 1440 : $this->minutes((string) $endTime);
-                $opensAt = ApplicationSetting::current()->opensAt();
-                $openingMinutes = $this->minutes($opensAt);
-
-                if ($startMinutes < $openingMinutes) {
-                    $validator->errors()->add('start_time', __(':subject must begin within business hours at :time or later.', ['subject' => __('Schedule exceptions'), 'time' => ApplicationSetting::timeLabel($opensAt)]));
-
-                    return;
-                }
 
                 if ($endsNextDay && $endTime !== '00:00') {
                     $validator->errors()->add('end_time', 'A next-day exception must end at 12:00 midnight.');
