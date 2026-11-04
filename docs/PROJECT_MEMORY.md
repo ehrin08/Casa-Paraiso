@@ -32,7 +32,7 @@ The local `redesign` branch carries the presentation-only Modern Resort redesign
 - Motion: shared tokens (`--ease-casa`, `--casa-motion*`, `--casa-rise`, `--casa-stagger`) and the `casa-enter` / `casa-fade-in` keyframes live in `resources/css/app.css`. The Brand UI Guide's Accessibility and Motion section has the rules.
 - `config/casa.php` owns business hours, pagination, the default RFM segment seeds, the membership card prefix, and security switches. Live RFM rules, membership tiers, and voucher rules are database records the admin edits.
 - RFM (see `docs/RFM_ENGINE.md`):
-  - `RfmScorer` gives 1–5 percent-rank quintile scores over customers with paid, completed visits.
+  - `RfmScorer` gives 1–5 percent-rank quintile scores over customers with paid, completed visits. A customer with one paid visit within `casa.customer_rewards.new_customer_days` (30) always scores R 5 and F 1 (`RfmScorer::isNewCustomer`), so first-timers earn the New customer reward (since 2026-11-04).
   - `RfmRuleEngine` evaluates active `rfm_segments` by `priority`, and the first score-range match wins.
   - Issuing rewards, the Reports RFM table, the admin customer RFM profile, and membership recommendations all use both services.
   - `RfmVocabulary` is display-only. It turns scores into plain names (Last visit / How often / Total spent, e.g. "Recent", "Top spenders"), rule sentences and real value hints for the admin group screens and the customer card. Form fields stay `*_score_min/max` (1–5).

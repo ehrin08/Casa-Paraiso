@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-04: [New customer RFM reward for first-timers](sessions/2026-11-04-new-customer-rfm-reward.md)
 - 2026-11-04: [Therapist schedule times across the whole day](sessions/2026-11-04-roster-full-day-times.md)
 - 2026-11-04: [Commission and net revenue on Reports](sessions/2026-11-04-insights-revenue-commission.md)
 - 2026-11-04: [Demo booking from yesterday](sessions/2026-11-04-demo-yesterday-booking.md)

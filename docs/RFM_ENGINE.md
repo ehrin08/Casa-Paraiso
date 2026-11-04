@@ -35,6 +35,7 @@ Implemented in `app/Services/RfmScorer.php`.
   - "Worse" means **more days since the last visit** for Recency.
   - Ties share the lower score. For example, every one-visit customer gets F = 1.
   - A lone customer has nobody to rank against and gets the neutral score of 3.
+  - First-time exception: a customer with exactly one paid visit within `casa.customer_rewards.new_customer_days` (30) always scores R 5 and F 1 (M is still ranked), so first-timers reach the New customer group even when they are the only customer or tie with others who paid the same day.
 - Sorting plus binary search keeps scoring at O(n log n), so the report and the rules page can score every customer on each request.
 
 Worked example with ten customers whose visit counts are 1 to 10:
