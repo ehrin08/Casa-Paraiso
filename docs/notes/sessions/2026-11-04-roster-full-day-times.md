@@ -19,12 +19,19 @@ The user asked for therapist schedule times not to start at 1:00 PM, listing the
 - Tests: `WeeklyRosterTest` gains a full-day case (a 09:00–15:00 shift is bookable from 1:00 PM on default hours and from 10:00 AM on a special-hours day) and its invalid-time case uses 09:15.
 - Commit `6edd954` (local, not pushed).
 - Release package `output/hostinger-release/casa-paraiso-hostinger-20261104-003305-9c9ea9.zip` built and smoke-tested.
+- Live release `casa-paraiso-redesign-20261104d`, uploaded to the private `.casa-deploy-20261104d/` folder:
+  - its `.env` is a mode-600 copy of the 20261104c release's (never displayed);
+  - its `storage/app/public` is a symlink to `casa-paraiso/storage/app/public`, and `public/storage` links to that;
+  - config, route and view caches were built;
+  - `public_html` was switched atomically to it.
 
 ## Verification
 
 - Targeted: schedule, roster, calendar, operating-hours and therapist layout tests (72 passed); `tests/js/schedule-dialog.test.mjs` (7 passed).
 - Full suite 657 passed, `npm run build`, Docker startup through the wrapper, `git diff --check`.
-- Not deployed: SSH to the Hostinger account (port 65002) was refused at release time, while https://casaparaiso.site/up returned 200.
+- SSH (port 65002) was refused from the first network; it worked after the user switched networks.
+- Host: `sha256sum -c` passed. No pending migrations. `casa:audit-crud-integrity` passed. `casa:check-hosting` first failed on the public storage link, because the extracted release had no `public/storage`; after creating it, every check passed.
+- Live: `/`, `/login` and `/up` return 200. `/admin/staff-schedules` redirects guests to login. `/.env` returns 403 and `/composer.json` returns 404. No log files were written. The served `TherapistSchedulePage.php` has the full-day time list.
 
 ## Decisions
 
@@ -33,5 +40,8 @@ The user asked for therapist schedule times not to start at 1:00 PM, listing the
 
 ## Follow-ups
 
-- [ ] Re-enable SSH access in hPanel, then deploy the package as `casa-paraiso-redesign-20261104d/` (same steps as 20261104c) and repoint the hPanel cron.
+- [ ] Repoint the hPanel cron to `casa-paraiso-redesign-20261104d/artisan schedule:run`.
+- [ ] Delete the ZIP and checksum in `.casa-deploy-20261104d/` once the release is settled.
 - [ ] Push `redesign` and fast-forward `main` when ready.
+- Future releases: create `public/storage` (linking to the release's `storage/app/public`) before running `casa:check-hosting`.
+- Rollback: from the domain directory, `ln -s "$PWD/casa-paraiso-redesign-20261104c/public" public_html.new && mv -T public_html.new public_html`.
