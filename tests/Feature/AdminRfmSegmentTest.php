@@ -132,8 +132,10 @@ class AdminRfmSegmentTest extends TestCase
         $service = Service::factory()->create();
         $appointment = Appointment::factory()->for($customer)->for($service)->create(['status' => Appointment::STATUS_COMPLETED]);
         Transaction::factory()->for($customer)->for($appointment)->for($service)->create(['amount' => 1500, 'payment_status' => Transaction::PAYMENT_PAID, 'paid_at' => now()->subDays(3)]);
+        $return = Appointment::factory()->for($customer)->for($service)->create(['status' => Appointment::STATUS_COMPLETED]);
+        Transaction::factory()->for($customer)->for($return)->for($service)->create(['amount' => 1500, 'payment_status' => Transaction::PAYMENT_PAID, 'paid_at' => now()->subDays(2)]);
 
-        // A lone scored customer gets the neutral 3 on every measure.
+        // A lone returning customer gets the neutral 3 on every measure (a first-timer would score as new).
         $this->actingAs($this->admin)->get(route('admin.customers.show', $customer))
             ->assertOk()
             ->assertSee('Customer group')

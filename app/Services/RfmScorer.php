@@ -15,6 +15,11 @@ use Illuminate\Support\Collection;
  * their percent rank, (customers strictly worse) / (population - 1), split into fifths. The top
  * fifth scores 5, the bottom fifth scores 1, and tied customers share the lower score. A lone
  * customer has nobody to rank against and scores the neutral 3.
+ *
+ * First-time customers are the exception: a customer with exactly one paid visit inside the
+ * new-customer window (casa.customer_rewards.new_customer_days) always scores Recency 5 and
+ * Frequency 1. Ranking alone cannot recognise them while the customer list is small, because a
+ * lone customer scores 3 and customers who paid on the same day tie for a lower Recency score.
  */
 class RfmScorer
 {
@@ -110,12 +115,26 @@ class RfmScorer
         $frequency = $population->pluck('frequency_count')->sort()->values()->all();
         $monetary = $population->pluck('monetary_total')->sort()->values()->all();
 
-        return fn (array $metrics): array => [
-            // Recency is better when fewer days have passed, so "worse" customers waited longer.
-            'r' => $this->quintile($size - $this->countAtMost($recency, $metrics['recency_days']), $size),
-            'f' => $this->quintile($this->countBelow($frequency, $metrics['frequency_count']), $size),
-            'm' => $this->quintile($this->countBelow($monetary, $metrics['monetary_total']), $size),
-        ];
+        return function (array $metrics) use ($size, $recency, $frequency, $monetary): array {
+            $scores = [
+                // Recency is better when fewer days have passed, so "worse" customers waited longer.
+                'r' => $this->quintile($size - $this->countAtMost($recency, $metrics['recency_days']), $size),
+                'f' => $this->quintile($this->countBelow($frequency, $metrics['frequency_count']), $size),
+                'm' => $this->quintile($this->countBelow($monetary, $metrics['monetary_total']), $size),
+            ];
+
+            return $this->isNewCustomer($metrics) ? ['r' => 5, 'f' => 1, 'm' => $scores['m']] : $scores;
+        };
+    }
+
+    /** @param array{recency_days: int, frequency_count: int, monetary_total: float} $metrics */
+    public function isNewCustomer(array $metrics): bool
+    {
+        $window = config('casa.customer_rewards.new_customer_days');
+
+        return $window !== null
+            && $metrics['frequency_count'] === 1
+            && $metrics['recency_days'] <= (int) $window;
     }
 
     private function quintile(int $worse, int $size): int

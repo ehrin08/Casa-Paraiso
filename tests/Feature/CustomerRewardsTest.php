@@ -88,8 +88,31 @@ class CustomerRewardsTest extends TestCase
     {
         $customer = CustomerProfile::factory()->create();
 
-        // A lone customer scores the neutral 3/3/3, which no default rule covers.
-        $this->assertNull(app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 1, 500, 1)));
+        // A lone returning customer scores the neutral 3/3/3, which no default rule covers.
+        $this->assertNull(app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 2, 500, 1)));
+    }
+
+    public function test_the_very_first_paying_customer_gets_the_new_customer_reward(): void
+    {
+        $customer = CustomerProfile::factory()->create();
+
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 1, 500, 0));
+
+        $this->assertSame('new_customer', $reward?->rfmSegment?->preset_key);
+        $this->assertSame([5, 1, 3], [$reward->r_score, $reward->f_score, $reward->m_score]);
+    }
+
+    public function test_first_timers_who_pay_on_the_same_day_all_get_the_new_customer_reward(): void
+    {
+        $this->background(visits: 2, amount: 1500, days: 40);
+        $earlier = CustomerProfile::factory()->count(3)->create()
+            ->each(fn (CustomerProfile $customer) => $this->paidVisit($customer, 1, 800, 0));
+        $customer = CustomerProfile::factory()->create();
+
+        $reward = app(RfmPromotionGenerator::class)->generateForTransaction($this->paidVisit($customer, 1, 800, 0));
+
+        $this->assertCount(3, $earlier);
+        $this->assertSame('new_customer', $reward?->rfmSegment?->preset_key);
     }
 
     public function test_expired_reward_does_not_block_the_next_qualifying_reward_and_is_not_bookable(): void

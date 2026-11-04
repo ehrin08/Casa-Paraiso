@@ -157,6 +157,9 @@ return [
     'customer_rewards' => [
         'default_validity_days' => 90,
         'validity_options' => [30, 60, 90, 180],
+        // A customer with one paid visit this many days ago or less always scores Recency 5 and
+        // Frequency 1, so first-timers reach the New customer group even while few customers exist.
+        'new_customer_days' => 30,
         // Default RFM segments. Raw thresholds remain for the 2026_07_14 migration; matching uses the 1–5 score ranges.
         'presets' => [
             [
@@ -238,7 +241,7 @@ return [
             [
                 'key' => 'new_customer',
                 'name' => 'New customer',
-                'description' => 'The most recent fifth with a single paid visit (R 5, F 1).',
+                'description' => 'A single paid visit within the last 30 days, or the most recent fifth with one visit (R 5, F 1).',
                 'recency_min_days' => null,
                 'recency_max_days' => 30,
                 'frequency_min' => 1,
