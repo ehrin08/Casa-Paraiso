@@ -2,6 +2,8 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-15: [Panel design revisions: fonts, colors, booking pop-up](sessions/2026-11-15-panel-design-revisions.md)
+- 2026-11-13: [Defense panel revisions recorded as to-do](sessions/2026-11-13-defense-panel-todo.md)
 - 2026-11-08: [Redesign branch leftover check](sessions/2026-11-08-redesign-leftover-check.md)
 - 2026-11-04: [New customer reward check and Kenneth voucher](sessions/2026-11-04-new-customer-reward-check.md)
 - 2026-11-04: [New customer RFM reward for first-timers](sessions/2026-11-04-new-customer-rfm-reward.md)

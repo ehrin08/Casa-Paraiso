@@ -9,7 +9,7 @@
         </p>
 
         <section aria-labelledby="information-heading">
-            <h2 id="information-heading" class="font-editorial text-2xl font-semibold text-casa-text">Information we collect</h2>
+            <h2 id="information-heading" class="text-xl font-extrabold text-casa-text">Information we collect</h2>
             <p class="mt-2">Depending on how you use Casa Paraiso, we may handle:</p>
             <ul class="mt-2 list-disc space-y-1 ps-5">
                 <li>account, contact, and profile details such as your name, email address, phone number, and password credentials;</li>
@@ -21,24 +21,24 @@
         </section>
 
         <section aria-labelledby="use-heading">
-            <h2 id="use-heading" class="font-editorial text-2xl font-semibold text-casa-text">How we use information</h2>
+            <h2 id="use-heading" class="text-xl font-extrabold text-casa-text">How we use information</h2>
             <p class="mt-2">We use this information to authenticate accounts, schedule and manage visits, maintain service and payment records, respond to feedback, provide customer rewards, protect the application, and support the spa’s day-to-day decisions.</p>
         </section>
 
         <section aria-labelledby="access-heading">
-            <h2 id="access-heading" class="font-editorial text-2xl font-semibold text-casa-text">Who can access it</h2>
+            <h2 id="access-heading" class="text-xl font-extrabold text-casa-text">Who can access it</h2>
             <p class="mt-2">Access is limited by workspace role. Customers can access their own account and visit information. Receptionists, therapists, administrators, and the protected super administrator receive only the operational access needed for their responsibilities.</p>
             <p class="mt-2">Casa Paraiso also relies on hosting and database providers to operate the application. If you select Google sign-in, Google processes the sign-in step under Google’s own privacy policy.</p>
             <p class="mt-2">To label feedback as positive, neutral, or negative, your star rating and comment are sent to Google’s Gemini API. Email addresses, phone numbers, links, and booking numbers are removed first, but names and other details you write are not. Under Google’s terms for its free service, Google may keep these comments, use them to improve its products, and have people review them. Please leave personal or sensitive details out of feedback comments.</p>
         </section>
 
         <section aria-labelledby="security-heading">
-            <h2 id="security-heading" class="font-editorial text-2xl font-semibold text-casa-text">Security and your choices</h2>
+            <h2 id="security-heading" class="text-xl font-extrabold text-casa-text">Security and your choices</h2>
             <p class="mt-2">The application uses protected sessions, password hashing, verification, rate limits, HTTPS settings, role checks, and least-privilege database access. You can review or update available profile details, change your password, sign out, and request account deletion through the account controls provided by the application.</p>
         </section>
 
         <section aria-labelledby="contact-heading">
-            <h2 id="contact-heading" class="font-editorial text-2xl font-semibold text-casa-text">Questions</h2>
+            <h2 id="contact-heading" class="text-xl font-extrabold text-casa-text">Questions</h2>
             <p class="mt-2">For questions about your information or this policy, contact Casa Paraiso using the business details below.</p>
             <address class="mt-3 not-italic text-casa-text">
                 @if ($applicationSettings->business_name)

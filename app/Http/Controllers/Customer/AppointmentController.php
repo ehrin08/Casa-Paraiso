@@ -216,7 +216,8 @@ class AppointmentController extends Controller
 
         return redirect()
             ->route('customer.appointments.history')
-            ->with('status', 'appointment-booked');
+            ->with('status', 'appointment-booked')
+            ->with(\App\Services\BookingSuccessConfirmation::FLASH_KEY, $appointment->id);
     }
 
     public function show(Request $request, Appointment $appointment): View

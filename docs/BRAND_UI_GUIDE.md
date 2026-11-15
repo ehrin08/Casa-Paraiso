@@ -29,12 +29,23 @@ The signature visual is the **tropical canopy**: an arched image frame paired wi
 | Casa Muted | `#67675F` | Secondary text |
 | Casa Border | `#DCD2C2` | Borders and separators |
 
-On the `redesign` branch, soft tone accents (palm, brass, cacao, and the blue, rose and violet tokens) color metric cards, drawer icon chips, page header bands and charts, as described in [REDESIGN_MODERN_RESORT.md](REDESIGN_MODERN_RESORT.md#color-accents). Text on those pastels stays a dark ink. Casa Brass is decorative and should not carry small text. Use Brass Light for meaningful text on dark surfaces. Success, warning, error, and information states must include text or icons rather than relying on color alone.
+Accents use the brand colors only. Metric cards, drawer and account-menu icon chips, the page header band and active tabs use Casa Palm on flat Casa Paper, with Casa Brass as the one accent (the active drawer ring and the notification count). Gradient washes and glows are not used inside the workspaces. Other hues appear only where the color carries meaning, and always with a text label or icon:
+
+- **Appointment status:** confirmed blue, completed palm, cancelled rose, no-show amber.
+- **Sentiment:** positive palm, neutral amber, negative rose.
+- **Payments and attendance pills:** success green, warning amber, information blue, danger red.
+- **Therapist calendar lanes and role badges:** the categorical tones, so people can tell therapists apart.
+
+Text on tinted backgrounds stays a dark ink. Casa Brass is decorative and should not carry small text. Use Brass Light for meaningful text on dark surfaces.
 
 ## Typography
 
-- **Cormorant Garamond 600–700:** marketing heroes, customer lounge display moments, and short emotional statements.
-- **Manrope 400–800:** navigation, operational headings, body text, forms, tables, buttons, metrics, and captions.
+The app uses two fonts and no others.
+
+- **Manrope 400–800 (main font):** everything by default, including navigation, section and card headings, body text, forms, tables, buttons, metrics and captions.
+- **Cormorant Garamond 600 (highlight font):** page titles only. That is the `h1` of every page for every role, the headings of the public homepage and guest sign-in pages, and the title of the booking success pop-up. Card headings, dialog titles, initials and numbers stay in Manrope.
+- The rule is set once in `resources/css/app.css` (`body[data-workspace-role] .casa-app-page h1`); page CSS sets only the size.
+- Exception: PDF and print exports use DejaVu Sans, because the PDF engine needs it for the peso sign.
 - Body copy is 16px where space permits and never below 14px for meaningful content.
 - Uppercase text is limited to short labels with increased letter spacing.
 
@@ -79,7 +90,7 @@ Compact density applies only inside the authenticated application shell. Public 
 
 - Use the shared `page-heading` component for authenticated page titles. Customer headings may use its editorial variant; admin and staff headings use the operational variant.
 - **Top bar:** frosted glass with a soft shadow, pinned to the top of the window. It slides away while scrolling down and returns on any scroll up, near the top of the page, on keyboard focus, or while its drawer or account menu is open. The public landing header behaves the same way, and stays while its mobile menu is open. It holds ☰, the logo (the single "View site" link to the public homepage), a notification bell with the unread booking count (admin, reception and therapist), and an initials avatar that opens the account menu: role, name and email, then My profile, Settings, User accounts and System issues as permitted, and Log out.
-- **Drawer:** a deep palm gradient (palm-dark to charcoal) with a faint brass glow, cream links and a brass-tinted active pill with a brass indicator. Groups are separated by dividers without visible labels. There is no account card or hours text. It closes on Escape, backdrop click, link choice or navigation. Focus moves into the drawer, Tab stays inside it, and closing returns focus to ☰. Page scrolling is locked while it is open.
+- **Drawer:** solid deep palm, cream links and a brass-tinted active pill with a brass indicator. Groups are separated by dividers without visible labels. There is no account card or hours text. It closes on Escape, backdrop click, link choice or navigation. Focus moves into the drawer, Tab stays inside it, and closing returns focus to ☰. Page scrolling is locked while it is open.
 - **Fewer destinations:** admin Payments covers Payments and Commissions, and Insights covers Reports, Feedback and Customer rewards; therapist Payments covers Payments and My commissions. The merged pages keep their routes and switch through a pill section-tab row at the top of the page content.
 - Use `stat-strip` for compact context on detail pages and appointment calendars. Reserve larger metric cards for dashboards, feedback, customer rewards, transactions, and reports.
 - Put record totals and useful status counts in toolbar chips. Do not add generic “Showing” or “Search Ready” metric cards above lists.
@@ -107,6 +118,7 @@ The Today dashboard uses four cream metric cards with muted palm icon circles, a
 - Every create and edit route keeps its full page, which direct URLs and browsers without JavaScript still use. A failed save returns to the page that opened the panel, and that page reopens the same panel with the errors and the entered values. Uploaded files have to be chosen again.
 - Keep these as they are: the booking wizards, admin Settings, reward settings, the weekly roster editors, and the attendance camera pages.
 - Every state-changing action that is destructive or hard to undo opens `x-confirm-action` or `x-confirm-submit`. For cancel, no-show, remove, deactivate and dismiss actions, use `tone="danger"` and a `dismiss-label` that names what is kept, such as "Keep booking". Short contextual forms such as Finish service, account deletion, feedback and notes use `x-modal` with the `_modal` hidden field, so validation reopens them.
+- **Success feedback:** after a booking is saved (customer, admin or reception), a centered pop-up (`x-booking-success`) opens once with a check mark, a serif title, the treatment, date, time, therapist and booking number, and Done plus a link to the booking. It does not reopen on refresh. Every other success or error message is a toast at the top centre: a paper card with a solid palm (success) or red (error) icon badge, bold text and a close button. Success toasts stay 6 seconds and errors 8; the timer pauses while the pointer or keyboard focus is on the toast.
 - Dialogs share one layout through `x-modal-shell`: a glass title bar, a body, and a sticky footer with actions aligned right. Backdrops are charcoal at 45% with an 8px blur, including the native Settings and roster dialogs.
 
 ## Pagination Pattern
@@ -252,7 +264,7 @@ Preserve established service names, prices, business hours, statuses, and the li
 - Every control needs a visible label or accessible name and a visible keyboard focus state.
 - Keep motion between 160–220ms and use it only to explain navigation or state changes.
 - Use the shared motion tokens in `resources/css/app.css`: `--casa-motion-fast` (160ms), `--casa-motion` (200ms), `--casa-motion-slow` (220ms), `--casa-rise` (6px), `--casa-stagger` (30ms), and the `--ease-casa` easing (Tailwind `ease-casa`).
-  - Reuse the `casa-enter` (fade and small rise) and `casa-fade-in` keyframes; do not add per-page keyframes.
+  - Reuse the `casa-enter` (fade and small rise) and `casa-fade-in` keyframes; do not add per-page keyframes. The booking success check mark is the one exception (`casa-success-pop`, `casa-success-draw`).
   - Animate only `opacity` and `transform`/`translate`, so nothing shifts layout. Content must end fully visible, and nothing may wait for an animation before it can be used.
   - Workspace pages fade in with opacity only, without fill, so fixed dialogs inside `<main>` keep their positioning. Summary figures (`stat-strip`, appointment stats, dashboard metric cards) rise in with a stagger capped at the fourth item.
   - Modals enter in 200ms and leave in 160ms with a 0.5rem rise. Dropdowns and toasts use the same timing. Buttons and section tabs move down 1px on press.

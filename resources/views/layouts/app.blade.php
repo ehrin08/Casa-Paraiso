@@ -31,13 +31,18 @@
         <a href="#main-content" class="sr-only rounded-lg bg-casa-paper px-4 py-3 font-bold text-casa-cacao focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100]">Skip to main content</a>
         @php
             $isCustomer = Auth::user()?->isCustomer() ?? false;
+            $bookingSuccess = app(\App\Services\BookingSuccessConfirmation::class);
+            $bookedAppointment = $bookingSuccess->consume(request());
         @endphp
 
         <x-page-loading />
 
         <div class="casa-page casa-app-page">
             @include('layouts.navigation')
-            <x-toast-stack />
+            <x-toast-stack :suppress-booking="(bool) $bookedAppointment" />
+            @if ($bookedAppointment)
+                <x-booking-success :appointment="$bookedAppointment" :detail-url="$bookingSuccess->detailUrl(request(), $bookedAppointment)" />
+            @endif
 
             <x-modal-host />
 
@@ -99,7 +104,7 @@
                 </main>
             </div>
 
-            @if ($isCustomer)<x-customer-feedback-prompt />@endif
+            @if ($isCustomer && ! $bookedAppointment)<x-customer-feedback-prompt />@endif
         </div>
         @stack('scripts')
     </body>

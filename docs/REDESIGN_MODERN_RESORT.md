@@ -41,21 +41,18 @@ Page stylesheets contain no raw hex values. Tints, lines and chart shades are `c
 
 ## Color accents
 
-Soft tints add color without leaving the brand family. Text stays dark ink on each pastel, and color is never the only signal: every status keeps its label.
+Revised on 2026-11-15 after the defense panel asked for consistent colors. The earlier rotation of six pastels by position is removed.
 
-- **Tone classes** (`app.css`): `.casa-tone-palm`, `-brass`, `-cacao`, `-blue`, `-rose` and `-violet`. Each sets `--tone` (ink) and `--tone-bg` (pastel) from the Casa tokens.
-- **Metric cards:** cards in the metric grids cycle palm, brass, blue, rose, violet, cacao by position, with a soft diagonal wash, a tinted top edge and a matching icon circle. A card that names its own tone (`x-metric-card`'s `tone` prop) keeps it. Cancelled stats are always rose, and feedback sentiment stays positive palm, neutral amber, negative rose.
-- **Drawer and account menu:** each destination has a pastel icon chip, for example Today palm, Appointments blue, Customers rose, Therapists violet, Services amber and Payments cacao. The active chip gets a brass ring.
-- **Page header band:** staff pages fade palm-tint, then cream, then amber with a faint brass glow; customer pages fade rose-tint, then cream, then amber.
-- **Charts and statuses:**
+- **Brand accent:** metric cards, drawer and account-menu icon chips, the page header band and active section tabs use Casa Palm on flat Casa Paper. `x-metric-card` keeps its `tone` prop, but every value renders palm.
+- **No washes or glows:** the diagonal card wash, the three-stop header band, the brass glow, and the gradient fills on the drawer, avatar, calendar events, loading bar and report bars are now solid colors.
+- **Tone classes** (`app.css`): `.casa-tone-palm` is the default. `-brass`, `-cacao`, `-blue`, `-rose` and `-violet` remain for meaning only.
+- **Colors that carry meaning:**
   - **Appointment statuses:** confirmed blue, completed palm, cancelled rose, no-show amber.
   - **Sentiment:** positive palm, neutral amber, negative rose.
-  - **Service revenue tracks:** palm, amber, blue and rose.
-  - **RFM bars:** blue.
   - **Payment pills:** paid green, unpaid amber, refunded blue.
   - **Attendance:** on duty green, completed blue.
-  - **Customer calendar:** completed visits are blue.
-  - `x-status-badge` also has an `info` tone.
+  - **Therapist calendar lanes and role badges:** categorical tones.
+- Text stays dark ink on each tint, and every status keeps its label.
 
 ## Phase checklist
 

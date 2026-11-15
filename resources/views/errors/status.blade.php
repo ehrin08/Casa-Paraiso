@@ -7,7 +7,7 @@
         <meta name="robots" content="noindex,nofollow">
         <title>{{ $content['title'] }} · {{ config('app.name', 'Casa Paraiso') }}</title>
         <style>
-            :root { color-scheme: light; font-family: Arial, sans-serif; background: #f5f0e7; color: #232620; }
+            :root { color-scheme: light; font-family: "Manrope", ui-sans-serif, system-ui, sans-serif; background: #f5f0e7; color: #232620; }
             body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
             main { width: min(100%, 42rem); box-sizing: border-box; background: #fffcf7; border: 1px solid #dcd2c2; border-radius: 20px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 14px 36px rgba(35, 38, 32, .10); text-align: center; }
             img { width: min(210px, 70%); height: auto; }

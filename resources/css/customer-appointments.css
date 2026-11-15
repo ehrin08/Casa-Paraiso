@@ -1,5 +1,5 @@
 /* My appointments extends the shared customer workspace. */
-.casa-app-page .customer-appointments-heading h1 { margin-top: 8px; font-family: var(--font-editorial); font-size: clamp(2rem, 3.4vw, 2.75rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.025em; }
+.casa-app-page .customer-appointments-heading h1 { margin-top: 8px; font-size: clamp(2rem, 3.4vw, 2.75rem); line-height: 1.1; }
 .customer-appointments-eyebrow { color: var(--color-casa-palm-dark); font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.16em; }
 .customer-appointments-subtitle { margin-top: 8px; color: var(--color-casa-muted); font-size: 16px; line-height: 1.5; }
 .customer-appointments-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -18,8 +18,8 @@ body[data-workspace-role] .customer-appointments .casa-button-primary, body[data
 .customer-appointments .casa-appointment-stat dd { margin-top: 2px; font-size: 26px; font-weight: 600; }
 .customer-appointments-panels { display: grid; gap: 16px; align-items: start; }
 .customer-appointments-card { min-width: 0; padding: 16px; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-panel); background: var(--color-casa-paper); box-shadow: var(--shadow-casa-soft); }
-.customer-appointments .customer-appointments-card h2 { font-family: var(--font-editorial); font-size: 22px; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
-.customer-appointments-card h3 { margin-top: 12px; font-family: var(--font-editorial); font-size: 26px; font-weight: 600; line-height: 1.15; overflow-wrap: anywhere; }
+.customer-appointments .customer-appointments-card h2 { font-size: 20px; font-weight: 800; line-height: 1.25; letter-spacing: -0.02em; }
+.customer-appointments-card h3 { margin-top: 12px; font-size: 22px; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .customer-appointments-aside { display: grid; gap: 16px; min-width: 0; }
 .customer-appointments-card-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .customer-appointments-badge { padding: 3px 8px; border-radius: 999px; background: var(--color-casa-success-bg); color: var(--color-casa-success); font-size: 14px; line-height: 1.4; }

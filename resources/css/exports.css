@@ -5,7 +5,7 @@
 .casa-export-menu .casa-export-chevron { width: 16px; height: 16px; margin-left: -0.15rem; transition: transform 160ms ease; }
 .casa-export-menu[open] .casa-export-chevron { transform: rotate(180deg); }
 .casa-export-menu > summary:focus-visible { outline: 2px solid var(--color-casa-palm); outline-offset: 3px; }
-.casa-export-options { position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; display: grid; gap: 2px; width: 248px; max-width: calc(100vw - 32px); margin: 0; padding: 6px; list-style: none; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); box-shadow: 0 8px 24px rgb(35 38 32 / 12%); }
+.casa-export-options { position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; display: grid; gap: 2px; width: 248px; max-width: calc(100vw - 32px); margin: 0; padding: 6px; list-style: none; border: 1px solid var(--color-casa-border); border-radius: var(--radius-casa-control); background: var(--color-casa-paper); box-shadow: var(--shadow-casa-card); }
 .casa-export-options a { display: grid; gap: 1px; padding: 9px 12px; border-radius: calc(var(--radius-casa-control) - 4px); color: var(--color-casa-text); text-decoration: none; }
 .casa-export-options a:hover, .casa-export-options a:focus-visible { background: var(--color-casa-sand); outline: none; }
 .casa-export-options strong { font-size: 0.9375rem; font-weight: 700; }

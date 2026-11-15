@@ -6,12 +6,8 @@
 ])
 
 @php
-    $toneClass = match ($tone) {
-        'green' => 'casa-tone-palm',
-        'gold' => 'casa-tone-brass',
-        'charcoal' => 'casa-tone-blue',
-        default => 'casa-tone-cacao',
-    };
+    // Every card uses the brand palm accent; the tone prop is kept so callers stay unchanged.
+    $toneClass = 'casa-tone-palm';
     $accent = 'bg-[var(--tone)]';
 @endphp
 

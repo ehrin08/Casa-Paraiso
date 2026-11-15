@@ -1,3 +1,5 @@
+@props(['suppressBooking' => false])
+
 @php
     $status = session('status');
     $message = match ($status) {
@@ -51,45 +53,50 @@
         default => is_string($status) && $status !== '' ? __(str_replace('-', ' ', ucfirst($status))) : null,
     };
 
+    // The booking success pop-up already says this.
+    if ($suppressBooking && in_array($status, ['appointment-booked', 'appointment-created'], true)) {
+        $message = null;
+    }
+
     $errorMessage = session('error');
+    $toasts = array_filter([
+        $message ? ['type' => 'success', 'text' => $message, 'role' => 'status', 'timeout' => 6000] : null,
+        $errorMessage ? ['type' => 'error', 'text' => $errorMessage, 'role' => 'alert', 'timeout' => 8000] : null,
+    ]);
 @endphp
 
-@if ($message || $errorMessage)
-    <div class="pointer-events-none fixed end-4 top-4 z-[60] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-3">
-        @if ($message)
+@if ($toasts)
+    <div class="casa-toast-stack" data-toast-stack>
+        @foreach ($toasts as $toast)
             <div
-                x-data="{ show: true }"
-                x-init="setTimeout(() => show = false, 4200)"
+                x-data="{ show: true, timer: null, start() { this.timer = setTimeout(() => this.show = false, {{ $toast['timeout'] }}) }, hold() { clearTimeout(this.timer) } }"
+                x-init="start()"
                 x-show="show"
+                x-on:mouseenter="hold()"
+                x-on:mouseleave="start()"
+                x-on:focusin="hold()"
+                x-on:focusout="start()"
                 x-transition:enter="transition ease-casa duration-200"
-                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-start="opacity-0 -translate-y-2"
                 x-transition:enter-end="opacity-100 translate-y-0"
                 x-transition:leave="transition ease-in duration-160"
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
-                role="status"
-                class="pointer-events-auto rounded-[20px] border border-casa-success/15 bg-casa-success-bg px-5 py-4 text-sm font-semibold text-casa-success shadow-casa-card"
+                role="{{ $toast['role'] }}"
+                class="casa-toast casa-toast--{{ $toast['type'] }}"
             >
-                {{ $message }}
+                <span class="casa-toast__icon" aria-hidden="true">
+                    @if ($toast['type'] === 'success')
+                        <svg viewBox="0 0 24 24" fill="none"><path d="m5.5 12.5 4.2 4.2L18.5 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    @else
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 7v6.5M12 17.2v.3" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+                    @endif
+                </span>
+                <p class="casa-toast__message"><span class="sr-only">{{ $toast['type'] === 'success' ? __('Success:') : __('Error:') }}</span> {{ $toast['text'] }}</p>
+                <button type="button" class="casa-toast__close" aria-label="{{ __('Dismiss message') }}" x-on:click="show = false">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
             </div>
-        @endif
-
-        @if ($errorMessage)
-            <div
-                x-data="{ show: true }"
-                x-init="setTimeout(() => show = false, 5600)"
-                x-show="show"
-                x-transition:enter="transition ease-casa duration-200"
-                x-transition:enter-start="opacity-0 translate-y-1"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-160"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                role="alert"
-                class="pointer-events-auto rounded-[20px] border border-casa-danger/15 bg-casa-danger-bg px-5 py-4 text-sm font-semibold text-casa-danger-text shadow-casa-card"
-            >
-                {{ $errorMessage }}
-            </div>
-        @endif
+        @endforeach
     </div>
 @endif

@@ -145,16 +145,18 @@ class AppointmentController extends Controller
 
         return redirect()
             ->route('admin.appointments.show', $appointment)
-            ->with('status', 'appointment-created');
+            ->with('status', 'appointment-created')
+            ->with(\App\Services\BookingSuccessConfirmation::FLASH_KEY, $appointment->id);
     }
 
     public function storeFromCalendar(AdminCalendarAppointmentStoreRequest $request, AppointmentManagement $management): RedirectResponse
     {
-        $management->persist(new Appointment, $request->validated(), $request->user()->id);
+        $appointment = $management->persist(new Appointment, $request->validated(), $request->user()->id);
 
         return redirect()
             ->route('admin.appointments.index')
-            ->with('status', 'appointment-created');
+            ->with('status', 'appointment-created')
+            ->with(\App\Services\BookingSuccessConfirmation::FLASH_KEY, $appointment->id);
     }
 
     public function show(Request $request, Appointment $appointment): View

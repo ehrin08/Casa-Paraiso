@@ -73,7 +73,8 @@ class AppointmentController extends Controller
     {
         $appointment = $management->persist(new Appointment, $request->validated(), $request->user()->id);
 
-        return redirect()->route('reception.appointments.show', $appointment)->with('status', 'appointment-created');
+        return redirect()->route('reception.appointments.show', $appointment)->with('status', 'appointment-created')
+            ->with(\App\Services\BookingSuccessConfirmation::FLASH_KEY, $appointment->id);
     }
 
     public function show(Appointment $appointment): View

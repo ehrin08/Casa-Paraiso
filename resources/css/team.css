@@ -28,7 +28,7 @@ body[data-workspace-role] .team-table td { padding: 0.75rem 1rem; border-bottom:
 
 /* Photo field shared by the admin card form and the staff profile card. */
 .team-photo-field { display: flex; align-items: flex-start; gap: 1rem; min-width: 0; }
-.team-photo-preview { display: grid; place-items: center; flex: 0 0 88px; width: 88px; height: 88px; border-radius: 50%; background: var(--color-casa-palm-tint); color: var(--color-casa-palm-dark); font-family: var(--font-editorial); font-size: 2rem; font-weight: 600; }
+.team-photo-preview { display: grid; place-items: center; flex: 0 0 88px; width: 88px; height: 88px; border-radius: 50%; background: var(--color-casa-palm-tint); color: var(--color-casa-palm-dark); font-size: 1.75rem; font-weight: 800; }
 .team-photo-inputs { flex: 1; min-width: 0; }
 @media (max-width: 479px) {
     .team-photo-field { flex-direction: column; }
