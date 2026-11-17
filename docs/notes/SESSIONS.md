@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-17: [Test cases moved onto the work before November 20](sessions/2026-11-17-test-cases-to-resolve.md)
 - 2026-11-17: [Standard test-case format added to the task list](sessions/2026-11-17-test-case-format.md)
 - 2026-11-17: [Drafting-log dates removed from the manuscript](sessions/2026-11-17-remove-manuscript-draft-dates.md)
 - 2026-11-17: [Chapter IV revision drafted in a review tab](sessions/2026-11-17-chapter4-draft.md)

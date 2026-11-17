@@ -39,4 +39,5 @@ From [Defense Panel Revisions](2026-11-10-defense-panel-revisions.md):
 - [ ] Revise the whole Chapter IV: more results and discussion, fewer screenshots, screenshots only for major functions (draft in the Chapter IV Draft tab, awaiting review)
 - [ ] No table split across a page break
 - [ ] Abstract: 250 words, 5 to 8 keywords
+- [ ] Test cases in the standard table format (ID, Test Case Title, Test Steps, Test Data, Expected Results, Actual Results), added to the to-resolve list on 2026-11-17; see Testing and evaluation result above
 - [x] Decide whether to rename or remove the "Booking System" entry in the Definition of Terms: renamed "Appointment System" on 2026-11-17
