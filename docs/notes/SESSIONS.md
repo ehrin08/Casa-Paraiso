@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-17: [Chapter IV revision drafted in a review tab](sessions/2026-11-17-chapter4-draft.md)
 - 2026-11-17: [Panel design revisions release](sessions/2026-11-17-design-revisions-release.md)
 - 2026-11-17: [Task list at the end of every task](sessions/2026-11-17-task-list-rule.md)
 - 2026-11-17: [Submission timeline and new revision notes](sessions/2026-11-17-submission-timeline.md)
