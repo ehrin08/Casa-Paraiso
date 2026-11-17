@@ -22,6 +22,10 @@ From the Important Dates sheet supplied on 2026-11-17. Back to [Docs Home](../HO
    - [ ] Technology Transfer approved forms (Proposal and MOA); required because Casa Paraiso is a client project
    - [ ] Source code: upload to Google Drive and give the link only
    - [ ] Testing and evaluation result
+     - [ ] Write the test cases in the standard format (added 2026-11-17), one table with these columns:
+
+       | ID | Test Case Title | Test Steps | Test Data | Expected Results | Actual Results |
+       | --- | --- | --- | --- | --- | --- |
    - [ ] Curriculum vitae
 2. [ ] **10-page full paper**: soft and hard copy
 3. [ ] **One hardbound copy**: the sheet refers to a sample, which was not included in the image
