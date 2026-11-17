@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-17: [Submission timeline and new revision notes](sessions/2026-11-17-submission-timeline.md)
 - 2026-11-17: ["Booking" removed from the system name in the manuscript](sessions/2026-11-17-manuscript-title-booking.md)
 - 2026-11-17: [Manuscript link recorded in the project context](sessions/2026-11-17-manuscript-link.md)
 - 2026-11-15: [Panel design revisions: fonts, colors, booking pop-up](sessions/2026-11-15-panel-design-revisions.md)

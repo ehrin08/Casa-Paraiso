@@ -21,5 +21,8 @@ Context: the system handles **appointments only, with no online payment**. That'
   "...Web-Based Appointment System for Casa Paraiso..." (or "Appointment Scheduling System").
   Also check the abstract, the Chapter I objectives, the page headers, and the app's own UI and meta titles for "booking".
   Done 2026-11-17: the title page already read "Appointment System"; the 20 remaining uses of "Appointment Booking System" as the system's name were replaced (18 in the main tab from the approval sheet to Chapter V, one in each questionnaire tab). Left as is: "booking" as an activity ("appointment booking form"), cited works, and the cited "Booking System" entry in the Definition of Terms, which is still open for the authors to rename or drop. Page headers and the app's titles never carried the old name.
-- [ ] **Revise the whole Chapter IV.**
+- [ ] **Revise the whole Chapter IV.** Reason (added 2026-11-17): the chapter should carry more results and discussion and fewer screenshots. Keep screenshots only for the major functions.
 - [ ] **Do not cut tables.** No table should be split across a page break.
+- [ ] **Abstract** (added 2026-11-17): 250 words, with 5 to 8 keywords. "250 words" is read here as the limit.
+
+Deadlines and submission requirements are in the [Submission Timeline](2026-11-17-submission-timeline.md).
