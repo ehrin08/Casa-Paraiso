@@ -26,7 +26,7 @@ From the Important Dates sheet supplied on 2026-11-17. Back to [Docs Home](../HO
 
        | ID | Test Case Title | Test Steps | Test Data | Expected Results | Actual Results |
        | --- | --- | --- | --- | --- | --- |
-   - [ ] Curriculum vitae
+   - [ ] Curriculum vitae: template for the three members drafted in the CV Draft tab on 2026-11-17, awaiting the group's answers; see [Group Curriculum Vitae](2026-11-17-group-cv.md)
 2. [ ] **10-page full paper**: soft and hard copy
 3. [ ] **One hardbound copy**: the sheet refers to a sample, which was not included in the image
 4. [ ] **Soft copy of the manuscript and PPT**: upload to the Google Drive folder
@@ -40,4 +40,5 @@ From [Defense Panel Revisions](2026-11-10-defense-panel-revisions.md):
 - [ ] No table split across a page break
 - [ ] Abstract: 250 words, 5 to 8 keywords
 - [ ] Test cases in the standard table format (ID, Test Case Title, Test Steps, Test Data, Expected Results, Actual Results), added to the to-resolve list on 2026-11-17; see Testing and evaluation result above
+- [ ] Curriculum vitae for the three members: template in the CV Draft tab (2026-11-17); send the [group questions](2026-11-17-group-cv.md#questions-for-the-group) and fill in the answers
 - [x] Decide whether to rename or remove the "Booking System" entry in the Definition of Terms: renamed "Appointment System" on 2026-11-17
