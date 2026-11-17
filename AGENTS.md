@@ -70,5 +70,6 @@ End every task with a short report, using only these parts:
 - **Result:** Success, Partial, or Failed, plus one line on what was done.
 - **Errors:** failures, skipped checks, or unresolved problems, each on one line, or "None".
 - **Suggestions:** at most three short next steps, or "None".
+- **Tasks:** the tracked to-do list after the task, so progress can be followed: done items checked, open items unchecked, with the next deadline. Take it from the current checklists, now [Defense Panel Revisions](docs/manuscript/2026-11-10-defense-panel-revisions.md) and [Submission Timeline](docs/manuscript/2026-11-17-submission-timeline.md), and update those files first when the task changed an item.
 
 Keep each part to a sentence or a short list. Leave out long explanations unless the user asks for them.
