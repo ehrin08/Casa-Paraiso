@@ -50,6 +50,8 @@ Notes about the client kept apart from project scope. They are not requirements 
 
 ## Manuscript
 
+The current capstone manuscript is this [Google Doc](https://docs.google.com/document/d/1mKYzY63egRP4O-SqVh5m8K8KSPlxyio1bxD5IyCZF78/edit?usp=sharing) (link confirmed 2026-11-17). The notes below record work done on it.
+
 - [Defense Panel Revisions](manuscript/2026-11-10-defense-panel-revisions.md): panel's handwritten notes: one main font plus one highlight font, consistent colors with AI-looking leftovers removed, "Booking" removed from the title (appointments only, no online payment), Chapter IV revised in full, no tables split across pages (2026-11-10).
 - [Temporary Revisions checklist](manuscript/2026-11-02-temporary-revisions-checklist.md): what still needs revising in the tab, including test-label contradictions, NLP figure and table, pending UAT wording, and comment follow-ups; doc unchanged (2026-11-02).
 - [Chapter III diagrams](manuscript/2026-11-02-chapter3-diagrams.md): 11 redrawn or new Chapter III figures (architecture, RFM flow, three-part ERD, context, use case, DFD 0/1, booking and sentiment flows), with images, captions, text and renumbering applied in the Doc, Figure 1 redrawn and the three front-matter lists refreshed; [diagram sources](manuscript/diagrams/README.md) (2026-11-02).

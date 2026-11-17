@@ -22,6 +22,7 @@ The local `redesign` branch carries the presentation-only Modern Resort redesign
 | Role workflows and UI | `SCREEN_FLOW.md`, `BRAND_UI_GUIDE.md` |
 | Security release gate | `SECURITY_HARDENING.md` |
 | Docs index, Obsidian vault (`C:\Obsidian`, `Casa Paraiso` junction to `docs/`), and per-task session history | `HOME.md`, `notes/SESSIONS.md` |
+| Capstone manuscript | [Google Doc](https://docs.google.com/document/d/1mKYzY63egRP4O-SqVh5m8K8KSPlxyio1bxD5IyCZF78/edit?usp=sharing), edited through the Google Docs connector; repo notes in `manuscript/` |
 
 ## Entry Points
 
