@@ -29,5 +29,5 @@ Carry out the panel's title revision in the [manuscript Google Doc](https://docs
 
 ## Follow-ups
 
-- Decide whether the "Booking System" entry in the Definition of Terms should be renamed or removed.
+- Resolved later the same day: the "Booking System" entry in the Definition of Terms was renamed "Appointment System" (bold term only), keeping its definition and the Flinta (2022) citation, which is cited nowhere else. Only the three Mangca (2023) citations still say "booking system".
 - Panel items still open: revise the whole of Chapter IV; no tables split across pages.
