@@ -2,6 +2,7 @@
 
 Per-task session logs, newest first. Each entry links to a note in `sessions/` named `YYYY-MM-DD-<short-slug>.md`. See `AGENTS.md` for the required sections.
 
+- 2026-11-21: [Claude co-author line removed from git](sessions/2026-11-21-remove-claude-coauthor.md)
 - 2026-11-19: [Claude chat project for phone work](sessions/2026-11-19-claude-chat-phone-project.md)
 - 2026-11-19: [AI declaration filled in](sessions/2026-11-19-ai-declaration-fill.md)
 - 2026-11-19: [Test cases in the standard table format (Tables 8–10)](sessions/2026-11-19-test-cases-standard-format.md)

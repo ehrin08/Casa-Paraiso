@@ -62,6 +62,7 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 - Reuse successful checks within the same task while their relevant code and environment remain unchanged. Rerun checks when subsequent changes or failures invalidate their evidence. Investigate a failed targeted test and rerun it after correction before proceeding to the full verification gate; report unresolved failures.
 - Do not expose secrets in source, logs, documentation, commits, or the browser.
 - Commit only scoped changes. The fresh web-only history is published to `ehrin08/Casa-Paraiso`; the prior remote remains an archive.
+- Do not add a `Co-Authored-By: Claude` trailer or any other AI co-author line to commit messages.
 
 ## Task Report
 
