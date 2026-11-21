@@ -15,6 +15,7 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 ## Obsidian Knowledge Base
 
 - The Obsidian vault is `C:\Obsidian`; its `Casa Paraiso` folder is a junction to `docs/`, so `docs/` stays the source of truth.
+- `docs/notes/` (session logs) and `docs/manuscript/` (manuscript notes and checklists) are git-ignored: they live only on this machine and in Obsidian, never in the repository.
 - `docs/HOME.md` indexes the documentation. Link every new document from it.
 - At the end of every task, including documentation-only work, write `docs/notes/sessions/YYYY-MM-DD-<short-slug>.md` with front matter (`type: session-log`, `date`) and sections for Task, What Changed, Verification, Decisions, and Follow-ups. Add its link to the top of `docs/notes/SESSIONS.md`.
 - Use relative Markdown links, not `[[wikilinks]]`, so notes render on GitHub.
@@ -56,11 +57,13 @@ Primary documents are `docs/MVP_SCOPE.md`, `docs/TECH_STACK.md`, `docs/DATABASE_
 
 ## Verification and Delivery
 
-- Every delivery includes its session note and `docs/notes/SESSIONS.md` entry; these are documentation and do not trigger application checks.
+- Every delivery includes its session note and `docs/notes/SESSIONS.md` entry; these stay local in Obsidian, are never committed, and do not trigger application checks.
 - Documentation-only changes: check accuracy, referenced paths, instruction consistency, and whitespace errors with `git diff --check`. Skip application tests, asset builds, and Docker startup.
 - Application changes: verify relevant tests first, then the full Laravel suite (`php artisan test`), asset build (`npm run build`), and Docker startup path through the existing Docker wrapper.
 - Reuse successful checks within the same task while their relevant code and environment remain unchanged. Rerun checks when subsequent changes or failures invalidate their evidence. Investigate a failed targeted test and rerun it after correction before proceeding to the full verification gate; report unresolved failures.
 - Do not expose secrets in source, logs, documentation, commits, or the browser.
+- Commit only technical work: application code, configuration, migrations, tests, scripts, and system documents such as `AGENTS.md`, `docs/PROJECT_MEMORY.md`, and the other primary documents. A task that only touched session logs, manuscript notes, or checklists gets no commit.
+- Commit messages describe the system change, never the session (no "Record the …" commits).
 - Commit only scoped changes. The fresh web-only history is published to `ehrin08/Casa-Paraiso`; the prior remote remains an archive.
 - Do not add a `Co-Authored-By: Claude` trailer or any other AI co-author line to commit messages.
 

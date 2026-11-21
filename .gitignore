@@ -31,3 +31,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /output/imports/
+
+# Session logs and manuscript notes live only in Obsidian (C:\Obsidian junction to docs/)
+/docs/notes/
+/docs/manuscript/

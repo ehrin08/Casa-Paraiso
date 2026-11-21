@@ -50,6 +50,8 @@ Notes about the client kept apart from project scope. They are not requirements 
 
 ## Manuscript
 
+The Manuscript and Session Notes sections are local Obsidian notes; `docs/manuscript/` and `docs/notes/` are git-ignored, so these links do not resolve on GitHub.
+
 The current capstone manuscript is this [Google Doc](https://docs.google.com/document/d/1mKYzY63egRP4O-SqVh5m8K8KSPlxyio1bxD5IyCZF78/edit?usp=sharing) (link confirmed 2026-11-17). The notes below record work done on it.
 
 - [Claude Chat Project for Phone Work](manuscript/2026-11-19-claude-chat-project.md): the Casa Paraiso Phone Brief Google Doc, the chat project's instructions and setup, and how its work log syncs back to this repo (2026-11-19).
